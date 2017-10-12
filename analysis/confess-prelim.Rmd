@@ -1,0 +1,312 @@
+---
+title: "CONFESS image classification: preliminary analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background and goals
+
+Here we use [CONFESS ](https://www.bioconductor.org/packages/devel/bioc/vignettes/CONFESS/inst/doc/vignette.html#data-inspection-by-batch-chip) to perform FUCCI and DAPI image analysis. CONFESS is built on EBImage and has been previously used to quantify cell cycle phase for 200+ HeLa cells. Their results are described in a bioRxiv paper (http://dx.doi.org/10.1101/088500).
+
+In this document, I report results for four different FUCCI plates (18855_18511, 18870_18855, 18870_19101, 19101_19098). Additional results are reported for 18855_18511 comparing analysis on two sets of images differing in crop sizes.
+
+---
+
+## Loading data and packages
+
+Load RDS.
+
+```{r}
+confess_18855_18511_crop1 <- readRDS(file = "../data/confess/18855_18511_crop_09052017.rds")
+confess_18855_18511_crop2 <- readRDS(file = "../data/confess/18855_18511_crop_09072017.rds")
+confess_18870_18855 <- readRDS(file = "../data/confess/18870_18855_crop_09072017.rds")
+
+confess_18870_19101 <- readRDS(file = "../data/confess/18870_19101_crop_09122017.rds")
+confess_19101_19098 <- readRDS(file = "../data/confess/19101_19098_crop_09122017.rds")
+```
+
+Functions for exploratory data analysis.
+
+```{r}
+# make three plots
+# 1. log2 foreground versus log2 background intensity for Red channel
+# 2. log2 foreground versus log2 background intensity for Green channel
+# 3. signal-to-noise ratio of green versus red
+
+eda <- function(data, plot_title) {
+  with(data, {
+    xlim_red <- ylim_red <- range(c(log2(back_Red), log2(fore_Red)))
+    xlim_green <- ylim_green <- range(c(log2(back_Green), log2(fore_Green)))
+    
+    par(mfrow = c(2,2))
+    plot(x = log2(back_Red), y = log2(fore_Red), pch = 16, cex = .7,
+         xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+    plot(x = log2(back_Green), y = log2(fore_Green), pch = 16, cex = .7,
+         xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    plot(x = StN.green.norm, y = StN.red.norm,
+         pch = 16, cex = .7); abline(v=.5, h = .5) 
+    title(main = plot_title, outer = TRUE, line = -1)
+  })
+}
+```
+
+## Results
+
+In summary,
+
+1. There's little variation in the background intensity in either Green or Red channel images.
+2. The intensity range for the Red channel is more narrow than the Green channel.
+3. I computed signal-to-noise ratio by taking the background correction approach: substracting log2 background intensity from log2 foreground intensity. Then, for each channel, I normalized the signal-to-noise ratio by the range of the values. 
+
+* 18870_18855
+
+```{r}
+eda(confess_18870_18855, "18870_18855")
+with(confess_18870_18855, {
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos <- StN.green.norm > .5
+    red_pos <- StN.red.norm > .5
+    table(red_pos, green_pos)
+})
+```
+
+* 18870_19101
+
+```{r}
+eda(confess_18870_19101, "18870_19101")
+with(confess_18870_19101, {
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos <- StN.green.norm > .5
+    red_pos <- StN.red.norm > .5
+    table(red_pos, green_pos)
+})
+```
+
+* 19101_19098
+
+```{r}
+eda(confess_19101_19098, "19101_19098")
+with(confess_19101_19098, {
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos <- StN.green.norm > .5
+    red_pos <- StN.red.norm > .5
+    table(red_pos, green_pos)
+})
+```
+
+
+* 18855_18511, crop1
+
+```{r}
+eda(confess_18855_18511_crop1, "18855_18511, crop1")
+with(confess_18855_18511_crop1, {
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos <- StN.green.norm > .5
+    red_pos <- StN.red.norm > .5
+    table(red_pos, green_pos)
+})
+```
+
+* 18855_18511, crop2
+
+```{r}
+eda(confess_18855_18511_crop2, "18855_18511, crop2")
+with(confess_18855_18511_crop2, {
+    StN.red <- log2(fore_Red) - min(log2(back_Red))
+    StN.green <- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos <- StN.green.norm > .5
+    red_pos <- StN.red.norm > .5
+    table(red_pos, green_pos)
+})
+```
+
+## Exploratory analysis
+
+### Case 1
+
+Take 18870_18855. Let's look at the log2fore_red verus log2back_red, which ones are very similar?
+
+```{r}
+with(confess_18870_18855, {
+#  xlim_red <- ylim_red <- range(c(log2(back_Red), log2(fore_Red)))
+  StN.red <- log2(fore_Red) - min(log2(back_Red))
+  StN.green <- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+
+  which_cell <- StN.green.norm < .5 & StN.red.norm < .2
+
+  xy <- cbind(log2(back_Red), log2(fore_Red))
+#  xy <- xy[which(abs(log2(fore_Red)-log2(back_Red)) < .05),]
+  xy <- xy[which_cell,]
+  par(mfrow = c(1,1))
+  plot(xy, 
+       xlim = c(14.35,14.6), ylim = c(14.35,14.6),
+       xlab = "log2(Red background)",
+       ylab = "log2(Red foreground)",
+       pch = 16,
+#       pch = as.character(1:96)[which(log(back_Red) < 14.5)], 
+       cex = .8); abline(0, 1)
+})
+```
+
+Consider the cells which foreground Red and Background Red are very similar. Of these 28 cells, about half have no DAPI signals and the ones with DAPI signal exhibit green signal. 
+
+```{r}
+with(confess_18870_18855, {
+     StN.red <- log2(fore_Red) - min(log2(back_Red))
+     StN.green <- log2(fore_Green) - min(log2(back_Green))
+     StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+     StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+     print(which(StN.green.norm < .5 & StN.red.norm < .2))
+     })
+```
+
+DAPI/Red/Green
+14: Y/N/Y
+16: N/N/N
+20: ?/N/N
+21: Y/N/Y
+22: Y/?/Y
+28: Y/?/Y
+30: Y/N/Y
+33: ?/N/Y
+35: ?/N/?
+39: ?/N/?
+41: ?/N/?
+43: N/N/?
+44: N/?/N
+46: Y/N/Y
+48: N/N/N
+49: N/N/?
+54: Y/N/Y
+58: Y/?/Y
+60: Y/N/Y
+62: N/N/N
+63: Y/N/Y
+64: Y/N/Y
+68: N/N/?
+71: N/N/?
+72: Y/N/Y
+74: ?/N/Y
+75: Y/Y/Y
+95: ?/N/?
+
+### Case 2
+
+Consider 18870_19101. Results are similar to 18870_18855.
+
+```{r}
+with(confess_18870_19101, {
+  xlim_red <- ylim_red <- range(c(log2(back_Red), log2(fore_Red)))
+  xlim_green <- ylim_green <- range(c(log2(back_Green), log2(fore_Green)))
+  
+  par(mfrow = c(2,2))
+  plot(x = log2(back_Red), y = log2(fore_Red), 
+       xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+  plot(x = log2(back_Green), y = log2(fore_Green),
+       xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+  StN.red <- log2(fore_Red) - min(log2(back_Red))
+  StN.green <- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+  plot(x = StN.green.norm, 
+       y = StN.red.norm); abline(v=.5, h = .5) 
+})
+```
+
+Look at the log2fore_red verus log2back_red, which ones are very similar?
+
+```{r}
+with(confess_18870_19101, {
+#  xlim_red <- ylim_red <- range(c(log2(back_Red), log2(fore_Red)))
+  StN.red <- log2(fore_Red) - min(log2(back_Red))
+  StN.green <- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+
+  which_cell <- StN.green.norm < .3 & StN.red.norm < .3
+
+  xy <- cbind(log2(back_Red), log2(fore_Red))
+#  xy <- xy[which(abs(log2(fore_Red)-log2(back_Red)) < .05),]
+  xy <- xy[which_cell,]
+  par(mfrow = c(1,1))
+  plot(xy, 
+       xlim = c(14.28,14.6), ylim = c(14.28,14.6),
+       xlab = "log2(Red background)",
+       ylab = "log2(Red foreground)",
+       pch = 16,
+#       pch = as.character(1:96)[which(log(back_Red) < 14.5)], 
+       cex = .8); abline(0, 1)
+})
+```
+
+Consider the cells which foreground Red and Background Red are very similar. Of these 28 cells, about half have no DAPI signals and the ones with DAPI signal exhibit green signal. 
+
+```{r}
+with(confess_18870_19101, {
+     StN.red <- log2(fore_Red) - min(log2(back_Red))
+     StN.green <- log2(fore_Green) - min(log2(back_Green))
+     StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+     StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+     print(which(StN.green.norm < .3 & StN.red.norm < .3))
+     })
+```
+
+
+### Digging in CONFESS
+
+Observe that 19 out of 28 cells that are called as both Green and Red negative were estimated using BF method. There are other two methods: Both.Channels and One.channel. What's the difference between these? TBD.
+
+```{r}
+with(confess_18870_18855, {
+  xlim_red <- ylim_red <- range(c(log2(back_Red), log2(fore_Red)))
+  xlim_green <- ylim_green <- range(c(log2(back_Green), log2(fore_Green)))
+  
+  par(mfrow = c(2,2))
+  plot(x = log2(back_Red), y = log2(fore_Red), 
+       xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+  plot(x = log2(back_Green), y = log2(fore_Green),
+       xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+  StN.red <- log2(fore_Red) - min(log2(back_Red))
+  StN.green <- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm <- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm <- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+  plot(x = StN.green.norm, 
+       y = StN.red.norm); abline(v=.5, h = .5) 
+
+  which_cell <- StN.green.norm < .5 & StN.red.norm < .5
+  print(table(which_cell, Estimation.Type))
+  print(which(which_cell))
+})
+```
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
