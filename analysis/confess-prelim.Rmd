@@ -3,6 +3,25 @@ title: "CONFESS image classification: preliminary analysis"
 output: html_document
 ---
 
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -20,12 +39,12 @@ In this document, I report results for four different FUCCI plates (18855_18511,
 Load RDS.
 
 ```{r}
-confess_18855_18511_crop1 <- readRDS(file = "../data/confess/18855_18511_crop_09052017.rds")
-confess_18855_18511_crop2 <- readRDS(file = "../data/confess/18855_18511_crop_09072017.rds")
-confess_18870_18855 <- readRDS(file = "../data/confess/18870_18855_crop_09072017.rds")
+confess_18855_18511_crop1 <- readRDS(file = "../data/18855_18511_crop_09052017.rds")
+confess_18855_18511_crop2 <- readRDS(file = "../data/18855_18511_crop_09072017.rds")
+confess_18870_18855 <- readRDS(file = "../data/18870_18855_crop_09072017.rds")
 
-confess_18870_19101 <- readRDS(file = "../data/confess/18870_19101_crop_09122017.rds")
-confess_19101_19098 <- readRDS(file = "../data/confess/19101_19098_crop_09122017.rds")
+confess_18870_19101 <- readRDS(file = "../data/18870_19101_crop_09122017.rds")
+confess_19101_19098 <- readRDS(file = "../data/19101_19098_crop_09122017.rds")
 ```
 
 Functions for exploratory data analysis.
@@ -310,3 +329,9 @@ with(confess_18870_18855, {
 sessionInfo()
 ```
 
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
