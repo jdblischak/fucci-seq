@@ -8,10 +8,7 @@ output:
 Website to share results of fucci-seq project.
 
 
-* [Image analysis using CONFESS](test-confess.html)
-    * [Test different input format](test-jpeg.html)
-    * [Determine crop size](18855.html)
-    * [Understanding CONFESS output](intensity-18855.html)
+* [CONFESS preliminary results](confess-prelim.html)
 
 
 
