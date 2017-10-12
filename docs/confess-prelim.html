@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>CONFESS image classification: preliminary analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">CONFESS image classification: preliminary analysis</h1>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-10-12</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 8e822f0</p>
+<div id="background-and-goals" class="section level2">
+<h2>Background and goals</h2>
+<p>Here we use <a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/CONFESS/inst/doc/vignette.html#data-inspection-by-batch-chip">CONFESS</a> to perform FUCCI and DAPI image analysis. CONFESS is built on EBImage and has been previously used to quantify cell cycle phase for 200+ HeLa cells. Their results are described in a bioRxiv paper (<a href="http://dx.doi.org/10.1101/088500" class="uri">http://dx.doi.org/10.1101/088500</a>).</p>
+<p>In this document, I report results for four different FUCCI plates (18855_18511, 18870_18855, 18870_19101, 19101_19098). Additional results are reported for 18855_18511 comparing analysis on two sets of images differing in crop sizes.</p>
+<hr />
+</div>
+<div id="loading-data-and-packages" class="section level2">
+<h2>Loading data and packages</h2>
+<p>Load RDS.</p>
+<pre class="r"><code>confess_18855_18511_crop1 &lt;- readRDS(file = &quot;../data/18855_18511_crop_09052017.rds&quot;)
+confess_18855_18511_crop2 &lt;- readRDS(file = &quot;../data/18855_18511_crop_09072017.rds&quot;)
+confess_18870_18855 &lt;- readRDS(file = &quot;../data/18870_18855_crop_09072017.rds&quot;)
+
+confess_18870_19101 &lt;- readRDS(file = &quot;../data/18870_19101_crop_09122017.rds&quot;)
+confess_19101_19098 &lt;- readRDS(file = &quot;../data/19101_19098_crop_09122017.rds&quot;)</code></pre>
+<p>Functions for exploratory data analysis.</p>
+<pre class="r"><code># make three plots
+# 1. log2 foreground versus log2 background intensity for Red channel
+# 2. log2 foreground versus log2 background intensity for Green channel
+# 3. signal-to-noise ratio of green versus red
+
+eda &lt;- function(data, plot_title) {
+  with(data, {
+    xlim_red &lt;- ylim_red &lt;- range(c(log2(back_Red), log2(fore_Red)))
+    xlim_green &lt;- ylim_green &lt;- range(c(log2(back_Green), log2(fore_Green)))
+    
+    par(mfrow = c(2,2))
+    plot(x = log2(back_Red), y = log2(fore_Red), pch = 16, cex = .7,
+         xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+    plot(x = log2(back_Green), y = log2(fore_Green), pch = 16, cex = .7,
+         xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    plot(x = StN.green.norm, y = StN.red.norm,
+         pch = 16, cex = .7); abline(v=.5, h = .5) 
+    title(main = plot_title, outer = TRUE, line = -1)
+  })
+}</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>In summary,</p>
+<ol style="list-style-type: decimal">
+<li>There’s little variation in the background intensity in either Green or Red channel images.</li>
+<li>The intensity range for the Red channel is more narrow than the Green channel.</li>
+<li>I computed signal-to-noise ratio by taking the background correction approach: substracting log2 background intensity from log2 foreground intensity. Then, for each channel, I normalized the signal-to-noise ratio by the range of the values.</li>
+</ol>
+<ul>
+<li>18870_18855</li>
+</ul>
+<pre class="r"><code>eda(confess_18870_18855, &quot;18870_18855&quot;)
+with(confess_18870_18855, {
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos &lt;- StN.green.norm &gt; .5
+    red_pos &lt;- StN.red.norm &gt; .5
+    table(red_pos, green_pos)
+})</code></pre>
+<pre><code>       green_pos
+red_pos FALSE TRUE
+  FALSE    28   48
+  TRUE      0   20</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ul>
+<li>18870_19101</li>
+</ul>
+<pre class="r"><code>eda(confess_18870_19101, &quot;18870_19101&quot;)
+with(confess_18870_19101, {
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos &lt;- StN.green.norm &gt; .5
+    red_pos &lt;- StN.red.norm &gt; .5
+    table(red_pos, green_pos)
+})</code></pre>
+<pre><code>       green_pos
+red_pos FALSE TRUE
+  FALSE    33   39
+  TRUE      0   24</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ul>
+<li>19101_19098</li>
+</ul>
+<pre class="r"><code>eda(confess_19101_19098, &quot;19101_19098&quot;)
+with(confess_19101_19098, {
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos &lt;- StN.green.norm &gt; .5
+    red_pos &lt;- StN.red.norm &gt; .5
+    table(red_pos, green_pos)
+})</code></pre>
+<pre><code>       green_pos
+red_pos FALSE TRUE
+  FALSE    32   49
+  TRUE      0   15</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ul>
+<li>18855_18511, crop1</li>
+</ul>
+<pre class="r"><code>eda(confess_18855_18511_crop1, &quot;18855_18511, crop1&quot;)
+with(confess_18855_18511_crop1, {
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos &lt;- StN.green.norm &gt; .5
+    red_pos &lt;- StN.red.norm &gt; .5
+    table(red_pos, green_pos)
+})</code></pre>
+<pre><code>       green_pos
+red_pos FALSE TRUE
+  FALSE    28   46
+  TRUE      1   21</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ul>
+<li>18855_18511, crop2</li>
+</ul>
+<pre class="r"><code>eda(confess_18855_18511_crop2, &quot;18855_18511, crop2&quot;)
+with(confess_18855_18511_crop2, {
+    StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+    StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+    StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+    StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+    green_pos &lt;- StN.green.norm &gt; .5
+    red_pos &lt;- StN.red.norm &gt; .5
+    table(red_pos, green_pos)
+})</code></pre>
+<pre><code>       green_pos
+red_pos FALSE TRUE
+  FALSE    25   47
+  TRUE      2   22</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="exploratory-analysis" class="section level2">
+<h2>Exploratory analysis</h2>
+<div id="case-1" class="section level3">
+<h3>Case 1</h3>
+<p>Take 18870_18855. Let’s look at the log2fore_red verus log2back_red, which ones are very similar?</p>
+<pre class="r"><code>with(confess_18870_18855, {
+#  xlim_red &lt;- ylim_red &lt;- range(c(log2(back_Red), log2(fore_Red)))
+  StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+  StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+
+  which_cell &lt;- StN.green.norm &lt; .5 &amp; StN.red.norm &lt; .2
+
+  xy &lt;- cbind(log2(back_Red), log2(fore_Red))
+#  xy &lt;- xy[which(abs(log2(fore_Red)-log2(back_Red)) &lt; .05),]
+  xy &lt;- xy[which_cell,]
+  par(mfrow = c(1,1))
+  plot(xy, 
+       xlim = c(14.35,14.6), ylim = c(14.35,14.6),
+       xlab = &quot;log2(Red background)&quot;,
+       ylab = &quot;log2(Red foreground)&quot;,
+       pch = 16,
+#       pch = as.character(1:96)[which(log(back_Red) &lt; 14.5)], 
+       cex = .8); abline(0, 1)
+})</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider the cells which foreground Red and Background Red are very similar. Of these 28 cells, about half have no DAPI signals and the ones with DAPI signal exhibit green signal.</p>
+<pre class="r"><code>with(confess_18870_18855, {
+     StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+     StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+     StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+     StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+     print(which(StN.green.norm &lt; .5 &amp; StN.red.norm &lt; .2))
+     })</code></pre>
+<pre><code> [1] 14 16 20 21 22 28 30 33 35 39 41 43 44 46 48 49 54 58 60 62 63 64 68
+[24] 71 72 74 75 95</code></pre>
+<p>DAPI/Red/Green 14: Y/N/Y 16: N/N/N 20: ?/N/N 21: Y/N/Y 22: Y/?/Y 28: Y/?/Y 30: Y/N/Y 33: ?/N/Y 35: ?/N/? 39: ?/N/? 41: ?/N/? 43: N/N/? 44: N/?/N 46: Y/N/Y 48: N/N/N 49: N/N/? 54: Y/N/Y 58: Y/?/Y 60: Y/N/Y 62: N/N/N 63: Y/N/Y 64: Y/N/Y 68: N/N/? 71: N/N/? 72: Y/N/Y 74: ?/N/Y 75: Y/Y/Y 95: ?/N/?</p>
+</div>
+<div id="case-2" class="section level3">
+<h3>Case 2</h3>
+<p>Consider 18870_19101. Results are similar to 18870_18855.</p>
+<pre class="r"><code>with(confess_18870_19101, {
+  xlim_red &lt;- ylim_red &lt;- range(c(log2(back_Red), log2(fore_Red)))
+  xlim_green &lt;- ylim_green &lt;- range(c(log2(back_Green), log2(fore_Green)))
+  
+  par(mfrow = c(2,2))
+  plot(x = log2(back_Red), y = log2(fore_Red), 
+       xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+  plot(x = log2(back_Green), y = log2(fore_Green),
+       xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+  StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+  StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+  plot(x = StN.green.norm, 
+       y = StN.red.norm); abline(v=.5, h = .5) 
+})</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Look at the log2fore_red verus log2back_red, which ones are very similar?</p>
+<pre class="r"><code>with(confess_18870_19101, {
+#  xlim_red &lt;- ylim_red &lt;- range(c(log2(back_Red), log2(fore_Red)))
+  StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+  StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+
+  which_cell &lt;- StN.green.norm &lt; .3 &amp; StN.red.norm &lt; .3
+
+  xy &lt;- cbind(log2(back_Red), log2(fore_Red))
+#  xy &lt;- xy[which(abs(log2(fore_Red)-log2(back_Red)) &lt; .05),]
+  xy &lt;- xy[which_cell,]
+  par(mfrow = c(1,1))
+  plot(xy, 
+       xlim = c(14.28,14.6), ylim = c(14.28,14.6),
+       xlab = &quot;log2(Red background)&quot;,
+       ylab = &quot;log2(Red foreground)&quot;,
+       pch = 16,
+#       pch = as.character(1:96)[which(log(back_Red) &lt; 14.5)], 
+       cex = .8); abline(0, 1)
+})</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider the cells which foreground Red and Background Red are very similar. Of these 28 cells, about half have no DAPI signals and the ones with DAPI signal exhibit green signal.</p>
+<pre class="r"><code>with(confess_18870_19101, {
+     StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+     StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+     StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+     StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+     print(which(StN.green.norm &lt; .3 &amp; StN.red.norm &lt; .3))
+     })</code></pre>
+<pre><code> [1]  2  9 11 12 16 18 21 23 28 30 34 35 36 37 38 45 47 55 61 66 72 73 75
+[24] 76 78 87</code></pre>
+</div>
+<div id="digging-in-confess" class="section level3">
+<h3>Digging in CONFESS</h3>
+<p>Observe that 19 out of 28 cells that are called as both Green and Red negative were estimated using BF method. There are other two methods: Both.Channels and One.channel. What’s the difference between these? TBD.</p>
+<pre class="r"><code>with(confess_18870_18855, {
+  xlim_red &lt;- ylim_red &lt;- range(c(log2(back_Red), log2(fore_Red)))
+  xlim_green &lt;- ylim_green &lt;- range(c(log2(back_Green), log2(fore_Green)))
+  
+  par(mfrow = c(2,2))
+  plot(x = log2(back_Red), y = log2(fore_Red), 
+       xlim = xlim_red, ylim = ylim_red); abline(0, 1)
+  plot(x = log2(back_Green), y = log2(fore_Green),
+       xlim = xlim_green, ylim = ylim_green); abline(0, 1) 
+  StN.red &lt;- log2(fore_Red) - min(log2(back_Red))
+  StN.green &lt;- log2(fore_Green) - min(log2(back_Green))
+  StN.red.norm &lt;- (StN.red-min(StN.red))/(max(StN.red)-min(StN.red))
+  StN.green.norm &lt;- (StN.green-min(StN.green))/(max(StN.green)-min(StN.green))
+  plot(x = StN.green.norm, 
+       y = StN.red.norm); abline(v=.5, h = .5) 
+
+  which_cell &lt;- StN.green.norm &lt; .5 &amp; StN.red.norm &lt; .5
+  print(table(which_cell, Estimation.Type))
+  print(which(which_cell))
+})</code></pre>
+<pre><code>          Estimation.Type
+which_cell BF Both.Channels One.Channel
+     FALSE  1            46          21
+     TRUE  19             4           5
+ [1] 14 16 20 21 22 28 30 33 35 39 41 43 44 46 48 49 54 58 60 62 63 64 68
+[24] 71 72 74 75 95</code></pre>
+<p><img src="figure/confess-prelim.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.2 (2017-09-28)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 17.04
+
+Matrix products: default
+BLAS: /usr/lib/libblas/libblas.so.3.7.0
+LAPACK: /usr/lib/lapack/liblapack.so.3.7.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] compiler_3.4.2  backports_1.1.1 magrittr_1.5    rprojroot_1.2  
+ [5] tools_3.4.2     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.11   
+ [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.17      git2r_0.19.0   
+[13] stringr_1.2.0   digest_0.6.12   evaluate_0.10.1</code></pre>
+</div>
+<div id="session-information-1" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.2 (2017-09-28)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 17.04
+
+Matrix products: default
+BLAS: /usr/lib/libblas/libblas.so.3.7.0
+LAPACK: /usr/lib/lapack/liblapack.so.3.7.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] compiler_3.4.2  backports_1.1.1 magrittr_1.5    rprojroot_1.2  
+ [5] tools_3.4.2     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.11   
+ [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.17      git2r_0.19.0   
+[13] stringr_1.2.0   digest_0.6.12   evaluate_0.10.1</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
