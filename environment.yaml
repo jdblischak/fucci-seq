@@ -1,0 +1,49 @@
+# Conda configuration file to reproduce computing environment
+#
+# Instructions
+# 1. Create the conda environment:
+#    conda env create --file environment.yaml
+#
+# 2. Update the conda environment:
+#    conda env update --file environment.yaml
+#
+# 3. Activate the conda environment:
+#    source activate fucci-seq
+#
+# 4. Deactivate the conda environment:
+#    source deactivate fucci-seq
+#
+# Resources:
+#
+# https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
+# https://conda.io/docs/using/envs.html#create-environment-file-by-hand
+# https://bioconda.github.io
+# https://anaconda.org/jdblischak/repo
+#
+# Tips:
+# 1. Create custom channels in anaconda. The purpose of doing this is to 
+#    maintain a stable release of all software packages used in this project.
+# 
+# 
+name: fucci-seq
+channels:
+  - jdblischak
+  - bioconda
+  - conda-forge
+  - defaults
+  - r
+
+dependencies:
+  - bioconductor-biobase
+  - bioconductor-biocinstaller
+  - bioconductor-biomart
+  - bioconductor-confess
+  - bioconductor-ebimage
+  - bioconductor-edger
+  - r=3.4.*
+  - r-base
+  - r-cowplot
+  - r-data.table
+  - r-dplyr
+  - snakemake
+

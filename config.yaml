@@ -1,0 +1,41 @@
+# Snakemake configuration file
+#
+# The variables in this file control the behavior of the Snakefile at the root
+# of the project. It starts with raw sequencing reads in FASTQ files and
+# converts them to gene counts.
+
+# Paths ------------------------------------------------------------------------
+
+# The following paths must be updated to run the scripts on your machine.
+
+# Paths must end with forward slash
+
+# Enter the absolute path to the singlecell-qtl directory
+dir_proj: /project2/gilad/joycehsiao/fucci-seq
+
+# Enter the absolute path to a scratch directory for writing intermediate files
+scratch: /scratch/midway2/joycehsiao/fucci-seq
+
+# Enter the absolute path to the directory which contains the image files
+dir_image_data: /project2/gilad/fucci-seq/
+
+# Enter the path (absolute or relative to the Snakefile) for writing log
+# files. Make sure to also update this path for log files in cluster.json
+dir_log: log/
+
+# Samples ---------------------------------------------------------------------
+
+# Select which samples to run. You should select a subset when first configuring
+# and testing the pipeline.
+
+# C1 chips
+chips: ["18511_18855", "18855_19098", "18855_19101", "18855_19160", "18870_18511",
+        "18870_18855", "18870_19101", "18870_19160", "19098_18511", "19098_18870",
+        "19098_19160", "19101_18511", "19101_19098", "19101_19160", "19160_18511",
+        "19160_18870"]
+
+# rows of chips
+rows: ["A", "B", "C", "D", "E", "F", "G", "H"]
+
+# columns of chips
+cols: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
