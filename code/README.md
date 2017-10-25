@@ -1,33 +1,50 @@
-# Code
+# Image analysis using Mask - EBImage-based analysis with Kenneth's help
 
-The files here are scripts that are run from the command line. It is often
-useful for these scripts to take arguments as input. Several examples of how to
-read command line arguments are provided, specifically in R, Python, and Bash. For practice, you can pass arguments to these functions.
+# directories:
+# dir_code="/project2/gilad/joycehsiao/fucci-seq/code/" 
+# dir_images_data="/project2/gilad/fucci-seq/images_curated" 
+# dir_intensities="/project2/gilad/fucci-seq/intensities" 
+# dir_scratch_images="/scratch/midway2/joycehsiao/fucci-seq/images_processed"
+# dir_images_combined="/project2/gilad/fucci-seq/images_combined" 
+# dir_images_wellId="/project2/gilad/fucci-seq/images_wellid" 
+# dir_intensities_stats"/project2/gilad/fucci-seq/images_intensities"
+# dir_data="/project2/gilad/joycehsiao/fucci-seq/data/" 
 
-```
-$ code/script.R arg1 arg2 arg3
-Argument 1: arg1
-Argument 2: arg2
-Argument 3: arg3
-```
+# Detecting edges of the nuclei
+#    input: dir_images_data
+#    output: dir_intensities
+dir_code/
+|-- submit-fucciMask.sh
+|   |-- fucciMask.sbatch
+|   |-- fucciMask.wrapper.R: for all 96 wells
+|   |-- fucciMask.R: for ones single well
 
-To be able to use these scripts from anywhere, first make them executable, e.g.
+# Combing cropped images from different channels
+#    input: dir_scratch_images, dir_intensities, dir_images_wellId
+#    output: dir_images_combined
+dir_code/
+|-- submit-fucciMask.combineImages.sh
+|   |-- fucciMask.combineImages.sbatch
+|   |-- fucciMask.combineImages.R
 
-```
-$ chmod +x script.R
-```
+# Make well labels in tiff
+#    input: NULL
+#    output: dir_images_wellId
+dir_code/
+|-- makeWellIdImages.R
 
-Next open your `.bashrc` file and add the following line to include the scripts in `code` in the `PATH`. The example below demonstrates how to do this for a project called `example` in the home directory.
+# Summarize intensity values
+#    input: dir_intensities
+#    output: dir_intensities_stats
+dir_code/
+|-- intensity.summarize.R: compute summary statistics
 
-```
-export PATH=$PATH:~/example/code
-```
+#------ List of data files
+dir_data/
+|-- 18855_18511_crop_09052017.rds: CONFESS cell cycle phase assignment results
+|-- 18855_18511_crop_09072017.rds: CONFESS cell cycle phase assignment results
+|-- 18870_18855_crop_09072017.rds: CONFESS cell cycle phase assignment results
+|-- 18870_19101_crop_09122017.rds: CONFESS cell cycle phase assignment results
+|-- 19101_19098_crop_09122017.rds: CONFESS cell cycle phase assignment results
 
-If you do this, you no longer need to provide the path to the executable file.
 
-```
-$ script.R arg1 arg2 arg3
-Argument 1: arg1
-Argument 2: arg2
-Argument 3: arg3
-```
