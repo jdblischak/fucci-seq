@@ -1,3 +1,6 @@
+data/
+log/
+.snakemake/
 .Rproj.user
 .Rhistory
 .RData
@@ -7,3 +10,6 @@
 analysis/figure
 analysis/*html
 analysis/*_cache
+
+output_tmp/
+
