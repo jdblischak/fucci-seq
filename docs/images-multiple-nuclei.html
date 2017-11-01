@@ -311,101 +311,104 @@ div.section {
 </div>
 
 
-<div id="load-data-and-packages" class="section level2">
-<h2>Load data and packages</h2>
-<pre class="r"><code>dir_output_tmp &lt;- (&quot;/project2/gilad/joycehsiao/fucci-seq/output_tmp&quot;)
-nuclei_table &lt;- readRDS(paste0(dir_output_tmp, &quot;/&quot;, &quot;nuclei_table.rds&quot;))
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<p>Load summary table for the number of nuclei. Note that some samples are not included in this table, and those are the ones that contain no signal at all at the first pass of edge detection. The summary table contains three columns:</p>
+<p><code>plate</code>: labeled by the mix of individual cell lines<br />
+<code>well</code>: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).<br />
+<code>nnuclei</code>: number of nuclei detected in a single cell sample</p>
+<pre class="r"><code>nuclei_table &lt;- readRDS(&quot;/project2/gilad/joycehsiao/fucci-seq/output_tmp/nuclei_table.rds&quot;)
 
 with(nuclei_table, table(nnuclei))</code></pre>
 <pre><code>## nnuclei
 ##    0    1    2    3    4    5    6    7    8   12   20 
 ##    4 1264  141   53   21   14    2    2    2    1    1</code></pre>
-<p>Visual inspection confirmed multiple nuclei.</p>
+<p>Inspect samples with 12 nuclei.</p>
 <pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 12),]</code></pre>
 <pre><code>##         nnuclei  well       plate
 ## 0004811      12 00048 19160_18870</code></pre>
+<p>Inspect samples with 20 nuclei.</p>
 <pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 20),]</code></pre>
 <pre><code>##        nnuclei  well       plate
 ## 000636      20 00063 18870_19160</code></pre>
 <hr />
 </div>
-<div id="examples-with-two-nuclei" class="section level2">
-<h2>Examples with two nuclei</h2>
-<p>Print images for all that have two nuclei in plate 18511_18855 and save them in scratch.</p>
-<pre class="r"><code>cases &lt;- nuclei_table[which(nuclei_table$nnuclei == 2 &amp; nuclei_table$plate == &quot;18511_18855&quot;),]
+<div id="printing-images-for-inspection" class="section level2">
+<h2>Printing images for inspection</h2>
+<p><strong>This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images_inspect.</strong></p>
+<p>First select samples for inspection. The code below selects from plate <code>18511_18855</code> the samples that have two nuclei detected.</p>
+<pre class="r"><code>cases &lt;- nuclei_table[which(nuclei_table$nnuclei == 2 &amp; nuclei_table$plate == &quot;18511_18855&quot;),]</code></pre>
+<p>Extract the wells labels and convert to a character variable.</p>
+<pre class="r"><code>wells &lt;- as.character(cases$well)
 
-# print doubles
-wells &lt;- as.character(cases$well)
 wells &lt;- c(&quot;00012&quot;,&quot;00032&quot;,&quot;00044&quot;,&quot;00047&quot;,&quot;00051&quot;,&quot;00052&quot;,&quot;00067&quot;,&quot;00076&quot;,&quot;00085&quot;,&quot;00088&quot;,&quot;00096&quot;)
-#wells &lt;- sprintf(&quot;%05d&quot;, c(1:96))
+
 print(wells)</code></pre>
 <pre><code>##  [1] &quot;00012&quot; &quot;00032&quot; &quot;00044&quot; &quot;00047&quot; &quot;00051&quot; &quot;00052&quot; &quot;00067&quot; &quot;00076&quot;
 ##  [9] &quot;00085&quot; &quot;00088&quot; &quot;00096&quot;</code></pre>
-<pre class="r"><code># for printing wells only
-test &lt;- lapply(1:length(wells), function(index) {
-  id &lt;- wells[index]
-  dir_images_data_pl=&quot;/project2/gilad/fucci-seq/images_curated/18511_18855/&quot;
-  dir_output=&quot;/scratch/midway2/joycehsiao/fucci-seq/images_processed/18511_18855/&quot;
-  bright &lt;- readImage(paste0(dir_images_data_pl, &quot;BRIGHT/&quot;, id, &quot;.TIFF&quot;))
-  dapi &lt;- readImage(paste0(dir_images_data_pl, &quot;DAPI/&quot;, id, &quot;.TIFF&quot;))
-  gfp &lt;- readImage(paste0(dir_images_data_pl, &quot;GFP/&quot;, id, &quot;.TIFF&quot;))
-  rfp &lt;- readImage(paste0(dir_images_data_pl, &quot;RFP/&quot;, id, &quot;.TIFF&quot;))
-  tmp &lt;- create_mask(bright, dapi, gfp, rfp, id, 
-                     control=list(medianFilterRadius=10,
-                                     size_cutoff=200, display=FALSE,
-                                     printWholeDAPI=TRUE,
-                                     printProcessedImages=FALSE,
-                                     displayProcessedImages=FALSE),
-                     dir_output = dir_output)
-  return(tmp)
-})</code></pre>
-<figure>
-<figcaption>
-00012
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00012.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00032
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00032.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00044
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00044.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00047
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00047.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00051
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00051.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00052
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00052.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00067
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00067.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00076
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00076.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00085
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00085.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00088
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00088.outlines.png" style="width:50%; height=50%"></p>
-<figcaption>
-00096
-</figcaption>
-<p><img src="figure/images-multiple-nuclei.Rmd/00096.outlines.png" style="width:50%; height=50%"></p>
-</figure>
-<p>```</p>
+<p>The code below will save images in png format at <code>/project2/gilad/fucci-seq/images_inspect</code>.</p>
+<pre class="r"><code>#&#39; @param wells vector of wells ID (use the format specified above).
+#&#39; @param plate plate ID
+
+print_png &lt;- function(plate, wells) {
+  for (index in 1:length(wells)) {
+    id &lt;- wells[index]
+    dir_images_data_pl &lt;- paste0(&quot;/project2/gilad/fucci-seq/images_curated/&quot;,plate,&quot;/&quot;)
+    dir_output &lt;- &quot;/project2/gilad/fucci-seq/images_inspect/&quot;
+    bright &lt;- readImage(paste0(dir_images_data_pl, &quot;BRIGHT/&quot;, id, &quot;.TIFF&quot;))
+    dapi &lt;- readImage(paste0(dir_images_data_pl, &quot;DAPI/&quot;, id, &quot;.TIFF&quot;))
+    gfp &lt;- readImage(paste0(dir_images_data_pl, &quot;GFP/&quot;, id, &quot;.TIFF&quot;))
+    rfp &lt;- readImage(paste0(dir_images_data_pl, &quot;RFP/&quot;, id, &quot;.TIFF&quot;))
+    
+    writeImage(bright, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.bright.png&quot;))
+    writeImage(dapi, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.dapi.png&quot;))
+    writeImage(gfp, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.gfp.png&quot;))
+    writeImage(rfp, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.rfp.png&quot;))
+    # combo &lt;- combine(dapi, bright, gfp, rfp)
+    # writeImage(combo, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.combo.png&quot;))
+  }
+}
+
+
+plates &lt;- c(&quot;18511_18855&quot;,&quot;18855_19101&quot;,&quot;18855_19160&quot;,&quot;18870_18511&quot;,
+            &quot;18870_18855&quot;,&quot;18870_19101&quot;,&quot;18870_19160&quot;,&quot;19098_18511&quot;,
+            &quot;19098_18870&quot;,&quot;19098_19160&quot;,&quot;19101_18511&quot;,&quot;19101_19098&quot;,
+            &quot;19160_18870&quot;,&quot;18855_19098&quot;,&quot;19101_19160&quot;,&quot;19160_18511&quot;)
+
+for (index in 1:length(plates)) {
+  plate &lt;- plates[index]
+  cases &lt;- nuclei_table[which(nuclei_table$nnuclei &gt; 1 &amp; nuclei_table$plate == plate),]
+  wells &lt;- as.character(cases$well)
+  print_png(plate, wells) 
+}</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.4.1 (2017-06-30)
+## Platform: x86_64-redhat-linux-gnu (64-bit)
+## Running under: Scientific Linux 7.2 (Nitrogen)
+## 
+## Matrix products: default
+## BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_3.4.1  backports_1.1.1 magrittr_1.5    rprojroot_1.2  
+##  [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.13   
+##  [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.17      stringr_1.2.0  
+## [13] digest_0.6.12   evaluate_0.10.1</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
