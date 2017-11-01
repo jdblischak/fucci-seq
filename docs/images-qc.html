@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Images quality control</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Images quality control</h1>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-10-31</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 8065fdb</p>
+<div id="background-and-summary" class="section level2">
+<h2>Background and summary</h2>
+<p>QC for the image data. Results are described as follows.</p>
+<ol style="list-style-type: decimal">
+<li><p>No. of nuclei detected</p>
+<ul>
+<li>Across the 16 plates and 1,536 single cell samples, 34 samples were classifed as no nucleus (2.2%) and 238 samples (15.5%) were classied as having two or more nuclei. These imaging results compared to the previous study: similar number of single cell samples that have no nucleus (2.7% and 21 cells), and a much larger percent of single cell samples that have two or more nucleus (7%, 54 cells). Note that the number of nuclei detected by DAPI is not a direct measure of the cell size. Further analysis is required to quantify the size of the area covered by cytoplasm in each single cell image, which would be a more accurate approximation of cell size and thus mRNA content than the size of nucleus.</li>
+</ul></li>
+<li><p>DAPI intensity</p>
+<ul>
+<li><p>For each single cell sample, we computed the sum of DAPI pixel intensity in the nucleus area. We observed that there’s a significant variation in DAPI intensity across plates. This is not surprising given that experimentally the plates are prepared imaged on different days, and further biologically the plates contain different combination of individual cell lines. More importantly, we should consider individual variation in cell cycle phase - because individual cell lines can incorporate the cell cycle proteins at different rates (need to clarify more…).</p></li>
+<li><p>Looking at the DAPI noise intensity. The average level is between 0 to .1, which is very small compared to the DAPI signal intensity .1 to 1.</p></li>
+<li><p>Relationship between DAPI and green/red (Note that we should consider Red and Green separately for their relationship with DAPI.) We observed that the Red signal distribution is almost uniform across the DAPI intensity range, making it difficult to discern differences between positive/negative Red. On the other hand, the Green signal distribution varies across DAPI intensity ranges.</p></li>
+<li><p>There doesn’t appear to be plate variation in the relationship between Red/Green and DAPI.</p></li>
+</ul></li>
+<li><p>Background/Foreground intensity variation</p>
+<ul>
+<li><p>Saturation: at high pixel intensity, the signal intensites are mostly saturated (median ~ 1 and median &gt; mean). And this is more so for Green than for Red. But note that this may have to do with the area from which we compute the pixel intensities. For many of the single cell samples, the cell cycle proteins are outside of the nucleus and are mostly concentrated at the nucleus. If we consider the area outside of the nucleus, we may be better differentiation between signals at high pixel intensities.</p></li>
+<li><p>Background intensity by plate: mostly similar between plates in both Red and Green. In Red, there’s one plate that have some high background samples: 18855_19098. Mark this one to be investigated for later.</p></li>
+</ul></li>
+<li><p>Next step:</p>
+<ul>
+<li><p>For each single nucleus sample, compute sum of intensity in a fix 100 by 100 pixel area. This is an attempt to capture fluorescent intensity of the proteins in the entire cell, instead of just within the nucleus area as we have now.</p></li>
+<li><p>Account for individual variation in cell cycle phase. This will be done once we have the individual labels from sequencing data.</p></li>
+</ul></li>
+</ol>
+<hr />
+</div>
+<div id="loading-data-and-packages" class="section level2">
+<h2>Loading data and packages</h2>
+<pre class="r"><code>library(ggplot2)
+library(cowplot)
+library(wesanderson)</code></pre>
+<p>Name all plates.</p>
+<pre class="r"><code>plates &lt;- c(&quot;18511_18855&quot;,&quot;18855_19101&quot;,&quot;18855_19160&quot;,&quot;18870_18511&quot;,
+            &quot;18870_18855&quot;,&quot;18870_19101&quot;,&quot;18870_19160&quot;,&quot;19098_18511&quot;,
+            &quot;19098_18870&quot;,&quot;19098_19160&quot;,&quot;19101_18511&quot;,&quot;19101_19098&quot;,
+            &quot;19160_18870&quot;,&quot;19101_19160&quot;,&quot;19160_18511&quot;, &quot;18855_19098&quot;)</code></pre>
+<p>Name data directories.</p>
+<pre class="r"><code># Make directory shortcuts.
+dir_nuclei &lt;- paste0(&quot;/project2/gilad/fucci-seq/intensities/&quot;)
+#dir_ints_long &lt;- paste0(&quot;/project2/gilad/joycehsiao/fucci-seq/output_tmp/&quot;)
+#rds &lt;- paste0(dir_ints, plate, &quot;.tmp.2.rds&quot;)
+dir_output_tmp &lt;- (&quot;/project2/gilad/joycehsiao/fucci-seq/output_tmp&quot;)</code></pre>
+<hr />
+</div>
+<div id="edge-detection-using-dapi" class="section level2">
+<h2>Edge detection using DAPI</h2>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li>Some samples are not listed in the nuclei dataset. These didn’t pass the edge detection step. That is, the DAPI image was completely dark.<br />
+</li>
+<li>Samples that have 0 nucleus passed the initial edge detection but the area inside the mask is too dark or too faint.<br />
+</li>
+<li>For samples that have two nuclei, I looked at 18511_18855 and only one or two we can argue that maybe it could be a cell that got stuck in the suction. Need to look at these again and see how much we can salvage.</li>
+</ol>
+<pre class="r"><code>nuclei_table &lt;- readRDS(paste0(dir_output_tmp, &quot;/&quot;, &quot;nuclei_table.rds&quot;))
+
+with(nuclei_table, table(nnuclei))</code></pre>
+<pre><code>nnuclei
+   0    1    2    3    4    5    6    7    8   12   20 
+   4 1264  141   53   21   14    2    2    2    1    1 </code></pre>
+<pre class="r"><code>with(nuclei_table, table(plate, nnuclei))</code></pre>
+<pre><code>             nnuclei
+plate          0  1  2  3  4  5  6  7  8 12 20
+  18511_18855  0 78 11  2  0  1  0  1  1  0  0
+  18855_19098  0 76 12  4  1  1  0  0  0  0  0
+  18855_19101  0 71 13  5  3  1  1  0  0  0  0
+  18855_19160  0 87  4  3  1  0  0  0  0  0  0
+  18870_18511  1 80  3  5  1  1  0  0  0  0  0
+  18870_18855  0 86  6  1  0  1  0  0  0  0  0
+  18870_19101  0 83  7  2  0  1  0  0  0  0  0
+  18870_19160  0 80  5  4  4  1  0  0  0  0  1
+  19098_18511  0 82  8  3  1  2  0  0  0  0  0
+  19098_18870  0 89  2  2  0  2  0  0  0  0  0
+  19098_19160  1 77 10  1  2  1  0  0  0  0  0
+  19101_18511  0 73  9  7  2  1  0  0  1  0  0
+  19101_19098  0 83  9  2  0  1  0  1  0  0  0
+  19101_19160  0 86  2  1  2  0  0  0  0  0  0
+  19160_18511  0 73 15  4  3  0  1  0  0  0  0
+  19160_18870  2 60 25  7  1  0  0  0  0  1  0</code></pre>
+<p>Compute number of samples with 0 nucleus.</p>
+<pre class="r"><code>df &lt;- as.data.frame(with(nuclei_table, table(plate, nnuclei)))
+df$nnuclei &lt;- as.numeric(as.character(df$nnuclei))
+
+library(dplyr)</code></pre>
+<pre><code>
+Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    filter, lag</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>df %&gt;% filter(nnuclei &gt; 0) %&gt;%
+  group_by(plate) %&gt;% summarize(zero = 96-sum(Freq))</code></pre>
+<pre><code># A tibble: 16 x 2
+         plate  zero
+        &lt;fctr&gt; &lt;dbl&gt;
+ 1 18511_18855     2
+ 2 18855_19098     2
+ 3 18855_19101     2
+ 4 18855_19160     1
+ 5 18870_18511     6
+ 6 18870_18855     2
+ 7 18870_19101     3
+ 8 18870_19160     1
+ 9 19098_18511     0
+10 19098_18870     1
+11 19098_19160     5
+12 19101_18511     3
+13 19101_19098     0
+14 19101_19160     5
+15 19160_18511     0
+16 19160_18870     2</code></pre>
+<p>How many samples on average has 1 nucleus? 79</p>
+<pre class="r"><code>df &lt;- as.data.frame(with(nuclei_table, table(plate, nnuclei)))
+df$nnuclei &lt;- as.numeric(as.character(df$nnuclei))
+
+library(dplyr)
+df %&gt;% filter(nnuclei == 1 ) %&gt;% summarize(med = median(Freq), median = mean(Freq))</code></pre>
+<pre><code>  med median
+1  80     79</code></pre>
+<p>In the previous study (published in Scientific Reports), we flagged 21 samples that did not contain any cell, and 54 samples that contain more than one cell. Additinoally, we chose data-drive inclusion cutoffs using the number of total mapped reads, the percentage of unmapped reads, the percentage of ERCC spike-in reads, and the number of genes detected. In the end, we get 564 quality single cells. That is, 21/768~2.7% did not contain any cell, 54/768~7% contain more than one cell. 564/768~73.4% quality single cells</p>
+<p>In the current study and from the imaging results: one nuclei 1264/1536~82.2%; 34/1536~2.2% did not contain any cell, 238/1536~15.5% contain more than one cell.</p>
+<hr />
+</div>
+<div id="dapi" class="section level2">
+<h2>DAPI</h2>
+<p>Consider sum over nucleus area masked by the edge detected, and check distriubtion between plates and with plates. There’s significant variation in DAPI between plates.</p>
+<pre class="r"><code>dapi &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
+  dapi_sum &lt;- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, dapi_sum=dapi_sum)
+}) )
+
+
+ggplot(dapi, aes(x=dapi_sum)) + geom_density() + 
+  labs(main = &quot;DAPI distribution&quot;, x=&quot;DAPI intensity sum in the nucleus area&quot;)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(dapi, aes(x=dapi_sum, colour = plate)) + 
+  geom_density() +
+  labs(main = &quot;DAPI distribution by plate&quot;, x=&quot;DAPI intensity sum in the nucleus area&quot;)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>How about DAPI noise? Quite different between plates. But consider that the range of pixel intensity is 0 to 1, then .06 noise is trivial. Considering the differences though, I corrected the DAPI sum for the background noise by shifting the intensities down using the mean of background noise. There was not much difference between mean and median.</p>
+<pre class="r"><code>dapi_noise &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
+  dapi_sum &lt;- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, 
+             dapi.fore.mean=ints$dapi.fore.mean,
+             dapi.back.mean=ints$dapi.back.mean)
+}))
+
+
+plot_grid(
+  ggplot(dapi_noise, aes(x=plate, y=dapi.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main=&quot;DAPI background mean intensity&quot;), 
+  ggplot(dapi_noise, aes(x=plate, y=dapi.fore.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main=&quot;DAPI foreground mean intensity&quot;) )</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-9-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>DAPI sum adjusted for noise. Almost no difference compared to when not adjusted.</p>
+<pre class="r"><code>dapi_adj &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
+  dapi_sum &lt;- with(ints, size*(dapi.fore.mean-dapi.back.mean))
+  data.frame(plate=plates[index], well=ints$wellID, dapi_sum=dapi_sum)
+}) )
+
+# check how much they differ; almost no difference
+plot(dapi$dapi_sum, dapi_adj$dapi_sum)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>But fine. Within each plate or across plates, what’s the relationship between DAPI an Green/Red?</p>
+<p>Prepare a data for investigating the association between DAPI and green/red.</p>
+<pre class="r"><code>eval &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
+  dapi_sum &lt;- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, 
+             dapi_sum=dapi_sum, 
+             rfp.fore.mean=ints$rfp.fore.mean, rfp.fore.q05=ints$rfp.fore.q05, 
+             rfp.back.mean=ints$rfp.back.mean, rfp.back.q05=ints$rfp.back.q05,
+             gfp.fore.mean=ints$gfp.fore.mean, gfp.fore.q05=ints$gfp.fore.q05, 
+             gfp.back.mean=ints$gfp.back.mean, gfp.back.q05=ints$gfp.back.q05)
+}) )
+eval &lt;- eval %&gt;% mutate(dapi_5quant=ntile(dapi_sum,5))</code></pre>
+<p>All plates. Green versus red with DAPI coloring each nuclei. Not easy to see…</p>
+<pre class="r"><code>eval %&gt;%
+  ggplot + aes(x=rfp.fore.mean, y=gfp.fore.mean, colour= dapi_5quant) +
+  geom_point(cex=1, alpha=.7) </code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>eval %&gt;%
+  ggplot + aes(x=rfp.fore.mean-rfp.back.mean,
+               y=gfp.fore.mean-gfp.back.mean,
+               colour= dapi_5quant) +
+  geom_point(cex=1, alpha=.7) +
+  labs(x=&quot;Red signal&quot;, y = &quot;Green signal&quot;) </code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Take green/red versus DAPI.</p>
+<pre class="r"><code>plot_grid(
+ggplot(data=eval, aes(x=dapi_sum, y = rfp.fore.mean-rfp.back.mean)) +
+  geom_point(alpha=.5, col=&quot;red&quot;) + labs(x=&quot;DAPI&quot;, y=&quot;Red signals&quot;),
+ggplot(data=eval, aes(x=dapi_sum, y = gfp.fore.mean-gfp.back.mean)) +
+  geom_point(alpha=.5, col=&quot;green&quot;) + labs(x=&quot;DAPI&quot;, y = &quot;Green signals&quot;))</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-13-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>The three dimensional plots are dfficult to see. Let me plot green vs. red for each bin of DAPI.</p>
+<pre class="r"><code># fucci green and red density versus DAPI: signal percent
+ggplot(data=eval, aes(x=rfp.fore.mean-rfp.back.mean)) + geom_density(fill = &quot;red&quot;, alpha=.5) +
+  facet_wrap(~as.factor(dapi_5quant), nrow=1) + 
+  labs(main = &quot;Red by DAPI quantiles&quot;, x = &quot;Red signal (fore-back)&quot;)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-14-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data=eval, aes(x=gfp.fore.mean-gfp.back.mean)) + geom_density(fill = &quot;green&quot;, alpha=.5) +
+  facet_wrap(~as.factor(dapi_5quant), nrow=1) + 
+  labs(main = &quot;Green by DAPI quantiles&quot;, x = &quot;Green signal (fore-back)&quot;)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-14-2.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>Individual differences in DAPI versus Green/Red.</p>
+<pre class="r"><code>eval %&gt;% 
+  ggplot + aes(x=dapi_sum, y = rfp.fore.mean-rfp.back.mean) +
+  geom_point(alpha=.5, col=&quot;red&quot;) + labs(x=&quot;DAPI&quot;, y=&quot;Red signals&quot;) +
+  facet_wrap(~plate, ncol = 4)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-15-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>eval %&gt;% 
+  ggplot + aes(x=dapi_sum, y = gfp.fore.mean-gfp.back.mean) +
+  geom_point(alpha=.5, col=&quot;green&quot;) + labs(x=&quot;DAPI&quot;, y=&quot;Green signals&quot;) +
+  facet_wrap(~plate, ncol = 4)</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-15-2.png" width="1056" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="intensity-variation-between-plates" class="section level2">
+<h2>Intensity variation between plates</h2>
+<p>Mean versus median. This shows that at high pixel intensity, the signal intensites are mostly saturated. And this is more so for Green than for Red. But note that this may have to do with the area from which we compute the pixel intensities. For many of the single cell samples, the cell cycle proteins are outside of the nucleus and are mostly concentrated at the nucleus. If we consider the area outside of the nucleus, we may be better differentiation between signals at high pixel intensities.</p>
+<pre class="r"><code>plot_grid(
+  ggplot(eval, aes(x=rfp.fore.q05, y=rfp.fore.mean)) + 
+    geom_point(cex=.6, col = &quot;red&quot;) + 
+    labs(main=&quot;Red intensity&quot;, x=&quot;Median&quot;, y=&quot;Mean&quot;), 
+    ggplot(eval, aes(x=gfp.fore.q05, y=gfp.fore.mean)) + 
+    geom_point(cex=.6, col = &quot;green&quot;) + 
+    labs(main=&quot;Green intensity&quot;, x=&quot;Median&quot;, y=&quot;Mean&quot;) )</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Background variation between plates.</p>
+<pre class="r"><code>plot_grid(
+  ggplot(eval, aes(x=plate, y=rfp.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main=&quot;Red background mean intensity&quot;), 
+  ggplot(eval, aes(x=plate, y=gfp.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main=&quot;Green background mean intensity&quot;) )</code></pre>
+<p><img src="figure/images-qc.Rmd/unnamed-chunk-17-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] bindrcpp_0.2      dplyr_0.7.4       wesanderson_0.3.2 cowplot_0.8.0    
+[5] ggplot2_2.2.1    
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.13     bindr_0.1        knitr_1.17       magrittr_1.5    
+ [5] munsell_0.4.3    colorspace_1.3-2 R6_2.2.2         rlang_0.1.2     
+ [9] stringr_1.2.0    plyr_1.8.4       tools_3.4.1      grid_3.4.1      
+[13] gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6  assertthat_0.2.0
+[17] yaml_2.1.14      lazyeval_0.2.0   rprojroot_1.2    digest_0.6.12   
+[21] tibble_1.3.4     glue_1.1.1       evaluate_0.10.1  rmarkdown_1.6   
+[25] labeling_0.3     stringi_1.1.5    compiler_3.4.1   scales_0.5.0    
+[29] backports_1.1.1  pkgconfig_2.0.1 </code></pre>
+</div>
+<div id="session-information-1" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] bindrcpp_0.2      dplyr_0.7.4       wesanderson_0.3.2 cowplot_0.8.0    
+[5] ggplot2_2.2.1    
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.13     bindr_0.1        knitr_1.17       magrittr_1.5    
+ [5] munsell_0.4.3    colorspace_1.3-2 R6_2.2.2         rlang_0.1.2     
+ [9] stringr_1.2.0    plyr_1.8.4       tools_3.4.1      grid_3.4.1      
+[13] gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6  assertthat_0.2.0
+[17] yaml_2.1.14      lazyeval_0.2.0   rprojroot_1.2    digest_0.6.12   
+[21] tibble_1.3.4     glue_1.1.1       evaluate_0.10.1  rmarkdown_1.6   
+[25] labeling_0.3     stringi_1.1.5    compiler_3.4.1   scales_0.5.0    
+[29] backports_1.1.1  pkgconfig_2.0.1 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
