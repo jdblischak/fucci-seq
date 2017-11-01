@@ -7,101 +7,100 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Load data and packages
+## Load data 
+
+Load summary table for the number of nuclei. Note that some samples are not included in this table, and those are the ones that contain no signal at all at the first pass of edge detection. The summary table contains three columns:
+
+`plate`: labeled by the mix of individual cell lines  
+`well`: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).  
+`nnuclei`: number of nuclei detected in a single cell sample  
 
 ```{r}
-dir_output_tmp <- ("/project2/gilad/joycehsiao/fucci-seq/output_tmp")
-nuclei_table <- readRDS(paste0(dir_output_tmp, "/", "nuclei_table.rds"))
+nuclei_table <- readRDS("/project2/gilad/joycehsiao/fucci-seq/output_tmp/nuclei_table.rds")
 
 with(nuclei_table, table(nnuclei))
 ```
 
-Visual inspection confirmed multiple nuclei.
+Inspect samples with 12 nuclei.
 
 ```{r}
 nuclei_table[which(nuclei_table$nnuclei == 12),]
+```
+
+Inspect samples with 20 nuclei.
+
+```{r}
 nuclei_table[which(nuclei_table$nnuclei == 20),]
 ```
 
 ---
 
-## Examples with two nuclei
+## Printing images for inspection
 
-Print images for all that have two nuclei in plate 18511_18855 and save them in scratch.
+**This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images_inspect.**
+
+First select samples for inspection. The code below selects from plate `18511_18855` the samples that have two nuclei detected.
 
 ```{r}
 cases <- nuclei_table[which(nuclei_table$nnuclei == 2 & nuclei_table$plate == "18511_18855"),]
+```
 
-# print doubles
+Extract the wells labels and convert to a character variable.
+
+```{r}
 wells <- as.character(cases$well)
+
 wells <- c("00012","00032","00044","00047","00051","00052","00067","00076","00085","00088","00096")
-#wells <- sprintf("%05d", c(1:96))
+
 print(wells)
 ```
 
+The code below will save images in png format at `/project2/gilad/fucci-seq/images_inspect`.
+
 ```{r, eval = FALSE}
-# for printing wells only
-test <- lapply(1:length(wells), function(index) {
-  id <- wells[index]
-  dir_images_data_pl="/project2/gilad/fucci-seq/images_curated/18511_18855/"
-  dir_output="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18511_18855/"
-  bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
-  dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
-  gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
-  rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
-  tmp <- create_mask(bright, dapi, gfp, rfp, id, 
-                     control=list(medianFilterRadius=10,
-                                     size_cutoff=200, display=FALSE,
-                                     printWholeDAPI=TRUE,
-                                     printProcessedImages=FALSE,
-                                     displayProcessedImages=FALSE),
-                     dir_output = dir_output)
-  return(tmp)
-})
+#' @param wells vector of wells ID (use the format specified above).
+#' @param plate plate ID
+
+print_png <- function(plate, wells) {
+  for (index in 1:length(wells)) {
+    id <- wells[index]
+    dir_images_data_pl <- paste0("/project2/gilad/fucci-seq/images_curated/",plate,"/")
+    dir_output <- "/project2/gilad/fucci-seq/images_inspect/"
+    bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
+    dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
+    gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
+    rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
+    
+    writeImage(bright, paste0(dir_output, plate,".",id,".bright.png"))
+    writeImage(dapi, paste0(dir_output, plate,".",id,".dapi.png"))
+    writeImage(gfp, paste0(dir_output, plate,".",id,".gfp.png"))
+    writeImage(rfp, paste0(dir_output, plate,".",id,".rfp.png"))
+    # combo <- combine(dapi, bright, gfp, rfp)
+    # writeImage(combo, paste0(dir_output, plate,".",id,".combo.png"))
+  }
+}
+
+
+plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
+            "18870_18855","18870_19101","18870_19160","19098_18511",
+            "19098_18870","19098_19160","19101_18511","19101_19098",
+            "19160_18870","18855_19098","19101_19160","19160_18511")
+
+for (index in 1:length(plates)) {
+  plate <- plates[index]
+  cases <- nuclei_table[which(nuclei_table$nnuclei > 1 & nuclei_table$plate == plate),]
+  wells <- as.character(cases$well)
+  print_png(plate, wells) 
+}
+
+
 ```
 
-<figure>
+---
 
-<figcaption>00012</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00012.outlines.png" style="width:50%; height=50%">
+## Session information
 
-<figcaption>00032</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00032.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00044</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00044.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00047</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00047.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00051</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00051.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00052</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00052.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00067</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00067.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00076</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00076.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00085</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00085.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00088</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00088.outlines.png" style="width:50%; height=50%">
-
-<figcaption>00096</figcaption>
-<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00096.outlines.png" style="width:50%; height=50%">
-
-</figure>
-
-
-
-
-
-
-
+```{r}
+sessionInfo()
 ```
 
