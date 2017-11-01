@@ -35,9 +35,9 @@
 #' library(EBImage)
 #' id <- "00002"
 #' dir_images_data_pl="/project2/gilad/fucci-seq/images_curated/18870_18511/"
-#' dir_images_processed="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18870_18511/"
-#' bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
 #' dir_output="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18870_18511/"
+#'
+#' bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
 #' dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
 #' gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
 #' rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
@@ -102,10 +102,12 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
   if (nnuc==0)
   {
     cat(paste("Did not find any nuclei in image", id, "\n"))
-    return( list(id = id,
-                 total.nuclei = NULL,
-                 nuc.volume  = NULL,
-                 imageOutput = NULL) )
+    output <- list(id = id,
+                   total.nuclei = NA,
+                   nuc.volume  = NULL,
+                   imageOutput = NULL)
+    return(output)
+
     } else {
   # Remove identified nuclei that are smaller than a user-set size
   # We should think hard about whether this is a necessary step,
@@ -131,10 +133,7 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
     output <- list(id = id,
                  total.nuclei = nnuc,
                  nuc.volume  = NULL,
-                 imageOutput = list(label = NULL,
-                                    dapi = NULL,
-                                    rfp = NULL,
-                                    gfp = NULL))
+                 imageOutput = NULL)
   }
 
   # if one or more nuclei were found
@@ -169,6 +168,7 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
       # using boundaries detected (labeled)
       segmented <- paintObjects(labeled, cells, col='#ff00ff')
       writeImage(segmented, file=paste0(dir_output,id,'.outlines.TIFF'))
+      writeImage(segmented, file=paste0(dir_output,id,'.outlines.png'))
     }
 
     if (control$printProcessedImages == TRUE) {

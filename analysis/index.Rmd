@@ -8,7 +8,10 @@ output:
 Website to share results of fucci-seq project.
 
 
-* [CONFESS preliminary results](confess-prelim.html)
+## Image analysis
 
+* [CONFESS preliminary results](confess-prelim.html)
+* [Images QC](images-qc.html)
+* [Inspect images with multiple nuclei](images-multiple-nuclei.html)
 
 

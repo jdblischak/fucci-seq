@@ -11,7 +11,7 @@
 
 
 
-<title>Home</title>
+<title>Look at samples with more than 1 nucleus</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +19,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
@@ -162,6 +165,101 @@ $(document).ready(function () {
 
 
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -208,19 +306,106 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Look at samples with more than 1 nucleus</h1>
 
 </div>
 
 
-<p>Website to share results of fucci-seq project.</p>
-<div id="image-analysis" class="section level2">
-<h2>Image analysis</h2>
-<ul>
-<li><a href="confess-prelim.html">CONFESS preliminary results</a></li>
-<li><a href="images-qc.html">Images QC</a></li>
-<li><a href="images-multiple-nuclei.html">Inspect images with multiple nuclei</a></li>
-</ul>
+<div id="load-data-and-packages" class="section level2">
+<h2>Load data and packages</h2>
+<pre class="r"><code>dir_output_tmp &lt;- (&quot;/project2/gilad/joycehsiao/fucci-seq/output_tmp&quot;)
+nuclei_table &lt;- readRDS(paste0(dir_output_tmp, &quot;/&quot;, &quot;nuclei_table.rds&quot;))
+
+with(nuclei_table, table(nnuclei))</code></pre>
+<pre><code>## nnuclei
+##    0    1    2    3    4    5    6    7    8   12   20 
+##    4 1264  141   53   21   14    2    2    2    1    1</code></pre>
+<p>Visual inspection confirmed multiple nuclei.</p>
+<pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 12),]</code></pre>
+<pre><code>##         nnuclei  well       plate
+## 0004811      12 00048 19160_18870</code></pre>
+<pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 20),]</code></pre>
+<pre><code>##        nnuclei  well       plate
+## 000636      20 00063 18870_19160</code></pre>
+<hr />
+</div>
+<div id="examples-with-two-nuclei" class="section level2">
+<h2>Examples with two nuclei</h2>
+<p>Print images for all that have two nuclei in plate 18511_18855 and save them in scratch.</p>
+<pre class="r"><code>cases &lt;- nuclei_table[which(nuclei_table$nnuclei == 2 &amp; nuclei_table$plate == &quot;18511_18855&quot;),]
+
+# print doubles
+wells &lt;- as.character(cases$well)
+wells &lt;- c(&quot;00012&quot;,&quot;00032&quot;,&quot;00044&quot;,&quot;00047&quot;,&quot;00051&quot;,&quot;00052&quot;,&quot;00067&quot;,&quot;00076&quot;,&quot;00085&quot;,&quot;00088&quot;,&quot;00096&quot;)
+#wells &lt;- sprintf(&quot;%05d&quot;, c(1:96))
+print(wells)</code></pre>
+<pre><code>##  [1] &quot;00012&quot; &quot;00032&quot; &quot;00044&quot; &quot;00047&quot; &quot;00051&quot; &quot;00052&quot; &quot;00067&quot; &quot;00076&quot;
+##  [9] &quot;00085&quot; &quot;00088&quot; &quot;00096&quot;</code></pre>
+<pre class="r"><code># for printing wells only
+test &lt;- lapply(1:length(wells), function(index) {
+  id &lt;- wells[index]
+  dir_images_data_pl=&quot;/project2/gilad/fucci-seq/images_curated/18511_18855/&quot;
+  dir_output=&quot;/scratch/midway2/joycehsiao/fucci-seq/images_processed/18511_18855/&quot;
+  bright &lt;- readImage(paste0(dir_images_data_pl, &quot;BRIGHT/&quot;, id, &quot;.TIFF&quot;))
+  dapi &lt;- readImage(paste0(dir_images_data_pl, &quot;DAPI/&quot;, id, &quot;.TIFF&quot;))
+  gfp &lt;- readImage(paste0(dir_images_data_pl, &quot;GFP/&quot;, id, &quot;.TIFF&quot;))
+  rfp &lt;- readImage(paste0(dir_images_data_pl, &quot;RFP/&quot;, id, &quot;.TIFF&quot;))
+  tmp &lt;- create_mask(bright, dapi, gfp, rfp, id, 
+                     control=list(medianFilterRadius=10,
+                                     size_cutoff=200, display=FALSE,
+                                     printWholeDAPI=TRUE,
+                                     printProcessedImages=FALSE,
+                                     displayProcessedImages=FALSE),
+                     dir_output = dir_output)
+  return(tmp)
+})</code></pre>
+<figure>
+<figcaption>
+00012
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00012.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00032
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00032.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00044
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00044.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00047
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00047.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00051
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00051.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00052
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00052.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00067
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00067.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00076
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00076.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00085
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00085.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00088
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00088.outlines.png" style="width:50%; height=50%"></p>
+<figcaption>
+00096
+</figcaption>
+<p><img src="figure/images-multiple-nuclei.Rmd/00096.outlines.png" style="width:50%; height=50%"></p>
+</figure>
+<p>```</p>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -261,6 +446,8 @@ footer is added to webpages before the MathJax javascript. -->
 -->
 
 
+</div>
+</div>
 
 </div>
 

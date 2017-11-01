@@ -1,0 +1,315 @@
+---
+title: "Images quality control"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Background and summary
+
+QC for the image data. Results are described as follows.
+
+1. No. of nuclei detected 
+
+    * Across the 16 plates and 1,536 single cell samples, 34 samples were classifed as no nucleus (2.2%) and 238 samples (15.5%) were classied as having two or more nuclei. These imaging results compared to the previous study: similar number of single cell samples that have no nucleus (2.7% and 21 cells), and a much larger percent of single cell samples that have two or more nucleus (7%, 54 cells). Note that the number of nuclei detected by DAPI is not a direct measure of the cell size. Further analysis is required to quantify the size of the area covered by cytoplasm in each single cell image, which would be a more accurate approximation of cell size and thus mRNA content than the size of nucleus.
+    
+2. DAPI intensity
+
+    * For each single cell sample, we computed the sum of DAPI pixel intensity in the nucleus area. We observed that there's a significant variation in DAPI intensity across plates. This is not surprising given that experimentally the plates are prepared imaged on different days, and further biologically the plates contain different combination of individual cell lines. More importantly, we should consider individual variation in cell cycle phase - because individual cell lines can incorporate the cell cycle proteins at different rates (need to clarify more...). 
+    
+    * Looking at the DAPI noise intensity. The average level is between 0 to .1, which is very small compared to the DAPI signal intensity .1 to 1.
+    
+    * Relationship between DAPI and green/red (Note that we should consider Red and Green separately for their relationship with DAPI.) We observed that the Red signal distribution is almost uniform across the DAPI intensity range, making it difficult to discern differences between positive/negative Red. On the other hand, the Green signal distribution varies across DAPI intensity ranges.
+
+    * There doesn't appear to be plate variation in the relationship between Red/Green and DAPI.
+
+3. Background/Foreground intensity variation 
+
+    * Saturation: at high pixel intensity, the signal intensites are mostly saturated (median ~ 1 and median > mean). And this is more so for Green than for Red. But note that this may have to do with the area from which we compute the pixel intensities. For many of the single cell samples, the cell cycle proteins are outside of the nucleus and are mostly concentrated at the nucleus. If we consider the area outside of the nucleus, we may be better differentiation between signals at high pixel intensities.
+    
+    * Background intensity by plate: mostly similar between plates in both Red and Green. In Red, there's one plate that have some high background samples: 18855_19098. Mark this one to be investigated for later.
+
+
+4. Next step:
+
+    * For each single nucleus sample, compute sum of intensity in a fix 100 by 100 pixel area. This is an attempt to capture fluorescent intensity of the proteins in the entire cell, instead of just within the nucleus area as we have now.
+    
+    * Account for individual variation in cell cycle phase. This will be done once we have the individual labels from sequencing data.
+
+
+---
+
+## Loading data and packages
+
+```{r, message=FALSE}
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+```
+
+Name all plates.
+
+```{r}
+plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
+            "18870_18855","18870_19101","18870_19160","19098_18511",
+            "19098_18870","19098_19160","19101_18511","19101_19098",
+            "19160_18870","19101_19160","19160_18511", "18855_19098")
+```
+
+Name data directories.
+
+```{r}
+# Make directory shortcuts.
+dir_nuclei <- paste0("/project2/gilad/fucci-seq/intensities/")
+#dir_ints_long <- paste0("/project2/gilad/joycehsiao/fucci-seq/output_tmp/")
+#rds <- paste0(dir_ints, plate, ".tmp.2.rds")
+dir_output_tmp <- ("/project2/gilad/joycehsiao/fucci-seq/output_tmp")
+```
+
+---
+
+## Edge detection using DAPI
+
+
+```{r, eval = FALSE, echo = FALSE}
+# Make summary nuclei table
+nuclei_table <- do.call(rbind, lapply(1:length(plates), function(index) {
+  plate <- plates[index]
+  nnuclei <- readRDS(paste0(dir_nuclei,plate, ".nuclei.rds"))
+  tmp <- data.frame(nnuclei = nnuclei,
+                    well = names(nnuclei))
+  tmp$plate <- plate
+  return(tmp)
+}))
+saveRDS(nuclei_table, file = paste0(dir_output_tmp, "/", "nuclei_table.rds"))
+```
+
+Notes:
+
+1. Some samples are not listed in the nuclei dataset. These didn't pass the edge detection step. That is, the DAPI image was completely dark.  
+2. Samples that have 0 nucleus passed the initial edge detection but the area inside the mask is too dark or too faint.  
+3. For samples that have two nuclei, I looked at 18511_18855 and only one or two we can argue that maybe it could be a cell that got stuck in the suction. Need to look at these again and see how much we can salvage. 
+
+
+```{r}
+nuclei_table <- readRDS(paste0(dir_output_tmp, "/", "nuclei_table.rds"))
+
+with(nuclei_table, table(nnuclei))
+with(nuclei_table, table(plate, nnuclei))
+```
+
+Compute number of samples with 0 nucleus.
+
+```{r}
+df <- as.data.frame(with(nuclei_table, table(plate, nnuclei)))
+df$nnuclei <- as.numeric(as.character(df$nnuclei))
+
+library(dplyr)
+df %>% filter(nnuclei > 0) %>%
+  group_by(plate) %>% summarize(zero = 96-sum(Freq))
+```
+
+How many samples on average has 1 nucleus? 79
+
+```{r}
+df <- as.data.frame(with(nuclei_table, table(plate, nnuclei)))
+df$nnuclei <- as.numeric(as.character(df$nnuclei))
+
+library(dplyr)
+df %>% filter(nnuclei == 1 ) %>% summarize(med = median(Freq), median = mean(Freq))
+```
+
+In the previous study (published in Scientific Reports), we flagged 21 samples that did not contain any cell, and 54 samples that contain more than one cell. Additinoally, we chose data-drive inclusion cutoffs using the number of total mapped reads, the percentage of unmapped reads, the percentage of ERCC spike-in reads, and the number of genes detected. In the end, we get 564 quality single cells. That is, 21/768~2.7% did not contain any cell, 54/768~7% contain more than one cell. 564/768~73.4% quality single cells
+
+In the current study and from the imaging results: one nuclei 1264/1536~82.2%; 34/1536~2.2% did not contain any cell, 238/1536~15.5% contain more than one cell.
+
+---
+
+## DAPI
+
+Consider sum over nucleus area masked by the edge detected, and check distriubtion between plates and with plates. There's significant variation in DAPI between plates. 
+
+```{r}
+dapi <- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  dapi_sum <- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, dapi_sum=dapi_sum)
+}) )
+
+
+ggplot(dapi, aes(x=dapi_sum)) + geom_density() + 
+  labs(main = "DAPI distribution", x="DAPI intensity sum in the nucleus area")
+
+ggplot(dapi, aes(x=dapi_sum, colour = plate)) + 
+  geom_density() +
+  labs(main = "DAPI distribution by plate", x="DAPI intensity sum in the nucleus area")
+```
+
+How about DAPI noise? Quite different between plates. But consider that the range of pixel intensity is 0 to 1, then .06 noise is trivial. Considering the differences though, I corrected the DAPI sum for the background noise by shifting the intensities down using the mean of background noise. There was not much difference between mean and median.
+
+```{r, fig.width=11}
+dapi_noise <- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  dapi_sum <- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, 
+             dapi.fore.mean=ints$dapi.fore.mean,
+             dapi.back.mean=ints$dapi.back.mean)
+}))
+
+
+plot_grid(
+  ggplot(dapi_noise, aes(x=plate, y=dapi.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main="DAPI background mean intensity"), 
+  ggplot(dapi_noise, aes(x=plate, y=dapi.fore.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main="DAPI foreground mean intensity") )
+```
+
+DAPI sum adjusted for noise. Almost no difference compared to when not adjusted.
+
+```{r}
+dapi_adj <- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  dapi_sum <- with(ints, size*(dapi.fore.mean-dapi.back.mean))
+  data.frame(plate=plates[index], well=ints$wellID, dapi_sum=dapi_sum)
+}) )
+
+# check how much they differ; almost no difference
+plot(dapi$dapi_sum, dapi_adj$dapi_sum)
+```
+
+But fine. Within each plate or across plates, what's the relationship between DAPI an Green/Red?
+
+Prepare a data for investigating the association between DAPI and green/red.
+
+```{r}
+eval <- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  dapi_sum <- with(ints, size*dapi.fore.mean)
+  data.frame(plate=plates[index], well=ints$wellID, 
+             dapi_sum=dapi_sum, 
+             rfp.fore.mean=ints$rfp.fore.mean, rfp.fore.q05=ints$rfp.fore.q05, 
+             rfp.back.mean=ints$rfp.back.mean, rfp.back.q05=ints$rfp.back.q05,
+             gfp.fore.mean=ints$gfp.fore.mean, gfp.fore.q05=ints$gfp.fore.q05, 
+             gfp.back.mean=ints$gfp.back.mean, gfp.back.q05=ints$gfp.back.q05)
+}) )
+eval <- eval %>% mutate(dapi_5quant=ntile(dapi_sum,5))
+```
+
+All plates. Green versus red with DAPI coloring each nuclei. Not easy to see...
+
+```{r}
+eval %>%
+  ggplot + aes(x=rfp.fore.mean, y=gfp.fore.mean, colour= dapi_5quant) +
+  geom_point(cex=1, alpha=.7) 
+
+eval %>%
+  ggplot + aes(x=rfp.fore.mean-rfp.back.mean,
+               y=gfp.fore.mean-gfp.back.mean,
+               colour= dapi_5quant) +
+  geom_point(cex=1, alpha=.7) +
+  labs(x="Red signal", y = "Green signal") 
+```
+
+Take green/red versus DAPI.
+
+```{r, fig.width=11}
+plot_grid(
+ggplot(data=eval, aes(x=dapi_sum, y = rfp.fore.mean-rfp.back.mean)) +
+  geom_point(alpha=.5, col="red") + labs(x="DAPI", y="Red signals"),
+ggplot(data=eval, aes(x=dapi_sum, y = gfp.fore.mean-gfp.back.mean)) +
+  geom_point(alpha=.5, col="green") + labs(x="DAPI", y = "Green signals"))
+```
+
+
+The three dimensional plots are dfficult to see. Let me plot green vs. red for each bin of DAPI.
+ 
+```{r, fig.width=11}
+# fucci green and red density versus DAPI: signal percent
+ggplot(data=eval, aes(x=rfp.fore.mean-rfp.back.mean)) + geom_density(fill = "red", alpha=.5) +
+  facet_wrap(~as.factor(dapi_5quant), nrow=1) + 
+  labs(main = "Red by DAPI quantiles", x = "Red signal (fore-back)")
+
+ggplot(data=eval, aes(x=gfp.fore.mean-gfp.back.mean)) + geom_density(fill = "green", alpha=.5) +
+  facet_wrap(~as.factor(dapi_5quant), nrow=1) + 
+  labs(main = "Green by DAPI quantiles", x = "Green signal (fore-back)")
+```
+
+Individual differences in DAPI versus Green/Red.
+
+```{r, fig.width=11}
+eval %>% 
+  ggplot + aes(x=dapi_sum, y = rfp.fore.mean-rfp.back.mean) +
+  geom_point(alpha=.5, col="red") + labs(x="DAPI", y="Red signals") +
+  facet_wrap(~plate, ncol = 4)
+
+eval %>% 
+  ggplot + aes(x=dapi_sum, y = gfp.fore.mean-gfp.back.mean) +
+  geom_point(alpha=.5, col="green") + labs(x="DAPI", y="Green signals") +
+  facet_wrap(~plate, ncol = 4)
+```
+
+---
+
+## Intensity variation between plates
+
+Mean versus median. This shows that at high pixel intensity, the signal intensites are mostly saturated. And this is more so for Green than for Red. But note that this may have to do with the area from which we compute the pixel intensities. For many of the single cell samples, the cell cycle proteins are outside of the nucleus and are mostly concentrated at the nucleus. If we consider the area outside of the nucleus, we may be better differentiation between signals at high pixel intensities.
+
+
+```{r}
+plot_grid(
+  ggplot(eval, aes(x=rfp.fore.q05, y=rfp.fore.mean)) + 
+    geom_point(cex=.6, col = "red") + 
+    labs(main="Red intensity", x="Median", y="Mean"), 
+    ggplot(eval, aes(x=gfp.fore.q05, y=gfp.fore.mean)) + 
+    geom_point(cex=.6, col = "green") + 
+    labs(main="Green intensity", x="Median", y="Mean") )
+```
+
+
+Background variation between plates.
+
+```{r, fig.width=11}
+plot_grid(
+  ggplot(eval, aes(x=plate, y=rfp.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main="Red background mean intensity"), 
+  ggplot(eval, aes(x=plate, y=gfp.back.mean, colour = plate)) + 
+    geom_boxplot(cex=.6) + labs(main="Green background mean intensity") )
+```
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

@@ -1,0 +1,107 @@
+---
+title: "Look at samples with more than 1 nucleus"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data and packages
+
+```{r}
+dir_output_tmp <- ("/project2/gilad/joycehsiao/fucci-seq/output_tmp")
+nuclei_table <- readRDS(paste0(dir_output_tmp, "/", "nuclei_table.rds"))
+
+with(nuclei_table, table(nnuclei))
+```
+
+Visual inspection confirmed multiple nuclei.
+
+```{r}
+nuclei_table[which(nuclei_table$nnuclei == 12),]
+nuclei_table[which(nuclei_table$nnuclei == 20),]
+```
+
+---
+
+## Examples with two nuclei
+
+Print images for all that have two nuclei in plate 18511_18855 and save them in scratch.
+
+```{r}
+cases <- nuclei_table[which(nuclei_table$nnuclei == 2 & nuclei_table$plate == "18511_18855"),]
+
+# print doubles
+wells <- as.character(cases$well)
+wells <- c("00012","00032","00044","00047","00051","00052","00067","00076","00085","00088","00096")
+#wells <- sprintf("%05d", c(1:96))
+print(wells)
+```
+
+```{r, eval = FALSE}
+# for printing wells only
+test <- lapply(1:length(wells), function(index) {
+  id <- wells[index]
+  dir_images_data_pl="/project2/gilad/fucci-seq/images_curated/18511_18855/"
+  dir_output="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18511_18855/"
+  bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
+  dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
+  gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
+  rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
+  tmp <- create_mask(bright, dapi, gfp, rfp, id, 
+                     control=list(medianFilterRadius=10,
+                                     size_cutoff=200, display=FALSE,
+                                     printWholeDAPI=TRUE,
+                                     printProcessedImages=FALSE,
+                                     displayProcessedImages=FALSE),
+                     dir_output = dir_output)
+  return(tmp)
+})
+```
+
+<figure>
+
+<figcaption>00012</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00012.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00032</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00032.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00044</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00044.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00047</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00047.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00051</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00051.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00052</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00052.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00067</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00067.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00076</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00076.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00085</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00085.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00088</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00088.outlines.png" style="width:50%; height=50%">
+
+<figcaption>00096</figcaption>
+<img src="/project2/gilad/joycehsiao/fucci-seq/analysis/figure/images-multiple-nuclei.Rmd/00096.outlines.png" style="width:50%; height=50%">
+
+</figure>
+
+
+
+
+
+
+
+```
+
