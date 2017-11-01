@@ -33,9 +33,9 @@
 #'
 #' @example
 #' library(EBImage)
-#' id <- "00002"
-#' dir_images_data_pl="/project2/gilad/fucci-seq/images_curated/18870_18511/"
-#' dir_output="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18870_18511/"
+#' id <- "00081"
+#' dir_images_data_pl="/project2/gilad/fucci-seq/images_curated/18855_19098/"
+#' dir_output="/scratch/midway2/joycehsiao/fucci-seq/images_processed/18855_19098/"
 #'
 #' bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
 #' dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
@@ -47,7 +47,7 @@
 create_mask <- function(bright, dapi, gfp, rfp, id,
                         dir_output=NULL,
                         control=list(medianFilterRadius=10,
-                                     size_cutoff=200, display=FALSE,
+                                     size_cutoff=350, display=FALSE,
                                      printWholeDAPI=FALSE,
                                      printProcessedImages=FALSE,
                                      displayProcessedImages=FALSE))
@@ -175,13 +175,13 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
       for (i in 1:nnuc)
       {
         name <- paste0(id,'.',i)
-        # a zoomed in image of each channel
-        this.mask   <- mask[start.x[i]:end.x[i], start.y[i]:end.y[i]]
-        this.dapi   <- dapi[start.x[i]:end.x[i], start.y[i]:end.y[i]]
-        this.bright <- bright[start.x[i]:end.x[i], start.y[i]:end.y[i]]
-        this.rfp    <- rfp[start.x[i]:end.x[i], start.y[i]:end.y[i]]
-        this.gfp    <- gfp[start.x[i]:end.x[i], start.y[i]:end.y[i]]
 
+        # a zoomed in image of each channel
+       this.mask   <- mask[start.x[i]:end.x[i], start.y[i]:end.y[i]]
+       this.dapi   <- dapi[start.x[i]:end.x[i], start.y[i]:end.y[i]]
+       this.bright <- bright[start.x[i]:end.x[i], start.y[i]:end.y[i]]
+       this.rfp    <- rfp[start.x[i]:end.x[i], start.y[i]:end.y[i]]
+       this.gfp    <- gfp[start.x[i]:end.x[i], start.y[i]:end.y[i]]
 
         # zoomed in outlines
         this.label  <- bwlabel(this.mask)
@@ -205,8 +205,14 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
           display(this.rfp)
           display(this.gfp)
         }
+
       }
     }
+
+    # make a mask for the zoom-in image
+    mask.zoom <- mask
+    mask.zoom[start.x[1]:end.x[1], start.y[1]:end.y[1]] <- 1
+    label.zoom  <- bwlabel(mask.zoom)
 
     # The area of the nucleus, in pixels. Other metrics are available
     size <- computeFeatures.shape(labeled)[,1]
@@ -215,16 +221,11 @@ create_mask <- function(bright, dapi, gfp, rfp, id,
                  total.nuclei = nnuc,
                  nuc.volume  = size,
                  imageOutput = list(label = labeled,
+                                    label.zoom = label.zoom,
                                     dapi = dapi,
                                     rfp = rfp,
                                     gfp = gfp))
    }
-
-  # grab the mean fluorescence within identified nuclei
-  # other metrics are available if we want them
-  #  mean.dapi <- computeFeatures.basic(labeled, dapi)[,1]
-  #  mean.rfp  <- computeFeatures.basic(labeled, rfp)[,1]
-  #  mean.gfp  <- computeFeatures.basic(labeled, gfp)[,1]
 
   return( output )
 }
