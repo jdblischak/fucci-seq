@@ -43,9 +43,10 @@ library(methods)
     ints <- readRDS(paste0(args[1], args[3], "/", args[3], ".", id, ".ints",".rds"))
     imgdata <- ints$imageOutput
     nnuclei <- nuclei[index]
+
+    # ----- Approach 1: consider areas inside/outside the nucleus defined by DAPI
     # use EBImage functions to compute summary statistics
-    # the function computes statistics on the intensity of the pixels inside
-    # the nucleus area
+
     # foreground intensity
     rfp.fore.stats <- computeFeatures.basic(imgdata$label,
                                 imgdata$rfp, basic.quantiles = c(.1, .5, .9))
@@ -71,16 +72,39 @@ library(methods)
     dimnames(gfp.back.stats)[[2]] <- gsub("b.", "gfp.back.", dimnames(gfp.back.stats)[[2]])
     dimnames(dapi.back.stats)[[2]] <- gsub("b.", "dapi.back.", dimnames(dapi.back.stats)[[2]])
 
-    data.frame(wellID=id, size=size, nnuclei=nnuclei, rfp.fore.stats, gfp.fore.stats, dapi.fore.stats,
-               rfp.back.stats, gfp.back.stats, dapi.back.stats)
-    # data.frame(rfp.fore.mean = mean(imgdata$rfp[imgdata$label == 1]),
-    #            rfp.back.mean = mean(imgdata$rfp[imgdata$label == 0]),
-    #            gfp.fore.mean = mean(imgdata$gfp[imgdata$label == 1]),
-    #            gfp.back.mean = mean(imgdata$gfp[imgdata$label == 0]),
-    #           rfp.fore.z.mean = mean(scale(imgdata$rfp)[imgdata$label == 1]),
-    #           rfp.back.z.mean = mean(scale(imgdata$rfp)[imgdata$label == 0]),
-    #           gfp.fore.z.mean = mean(scale(imgdata$gfp)[imgdata$label == 1]),
-    #           gfp.back.z.mean = mean(scale(imgdata$gfp)[imgdata$label == 0]))
+
+    # ----- Approach 2: consider the 100 x 100 pixel intensity area centered at the nucleus
+    # note that the area is bounded by the distance of the center to the image edges
+
+    # foreground intensity
+    rfp.fore.stats.zoom <- computeFeatures.basic(imgdata$label.zoom, imgdata$rfp)
+    gfp.fore.stats.zoom <- computeFeatures.basic(imgdata$label.zoom, imgdata$gfp)
+    dapi.fore.stats.zoom <- computeFeatures.basic(imgdata$label.zoom, imgdata$dapi)
+    size.zoom <- computeFeatures.shape(imgdata$label.zoom, imgdata$dapi)[,1]
+
+    #background intensity
+    rfp.back.stats.zoom <- computeFeatures.basic(1-imgdata$label.zoom, imgdata$rfp)
+    gfp.back.stats.zoom <- computeFeatures.basic(1-imgdata$label.zoom, imgdata$gfp)
+    dapi.back.stats.zoom <- computeFeatures.basic(1-imgdata$label.zoom, imgdata$dapi)
+
+    # summary stats
+    rfp.sum.zoom <- (rfp.fore.stats.zoom$b.mean-rfp.back.stats.zoom$b.mean)*size.zoom
+    gfp.sum.zoom <- (gfp.fore.stats.zoom$b.mean-gfp.back.stats.zoom$b.mean)*size.zoom
+    dapi.sum.zoom <- (dapi.fore.stats.zoom$b.mean-dapi.back.stats.zoom$b.mean)*size.zoom
+
+    # rename *.stats
+    dimnames(rfp.fore.stats)[[2]] <- gsub("b.", "rfp.fore.", dimnames(rfp.fore.stats)[[2]])
+    dimnames(gfp.fore.stats)[[2]] <- gsub("b.", "gfp.fore.", dimnames(gfp.fore.stats)[[2]])
+    dimnames(dapi.fore.stats)[[2]] <- gsub("b.", "dapi.fore.", dimnames(dapi.fore.stats)[[2]])
+    dimnames(rfp.back.stats)[[2]] <- gsub("b.", "rfp.back.", dimnames(rfp.back.stats)[[2]])
+    dimnames(gfp.back.stats)[[2]] <- gsub("b.", "gfp.back.", dimnames(gfp.back.stats)[[2]])
+    dimnames(dapi.back.stats)[[2]] <- gsub("b.", "dapi.back.", dimnames(dapi.back.stats)[[2]])
+
+
+    data.frame(wellID=id, size=size, nnuclei=nnuclei,
+               rfp.fore.stats, gfp.fore.stats, dapi.fore.stats,
+               rfp.back.stats, gfp.back.stats, dapi.back.stats,
+               rfp.sum.zoom=rfp.sum.zoom, gfp.sum.zoom=gfp.sum.zoom, dapi.sum.zoom=dapi.sum.zoom)
   }) )
 
   saveRDS(ints_fb, file = paste0(args[2], args[3], ".stats.rds"))
