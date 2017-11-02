@@ -1,0 +1,273 @@
+---
+title: "Images quality control follow-up analysis"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Background and summary
+
+In the current analysis, we computed corrected signal for each channel as follows:
+
+```
+(foreground mean intensity - background mean intenstiy)*mask size
+```
+
+The `mask size` is defined as: Denote the center of the nucleus as `(cx,cy)`, then the mask area is `(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))`. The maximum mask size is 10,000.
+
+This metric for summarizing pixel intensity factors into the quantity of cell cycle protein, and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantify of cell cycle protein.
+
+
+Results:
+
+1. In about 10 to 15 single cell samples, the background intensity is greater than the foreground intensity by a small amount (~.001) in the Red or the Green channel. we need to check to see if there are signals at all for these samples in any of channles. If there's any signal, then we'll set the channel with no signal to the lowest possible intensity value.
+
+
+2. On log10 scale of pixel sum intensity, we are able to observe the separation of single cell samples on Red channel and also on Green channel. And, interestly, in figures plotting Red against Green, we observe three clusters roughly correspond to low, medium and high DAPI. 
+
+3. Plate effect: the pattern observed in Red intensities against Green intensities appears to vary by plate, and when we control for plate differencees in DAPI intensities, we see the distribution of DAPI intensities fairly similar across plates!
+
+4. The metric for intensity in the current analysis effective scales the mean intensity by the channel specific and sample-specific coverage area of fluorescent intensities. This is likely the main contributing factor for the better separtion of single cell samples we observe here.
+
+
+**Next steps**:
+
+1. Batch correction for plate and individual effect.
+
+2. Classification? How? Should be non-linear...
+
+---
+
+## Loading data and packages
+
+```{r, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+```
+
+Name all plates.
+
+```{r}
+plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
+            "18870_18855","18870_19101","18870_19160","19098_18511",
+            "19098_18870","19098_19160","19101_18511","19101_19098",
+            "19160_18870","19101_19160","19160_18511", "18855_19098")
+```
+
+Combine intensity stats from different plates.
+
+```{r, eval = FALSE}
+#tmp <- readRDS("/project2/gilad/fucci-seq/intensities_stats/18511_18855.stats.rds")
+ints <- do.call(rbind, lapply(1:length(plates), function(index) {
+  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  data.frame(plate=plates[index], well=ints$wellID, 
+             rfp.sum.zoom=ints$rfp.sum.zoom, 
+             gfp.sum.zoom=ints$gfp.sum.zoom, 
+             dapi.sum.zoom=ints$dapi.sum.zoom)
+}) )
+ints <- ints %>% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
+                        dapi_3quant=ntile(dapi.sum.zoom,3))
+saveRDS(ints, file =  "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds")
+```
+
+Load the above intensity stats rds.
+
+```{r}
+ints <- readRDS(file = "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds")
+```
+
+---
+
+## DAPI versus Green/Red
+
+### Pixel sum
+
+```{r, fig.width=9, fig.height=4}
+plot_grid(
+ggplot(ints, aes(x=dapi.sum.zoom, y = rfp.sum.zoom)) + 
+  geom_point(col = "red", alpha = .5, cex = .7) + 
+  labs(title = "Red versus DAPI",
+       subtitle = "pixel sum", 
+       x="DAPI channel", y = "Red channel") ,
+ggplot(ints, aes(x=dapi.sum.zoom, y = gfp.sum.zoom)) + 
+  geom_point(col = "green", alpha = .5, cex = .7) + 
+  labs(title = "Green versus DAPI",
+       subtitle = "pixel sum", 
+       x="DAPI channel", y = "Green channel") )
+```
+
+### log 10 pixel sum
+
+```{r, fig.width=9, fig.height=4}
+plot_grid(
+ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
+  geom_point(col = "red", alpha = .5, cex = .7) + 
+  labs(title = "Red versus DAPI",
+       subtitle="log10 pixel sum", 
+       x="DAPI channel", y = "Red channel"),
+ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
+  geom_point(col = "green", alpha = .5, cex = .7) + 
+  labs(title = "Green versus DAPI",
+       subtitle = "log10 pixel sum", 
+       x="DAPI channel", y = "Green channel")  )
+```
+
+### By plate
+
+```{r, fig.width=7, fig.height=7}
+ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
+  geom_point(col = "red", alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Red versus DAPI",
+       subtitle = "log10 pixel sum", 
+       x="DAPI channel", y = "Red channel")  
+
+
+ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
+  geom_point(col = "green", alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Green versus DAPI",
+       subtitle = "log10 pixel sum", 
+       x="DAPI channel", y = "Green channel")  
+```
+
+
+---
+
+## Red vs Green binned by DAPI quantiles
+
+
+### Across plates
+
+Compute DAPI quantiles across plates.
+
+```{r, fig.width=6, fig.height=5}
+ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+  geom_point(alpha = .5, cex = .7) + 
+  labs(title = "Samples binned by DAPI 3 quantiles", 
+       x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+  scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
+   
+
+ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+    geom_point(alpha = .5, cex = .7) + 
+    labs(title = "Samples binned by DAPI 4 quantiles", 
+         x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+    scale_color_manual(values=c("blue", "forestgreen", "darkorange", "red")) + theme_gray() 
+     
+```
+
+### By plate, overall DAPI quantiles
+
+Compute DAPI quantiles across plates.
+
+```{r, fig.width=8, fig.height=7}
+ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Samples binned by DAPI 4 quantiles", 
+       x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+  scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
+   
+
+ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Samples binned by DAPI 4 quantiles", 
+       x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+  scale_color_manual(values=c("blue", "forestgreen", "darkorange", "red")) + theme_gray() 
+   
+```
+
+
+### By plate, plate-specific DAPI quantiles
+
+Compute DAPI quantiles in each plate.
+
+```{r}
+ints_tmp <- ints %>% group_by(plate) %>% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
+                          dapi_3quant=ntile(dapi.sum.zoom,3))
+```
+
+```{r, fig.width=8, fig.height=7}
+ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Samples binned by DAPI 3 quantiles",
+       x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+  scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
+   
+ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~plate, ncol=4) +
+  labs(title = "Samples binned by DAPI 4 quantiles", 
+       x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
+  scale_color_manual(values=c("blue", "forestgreen", "darkorange", "red")) + theme_gray() 
+   
+```
+
+---
+
+## Density distribution
+
+
+### DAPI 3 quantiles
+
+```{r, fig.width=8, fig.height=3}
+ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = "red", alpha=.5) +
+  facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
+  labs(title = "Red by DAPI quantiles", x = "Red signal (fore-back)")
+
+ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = "green", alpha=.5) +
+  facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
+  labs(title = "Green by DAPI quantiles", x = "Red signal (fore-back)")
+```
+
+
+### DAPI 4 quantiles
+
+```{r, fig.width=8, fig.height=3}
+ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = "red", alpha=.5) +
+  facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
+  labs(title = "Red by DAPI quantiles", x = "Red signal (fore-back)")
+
+ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = "green", alpha=.5) +
+  facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
+  labs(title = "Green by DAPI quantiles", x = "Red signal (fore-back)")
+```
+
+---
+
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```
