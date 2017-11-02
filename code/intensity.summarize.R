@@ -88,18 +88,9 @@ library(methods)
     dapi.back.stats.zoom <- computeFeatures.basic(1-imgdata$label.zoom, imgdata$dapi)
 
     # summary stats
-    rfp.sum.zoom <- (rfp.fore.stats.zoom$b.mean-rfp.back.stats.zoom$b.mean)*size.zoom
-    gfp.sum.zoom <- (gfp.fore.stats.zoom$b.mean-gfp.back.stats.zoom$b.mean)*size.zoom
-    dapi.sum.zoom <- (dapi.fore.stats.zoom$b.mean-dapi.back.stats.zoom$b.mean)*size.zoom
-
-    # rename *.stats
-    dimnames(rfp.fore.stats)[[2]] <- gsub("b.", "rfp.fore.", dimnames(rfp.fore.stats)[[2]])
-    dimnames(gfp.fore.stats)[[2]] <- gsub("b.", "gfp.fore.", dimnames(gfp.fore.stats)[[2]])
-    dimnames(dapi.fore.stats)[[2]] <- gsub("b.", "dapi.fore.", dimnames(dapi.fore.stats)[[2]])
-    dimnames(rfp.back.stats)[[2]] <- gsub("b.", "rfp.back.", dimnames(rfp.back.stats)[[2]])
-    dimnames(gfp.back.stats)[[2]] <- gsub("b.", "gfp.back.", dimnames(gfp.back.stats)[[2]])
-    dimnames(dapi.back.stats)[[2]] <- gsub("b.", "dapi.back.", dimnames(dapi.back.stats)[[2]])
-
+    rfp.sum.zoom <- (rfp.fore.stats.zoom[,"b.mean"]-rfp.back.stats.zoom[,"b.mean"])*size.zoom
+    gfp.sum.zoom <- (gfp.fore.stats.zoom[,"b.mean"]-gfp.back.stats.zoom[,"b.mean"])*size.zoom
+    dapi.sum.zoom <- (dapi.fore.stats.zoom[,"b.mean"]-dapi.back.stats.zoom[,"b.mean"])*size.zoom
 
     data.frame(wellID=id, size=size, nnuclei=nnuclei,
                rfp.fore.stats, gfp.fore.stats, dapi.fore.stats,
