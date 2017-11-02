@@ -1,22 +1,46 @@
 ---
-title: "Look at samples with more than 1 nucleus"
+title: "Inspect samples detected having more than 1 nucleus"
+author: "Joyce Hsiao"
 output: html_document
 ---
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Load data 
 
-Load summary table for the number of nuclei. Note that some samples are not included in this table, and those are the ones that contain no signal at all at the first pass of edge detection. The summary table contains three columns:
+Load image QC table - for now it has only number of nuclei detected in each sample now. This table does not include all of the single cell samples, and the ones that are not included are the samples classifed as no DNA content in DAPI images. 
+
+The summary table contains three columns:
 
 `plate`: labeled by the mix of individual cell lines  
 `well`: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).  
 `nnuclei`: number of nuclei detected in a single cell sample  
 
 ```{r}
-nuclei_table <- readRDS("/project2/gilad/joycehsiao/fucci-seq/output_tmp/nuclei_table.rds")
+nuclei_table <- readRDS("/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rds")
 
 with(nuclei_table, table(nnuclei))
 ```
