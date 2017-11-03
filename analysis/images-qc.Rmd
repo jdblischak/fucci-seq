@@ -37,7 +37,7 @@ QC for the image data. Results are described as follows.
     
 2. DAPI intensity
 
-    * For each single cell sample, we computed the sum of DAPI pixel intensity in the nucleus area. We observed that there's a significant variation in DAPI intensity across plates. This is not surprising given that experimentally the plates are prepared imaged on different days, and further biologically the plates contain different combination of individual cell lines. More importantly, we should consider individual variation in cell cycle phase - because individual cell lines can incorporate the cell cycle proteins at different rates (need to clarify more...). 
+    * For each single cell sample, we computed the sum of DAPI pixel intensity in the nucleus area. We observed that there's a significant variation in DAPI intensity across plates. This is not surprising given that experimentally the plates are prepared imaged on different days, and further biologically the plates contain different combination of individual cell lines. More importantly, we should consider individual variation in cell cycle phase - because each individual cell lines may have different percentage of G1 or G2 due to different duration at G1 or G2 phase, respectively. 
     
     * Looking at the DAPI noise intensity. The average level is between 0 to .1, which is very small compared to the DAPI signal intensity .1 to 1.
     

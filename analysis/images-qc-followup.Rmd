@@ -39,7 +39,7 @@ In the current analysis, we computed corrected signal for each channel as follow
 
 The `mask size` is defined as: Denote the center of the nucleus as `(cx,cy)`, then the mask area is `(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))`. The maximum mask size is 10,000.
 
-This metric for summarizing pixel intensity factors into the quantity of cell cycle protein, and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantify of cell cycle protein.
+This metric for summarizing pixel intensity factors into the quantity of cell cycle protein (green and red), and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantity of cell cycle protein (green and red).
 
 
 Results:
