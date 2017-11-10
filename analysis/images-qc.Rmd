@@ -111,6 +111,7 @@ Notes:
 1. Some samples are not listed in the nuclei dataset. These didn't pass the edge detection step. That is, the DAPI image was completely dark.  
 2. Samples that have 0 nucleus passed the initial edge detection but the area inside the mask is too dark or too faint.  
 3. For samples that have two nuclei, I looked at 18511_18855 and only one or two we can argue that maybe it could be a cell that got stuck in the suction. Need to look at these again and see how much we can salvage. 
+4. For plate 19160_18870, the vaccuem was having problem during the cell sorting, which leads to lots of bubble in the tubes. As a results, anothe plate with the same individuals, 18870_19160, was collected.
 
 
 ```{r}
