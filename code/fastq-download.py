@@ -16,7 +16,7 @@ Options:
 """
 
 # Example usage:
-#   python code/fastq-download.py data/md5/YG-PYT-Fucci1.md5 Genomics/NGS-2017/171109_700819F_0583_ACAWRYACXX-YG-PYT-Fucci1/FastQ /project2/gilad/fucci-seq/fastq
+#   python code/fastq-download.py data/md5/YG-PYT-Fucci1.md5 /Genomics/NGS-2017/171109_700819F_0583_ACAWRYACXX-YG-PYT-Fucci1/FastQ /project2/gilad/fucci-seq/fastq
 #
 # Implementation details:
 #
@@ -50,8 +50,17 @@ Options:
 # ├── 20170908
 # └── 20170910
 #
-# The script will skip files that have already been downloaded and removes those
-# whose md5 checksum does not match.
+# The script does 1 of 3 things depending on the download status of the file:
+#
+# 1. If the file exists on the remote server, but not on the local machine, the
+# file is downloaded and its md5 checksum verified. If they don't match, the
+# file is removed.
+#
+# 2. If the file exists on the remote server and on the local machine, its md5
+# checksum is verified. If they don't match, the file is removed.
+#
+# 3. If the file does not exist on the remote server, a warning message is sent
+# to standard error and the file is skipped.
 
 import docopt
 import getpass
@@ -90,7 +99,6 @@ def main(md5file, remotedir, outdir = ".", hostname = "fgfftp.uchicago.edu",
             continue
         elif os.path.exists(localpath):
             sys.stderr.write("Already exists:\t%s\n"%(remotepath))
-            continue
         else:
             sftp.get(remotepath, localpath)
         if not os.path.exists(localpath):
