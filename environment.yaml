@@ -41,6 +41,7 @@ dependencies:
   - bioconductor-ebimage
   - bioconductor-edger
   - docopt
+  - ipdb
   - ipython
   - pysftp
   - r=3.4.*
