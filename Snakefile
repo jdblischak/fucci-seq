@@ -49,7 +49,6 @@ ensembl_genome_hs = config["ensembl_genome_hs"]
 # Paths to data (must end with forward slash)
 dir_data = config["dir_data"]
 dir_external = config["dir_external"]
-dir_scratch = config["dir_scratch"]
 dir_fq = dir_external + "fastq/"
 dir_fq_combin = dir_external + "fastq-combined/"
 dir_fastqc = dir_external + "fastqc/"
@@ -66,7 +65,6 @@ dir_totals = dir_external + "fucci-totals/"
 dir_id = dir_external + "id/"
 
 assert os.path.exists(dir_data), "Local data directory exists"
-assert os.path.exists(dir_scratch), "Scratch directory exists"
 assert os.path.exists(dir_external), "External data directory exists"
 
 # Directory to send log files. Needs to be created manually since it
@@ -99,7 +97,10 @@ rule intermediate:
     input: #MultiQC
            expand(dir_multiqc + "{chip}/multiqc_report.html", chip = chips),
            # totals
-           expand(dir_data + "totals/{chip}.txt", chip = chips, row = rows, col = cols)
+           expand(dir_data + "totals/{chip}.txt", chip = chips, row = rows, col = cols),
+           # counts
+           expand(dir_counts + "{chip}/{chip}-{row}{col}.txt", \
+                  chip = chips, row = rows, col = cols)
 
 rule rds:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
@@ -174,8 +175,8 @@ rule gather_exons:
 localrules: index_bam, index_bam_dedup
 
 rule target_counts:
-    input: bam = expand(dir_counts + "{chip}/{chip}-{row}{col}.txt", \
-                        chip = chips, row = rows, col = cols)
+    input: counts = expand(dir_counts + "{chip}/{chip}-{row}{col}.txt", \
+                           chip = chips, row = rows, col = cols)
 
 rule target_bam:
     input: bam = expand(dir_bam + "{chip}/{chip}-{row}{col}-sort.bam", \
