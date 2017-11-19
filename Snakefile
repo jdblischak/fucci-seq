@@ -424,14 +424,12 @@ rule count_totals:
         # Parse the BAM file to obtain:
         #  * The number of reads with a valid UMI
         #  * The number of mapped (and unmapped) reads
-        #  * The number of reads mapped to ce, dm, ercc, hs
+        #  * The number of reads mapped to ercc, hs
         # https://pysam.readthedocs.io/en/stable/api.html#pysam.AlignedSegment
         import pysam
         umi = 0
         unmapped = 0
         mapped = 0
-        ce = 0
-        dm = 0
         ercc = 0
         hs = 0
         bam = pysam.AlignmentFile(input.bam, "rb")
@@ -442,11 +440,7 @@ rule count_totals:
             else:
                 mapped += 1
                 ref = read.reference_name
-                if ref[:2] == "ce":
-                    ce += 1
-                elif ref[:2] == "dm":
-                    dm += 1
-                elif ref[:2] == "hs":
+                if ref[:2] == "hs":
                     hs += 1
                 else:
                     ercc += 1
@@ -454,21 +448,15 @@ rule count_totals:
 
         # Parse the deduplicated BAM file to obtain:
         #  * The number of molecules
-        #  * The number of molecules mapped to ce, dm, ercc, hs
+        #  * The number of molecules mapped to ercc, hs
         mol = 0
-        mol_ce = 0
-        mol_dm = 0
         mol_ercc = 0
         mol_hs = 0
         dedup = pysam.AlignmentFile(input.dedup, "rb")
         for read in dedup:
             mol += 1
             ref = read.reference_name
-            if ref[:2] == "ce":
-                mol_ce += 1
-            elif ref[:2] == "dm":
-                mol_dm += 1
-            elif ref[:2] == "hs":
+            if ref[:2] == "hs":
                 mol_hs += 1
             else:
                 mol_ercc += 1
@@ -479,11 +467,11 @@ rule count_totals:
             "Reads with a UMI less than or equal to raw reads"
         assert mapped + unmapped == umi, \
             "Mapped and unmapped reads sum to reads with a UMI"
-        assert ce + dm + hs + ercc == mapped, \
+        assert hs + ercc == mapped, \
             "Reads mapped to specific genomes sum to mapped reads"
         assert mol < mapped, \
             "Molecules less than reads."
-        assert mol_ce + mol_dm + mol_ercc + mol_hs == mol, \
+        assert mol_ercc + mol_hs == mol, \
             "Molecules mapped to specific genomes sum to molecules"
 
         # Export total counts
@@ -492,13 +480,9 @@ rule count_totals:
                                  str(umi),
                                  str(mapped),
                                  str(unmapped),
-                                 str(ce),
-                                 str(dm),
                                  str(ercc),
                                  str(hs),
                                  str(mol),
-                                 str(mol_ce),
-                                 str(mol_dm),
                                  str(mol_ercc),
                                  str(mol_hs)]
                       ) + "\n")
@@ -520,13 +504,9 @@ rule gather_totals:
                             "umi",
                             "mapped",
                             "unmapped",
-                            "reads_ce",
-                            "reads_dm",
                             "reads_ercc",
                             "reads_hs",
                             "molecules",
-                            "mol_ce",
-                            "mol_dm",
                             "mol_ercc",
                             "mol_hs"]) + "\n"
         outfile.write(header)

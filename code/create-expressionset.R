@@ -68,13 +68,9 @@ metadata <- data.frame(labelDescription = c(
   "The number of reads with a valid UMI",
   "The number of reads with a valid UMI that mapped to a genome",
   "The number of reads with a valid UMI that did *not* map to a genome",
-  "The number of reads that mapped to the C. elegans genome",
-  "The number of reads that mapped to the D. melanogaster genome",
   "The number of reads that mapped to the ERCC spike-in transcripts",
   "The number of reads that mapped to the H. sapiens genome",
   "The number of molecules (i.e. post UMI-deduplication)",
-  "The number of molecules that mapped to the C. elegans genome",
-  "The number of molecules that mapped to the D. melanogaster genome",
   "The number of molecules that mapped to the ERCC spike-in transcripts",
   "The number of molecules that mapped to the H. sapiens genome",
   # Number of genes detected
