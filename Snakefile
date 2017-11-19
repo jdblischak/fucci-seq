@@ -44,8 +44,6 @@ ensembl_rel = config["ensembl_rel"]
 ensembl_ftp = "ftp://ftp.ensembl.org/pub/release-" + \
               str(ensembl_rel) + "/fasta/"
 ensembl_exons = "exons-ensembl-release-" + str(ensembl_rel) + ".saf"
-ensembl_genome_ce = config["ensembl_genome_ce"]
-ensembl_genome_dm = config["ensembl_genome_dm"]
 ensembl_genome_hs = config["ensembl_genome_hs"]
 
 # Paths to data (must end with forward slash)
@@ -56,15 +54,15 @@ dir_fq = dir_external + "fastq/"
 dir_fq_combin = dir_external + "fastq-combined/"
 dir_fastqc = dir_external + "fastqc/"
 dir_multiqc = dir_external + "multiqc/"
-dir_genome = dir_scratch + "genome-ensembl-release-" + str(ensembl_rel) + "/"
-dir_fq_filter = dir_scratch + "scqtl-fastq-filter/"
-dir_fq_extract = dir_scratch + "scqtl-fastq-extract/"
+dir_genome = dir_external + "genome-ensembl-release-" + str(ensembl_rel) + "/"
+dir_fq_filter = dir_external + "fucci-fastq-filter/"
+dir_fq_extract = dir_external + "fucci-fastq-extract/"
 dir_bam = dir_external + "bam/"
 dir_bam_dedup = dir_external + "bam-dedup/"
-dir_bam_dedup_stats = dir_scratch + "scqtl-bam-dedup-stats/"
-dir_bam_verify = dir_scratch + "scqtl-bam-verify/"
-dir_counts = dir_scratch + "scqtl-counts/"
-dir_totals = dir_scratch + "scqtl-totals/"
+dir_bam_dedup_stats = dir_external + "fucci-bam-dedup-stats/"
+dir_bam_verify = dir_external + "fucci-bam-verify/"
+dir_counts = dir_external + "fucci-counts/"
+dir_totals = dir_external + "fucci-totals/"
 dir_id = dir_external + "id/"
 
 assert os.path.exists(dir_data), "Local data directory exists"
@@ -78,8 +76,6 @@ if not os.path.isdir(dir_log):
     os.mkdir(dir_log)
 
 # Names of chromosomes
-chr_ce = config["chr_ce"]
-chr_dm = config["chr_dm"]
 chr_hs = config["chr_hs"]
 
 # Input samples ----------------------------------------------------------------
@@ -95,18 +91,18 @@ wildcard_constraints: chip = "[0-9]{8,8}", row = "[A-H]", col = "[0-1][0-9]"
 # Targets ----------------------------------------------------------------------
 
 rule all:
-    input: counts = dir_data + "scqtl-counts.txt.gz",
-           anno = dir_data + "scqtl-annotation.txt",
-           description = dir_data + "scqtl-annotation-description.txt"
+    input: counts = dir_data + "fucci-counts.txt.gz",
+           anno = dir_data + "fucci-annotation.txt",
+           description = dir_data + "fucci-annotation-description.txt"
+
+rule intermediate:
+    input: #MultiQC
+           expand(dir_multiqc + "{chip}/multiqc_report.html", chip = chips),
+           # totals
+           expand(dir_data + "totals/{chip}.txt", chip = chips, row = rows, col = cols)
 
 rule rds:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
-
-rule chip_03232017:
-    input: dir_data + "eset/03232017.rds"
-
-rule chip_04202017:
-    input: dir_data + "eset/04202017.rds"
 
 # Functions --------------------------------------------------------------------
 
@@ -114,7 +110,7 @@ rule chip_04202017:
 # Inspired by this post on the Snakemake Google Group:
 # https://groups.google.com/forum/#!searchin/snakemake/multiple$20input$20files%7Csort:relevance/snakemake/bpTnr7FgDuQ/ybacyom6BQAJ
 def merge_fastq(wc):
-    pattern = dir_fq + "{{pre}}-{chip}-{row}{col}_S{{s}}_L{{lane}}_R1_001.fastq.gz"
+    pattern = dir_fq + "{chip}/{{pre}}-{chip}-{row}{col}_S{{s}}_L{{lane}}_R1_001.fastq.gz"
     unknowns = glob_wildcards(pattern.format(chip = wc.chip, row = wc.row,
                                              col = wc.col))
     files = expand(pattern.format(chip = wc.chip, row = wc.row, col = wc.col),
@@ -129,27 +125,9 @@ rule target_exons:
     input: dir_genome + ensembl_exons
 
 rule target_fasta:
-    input: expand(dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
-                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_ce),
-           expand(dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
-                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_dm),
-           expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
+    input: expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
                   ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_hs),
            dir_genome + "ercc.fa"
-
-rule download_genome_ce:
-    output: dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
-            ".dna_sm.chromosome.{chr}.fa.gz"
-    params: chr = "{chr}", build = ensembl_genome_ce,
-            ftp = ensembl_ftp + "caenorhabditis_elegans/dna/"
-    shell: "wget -O {output} {params.ftp}Caenorhabditis_elegans.{params.build}.dna_sm.chromosome.{params.chr}.fa.gz"
-
-rule download_genome_dm:
-    output: dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
-            ".dna_sm.chromosome.{chr}.fa.gz"
-    params: chr = "{chr}", build = ensembl_genome_dm,
-            ftp = ensembl_ftp + "drosophila_melanogaster/dna/"
-    shell: "wget -O {output} {params.ftp}Drosophila_melanogaster.{params.build}.dna_sm.chromosome.{params.chr}.fa.gz"
 
 rule download_genome_hs:
     output: dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
@@ -162,30 +140,16 @@ rule download_ercc:
     output: dir_genome + "ercc.fa"
     shell: "wget -O {output} http://tools.invitrogen.com/downloads/ERCC92.fa"
 
-rule unzip_chromosome_fasta_ce:
-    input: expand(dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
-                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_ce)
-    output: temp(dir_genome + "ce.fa")
-    shell: "zcat {input} | sed 's/>/>ce/' > {output}"
-
-rule unzip_chromosome_fasta_dm:
-    input: expand(dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
-                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_dm)
-    output: temp(dir_genome + "dm.fa")
-    shell: "zcat {input} | sed 's/>/>dm/' > {output}"
-
 rule unzip_chromosome_fasta_hs:
     input: expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
                   ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_hs)
     output: temp(dir_genome + "hs.fa")
     shell: "zcat {input} | sed 's/>/>hs/' > {output}"
 
-rule create_exons:
-    output: dir_genome + "{organism}.saf"
-    params: archive = ensembl_archive, organism = "{organism}",
-            # Hack to dynamically get the list of chromosomes for each organism
-            # https://stackoverflow.com/a/45585380/2483477
-            chroms = lambda wildcards: globals()["chr_" + "{organism}".format(**wildcards)]
+rule create_exons_hs:
+    output: dir_genome + "hs.saf"
+    params: archive = ensembl_archive, organism = "hs",
+            chroms = chr_hs
     shell: "Rscript code/create-exons.R {params.archive} {params.organism} \
             {params.chroms} > {output}"
 
@@ -199,8 +163,8 @@ rule create_exons_ercc:
     shell: "Rscript code/create-exons-ercc.R {input} > {output}"
 
 rule gather_exons:
-    input: expand(dir_genome + "{organism}.saf", \
-                  organism = ["ce", "dm", "ercc", "hs"])
+    input: hs = dir_genome + "hs.saf",
+           ercc = dir_genome + "ercc.saf"
     output: dir_genome + ensembl_exons
     shell: "cat {input[0]} | grep GeneID > {output}; \
            cat {input} | grep -v GeneID >> {output}"
@@ -224,9 +188,7 @@ rule target_fastq:
                   chip = chips, row = rows, col = cols)
 
 rule subread_index:
-    input: dir_genome + "ce.fa",
-           dir_genome + "dm.fa",
-           dir_genome + "hs.fa",    
+    input: dir_genome + "hs.fa",    
            dir_genome + "ercc.fa"
     output: dir_genome + "genome.reads"
     params: prefix = dir_genome + "genome"
@@ -397,14 +359,14 @@ rule expressionset:
 
 rule counts_combined:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
-    output: dir_data + "scqtl-counts.txt.gz"
+    output: dir_data + "fucci-counts.txt.gz"
     params: dir_eset = dir_data + "eset/"
     shell: "Rscript code/output-exp-mat.R {params.dir_eset} {output}"
 
 rule annotation_combined:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
-    output: anno = dir_data + "scqtl-annotation.txt",
-            description = dir_data + "scqtl-annotation-description.txt"
+    output: anno = dir_data + "fucci-annotation.txt",
+            description = dir_data + "fucci-annotation-description.txt"
     params: dir_eset = dir_data + "eset/"
     shell: "Rscript code/output-annotation.R {params.dir_eset} \
                                              {output.anno} \
