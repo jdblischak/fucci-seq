@@ -10,6 +10,6 @@
 #SBATCH --mem=4G
 #SBATCH --tasks-per-node=4
 
-source activate fucci-seq
+source activate scqtl
 
 bash submit-snakemake.sh $*

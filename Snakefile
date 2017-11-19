@@ -38,26 +38,49 @@ from snakemake.utils import R
 
 configfile: "config.yaml"
 
-# Paths to data (must end with forward slash)
-dir_proj = config["dir_proj"]
-dir_image_data = config["dir_image_data"]
-dir_image_raw = dir_image_data + "images"
-dir_image_combined = dir_image_data + "images_combined"
-dir_image_intensities = dir_image_data + "intensities"
-dir_images_rds=dir
-dir_fq_combin = dir_data + "fastq-combined/"
-scratch = config["scratch"]
-dir_images_processed = scratch + "images_processed"
+# Specify Ensembl release for genome sequence and annotation
+ensembl_archive = config["ensembl_archive"]
+ensembl_rel = config["ensembl_rel"]
+ensembl_ftp = "ftp://ftp.ensembl.org/pub/release-" + \
+              str(ensembl_rel) + "/fasta/"
+ensembl_exons = "exons-ensembl-release-" + str(ensembl_rel) + ".saf"
+ensembl_genome_ce = config["ensembl_genome_ce"]
+ensembl_genome_dm = config["ensembl_genome_dm"]
+ensembl_genome_hs = config["ensembl_genome_hs"]
 
-assert os.path.exists(dir_proj), "Project directory exists"
-assert os.path.exists(dir_image_data), "Image raw data directory exists"
-assert os.path.exists(scratch), "Scratch directory exists"
+# Paths to data (must end with forward slash)
+dir_data = config["dir_data"]
+dir_external = config["dir_external"]
+dir_scratch = config["dir_scratch"]
+dir_fq = dir_external + "fastq/"
+dir_fq_combin = dir_external + "fastq-combined/"
+dir_fastqc = dir_external + "fastqc/"
+dir_multiqc = dir_external + "multiqc/"
+dir_genome = dir_scratch + "genome-ensembl-release-" + str(ensembl_rel) + "/"
+dir_fq_filter = dir_scratch + "scqtl-fastq-filter/"
+dir_fq_extract = dir_scratch + "scqtl-fastq-extract/"
+dir_bam = dir_external + "bam/"
+dir_bam_dedup = dir_external + "bam-dedup/"
+dir_bam_dedup_stats = dir_scratch + "scqtl-bam-dedup-stats/"
+dir_bam_verify = dir_scratch + "scqtl-bam-verify/"
+dir_counts = dir_scratch + "scqtl-counts/"
+dir_totals = dir_scratch + "scqtl-totals/"
+dir_id = dir_external + "id/"
+
+assert os.path.exists(dir_data), "Local data directory exists"
+assert os.path.exists(dir_scratch), "Scratch directory exists"
+assert os.path.exists(dir_external), "External data directory exists"
 
 # Directory to send log files. Needs to be created manually since it
 # is not a file created by a Snakemake rule.
 dir_log = config["dir_log"]
 if not os.path.isdir(dir_log):
     os.mkdir(dir_log)
+
+# Names of chromosomes
+chr_ce = config["chr_ce"]
+chr_dm = config["chr_dm"]
+chr_hs = config["chr_hs"]
 
 # Input samples ----------------------------------------------------------------
 
@@ -72,6 +95,11 @@ wildcard_constraints: chip = "[0-9]{8,8}", row = "[A-H]", col = "[0-1][0-9]"
 # Targets ----------------------------------------------------------------------
 
 rule all:
+    input: counts = dir_data + "scqtl-counts.txt.gz",
+           anno = dir_data + "scqtl-annotation.txt",
+           description = dir_data + "scqtl-annotation-description.txt"
+
+rule rds:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
 
 rule chip_03232017:
@@ -86,13 +114,71 @@ rule chip_04202017:
 # Inspired by this post on the Snakemake Google Group:
 # https://groups.google.com/forum/#!searchin/snakemake/multiple$20input$20files%7Csort:relevance/snakemake/bpTnr7FgDuQ/ybacyom6BQAJ
 def merge_fastq(wc):
-    pattern = dir_fq + "YG-PYT-{chip}-{row}{col}_S{{s}}_L{{lane}}_R1_001.fastq.gz"
+    pattern = dir_fq + "{{pre}}-{chip}-{row}{col}_S{{s}}_L{{lane}}_R1_001.fastq.gz"
     unknowns = glob_wildcards(pattern.format(chip = wc.chip, row = wc.row,
                                              col = wc.col))
     files = expand(pattern.format(chip = wc.chip, row = wc.row, col = wc.col),
-                   zip, s = unknowns.s, lane = unknowns.lane)
+                   zip, pre = unknowns.pre, s = unknowns.s, lane = unknowns.lane)
     return files
 
+# Prepare genome annotation ----------------------------------------------------
+
+localrules: download_ercc, download_ercc_gtf, gather_exons
+
+rule target_exons:
+    input: dir_genome + ensembl_exons
+
+rule target_fasta:
+    input: expand(dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_ce),
+           expand(dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_dm),
+           expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_hs),
+           dir_genome + "ercc.fa"
+
+rule download_genome_ce:
+    output: dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
+            ".dna_sm.chromosome.{chr}.fa.gz"
+    params: chr = "{chr}", build = ensembl_genome_ce,
+            ftp = ensembl_ftp + "caenorhabditis_elegans/dna/"
+    shell: "wget -O {output} {params.ftp}Caenorhabditis_elegans.{params.build}.dna_sm.chromosome.{params.chr}.fa.gz"
+
+rule download_genome_dm:
+    output: dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
+            ".dna_sm.chromosome.{chr}.fa.gz"
+    params: chr = "{chr}", build = ensembl_genome_dm,
+            ftp = ensembl_ftp + "drosophila_melanogaster/dna/"
+    shell: "wget -O {output} {params.ftp}Drosophila_melanogaster.{params.build}.dna_sm.chromosome.{params.chr}.fa.gz"
+
+rule download_genome_hs:
+    output: dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
+            ".dna_sm.chromosome.{chr}.fa.gz"
+    params: chr = "{chr}", build = ensembl_genome_hs,
+            ftp = ensembl_ftp + "homo_sapiens/dna/"
+    shell: "wget -O {output} {params.ftp}Homo_sapiens.{params.build}.dna_sm.chromosome.{params.chr}.fa.gz"
+
+rule download_ercc:
+    output: dir_genome + "ercc.fa"
+    shell: "wget -O {output} http://tools.invitrogen.com/downloads/ERCC92.fa"
+
+rule unzip_chromosome_fasta_ce:
+    input: expand(dir_genome + "Caenorhabditis_elegans." + ensembl_genome_ce + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_ce)
+    output: temp(dir_genome + "ce.fa")
+    shell: "zcat {input} | sed 's/>/>ce/' > {output}"
+
+rule unzip_chromosome_fasta_dm:
+    input: expand(dir_genome + "Drosophila_melanogaster." + ensembl_genome_dm + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_dm)
+    output: temp(dir_genome + "dm.fa")
+    shell: "zcat {input} | sed 's/>/>dm/' > {output}"
+
+rule unzip_chromosome_fasta_hs:
+    input: expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
+                  ".dna_sm.chromosome.{chr}.fa.gz", chr = chr_hs)
+    output: temp(dir_genome + "hs.fa")
+    shell: "zcat {input} | sed 's/>/>hs/' > {output}"
 
 rule create_exons:
     output: dir_genome + "{organism}.saf"
@@ -103,9 +189,29 @@ rule create_exons:
     shell: "Rscript code/create-exons.R {params.archive} {params.organism} \
             {params.chroms} > {output}"
 
+rule download_ercc_gtf:
+    output: dir_genome + "ERCC92.gtf"
+    shell: "wget -O {output} http://media.invitrogen.com.edgesuite.net/softwares/ERCC92.gtf"
+
+rule create_exons_ercc:
+    input: dir_genome + "ERCC92.gtf"
+    output: dir_genome + "ercc.saf"
+    shell: "Rscript code/create-exons-ercc.R {input} > {output}"
+
+rule gather_exons:
+    input: expand(dir_genome + "{organism}.saf", \
+                  organism = ["ce", "dm", "ercc", "hs"])
+    output: dir_genome + ensembl_exons
+    shell: "cat {input[0]} | grep GeneID > {output}; \
+           cat {input} | grep -v GeneID >> {output}"
+
 # Quantify expression with Subjunc/featureCounts -------------------------------
 
+localrules: index_bam, index_bam_dedup
 
+rule target_counts:
+    input: bam = expand(dir_counts + "{chip}/{chip}-{row}{col}.txt", \
+                        chip = chips, row = rows, col = cols)
 
 rule target_bam:
     input: bam = expand(dir_bam + "{chip}/{chip}-{row}{col}-sort.bam", \
@@ -120,7 +226,7 @@ rule target_fastq:
 rule subread_index:
     input: dir_genome + "ce.fa",
            dir_genome + "dm.fa",
-           dir_genome + "hs.fa",
+           dir_genome + "hs.fa",    
            dir_genome + "ercc.fa"
     output: dir_genome + "genome.reads"
     params: prefix = dir_genome + "genome"
@@ -167,6 +273,7 @@ rule subjunc:
     output: temp(dir_bam + "{chip}/{chip}-{row}{col}.bam")
     params: prefix = dir_genome + "genome"
     threads: 8
+    priority: 1
     shell: "subjunc -i {params.prefix} -r {input.read} -T {threads} > {output}"
 
 rule sort_bam:
@@ -287,6 +394,44 @@ rule expressionset:
                                                 {input.verify} \
                                                 {input.saf} \
                                                 {output}"
+
+rule counts_combined:
+    input: expand(dir_data + "eset/{chip}.rds", chip = chips)
+    output: dir_data + "scqtl-counts.txt.gz"
+    params: dir_eset = dir_data + "eset/"
+    shell: "Rscript code/output-exp-mat.R {params.dir_eset} {output}"
+
+rule annotation_combined:
+    input: expand(dir_data + "eset/{chip}.rds", chip = chips)
+    output: anno = dir_data + "scqtl-annotation.txt",
+            description = dir_data + "scqtl-annotation-description.txt"
+    params: dir_eset = dir_data + "eset/"
+    shell: "Rscript code/output-annotation.R {params.dir_eset} \
+                                             {output.anno} \
+                                             {output.description}"
+
+# Sequence quality control -----------------------------------------------------
+
+rule target_multiqc:
+    input: expand(dir_multiqc + "{chip}/multiqc_report.html", chip = chips)
+
+rule target_fastqc:
+    input: expand(dir_fastqc + "{chip}/{chip}-{row}{col}_fastqc.html", \
+                  chip = chips, row = rows, col = cols)
+
+rule fastqc:
+    input: dir_fq_combin + "{chip}/{chip}-{row}{col}.fastq.gz"
+    output: dir_fastqc + "{chip}/{chip}-{row}{col}_fastqc.html"
+    params: outdir = dir_fastqc + "{chip}/"
+    shell: "fastqc --outdir {params.outdir} {input}"
+
+rule multiqc:
+    input: expand(dir_fastqc + "{{chip}}/{{chip}}-{row}{col}_fastqc.html", \
+                  row = rows, col = cols)
+    output: dir_multiqc + "{chip}/" + "multiqc_report.html"
+    params: indir = dir_fastqc + "{chip}/",
+            outdir = dir_multiqc + "{chip}/"
+    shell: "multiqc --force --outdir {params.outdir} {params.indir}"
 
 # Calculate total counts -------------------------------------------------------
 
@@ -478,6 +623,7 @@ rule verify_bam:
             selfSM = temp(dir_id + "{chip}/{chip}-{row}{col}.selfSM"),
             log = dir_id + "{chip}/{chip}-{row}{col}.log"
     params: prefix = dir_id + "{chip}/{chip}-{row}{col}"
+    priority: 1
     shell: "verifyBamID --vcf {input.vcf} --bam {input.bam} --best --ignoreRG --out {params.prefix}"
 
 # Parse the various verifyBamID output files into one tab-separated file. Each

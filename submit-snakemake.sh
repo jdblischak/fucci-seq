@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source activate fucci-seq
+source activate scqtl
 
 snakemake \
     -kp \
