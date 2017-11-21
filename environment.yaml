@@ -40,10 +40,25 @@ dependencies:
   - bioconductor-confess
   - bioconductor-ebimage
   - bioconductor-edger
+  - biopython
+  - docopt
+  - fastqc
+  - git
+  - git-lfs
+  - ipdb
+  - ipython
+  - multiqc
+  - pysam
+  - python
+  - pysftp
   - r=3.4.*
   - r-base
   - r-cowplot
   - r-data.table
   - r-dplyr
+  - samtools
   - snakemake
-
+  - subread
+  - umi_tools
+  - verifybamid
+  - wget
