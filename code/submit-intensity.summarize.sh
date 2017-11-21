@@ -17,6 +17,7 @@ plates=("18511_18855" "18855_19101" "18855_19160" "18870_18511" \
         "19098_18870" "19098_19160" "19101_18511" "19101_19098" \
         "19160_18870" "18855_19098" "19101_19160" "19160_18511")
 
+#plates=("18511_18855")
 
 dir_intensity="/project2/gilad/fucci-seq/intensities/"
 dir_intensity_stats="/project2/gilad/fucci-seq/intensities_stats/"
