@@ -122,6 +122,9 @@ for (index in 1:length(plates)) {
 
 
 ### Single cell using manual inspection
+
+The distortion during the sorting makes the shape not as circular, resulting in mis-identification.
+
 18511_18855.00012
 18511_18855.00052
 18511_18855.00067
