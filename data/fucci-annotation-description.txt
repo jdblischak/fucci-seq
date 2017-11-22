@@ -3,9 +3,9 @@ experiment	ID of C1 chip (i.e. processing date in YYYYMMDD)
 well	Well of C1 chip (96 total, rows A-H, cols 1-12)
 cell_number	The number of cells observed in the well via microscopy
 concentration	The cDNA concentration of the well prior to library prep
-ERCC	Individual # 1 included on this C1 chip
-individual.1	Individual # 2 included on this C1 chip
-individual.2	The dilution factor of the ERCC spike-ins
+ERCC	The dilution factor of the ERCC spike-ins
+individual.1	Individual # 1 included on this C1 chip
+individual.2	Individual # 2 included on this C1 chip
 raw	The number of raw reads
 umi	The number of reads with a valid UMI
 mapped	The number of reads with a valid UMI that mapped to a genome
