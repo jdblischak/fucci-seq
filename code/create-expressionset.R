@@ -60,9 +60,11 @@ metadata <- data.frame(labelDescription = c(
   "Well of C1 chip (96 total, rows A-H, cols 1-12)",
   "The number of cells observed in the well via microscopy",
   "The cDNA concentration of the well prior to library prep",
+  "The dilution factor of the ERCC spike-ins",
   "Individual # 1 included on this C1 chip",
   "Individual # 2 included on this C1 chip",
-  "The dilution factor of the ERCC spike-ins",
+  "The chip label for the image files",
+  "The well label for the image files",
   # Total counts
   "The number of raw reads",
   "The number of reads with a valid UMI",
