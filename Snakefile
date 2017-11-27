@@ -158,6 +158,27 @@ rule download_ercc_gtf:
     output: dir_genome + "ERCC92.gtf"
     shell: "wget -O {output} http://media.invitrogen.com.edgesuite.net/softwares/ERCC92.gtf"
 
+rule create_exons_plasmid:
+    input: dir_data + "fucci-plasmid.fa"
+    output: dir_genome + "fucci-plasmid.saf"
+    run:
+        from Bio import SeqIO
+
+        infile = input[0]
+        outfile = output[0]
+        outhandle = open(outfile, "wt")
+
+        header = ["GeneID", "Chr", "Start", "End", "Strand", "Name"]
+        outhandle.write("\t".join(header) + "\n")
+
+        for seq_record in SeqIO.parse(infile, "fasta"):
+            name = seq_record.id
+            length = len(seq_record)
+            line = [name, name, "1", str(length), "+", name]
+            outhandle.write("\t".join(line) + "\n")
+
+        outhandle.close()
+
 rule create_exons_ercc:
     input: dir_genome + "ERCC92.gtf"
     output: dir_genome + "ercc.saf"
@@ -165,7 +186,8 @@ rule create_exons_ercc:
 
 rule gather_exons:
     input: hs = dir_genome + "hs.saf",
-           ercc = dir_genome + "ercc.saf"
+           ercc = dir_genome + "ercc.saf",
+           plasmid = dir_genome + "fucci-plasmid.saf"
     output: dir_genome + ensembl_exons
     shell: "cat {input[0]} | grep GeneID > {output}; \
            cat {input} | grep -v GeneID >> {output}"
@@ -190,7 +212,8 @@ rule target_fastq:
 
 rule subread_index:
     input: dir_genome + "hs.fa",    
-           dir_genome + "ercc.fa"
+           dir_genome + "ercc.fa",
+           dir_data + "fucci-plasmid.fa"
     output: dir_genome + "genome.reads"
     params: prefix = dir_genome + "genome"
     shell: "subread-buildindex -o {params.prefix} {input}"
