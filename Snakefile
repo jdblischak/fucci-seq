@@ -433,6 +433,8 @@ rule count_totals:
         mapped = 0
         ercc = 0
         hs = 0
+        egfp = 0
+        mcherry = 0
         bam = pysam.AlignmentFile(input.bam, "rb")
         for read in bam:
             umi += 1
@@ -443,6 +445,10 @@ rule count_totals:
                 ref = read.reference_name
                 if ref[:2] == "hs":
                     hs += 1
+                elif ref == "EGFP":
+                    egfp += 1
+                elif ref == "mCherry":
+                    mcherry += 1
                 else:
                     ercc += 1
         bam.close()
@@ -453,12 +459,18 @@ rule count_totals:
         mol = 0
         mol_ercc = 0
         mol_hs = 0
+        mol_egfp = 0
+        mol_mcherry = 0
         dedup = pysam.AlignmentFile(input.dedup, "rb")
         for read in dedup:
             mol += 1
             ref = read.reference_name
             if ref[:2] == "hs":
                 mol_hs += 1
+            elif ref == "EGFP":
+                mol_egfp += 1
+            elif ref == "mCherry":
+                mol_mcherry += 1
             else:
                 mol_ercc += 1
         dedup.close()
@@ -468,11 +480,11 @@ rule count_totals:
             "Reads with a UMI less than or equal to raw reads"
         assert mapped + unmapped == umi, \
             "Mapped and unmapped reads sum to reads with a UMI"
-        assert hs + ercc == mapped, \
+        assert hs + ercc + egfp + mcherry == mapped, \
             "Reads mapped to specific genomes sum to mapped reads"
         assert mol < mapped, \
             "Molecules less than reads."
-        assert mol_ercc + mol_hs == mol, \
+        assert mol_ercc + mol_hs + mol_egfp + mol_mcherry == mol, \
             "Molecules mapped to specific genomes sum to molecules"
 
         # Export total counts
@@ -483,9 +495,13 @@ rule count_totals:
                                  str(unmapped),
                                  str(ercc),
                                  str(hs),
+                                 str(egfp),
+                                 str(mcherry),
                                  str(mol),
                                  str(mol_ercc),
-                                 str(mol_hs)]
+                                 str(mol_hs),
+                                 str(mol_egfp),
+                                 str(mol_mcherry)]
                       ) + "\n")
 
 rule gather_totals:

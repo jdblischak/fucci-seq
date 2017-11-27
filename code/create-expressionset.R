@@ -72,9 +72,13 @@ metadata <- data.frame(labelDescription = c(
   "The number of reads with a valid UMI that did *not* map to a genome",
   "The number of reads that mapped to the ERCC spike-in transcripts",
   "The number of reads that mapped to the H. sapiens genome",
+  "The number of reads that mapped to the FUCCI EGFP transgene",
+  "The number of reads that mapped to the FUCCI mCherry transgene",
   "The number of molecules (i.e. post UMI-deduplication)",
   "The number of molecules that mapped to the ERCC spike-in transcripts",
   "The number of molecules that mapped to the H. sapiens genome",
+  "The number of molecules that mapped to the FUCCI EGFP transgene",
+  "The number of molecules that mapped to the FUCCI mCherry transgene",
   # Number of genes detected
   "The number of ERCC genes with at least one molecule",
   "The number of H. sapiens genes with at least one molecule",
@@ -110,8 +114,8 @@ feature <- exons %>%
   ungroup() %>%
   mutate(source = str_sub(chr, 1, 2),
          source = factor(source,
-                         levels = c("ER", "hs"),
-                         labels = c("ERCC", "H. sapiens")),
+                         levels = c("ER", "hs", "EG", "mC"),
+                         labels = c("ERCC", "H. sapiens", "EGFP", "mCherry")),
          source = as.factor(source)) %>%
   arrange(geneid)
 geneid <- feature$geneid
