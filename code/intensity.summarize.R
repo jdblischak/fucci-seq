@@ -98,10 +98,20 @@ library(methods)
     gfp.sum.zoom.median <- (gfp.fore.stats.zoom[,"b.q05"]-gfp.back.stats.zoom[,"b.q05"])*size.zoom
     dapi.sum.zoom.median <- (dapi.fore.stats.zoom[,"b.q05"]-dapi.back.stats.zoom[,"b.q05"])*size.zoom
 
-    data.frame(wellID=id, nnuclei=nnuclei, size=size,
+    dimnames(rfp.fore.stats.zoom)[[2]] <- gsub("b.", "rfp.fore.zoom.", dimnames(rfp.fore.stats.zoom)[[2]])
+    dimnames(gfp.fore.stats.zoom)[[2]] <- gsub("b.", "gfp.fore.zoom.", dimnames(gfp.fore.stats.zoom)[[2]])
+    dimnames(dapi.fore.stats.zoom)[[2]] <- gsub("b.", "dapi.fore.zoom.", dimnames(dapi.fore.stats.zoom)[[2]])
+    dimnames(rfp.back.stats.zoom)[[2]] <- gsub("b.", "rfp.back.zoom.", dimnames(rfp.back.stats.zoom)[[2]])
+    dimnames(gfp.back.stats.zoom)[[2]] <- gsub("b.", "gfp.back.zoom.", dimnames(gfp.back.stats.zoom)[[2]])
+    dimnames(dapi.back.stats.zoom)[[2]] <- gsub("b.", "dapi.back.zoom.", dimnames(dapi.back.stats.zoom)[[2]])
+
+
+    data.frame(wellID=id, nnuclei=nnuclei, size=size, size.zoom = size.zoom,
                perimeter=perimeter, eccentricity=eccentricity,
                rfp.fore.stats, gfp.fore.stats, dapi.fore.stats,
                rfp.back.stats, gfp.back.stats, dapi.back.stats,
+               rfp.fore.stats.zoom, gfp.fore.stats.zoom, dapi.fore.stats.zoom,
+               rfp.back.stats.zoom, gfp.back.stats.zoom, dapi.back.stats.zoom,
                rfp.sum.zoom.mean=rfp.sum.zoom.mean, gfp.sum.zoom.mean=gfp.sum.zoom.mean,
                dapi.sum.zoom.mean=dapi.sum.zoom.mean,
                rfp.sum.zoom.median=rfp.sum.zoom.median, gfp.sum.zoom.median=gfp.sum.zoom.median,
