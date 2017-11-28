@@ -91,7 +91,7 @@ metadata <- data.frame(labelDescription = c(
   "verifyBamID: The average sequencing depth that covered a SNP",
   "verifyBamID: A minimun depth threshold for QC only (affects snps_w_min)",
   "verifyBamID: The number of SNPs that had the minimum depth (min_dp); QC only",
-  "verifyBamID: Is the predicted individual 1 of the 4 added to the C1 chip?"
+  "verifyBamID: Is the predicted individual 1 of the 2 added to the C1 chip?"
 ))
 rownames(metadata) <- c(colnames(pheno))
 pheno_anno <- new("AnnotatedDataFrame", data = pheno, varMetadata = metadata)

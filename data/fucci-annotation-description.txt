@@ -6,15 +6,21 @@ concentration	The cDNA concentration of the well prior to library prep
 ERCC	The dilution factor of the ERCC spike-ins
 individual.1	Individual # 1 included on this C1 chip
 individual.2	Individual # 2 included on this C1 chip
+image_individual	The chip label for the image files
+image_label	The well label for the image files
 raw	The number of raw reads
 umi	The number of reads with a valid UMI
 mapped	The number of reads with a valid UMI that mapped to a genome
 unmapped	The number of reads with a valid UMI that did *not* map to a genome
 reads_ercc	The number of reads that mapped to the ERCC spike-in transcripts
 reads_hs	The number of reads that mapped to the H. sapiens genome
+reads_egfp	The number of reads that mapped to the FUCCI EGFP transgene
+reads_mcherry	The number of reads that mapped to the FUCCI mCherry transgene
 molecules	The number of molecules (i.e. post UMI-deduplication)
 mol_ercc	The number of molecules that mapped to the ERCC spike-in transcripts
 mol_hs	The number of molecules that mapped to the H. sapiens genome
+mol_egfp	The number of molecules that mapped to the FUCCI EGFP transgene
+mol_mcherry	The number of molecules that mapped to the FUCCI mCherry transgene
 detect_ercc	The number of ERCC genes with at least one molecule
 detect_hs	The number of H. sapiens genes with at least one molecule
 chip_id	verifyBamID: The predicted individual based on the sequencing data
