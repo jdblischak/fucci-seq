@@ -523,9 +523,13 @@ rule gather_totals:
                             "unmapped",
                             "reads_ercc",
                             "reads_hs",
+                            "reads_egfp",
+                            "reads_mcherry",
                             "molecules",
                             "mol_ercc",
-                            "mol_hs"]) + "\n"
+                            "mol_hs",
+                            "mol_egfp",
+                            "mol_mcherry"]) + "\n"
         outfile.write(header)
 
         for f in input:
