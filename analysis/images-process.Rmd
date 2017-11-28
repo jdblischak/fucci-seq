@@ -1,0 +1,98 @@
+---
+title: "Processing images"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Introduction
+
+All scripts were run from the directory
+
+```
+cd /project2/gilad/joycehsiao/fucci-seq/code/
+```
+
+and under the `conda` environment [fucci-seq](/project2/gilad/joycehsiao/fucci-seq/environment.yaml). To activate the `conda` environment:
+
+```
+cd /project2/gilad/joycehsiao/fucci-seq
+source activate fucci-seq
+```
+
+The raw image files are located at:
+
+```
+cd /project2/gilad/fucci-seq/code/images_curated
+```
+
+There are three majar steps in image processing. In each step, we use R script to perform the analysis and then use bash script to submit jobs to the cluster.
+
+Step 1: Detect nucleus outline
+
+Step 2: Combine images from all channels 
+
+Step 3: Compute summary metrics for image intensities
+
+
+---
+
+## Detect nucleus outline
+
+[fucciMask.R](/project2/gilad/joycehsiao/fucci-seq/code/fucciMask.R) processes data for one plate at a time, from reading in images from all four channels (`/project2/gilad/fucci-seq/images_curated/plateID`), detecting nucleus edge using DAPI channel, outputing cropped images fro each channel (`/scratch/midway2/joycehsiao/fucci-seq/images_processed`), to saving matrices identifying areas inside nucleus (`/project2/gilad/fucci-seq/intensities/plateID/*.ints.rds`), matrices containing pixel intensities for each channel (`/project2/gilad/fucci-seq/intensities/plateID/*.ints.rds`) and matrices containg the number of nuclei detected for each sample (`project2/gilad/fucci-seq/intensities/*.rds`).  
+
+[submit-fucciMask.sh](/project2/gilad/joycehsiao/fucci-seq/code/submit-fucciMask.sh) submits batch jobs running [fucciMask.R](/project2/gilad/joycehsiao/fucci-seq/code/fucciMask.R) for one plate a time.
+
+```
+bash submit-fucciMask.sh
+```
+
+
+## Combine images from all channels 
+
+[makeWellIdImages.R](/project2/gilad/joycehsiao/fucci-seq/code/makeWellIdImages.R) creates labels (00001, ..., 00096) for the images files and saves the labels in `/project2/gilad/fucci-seq/images_wellid`.
+
+[fucciMask.combineImages.R](/project2/gilad/joycehsiao/fucci-seq/code/fucciMask.combineImages.R) combines the image labels (`/project2/gilad/fucci-seq/images_wellid`) with the sample cropped images (`/scratch/midway2/joycehsiao/fucci-seq/images_processed`) for one plate at a time, making a combined image for each single cell sample for visualization (`/project2/gilad/fucci-seq/images_combined`).
+
+
+[submit-fucciMask.combineImages.sh](/project2/gilad/joycehsiao/fucci-seq/code/submit-fucciMask.combineImages.sh) submits batch jobs running [fucciMask.combineImages.R](/project2/gilad/joycehsiao/fucci-seq/code/fucciMask.combineImages.R) for one plate at a time.
+
+```
+bash submit-fucciMask.combineImages.sh
+```
+
+## Compute summary metrics for image intensities
+
+[intensity.summarize.R](/project2/gilad/joycehsiao/fucci-seq/code/intensity.summarize.R) uses R packakge [EBImage](https://bioconductor.org/packages/release/bioc/html/EBImage.html) to compute intensity summary statistics for the single cell samples detected to have single nucleus. The computation is done for one plate a time. Results are stored in `/project2/gilad/joycehsiao/fucci-seq/intensities_stats`.
+
+[submit-intensity.summarize.sh](/project2/gilad/joycehsiao/fucci-seq/code/submit-intensity.summarize.sh) submits batch jobs running [intensity.summarize.R](/project2/gilad/joycehsiao/fucci-seq/code/intensity.summarize.R) for one plate at a time.
+
+```
+bash submit-intensity.summarize.sh
+```
+
+

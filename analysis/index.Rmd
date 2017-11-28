@@ -11,9 +11,9 @@ Website to share results of fucci-seq project.
 ## Image analysis
 
 * [CONFESS preliminary results](confess-prelim.html)
-* Images analysis
-    * [QC analysis](images-qc.html)
-    * [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
+* [Processing images - from images to intensities](images-process.html)
+* [QC analysis](images-qc.html)
+* [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
 * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
 
 
