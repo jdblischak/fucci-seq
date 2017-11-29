@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="John Blischak" />
+
+<meta name="date" content="2017-11-29" />
+
+<title>Read to molecule conversion</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Read to molecule conversion</h1>
+<h4 class="author"><em>John Blischak</em></h4>
+<h4 class="date"><em>2017-11-29</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-11-29</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 2582fb0</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<pre class="r"><code>library(&quot;cowplot&quot;)
+library(&quot;dplyr&quot;)</code></pre>
+<pre><code>Warning: Installed Rcpp (0.12.13) different from Rcpp used to build dplyr (0.12.10).
+Please reinstall dplyr to avoid random crashes or undefined behavior.</code></pre>
+<pre class="r"><code>library(&quot;DT&quot;)
+library(&quot;ggplot2&quot;)
+library(&quot;reshape2&quot;)
+library(&quot;Biobase&quot;)
+theme_set(theme_cowplot())</code></pre>
+<pre class="r"><code>fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
+eset &lt;- Reduce(combine, Map(readRDS, fname))
+pData(eset)$experiment &lt;- as.factor(pData(eset)$experiment)</code></pre>
+</div>
+<div id="reads-versus-molecules" class="section level2">
+<h2>Reads versus molecules</h2>
+<pre class="r"><code>conv_hs_c1 &lt;- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
+                                     color = experiment)) +
+  geom_point() +
+  labs(x = &quot;Total read count&quot;,
+       y = &quot;Total molecule count&quot;,
+       title = &quot;Endogenous genes by C1 chip&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>conv_hs_ind &lt;- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
+                                      color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = &quot;Dark2&quot;) +
+  labs(x = &quot;Total read count&quot;,
+       y = &quot;Total molecule count&quot;,
+       title = &quot;Endogenous genes by individual&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>conv_ercc_c1 &lt;- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
+                                        color = experiment)) +
+  geom_point() +
+  labs(x = &quot;Total read count&quot;,
+       y = &quot;Total molecule count&quot;,
+       title = &quot;ERCC genes by C1 chip&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>conv_ercc_ind &lt;- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
+                                         color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = &quot;Dark2&quot;) +
+  labs(x = &quot;Total read count&quot;,
+       y = &quot;Total molecule count&quot;,
+       title = &quot;Endogenous genes by individual&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>plot_grid(conv_hs_c1, conv_hs_ind, conv_ercc_c1, conv_ercc_ind,
+        labels = letters[1:4])</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<p><img src="figure/reads-v-molecules.Rmd/reads-v-molecules-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="read-to-molecule-conversion" class="section level2">
+<h2>Read to molecule conversion</h2>
+<pre class="r"><code>eset$conv_hs &lt;- eset$mol_hs / eset$reads_hs
+eset$conv_ercc &lt;- eset$mol_ercc / eset$reads_ercc</code></pre>
+<pre class="r"><code>r2_hs_c1 &lt;- summary(lm(conv_hs ~ experiment, data = pData(eset)))$r.squared
+box_hs_c1 &lt;- ggplot(pData(eset), aes(x = experiment, y = conv_hs,
+                                     fill = experiment)) +
+  geom_boxplot() +
+  labs(x = &quot;C1 chip&quot;, y = &quot;Conversion efficiency&quot;,
+       title = sprintf(&quot;Endogenous genes R-squared: %.2f&quot;, r2_hs_c1)) +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>r2_hs_ind &lt;- summary(lm(conv_hs ~ chip_id, data = pData(eset)))$r.squared
+box_hs_ind &lt;- ggplot(pData(eset), aes(x = chip_id, y = conv_hs,
+                                      fill = chip_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = &quot;Dark2&quot;) +
+  labs(x = &quot;Individual&quot;, y = &quot;Conversion efficiency&quot;,
+       title = sprintf(&quot;Endogenous genes R-squared: %.2f&quot;, r2_hs_ind)) +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>r2_ercc_c1 &lt;- summary(lm(conv_ercc ~ experiment, data = pData(eset)))$r.squared
+box_ercc_c1 &lt;- ggplot(pData(eset), aes(x = experiment, y = conv_ercc,
+                                       fill = experiment)) +
+  geom_boxplot() +
+  labs(x = &quot;C1 chip&quot;, y = &quot;Conversion efficiency&quot;,
+       title = sprintf(&quot;ERCC genes R-squared: %.2f&quot;, r2_ercc_c1)) +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>r2_ercc_ind &lt;- summary(lm(conv_ercc ~ chip_id, data = pData(eset)))$r.squared
+box_ercc_ind &lt;- ggplot(pData(eset), aes(x = chip_id, y = conv_ercc,
+                                        fill = chip_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = &quot;Dark2&quot;) +
+  labs(x = &quot;Individual&quot;, y = &quot;Conversion efficiency&quot;,
+       title = sprintf(&quot;ERCC genes R-squared: %.2f&quot;, r2_ercc_ind)) +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>plot_grid(box_hs_c1, box_hs_ind, box_ercc_c1, box_ercc_ind,
+          labels = letters[1:4])</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<p><img src="figure/reads-v-molecules.Rmd/conversion-efficiency-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="total-ercc-versus-total-endogenous-molecules" class="section level2">
+<h2>Total ERCC versus total endogenous molecules</h2>
+<p>Recreating <a href="https://www.nature.com/articles/srep39921/figures/3">Tung et al., 2017 Figure 3b</a>:</p>
+<div class="figure">
+<img src="https://images.nature.com/lw926/nature-assets/srep/2017/170103/srep39921/images/srep39921-f3.jpg" alt="Tung et al., 2017 Figure 3b" />
+<p class="caption">Tung et al., 2017 Figure 3b</p>
+</div>
+<pre class="r"><code>gene_v_ercc_c1 &lt;- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
+                        color = experiment)) +
+  geom_point() +
+  labs(x = &quot;Total gene molecule-counts per sample&quot;,
+       y = &quot;Total ERCC molecule-counts per sample&quot;,
+       title = &quot;C1 chip&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>gene_v_ercc_ind &lt;- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
+                                           color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = &quot;Dark2&quot;) +
+  labs(x = &quot;Total gene molecule-counts per sample&quot;,
+       y = &quot;Total ERCC molecule-counts per sample&quot;,
+       title = &quot;Individual&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<pre class="r"><code>plot_grid(gene_v_ercc_c1, gene_v_ercc_ind, labels = letters[1:2])</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<p><img src="figure/reads-v-molecules.Rmd/gene-v-ercc-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<!-- Insert the session information into the document -->
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS: /home/jdblischak/software/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/jdblischak/software/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] Biobase_2.38.0      BiocGenerics_0.24.0 reshape2_1.4.2     
+[4] DT_0.2              dplyr_0.7.0         cowplot_0.8.0      
+[7] ggplot2_2.2.0      
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.13       knitr_1.16         magrittr_1.5      
+ [4] munsell_0.4.3      colorspace_1.3-2   R6_2.2.0          
+ [7] rlang_0.1.2        stringr_1.2.0      plyr_1.8.4        
+[10] tools_3.4.1        grid_3.4.1         gtable_0.2.0      
+[13] git2r_0.19.0       htmltools_0.3.6    assertthat_0.1    
+[16] yaml_2.1.14        lazyeval_0.2.0     rprojroot_1.2     
+[19] digest_0.6.12      tibble_1.3.3       RColorBrewer_1.1-2
+[22] htmlwidgets_0.9    glue_1.1.1         evaluate_0.10.1   
+[25] rmarkdown_1.6      labeling_0.3       stringi_1.1.2     
+[28] compiler_3.4.1     scales_0.4.1       backports_1.0.5   </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
