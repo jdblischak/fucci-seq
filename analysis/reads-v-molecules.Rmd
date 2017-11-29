@@ -1,0 +1,189 @@
+---
+title: "Read to molecule conversion"
+author: "John Blischak"
+date: 2017-11-29
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+## Setup
+
+```{r packages, message=FALSE}
+library("cowplot")
+library("dplyr")
+library("DT")
+library("ggplot2")
+library("reshape2")
+library("Biobase")
+theme_set(theme_cowplot())
+```
+
+```{r data}
+fname <- Sys.glob("../data/eset/*.rds")
+eset <- Reduce(combine, Map(readRDS, fname))
+pData(eset)$experiment <- as.factor(pData(eset)$experiment)
+```
+
+## Reads versus molecules
+
+```{r}
+conv_hs_c1 <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
+                                     color = experiment)) +
+  geom_point() +
+  labs(x = "Total read count",
+       y = "Total molecule count",
+       title = "Endogenous genes by C1 chip") +
+  theme(legend.position = "none")
+```
+
+```{r}
+conv_hs_ind <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
+                                      color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "Total read count",
+       y = "Total molecule count",
+       title = "Endogenous genes by individual") +
+  theme(legend.position = "none")
+```
+
+```{r}
+conv_ercc_c1 <- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
+                                        color = experiment)) +
+  geom_point() +
+  labs(x = "Total read count",
+       y = "Total molecule count",
+       title = "ERCC genes by C1 chip") +
+  theme(legend.position = "none")
+```
+
+```{r}
+conv_ercc_ind <- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
+                                         color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "Total read count",
+       y = "Total molecule count",
+       title = "Endogenous genes by individual") +
+  theme(legend.position = "none")
+```
+
+```{r reads-v-molecules, fig.width=10, fig.height=10}
+plot_grid(conv_hs_c1, conv_hs_ind, conv_ercc_c1, conv_ercc_ind,
+        labels = letters[1:4])
+```
+
+## Read to molecule conversion
+
+```{r}
+eset$conv_hs <- eset$mol_hs / eset$reads_hs
+eset$conv_ercc <- eset$mol_ercc / eset$reads_ercc
+```
+
+```{r}
+r2_hs_c1 <- summary(lm(conv_hs ~ experiment, data = pData(eset)))$r.squared
+box_hs_c1 <- ggplot(pData(eset), aes(x = experiment, y = conv_hs,
+                                     fill = experiment)) +
+  geom_boxplot() +
+  labs(x = "C1 chip", y = "Conversion efficiency",
+       title = sprintf("Endogenous genes R-squared: %.2f", r2_hs_c1)) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+```{r}
+r2_hs_ind <- summary(lm(conv_hs ~ chip_id, data = pData(eset)))$r.squared
+box_hs_ind <- ggplot(pData(eset), aes(x = chip_id, y = conv_hs,
+                                      fill = chip_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(x = "Individual", y = "Conversion efficiency",
+       title = sprintf("Endogenous genes R-squared: %.2f", r2_hs_ind)) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+```{r}
+r2_ercc_c1 <- summary(lm(conv_ercc ~ experiment, data = pData(eset)))$r.squared
+box_ercc_c1 <- ggplot(pData(eset), aes(x = experiment, y = conv_ercc,
+                                       fill = experiment)) +
+  geom_boxplot() +
+  labs(x = "C1 chip", y = "Conversion efficiency",
+       title = sprintf("ERCC genes R-squared: %.2f", r2_ercc_c1)) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+
+```{r}
+r2_ercc_ind <- summary(lm(conv_ercc ~ chip_id, data = pData(eset)))$r.squared
+box_ercc_ind <- ggplot(pData(eset), aes(x = chip_id, y = conv_ercc,
+                                        fill = chip_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(x = "Individual", y = "Conversion efficiency",
+       title = sprintf("ERCC genes R-squared: %.2f", r2_ercc_ind)) +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+```{r conversion-efficiency, fig.width=10, fig.height=10}
+plot_grid(box_hs_c1, box_hs_ind, box_ercc_c1, box_ercc_ind,
+          labels = letters[1:4])
+```
+
+## Total ERCC versus total endogenous molecules
+
+Recreating [Tung et al., 2017 Figure 3b](https://www.nature.com/articles/srep39921/figures/3):
+
+![Tung et al., 2017 Figure 3b](https://images.nature.com/lw926/nature-assets/srep/2017/170103/srep39921/images/srep39921-f3.jpg)
+
+```{r}
+gene_v_ercc_c1 <- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
+                        color = experiment)) +
+  geom_point() +
+  labs(x = "Total gene molecule-counts per sample",
+       y = "Total ERCC molecule-counts per sample",
+       title = "C1 chip") +
+  theme(legend.position = "none")
+```
+
+
+```{r}
+gene_v_ercc_ind <- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
+                                           color = chip_id)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "Total gene molecule-counts per sample",
+       y = "Total ERCC molecule-counts per sample",
+       title = "Individual") +
+  theme(legend.position = "none")
+```
+
+```{r gene-v-ercc, fig.width=10, fig.height=5}
+plot_grid(gene_v_ercc_c1, gene_v_ercc_ind, labels = letters[1:2])
+```
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

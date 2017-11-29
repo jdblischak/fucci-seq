@@ -18,5 +18,5 @@ Website to share results of fucci-seq project.
 
 ## QC
 
-* [Sequencing depth](totals.Rmd)
-
+* [Sequencing depth](totals.html)
+* [Reads versus molecules](reads-v-molecules.html)
