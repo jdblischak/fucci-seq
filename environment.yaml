@@ -47,6 +47,7 @@ dependencies:
   - ipdb
   - ipython
   - multiqc
+  - pandoc==1.19.2
   - pysam
   - python
   - pysftp
