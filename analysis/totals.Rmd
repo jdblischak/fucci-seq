@@ -1,0 +1,84 @@
+---
+title: "Sequencing depth per C1 chip"
+author: "John Blischak"
+date: 2017-11-28
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+## Setup
+
+```{r packages, message=FALSE}
+library("dplyr")
+library("DT")
+library("ggplot2")
+library("reshape2")
+library("Biobase")
+theme_set(cowplot::theme_cowplot())
+```
+
+```{r data}
+fname <- Sys.glob("../data/eset/*.rds")
+eset <- Reduce(combine, Map(readRDS, fname))
+pData(eset)$experiment <- as.factor(pData(eset)$experiment)
+```
+
+## Total sequencing depth
+
+```{r distribution-sequencing-depth}
+ggplot(pData(eset), aes(x = raw, color = experiment)) +
+  geom_density() +
+  labs(x = "Number of raw sequences per single cell", y = "Number of cells",
+       title = "Distribution of total raw sequences per single cell") +
+  scale_color_discrete(name = "C1 chip")
+```
+
+Sum of sequences across the 96 single cells per C1 chip.
+
+```{r datatable}
+total_per_experiment <- pData(eset) %>%
+  group_by(experiment) %>%
+  summarize(raw = sum(raw),
+            mapped = sum(mapped),
+            molecules = sum(molecules))
+datatable(total_per_experiment,
+          options = list(pageLength = nrow(total_per_experiment)),
+          colnames = c("C1 chip", "Number of raw sequences",
+                       "Number of mapped",
+                       "Number of molecules"))
+```
+
+```{r}
+ggplot(melt(total_per_experiment, id.vars = "experiment",
+            variable.name = "type", value.name = "count"),
+       aes(x = experiment, y = count, color = type)) +
+  geom_point() +
+  labs(title = "Sequencing depth per C1 chip",
+       x = "C1 chip", y = "Number of sequences") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+## Session information
+
+<!-- Insert the session information into the document -->
+```{r session-info}
+```

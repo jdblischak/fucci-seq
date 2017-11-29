@@ -16,4 +16,7 @@ Website to share results of fucci-seq project.
 * [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
 * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
 
+## QC
+
+* [Sequencing depth](totals.Rmd)
 
