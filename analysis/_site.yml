@@ -1,28 +1,25 @@
 name: fucci-seq
-output_dir: ../docs
-include: .nojekyll
-exclude: include
+output_dir: "../docs"
+include: [".nojekyll"]
+exclude: ["include"]
 navbar:
   title: fucci-seq
   left:
-  - text: Home
-    href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "License"
+      href: license.html
   right:
-  - icon: fa-github
-    href: https://github.com/jdblischak/workflowr
+    - icon: fa-github
+      href: https://github.com/jdblischak/workflowr
 output:
   html_document:
-    toc: yes
-    toc_float: yes
+    toc: true
+    toc_float: true
     theme: cosmo
     highlight: textmate
     include:
       before_body: include/header.html
       after_body: include/footer.html
-    lib_dir: site_libs
-    self_contained: no
-
