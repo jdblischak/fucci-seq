@@ -47,7 +47,7 @@ pData(eset)$experiment <- as.factor(pData(eset)$experiment)
 ```{r}
 conv_hs_c1 <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
                                      color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = "Total read count",
        y = "Total molecule count",
        title = "Endogenous genes by C1 chip") +
@@ -57,7 +57,7 @@ conv_hs_c1 <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
 ```{r}
 conv_hs_ind <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
                                       color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Total read count",
        y = "Total molecule count",
@@ -68,7 +68,7 @@ conv_hs_ind <- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
 ```{r}
 conv_ercc_c1 <- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
                                         color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = "Total read count",
        y = "Total molecule count",
        title = "ERCC genes by C1 chip") +
@@ -78,11 +78,11 @@ conv_ercc_c1 <- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
 ```{r}
 conv_ercc_ind <- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
                                          color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Total read count",
        y = "Total molecule count",
-       title = "Endogenous genes by individual") +
+       title = "ERCC genes by individual") +
   theme(legend.position = "none")
 ```
 
@@ -159,7 +159,7 @@ Recreating [Tung et al., 2017 Figure 3b](https://www.nature.com/articles/srep399
 ```{r}
 gene_v_ercc_c1 <- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
                         color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = "Total gene molecule-counts per sample",
        y = "Total ERCC molecule-counts per sample",
        title = "C1 chip") +
@@ -170,7 +170,7 @@ gene_v_ercc_c1 <- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
 ```{r}
 gene_v_ercc_ind <- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
                                            color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = "Dark2") +
   labs(x = "Total gene molecule-counts per sample",
        y = "Total ERCC molecule-counts per sample",

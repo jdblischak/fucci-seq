@@ -51,14 +51,26 @@ ggplot(pData(eset), aes(x = raw, color = experiment)) +
   scale_color_discrete(name = "C1 chip")
 ```
 
+Mapped reads per cell
+
+```{r mapped}
+ggplot(pData(eset), aes(x = experiment, y = mapped, color = experiment)) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Number of reads",
+       title = "Number of mapped sequences per single cell") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
 Sum of sequences across the 96 single cells per C1 chip.
 
 ```{r datatable}
 total_per_experiment <- pData(eset) %>%
   group_by(experiment) %>%
-  summarize(raw = sum(raw),
-            mapped = sum(mapped),
-            molecules = sum(molecules))
+  summarize(raw = sum(raw) / 10^6,
+            mapped = sum(mapped) / 10^6,
+            molecules = sum(molecules) / 10^6)
 datatable(total_per_experiment,
           options = list(pageLength = nrow(total_per_experiment)),
           colnames = c("C1 chip", "Number of raw sequences",
