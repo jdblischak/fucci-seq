@@ -21,10 +21,10 @@
 # https://anaconda.org/jdblischak/repo
 #
 # Tips:
-# 1. Create custom channels in anaconda. The purpose of doing this is to 
+# 1. Create custom channels in anaconda. The purpose of doing this is to
 #    maintain a stable release of all software packages used in this project.
-# 
-# 
+#
+#
 name: fucci-seq
 channels:
   - jdblischak
@@ -57,6 +57,8 @@ dependencies:
   - r-dplyr
   - r-dt
   - r-ggplot2
+  - r-lmoments
+  - r-moments
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
