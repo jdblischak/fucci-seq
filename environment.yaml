@@ -62,6 +62,7 @@ dependencies:
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
+  - r-wesanderson
   - r-workflowr
   - samtools
   - snakemake
