@@ -49,7 +49,6 @@ library(cowplot)
 library(wesanderson)
 library(RColorBrewer)
 library(Biobase)
-library(Lmoments)
 ```
 
 Name all plates.
