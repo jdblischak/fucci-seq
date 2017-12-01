@@ -372,11 +372,7 @@ plot_grid(
 
 **Normalize intensity for each channel**
 
-DAPI choose .001
-
-Green choose .01
-
-Red choose .01
+DAPI choose .001; Green choose .01; Red choose .01
 
 ```{r, echo = FALSE}
 ints_tmp$plate <- as.character(ints_tmp$plate)
@@ -435,7 +431,7 @@ plot_grid(
 
 After normalization: Green versus Red by individual
 
-```{r, fig.width=11, ecoh = FALSE}
+```{r, fig.width=12, fig.height=5, echo = FALSE}
 ints_normed <- ints_normed %>% 
   mutate(dapi_4quant=ntile(dapi.normed,4),
          dapi_3quant=ntile(dapi.normed,3))
@@ -456,7 +452,7 @@ plot_grid(
 
 Before normalization: Green versus Red by individual
 
-```{r, fig.width=11, echo = FALSE}
+```{r, fig.width=12, fig.height=5, echo = FALSE}
 ints_normed <- ints_normed %>% 
   mutate(dapi_4quant=ntile(dapi.sum.zoom.mean.log10,4),
          dapi_3quant=ntile(dapi.sum.zoom.mean.log10,3))
