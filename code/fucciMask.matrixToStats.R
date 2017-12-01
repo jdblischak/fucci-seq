@@ -39,13 +39,22 @@ ints <- do.call(rbind, lapply(1:length(plates), function(index) {
     rfp.back <- obj$rfp[obj$label.zoom==0]
     gfp.fore <- obj$gfp[obj$label.zoom==1]
     gfp.back <- obj$gfp[obj$label.zoom==0]
-    rfp.backmean.sum.log <- log(sum(rfp.fore-mean(rfp.back)))
-    gfp.backmean.sum.log <- log(sum(gfp.fore-mean(gfp.back)))
-    rfp.backmedian.sum.log <- log(sum(rfp.fore-median(rfp.back)))
-    gfp.backmedian.sum.log <- log(sum(gfp.fore-median(gfp.back)))
+    rfp.backmean.sum.log <- log10(sum(rfp.fore-mean(rfp.back)))
+    gfp.backmean.sum.log <- log10(sum(gfp.fore-mean(gfp.back)))
+    rfp.backmedian.sum.log <- log10(sum(rfp.fore-median(rfp.back)))
+    gfp.backmedian.sum.log <- log10(sum(gfp.fore-median(gfp.back)))
+
+    rfp.backmean.log.sum <- sum(log10(rfp.fore-mean(rfp.back)))
+    gfp.backmean.log.sum <- sum(log10(gfp.fore-mean(gfp.back)))
+    rfp.backmedian.log.sum <- sum(log10(rfp.fore-median(rfp.back)))
+    gfp.backmedian.log.sum <- sum(log10(gfp.fore-median(gfp.back)))
+
     rm(obj)
-    data.frame(plate=plate, id=id, rfp.backmean.sum.log, gfp.backmean.sum.log,
-               rfp.backmedian.sum.log, gfp.backmedian.sum.log)
+    data.frame(plate=plate, id=id,
+               rfp.backmean.sum.log, gfp.backmean.sum.log,
+               rfp.backmedian.sum.log, gfp.backmedian.sum.log,
+               rfp.backmean.log.sum, gfp.backmean.log.sum,
+               rfp.backmedian.log.sum, gfp.backmedian.log.sum)
   }))
   return(res)
 }))
