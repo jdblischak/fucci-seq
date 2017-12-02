@@ -31,32 +31,42 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction/background
 
+$~$
+
 In our image analysis, after the initial denoising step (smooth, adaptive threshold), we identified nucleus location in each cell and use nucleus location to center the channel images. 
 
-The next step is to summarize intensities for pixels located at the foreground area and at the background area. Initially we considered foreground to be the area inside nucleus (identified by DAPI), but then we realized that the FUCCI proteins can also locate outside of the nucleus. So instead we considered an area of fixed size across all samples (now arbitrarily defined as 100 x 100 pixels). We then compute the sum of pixel intensities in this area. 
+The next step is to summarize intensities for pixels located at the foreground area and at the background area. Initially we considered foreground to be the area inside nucleus (identified by DAPI), but then we realized that the FUCCI proteins can also locate outside of the nucleus. So instead for GFP and RFP, we considered an area of fixed size across all samples (now arbitrarily defined as 100 x 100 pixels). We then compute the sum of pixel intensities in this area. For DAPI, we compute the sum of pixel intensities inside the nucleus.
 
-*Data*: For denotes pixel intensity matrix $F$ obtained from $I$ samples and $J$ batches (C1 plates), $F^f_{ij}$ denotes pixels inside the forground area , and $F^b_{ij}$ denotes pixels located at the background area. $N^f$ and $N^b$ denote number of pixels located in the foreground and background area, respectively. 
+$~$
 
-*Method 1*: We first background-correct the foreground pixel intensity by sustracting the background average intensity from the foreground average intensity. Then we sum up the background-corrected pixel intensities in the foreground area by multipling the the number of foreground pixels. Finally, we take logarithmic transformation of the corrected foreground intensities. In image analysis, logarithmic transformation is used to enhance the contrast of the pixels in the low-intensity region. 
+**Data**: 
 
-$$
-log10(N^f\times(\frac{1}{N^f} \sum_{\{ i,j\}}F^f_{ij}- \frac{1}{N^b} \sum_{\{ i,j\}}F^b_{ij})))
-$$
-
-*Method 2*: We directly compute the sum of background-corrected forground intensity. We first background-correct the foreground pixel intensity by sustracting the background average intensity from the foreground pixel intensity values. Then we sum up the background-corrected pixel intensities in the foreground area. Finally, we take logarithmic transformation of the corrected foreground intensities. In image analysis, logarithmic transformation is used to enhance the contrast of the pixels in the low-intensity region. 
+Denote pixel intensity matrix as $F$. We have $I$ samples and $J$ batches (C1 plates). $F^{fore}_{ij}$ denotes pixels inside the forground area , and $F^{back}_{ij}$ denotes pixels located at the background area. $N^f$ and $N^b$ denote number of pixels located in the foreground and background area, respectively. We correct for background intensity by substracting from each pixel the background mean or median intensity. Then we sum up the background-corrected intensities and then take log transformation of the sum. log transformation is frequently used in image transformation for increasing contrast of the image, especially for regions with low pixel intensity.
 
 $$
-Y = log \big( \sum_F (I_{ij}^{F} - \frac{1}{|B|} \sum_B I_{ij}^{B}) \big)
+log10 \sum_{(i,j) \in fore} \big( F_{ij}^{fore} - \frac{1}{N^b} \sum_{(i,j) \in back} F_{ij}^{back} \big) 
 $$
 
-Finally, both methods are repeated for using median for summarizing central tendency. 
+$$
+log10 \sum_{(i,j) \in fore} \Big( F_{ij}^{fore} - median_{(i,j) \in back}(F_{ij}^{back}) \Big) 
+$$
+$~$
 
+**Results**:
+
+1. *Mean versus median for background*: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there's not an obvious trend for more or less right-skewed or left-skewd intensity distribution.
+
+2. *Background mean-corrected versus median-corrected intensities*: baased on our previous observation, it is not surprise that there's little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity.
+
+3. Green vs. Red and label samples with DAPI quantiles: not much difference between background mean-corrected versus background median-corrected. Though we see for the median-corrected RFP, there ara way fewer outliers in the low intensity range.
+
+4. Density of each channel by plate or individual: not much difference between plates or individuals for all channels.
 
 ---
 
 ## Load packages and data
 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -64,59 +74,43 @@ library(cowplot)
 library(wesanderson)
 library(RColorBrewer)
 library(Biobase)
-```
 
----
-
-## Load data 
-
-State the plates.
-
-```{r}
 plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
             "18870_18855","18870_19101","18870_19160","19098_18511",
             "19098_18870","19098_19160","19101_18511","19101_19098",
             "19160_18870","19101_19160","19160_18511", "18855_19098")
-```
 
-Method 1 data: log of average background-corrected intensities weighted by grid size.
 
-```{r, eval = TRUE, message=FALSE, warning=FALSE}
-# make the negative ones be the samllest one within its own plate
-ints_avg_sum <- do.call(rbind, lapply(1:length(plates), function(index) {
+##Combine intensity stats from different plates.
+ints <- do.call(rbind, lapply(1:length(plates), function(index) {
   tmp <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
   tmp <- data.frame(plate=plates[index], 
-                    well=as.character(droplevels(tmp$wellID)),
-         rfp.sum.zoom.median.log10=log10(tmp$rfp.sum.zoom.median),
-         gfp.sum.zoom.median.log10=log10(tmp$gfp.sum.zoom.median),
-         dapi.sum.zoom.median.log10=log10(tmp$dapi.sum.zoom.median),
-         rfp.sum.zoom.mean.log10=log10(tmp$rfp.sum.zoom.mean),
-         gfp.sum.zoom.mean.log10=log10(tmp$gfp.sum.zoom.mean),
-         dapi.sum.zoom.mean.log10=log10(tmp$dapi.sum.zoom.mean))
-  # mean
-  tmp$rfp.sum.zoom.mean.log10[which(tmp$rfp.sum.zoom.mean.log10 == "NaN")] <- min(tmp$rfp.sum.zoom.mean.log10, na.rm=TRUE)
-  tmp$gfp.sum.zoom.mean.log10[which(tmp$gfp.sum.zoom.mean.log10 == "NaN")] <- min(tmp$gfp.sum.zoom.mean.log10, na.rm=TRUE)
-  tmp$dapi.sum.zoom.mean.log10[which(tmp$dapi.sum.zoom.mean.log10 == "NaN")] <- min(tmp$dapi.sum.zoom.mean.log10, na.rm=TRUE)
-  
-  # median
-    tmp$rfp.sum.zoom.median.log10[which(tmp$rfp.sum.zoom.median.log10 == "NaN")] <- min(tmp$rfp.sum.zoom.median.log10, na.rm=TRUE)
-  tmp$gfp.sum.zoom.median.log10[which(tmp$gfp.sum.zoom.median.log10 == "NaN")] <- min(tmp$gfp.sum.zoom.median.log10, na.rm=TRUE)
-  tmp$dapi.sum.zoom.median.log10[which(tmp$dapi.sum.zoom.median.log10 == "NaN")] <- min(tmp$dapi.sum.zoom.median.log10, na.rm=TRUE)
+                    image=as.character(droplevels(tmp$wellID)),
+    rfp.back.zoom.mean=tmp$rfp.back.zoom.mean,
+    rfp.back.zoom.median=tmp$rfp.back.zoom.q05,
+    gfp.back.zoom.mean=tmp$gfp.back.zoom.mean,
+    gfp.back.zoom.median=tmp$gfp.back.zoom.q05,
+    dapi.back.zoom.mean=tmp$dapi.back.mean,
+    dapi.back.zoom.median=tmp$dapi.back.q05,
+    rfp.mean.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.mean)*size.zoom)),
+    gfp.mean.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.mean)*size.zoom)),
+    dapi.mean.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.mean)*size)),
+    rfp.median.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.q05)*size.zoom)),
+    gfp.median.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.q05)*size.zoom)),
+    dapi.median.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.q05)*size)) )
+
+  tmp$rfp.mean.log10sum[which(tmp$rfp.mean.log10sum == "NaN")] <- min(tmp$rfp.mean.log10sum, na.rm=TRUE)
+  tmp$gfp.mean.log10sum[which(tmp$gfp.mean.log10sum == "NaN")] <- min(tmp$gfp.mean.log10sum, na.rm=TRUE)
+  tmp$dapi.mean.log10sum[which(tmp$dapi.mean.log10sum == "NaN")] <- min(tmp$dapi.mean.log10sum, na.rm=TRUE)
+  tmp$rfp.median.log10sum[which(tmp$rfp.median.log10sum == "NaN")] <- min(tmp$rfp.median.log10sum, na.rm=TRUE)
+  tmp$gfp.median.log10sum[which(tmp$gfp.median.log10sum == "NaN")] <- min(tmp$gfp.median.log10sum, na.rm=TRUE)
+  tmp$dapi.median.log10sum[which(tmp$dapi.median.log10sum == "NaN")] <- min(tmp$dapi.median.log10sum, na.rm=TRUE)
 
   return(tmp)  
 }) )
-```
+saveRDS(ints, "/project2/gilad/fucci-seq/intensities_matrix2stats/ints.rds")
 
-
-Method 2 data: log of the sum of background-corrected intensities. 
-
-```{r, eval = TRUE}
-ints_sum <- readRDS("/project2/gilad/fucci-seq/intensities_matrix2stats/ints.rds")
-```
-
-Load the expression set info.
-
-```{r}
+##Load the expression set info.
 eset_fls <- list.files("../data/eset", full.names=TRUE)
 
 anno <- do.call(rbind, lapply(1:length(eset_fls), function(index) {
@@ -126,204 +120,206 @@ anno <- do.call(rbind, lapply(1:length(eset_fls), function(index) {
 }))
 
 # make unique id in both
-ints_avg_sum$unique <- paste0(ints_avg_sum$plate,"_",as.numeric(ints_avg_sum$well))
-ints_sum$unique <- paste0(ints_sum$plate,"_",as.numeric(ints_sum$id))
-anno$unique <- paste0(anno$image_individual,"_",anno$image_label)
+ints$unique <- paste0(ints$plate,"_",as.character(ints$image))
+anno$unique <- paste0(anno$image_individual,"_", sprintf("%05d",as.numeric(anno$image_label)))
 
 # subset annotation file
-subset_index1 <- which(anno$unique %in% ints_avg_sum$unique)
-subset_index2 <- which(anno$unique %in% ints_sum$unique)
-all.equal(subset_index1,subset_index2)
-anno_subset <- anno[subset_index1,]
+subset_index <- which(anno$unique %in% ints$unique)
+anno_subset <- anno[subset_index,]
 
 # subset intensities
-ints_subset_index1 <- match(anno_subset$unique, ints_avg_sum$unique)
-ints_avg_sum_subset <- ints_avg_sum[ints_subset_index1,]
+ints_subset_index <- match(anno_subset$unique, ints$unique)
+ints_subset <- ints[ints_subset_index,]
 
-ints_subset_index2 <- match(anno_subset$unique, ints_sum$unique)
-ints_sum_subset <- ints_sum[ints_subset_index2,]
+#all.equal(anno_subset$unique, ints_subset$unique)
 
-all.equal(ints_avg_sum_subset$unique, ints_sum_subset$unique)
+ints_subset$chip_id <- anno_subset$chip_id
 
-ints_avg_sum_subset$chip_id <- anno_subset$chip_id
-ints_sum_subset$chip_id <- anno_subset$chip_id
-
-
-ints_avg_sum_subset <- ints_avg_sum_subset %>% group_by(plate) %>%
-  mutate(dapi_3quant=ntile(dapi.sum.zoom.mean.log10,3))
+ints_subset <- ints_subset %>% group_by(plate) %>%
+  mutate(dapi_3quant.mean=ntile(dapi.mean.log10sum,3),
+         dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
+         dapi_3quant.median=ntile(dapi.median.log10sum,3),
+         dapi_4quant.median=ntile(dapi.median.log10sum,4))
 ```
-
---
-
+$~$
+---
+$~$
 ## Compare the two methods
 
-```{r, echo = FALSE, fig.width=8, fig.height=5}
-par(mfrow = c(1,2))
-plot(x=ints_avg_sum_subset$rfp.sum.zoom.mean.log10,
-     y=ints_sum_subset$rfp.backmean.sum.log,
-     xlab = "sum of average intensity", ylab = "sum intensity",
-     main = "mean-based", cex=.6, pch=16)
-abline(0,1, col = "blue")
+$~$
 
-plot(x=ints_avg_sum_subset$rfp.sum.zoom.median.log10,
-     y=ints_sum_subset$rfp.backmedian.sum.log,
-     xlab = "sum of median intensity", ylab = "sum intensity",
-     main = "median-based", cex=.6, pch=16)
-abline(0,1, col = "blue")
+*Mean versus median for background*: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there's not an obvious trend for more or less right-skewed or left-skewd intensity distribution.
+$~$
 
-title(main = "Compare methods for RFP", outer = TRUE, line = -1)
+```{r, echo = FALSE, fig.width=7, fig.height=8}
+par(mfrow = c(2,2))
+plot(x=sort(ints_subset$rfp.back.zoom.mean-ints_subset$rfp.back.zoom.median), 
+     type = "h",
+     xlab = "samples sorted by (mean-median) difference", 
+     ylab = "frequency",
+     main = "RFP", cex=.6, pch=16)
 
-par(mfrow = c(1,2))
-plot(x=ints_avg_sum_subset$gfp.sum.zoom.mean.log10,
-     y=ints_sum_subset$gfp.backmean.sum.log,
-     xlab = "sum of average intensity", ylab = "sum intensity",
-     main = "mean-based", cex=.6, pch=16)
-abline(0,1, col = "blue")
+plot(x=sort(ints_subset$gfp.back.zoom.mean-ints_subset$gfp.back.zoom.median), 
+     type = "h",
+     xlab = "samples sorted by (mean-median) difference", 
+     ylab = "frequency",
+     main = "GFP", cex=.6, pch=16)
 
-plot(x=ints_avg_sum_subset$gfp.sum.zoom.median.log10,
-     y=ints_sum_subset$gfp.backmedian.sum.log,
-     xlab = "sum of median intensity", ylab = "sum intensity",
-     main = "median-based", cex=.6, pch=16)
-abline(0,1, col = "blue")
-
-title(main = "Compare methods for GFP", outer = TRUE, line = -1)
+plot(x=sort(ints_subset$dapi.back.zoom.mean-ints_subset$dapi.back.zoom.median), 
+     type = "h",
+     xlab = "samples sorted by (mean-median) difference", 
+     ylab = "frequency",
+     main = "DAPI", cex=.6, pch=16)
+title("Mean minus Median",outer=TRUE, line=-2)
 ```
 
----
+$~$
 
-## Compare mean versus median
-
-```{r, echo = FALSE, fig.width=8, fig.height=5}
-par(mfrow = c(1,2))
-plot(x=ints_sum_subset$rfp.backmean.sum.log,
-     y=ints_sum_subset$rfp.backmedian.sum.log,
+*Plotting background corrected foreground intensities*: baased on our previous observation, it is not surprise that there's little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity.
+$~$
+```{r, echo = FALSE, fig.width=7, fig.height=8}
+par(mfrow = c(2,2))
+plot(x=ints_subset$rfp.mean.log10sum,
+     y=ints_subset$rfp.median.log10sum,
      xlab = "mean-corrected intensity", 
      ylab = "median-corrected intensity",
-     main = "sum-based methods", cex=.6, pch=16)
+     xlim=c(-1,3.5),ylim=c(-1,3.5),
+     main = "RFP", cex=.6, pch=16)
 abline(0,1, col = "blue")
 
-plot(x=ints_avg_sum_subset$rfp.sum.zoom.mean.log10,
-     y=ints_avg_sum_subset$rfp.sum.zoom.median.log10,
+plot(x=ints_subset$gfp.mean.log10sum,
+     y=ints_subset$gfp.median.log10sum,
      xlab = "mean-corrected intensity", 
      ylab = "median-corrected intensity",
-     main = "average-based methods", cex=.6, pch=16)
+     xlim=c(-1,3.5),ylim=c(-1,3.5),
+     main = "GFP", cex=.6, pch=16)
 abline(0,1, col = "blue")
 
-title(main = "RFP", outer = TRUE, line = -1)
-
-par(mfrow = c(1,2))
-plot(x=ints_sum_subset$gfp.backmean.sum.log,
-     y=ints_sum_subset$gfp.backmedian.sum.log,
-     xlab = "background-mean-corrected intensity", 
-     ylab = "background-median-corrected intensity",
-     main = "sum-based methods", cex=.6, pch=16)
+plot(x=ints_subset$dapi.mean.log10sum,
+     y=ints_subset$dapi.median.log10sum,
+     xlab = "mean-corrected intensity", 
+     ylab = "median-corrected intensity",
+     xlim=c(-1,3.5),ylim=c(-1,3.5),
+     main = "DAPI", cex=.6, pch=16)
 abline(0,1, col = "blue")
+```
+$~$
 
-plot(x=ints_avg_sum_subset$gfp.sum.zoom.mean.log10,
-     y=ints_avg_sum_subset$gfp.sum.zoom.median.log10,
-     xlab = "background-mean-corrected intensity", 
-     ylab = "background-median-corrected intensity",
-     main = "average-based methods, s", cex=.6, pch=16)
-abline(0,1, col = "blue")
+Green vs. Red and label samples with DAPI quantiles: not much difference between background mean-corrected versus background median-corrected.
 
-title(main = "GFP", outer = TRUE, line = -1)
+$~$
+
+```{r, echo = FALSE, fig.width=12}
+plot_grid(
+  ggplot(ints_subset, aes(x=rfp.mean.log10sum, 
+                          y=gfp.mean.log10sum, col=as.factor(dapi_3quant.mean))) + 
+      geom_point(alpha = .5, cex = .7) + 
+      xlim(-1,3.5) + ylim(-1,3.5) + 
+      labs(title = "background mean-corrected",
+           x="RFP intensity", y = "GFP intensity") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(ints_subset, aes(x=rfp.median.log10sum, 
+                              y=gfp.median.log10sum, col=as.factor(dapi_3quant.median))) + 
+      geom_point(alpha = .5, cex = .7) + 
+      xlim(-1,3.5) + ylim(-1,3.5) + 
+      labs(title = "background median-corrected",
+           x="RFP intensity", y = "GFP intensity") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") )
 ```
 
 ---
 
-## Density distributions
+## Density by plate
 
-**RFP**
+$~$
 
-```{r, echo = FALSE, fig.width=10, fig.height=6, warning=FALSE}
+Not too different between mean and median adjusted. 
+
+```{r, echo = FALSE, fig.width=10, fig.height=8, warning=FALSE}
 plot_grid(
-  ggplot(ints_avg_sum, aes(x=rfp.sum.zoom.mean.log10, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background mean-corrected",
+  ggplot(ints_subset, aes(x=rfp.mean.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background mean-corrected",
          x="RFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum, aes(x=rfp.backmean.sum.log, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background mean-corrected",
+  ggplot(ints_subset, aes(x=rfp.median.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background median-corrected",
          x="RFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_avg_sum, aes(x=rfp.sum.zoom.median.log10, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background median-corrected",
-         x="RFP intensity", y = "Density") + 
-    theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum, aes(x=rfp.backmedian.sum.log, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background median-corrected",
-         x="RFP intensity", y = "Density") + 
-    theme_gray() + theme(legend.position="none") )
-```
-
-**GFP**
-
-```{r, echo = FALSE, fig.width=10, fig.height=6, warning=FALSE}
-plot_grid(
-  ggplot(ints_avg_sum, aes(x=gfp.sum.zoom.mean.log10, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background mean-corrected",
+  ggplot(ints_subset, aes(x=gfp.mean.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background mean-corrected",
          x="GFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum, aes(x=gfp.backmean.sum.log, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background mean-corrected",
+  ggplot(ints_subset, aes(x=gfp.median.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background median-corrected",
          x="GFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"), 
+  ggplot(ints_subset, aes(x=dapi.mean.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background mean-corrected",
+         x="DAPI intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_avg_sum, aes(x=gfp.sum.zoom.median.log10, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background median-corrected",
-         x="GFP intensity", y = "Density") + 
-    theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum, aes(x=gfp.backmedian.sum.log, col=as.factor(plate))) + 
-    geom_density(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background median-corrected",
-         x="GFP intensity", y = "Density") + 
-    theme_gray() + theme(legend.position="none") )
+  ggplot(ints_subset, aes(x=dapi.median.log10sum, col=as.factor(plate))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) +
+    labs(title = "background median-corrected",
+         x="DAPI intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"), 
+  ncol=2)
 ```
 
 ---
 
-## Green versus Red
+## Density by individual
 
-```{r, fig.width=9, fig.height=9, echo = FALSE, warning=FALSE}
-ints_sum_subset$dapi_3quant <- ints_avg_sum_subset$dapi_3quant
+$~$
+
+Also not too different between individuals.
+
+```{r, echo = FALSE, fig.width=10, fig.height=8, warning=FALSE}
 plot_grid(
-  ggplot(ints_avg_sum_subset, aes(x=rfp.sum.zoom.mean.log10, 
-                           y = gfp.sum.zoom.mean.log10, col=as.factor(dapi_3quant))) + 
-    geom_point(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background mean-corrected",
-         x="RFP intensity", y = "GFP intensity") + 
+  ggplot(ints_subset, aes(x=rfp.mean.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background mean-corrected",
+         x="RFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum_subset, aes(x=rfp.backmean.sum.log,
-                       y=gfp.backmean.sum.log, col=as.factor(dapi_3quant))) + 
-    geom_point(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background mean-corrected",
-         x="RFP intensity", y = "GFP intensity") + 
+  ggplot(ints_subset, aes(x=rfp.median.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background median-corrected",
+         x="RFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_avg_sum_subset, aes(x=rfp.sum.zoom.median.log10, 
-                           y = gfp.sum.zoom.median.log10, col=as.factor(dapi_3quant))) + 
-    geom_point(alpha = .5, cex = .7) + 
-    labs(title = "Average-based, background median-corrected",
-         x="RFP intensity", y = "GFP intensity") + 
+  ggplot(ints_subset, aes(x=gfp.mean.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background mean-corrected",
+         x="GFP intensity", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_sum_subset, aes(x=rfp.backmedian.sum.log,
-                       y=gfp.backmedian.sum.log, col=as.factor(dapi_3quant))) + 
-    geom_point(alpha = .5, cex = .7) + 
-    labs(title = "Sum-based, background median-corrected",
-         x="RFP intensity", y = "GFP intensity") + 
-    theme_gray() + theme(legend.position="none") )
+  ggplot(ints_subset, aes(x=gfp.median.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background median-corrected",
+         x="GFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"), 
+  ggplot(ints_subset, aes(x=dapi.mean.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background mean-corrected",
+         x="DAPI intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_subset, aes(x=dapi.median.log10sum, col=as.factor(chip_id))) + 
+    geom_density(alpha = .5, cex = .7) + xlim(-1,3.5) + 
+    labs(title = "background median-corrected",
+         x="DAPI intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"), 
+  ncol=2)
 ```
-
 
 ---
 
 ## Session information
 
-```{r}
+```{r, echo = FALSE}
 sessionInfo()
 ```
 
