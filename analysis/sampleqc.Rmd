@@ -101,6 +101,30 @@ plot_unmapped <- ggplot(anno[anno$cell_number == 0 |
 
 plot_unmapped
 ```
+Look at the unmapped percentage per sample by C1 experimnet and by individual. 
+
+```{r unmapped_exp}
+unmapped_exp <- ggplot(anno, aes(x = as.factor(experiment), y = unmapped_ratios, color = as.factor(experiment))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Unmapped reads/ total reads",
+       title = "Unmapped reads percentage") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+unmapped_indi <- ggplot(anno, aes(x = chip_id, y = unmapped_ratios, color = as.factor(chip_id))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Unmapped reads/ total reads",
+       title = "Unmapped reads percentage") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+plot_grid(unmapped_exp + theme(legend.position = "none"),
+          unmapped_indi + theme(legend.position = "none"),
+          labels = letters[1:2])
+```
+
 
 ## ERCC percentage 
 
@@ -131,6 +155,30 @@ plot_ercc <- ggplot(anno[anno$cell_number == 0 |
 plot_ercc
 ```
 
+Look at the ERCC spike-in percentage per sample by C1 experimnet and by individual. 
+
+```{r ercc_exp}
+ercc_exp <- ggplot(anno, aes(x = as.factor(experiment), y = ercc_percentage, color = as.factor(experiment))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "ERCC percentage",
+       title = "ERCC percentage per sample") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+ercc_indi <- ggplot(anno, aes(x = chip_id, y = ercc_percentage, color = as.factor(chip_id))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "ERCC percentage",
+       title = "ERCC percentage per sample") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+plot_grid(ercc_exp + theme(legend.position = "none"),
+          ercc_indi + theme(legend.position = "none"),
+          labels = letters[1:2])
+```
+
 ## Number of genes detected 
 ```{r gene-number}
 ## cut off 
@@ -156,12 +204,24 @@ plot_gene <- ggplot(anno[anno$cell_number == 0 |
 plot_gene
 ```
 
-```{r density plots}
-plot_grid(plot_reads + theme(legend.position=c(.7,.7)),
-          plot_unmapped + theme(legend.position = "none"),
-          plot_ercc + theme(legend.position = "none"), 
-          plot_gene + theme(legend.position = "none"),
-          labels = LETTERS[1:4])
+## FUCCI transgene 
+```{r fucci}
+## plot molecule number of egfp and mCherry 
+egfp_mol <- ggplot(anno[anno$cell_number == 0 |
+            anno$cell_number == 1 , ],
+       aes(x = mol_egfp, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       labs(x = "EGFP molecule numbers", title = "Numbers of EGFP molecules")
+
+mcherry_mol <- ggplot(anno[anno$cell_number == 0 |
+            anno$cell_number == 1 , ],
+       aes(x = mol_mcherry, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       labs(x = "mCherry molecule numbers", title = "Numbers of mCherry molecules")
+
+plot_grid(egfp_mol + theme(legend.position = c(.5,.9)), 
+          mcherry_mol + theme(legend.position = "none"),
+          labels = letters[1:2])
 ```
 
 
