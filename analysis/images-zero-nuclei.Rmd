@@ -61,6 +61,47 @@ nuclei_table <- readRDS("/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rd
 kable(nuclei_table[which(nuclei_table$nnuclei==0|is.na(nuclei_table$nnuclei)),])
 ```
 
+---
+
+## Printing images for inspection
+
+**This section is for record keeping. All images for samples with no nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images-inspect-zero-nucleus.**
+
+The code below will save images in png format at `/project2/gilad/fucci-seq/images-inspect-zero-nucleus`.
+
+```{r, eval = FALSE}
+#' @param wells vector of wells ID (use the format specified above).
+#' @param plate plate ID
+
+print_png <- function(plate, wells) {
+  for (index in 1:length(wells)) {
+    id <- wells[index]
+    dir_images_data_pl <- paste0("/project2/gilad/fucci-seq/images_curated/",plate,"/")
+    dir_output <- "/project2/gilad/fucci-seq/images-inspect-zero-nucleus/"
+    bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
+    dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
+    gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
+    rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
+    
+    writeImage(bright, paste0(dir_output, plate,".",id,".bright.png"))
+    writeImage(dapi, paste0(dir_output, plate,".",id,".dapi.png"))
+    writeImage(gfp, paste0(dir_output, plate,".",id,".gfp.png"))
+    writeImage(rfp, paste0(dir_output, plate,".",id,".rfp.png"))
+    # combo <- combine(dapi, bright, gfp, rfp)
+    # writeImage(combo, paste0(dir_output, plate,".",id,".combo.png"))
+  }
+}
+
+
+tmp_table <- nuclei_table[which(nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)),]
+plates <- unique(as.character(tmp_table$plate))
+for (index in 1:length(plates)) {
+  plate <- plates[index]
+  cases <- nuclei_table[which( (nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)) & nuclei_table$plate == plate),]
+  wells <- as.character(cases$image)
+  print_png(plate, wells) 
+}
+```
 
 ---
 
