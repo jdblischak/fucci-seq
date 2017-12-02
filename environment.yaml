@@ -57,8 +57,6 @@ dependencies:
   - r-dplyr
   - r-dt
   - r-ggplot2
-  - r-lmoments
-  - r-moments
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
