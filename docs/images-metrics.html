@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Investigate metrics for summarizing intensities</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Investigate metrics for summarizing intensities</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-12-01</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 2333828</p>
+<div id="introductionbackground" class="section level2">
+<h2>Introduction/background</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>In our image analysis, after the initial denoising step (smooth, adaptive threshold), we identified nucleus location in each cell and use nucleus location to center the channel images.</p>
+<p>The next step is to summarize intensities for pixels located at the foreground area and at the background area. Initially we considered foreground to be the area inside nucleus (identified by DAPI), but then we realized that the FUCCI proteins can also locate outside of the nucleus. So instead for GFP and RFP, we considered an area of fixed size across all samples (now arbitrarily defined as 100 x 100 pixels). We then compute the sum of pixel intensities in this area. For DAPI, we compute the sum of pixel intensities inside the nucleus.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p><strong>Data</strong>:</p>
+<p>Denote pixel intensity matrix as <span class="math inline">\(F\)</span>. We have <span class="math inline">\(I\)</span> samples and <span class="math inline">\(J\)</span> batches (C1 plates). <span class="math inline">\(F^{fore}_{ij}\)</span> denotes pixels inside the forground area , and <span class="math inline">\(F^{back}_{ij}\)</span> denotes pixels located at the background area. <span class="math inline">\(N^f\)</span> and <span class="math inline">\(N^b\)</span> denote number of pixels located in the foreground and background area, respectively. We correct for background intensity by substracting from each pixel the background mean or median intensity. Then we sum up the background-corrected intensities and then take log transformation of the sum. log transformation is frequently used in image transformation for increasing contrast of the image, especially for regions with low pixel intensity.</p>
+<p><span class="math display">\[
+log10 \sum_{(i,j) \in fore} \big( F_{ij}^{fore} - \frac{1}{N^b} \sum_{(i,j) \in back} F_{ij}^{back} \big) 
+\]</span></p>
+<p><span class="math display">\[
+log10 \sum_{(i,j) \in fore} \Big( F_{ij}^{fore} - median_{(i,j) \in back}(F_{ij}^{back}) \Big) 
+\]</span> <span class="math inline">\(~\)</span></p>
+<p><strong>Results</strong>:</p>
+<ol style="list-style-type: decimal">
+<li><p><em>Mean versus median for background</em>: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there’s not an obvious trend for more or less right-skewed or left-skewd intensity distribution.</p></li>
+<li><p><em>Background mean-corrected versus median-corrected intensities</em>: baased on our previous observation, it is not surprise that there’s little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity.</p></li>
+<li><p>Green vs. Red and label samples with DAPI quantiles: not much difference between background mean-corrected versus background median-corrected. Though we see for the median-corrected RFP, there ara way fewer outliers in the low intensity range.</p></li>
+<li><p>Density of each channel by plate or individual: not much difference between plates or individuals for all channels.</p></li>
+</ol>
+<hr />
+</div>
+<div id="load-packages-and-data" class="section level2">
+<h2>Load packages and data</h2>
+<pre class="r"><code>library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+
+plates &lt;- c(&quot;18511_18855&quot;,&quot;18855_19101&quot;,&quot;18855_19160&quot;,&quot;18870_18511&quot;,
+            &quot;18870_18855&quot;,&quot;18870_19101&quot;,&quot;18870_19160&quot;,&quot;19098_18511&quot;,
+            &quot;19098_18870&quot;,&quot;19098_19160&quot;,&quot;19101_18511&quot;,&quot;19101_19098&quot;,
+            &quot;19160_18870&quot;,&quot;19101_19160&quot;,&quot;19160_18511&quot;, &quot;18855_19098&quot;)
+
+
+##Combine intensity stats from different plates.
+ints &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
+  tmp &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
+  tmp &lt;- data.frame(plate=plates[index], 
+                    image=as.character(droplevels(tmp$wellID)),
+    rfp.back.zoom.mean=tmp$rfp.back.zoom.mean,
+    rfp.back.zoom.median=tmp$rfp.back.zoom.q05,
+    gfp.back.zoom.mean=tmp$gfp.back.zoom.mean,
+    gfp.back.zoom.median=tmp$gfp.back.zoom.q05,
+    dapi.back.zoom.mean=tmp$dapi.back.mean,
+    dapi.back.zoom.median=tmp$dapi.back.q05,
+    rfp.mean.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.mean)*size.zoom)),
+    gfp.mean.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.mean)*size.zoom)),
+    dapi.mean.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.mean)*size)),
+    rfp.median.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.q05)*size.zoom)),
+    gfp.median.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.q05)*size.zoom)),
+    dapi.median.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.q05)*size)) )
+
+  tmp$rfp.mean.log10sum[which(tmp$rfp.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$rfp.mean.log10sum, na.rm=TRUE)
+  tmp$gfp.mean.log10sum[which(tmp$gfp.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$gfp.mean.log10sum, na.rm=TRUE)
+  tmp$dapi.mean.log10sum[which(tmp$dapi.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$dapi.mean.log10sum, na.rm=TRUE)
+  tmp$rfp.median.log10sum[which(tmp$rfp.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$rfp.median.log10sum, na.rm=TRUE)
+  tmp$gfp.median.log10sum[which(tmp$gfp.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$gfp.median.log10sum, na.rm=TRUE)
+  tmp$dapi.median.log10sum[which(tmp$dapi.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$dapi.median.log10sum, na.rm=TRUE)
+
+  return(tmp)  
+}) )
+saveRDS(ints, &quot;/project2/gilad/fucci-seq/intensities_matrix2stats/ints.rds&quot;)
+
+##Load the expression set info.
+eset_fls &lt;- list.files(&quot;../data/eset&quot;, full.names=TRUE)
+
+anno &lt;- do.call(rbind, lapply(1:length(eset_fls), function(index) {
+  eset_index &lt;- readRDS(eset_fls[[index]])
+  pdata_index &lt;- pData(eset_index)
+  return(pdata_index)
+}))
+
+# make unique id in both
+ints$unique &lt;- paste0(ints$plate,&quot;_&quot;,as.character(ints$image))
+anno$unique &lt;- paste0(anno$image_individual,&quot;_&quot;, sprintf(&quot;%05d&quot;,as.numeric(anno$image_label)))
+
+# subset annotation file
+subset_index &lt;- which(anno$unique %in% ints$unique)
+anno_subset &lt;- anno[subset_index,]
+
+# subset intensities
+ints_subset_index &lt;- match(anno_subset$unique, ints$unique)
+ints_subset &lt;- ints[ints_subset_index,]
+
+#all.equal(anno_subset$unique, ints_subset$unique)
+
+ints_subset$chip_id &lt;- anno_subset$chip_id
+
+ints_subset &lt;- ints_subset %&gt;% group_by(plate) %&gt;%
+  mutate(dapi_3quant.mean=ntile(dapi.mean.log10sum,3),
+         dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
+         dapi_3quant.median=ntile(dapi.median.log10sum,3),
+         dapi_4quant.median=ntile(dapi.median.log10sum,4))</code></pre>
+</div>
+<div id="section" class="section level2">
+<h2><span class="math inline">\(~\)</span></h2>
+<p><span class="math inline">\(~\)</span> ## Compare the two methods</p>
+<p><span class="math inline">\(~\)</span></p>
+<p><em>Mean versus median for background</em>: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there’s not an obvious trend for more or less right-skewed or left-skewd intensity distribution. <span class="math inline">\(~\)</span></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><span class="math inline">\(~\)</span></p>
+<p><em>Plotting background corrected foreground intensities</em>: baased on our previous observation, it is not surprise that there’s little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity. <span class="math inline">\(~\)</span> <img src="figure/images-metrics.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /> <span class="math inline">\(~\)</span></p>
+<p>Green vs. Red and label samples with DAPI quantiles: not much difference between background mean-corrected versus background median-corrected.</p>
+<p><span class="math inline">\(~\)</span></p>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="density-by-plate" class="section level2">
+<h2>Density by plate</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>Not too different between mean and median adjusted.</p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-5-1.png" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="density-by-individual" class="section level2">
+<h2>Density by individual</h2>
+<p><span class="math inline">\(~\)</span></p>
+<p>Also not too different between individuals.</p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] Biobase_2.38.0      BiocGenerics_0.24.0 RColorBrewer_1.1-2 
+[4] wesanderson_0.3.2   cowplot_0.8.0       ggplot2_2.2.0      
+[7] dplyr_0.7.0         data.table_1.10.4  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.13     knitr_1.16       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 R6_2.2.0         rlang_0.1.2      stringr_1.2.0   
+ [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
+[13] git2r_0.19.0     htmltools_0.3.6  lazyeval_0.2.0   yaml_2.1.14     
+[17] rprojroot_1.2    digest_0.6.12    assertthat_0.1   tibble_1.3.3    
+[21] glue_1.1.1       evaluate_0.10.1  rmarkdown_1.6    labeling_0.3    
+[25] stringi_1.1.2    compiler_3.4.1   scales_0.4.1     backports_1.0.5 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
