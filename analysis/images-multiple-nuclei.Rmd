@@ -31,9 +31,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load data 
 
-Load image QC table - for now it has only number of nuclei detected in each sample now. This table does not include all of the single cell samples, and the ones that are not included are the samples classifed as no DNA content in DAPI images. 
-
-The summary table contains three columns:
+Load nuclei detection results directly from image analysis output `/project2/gilad/fucci-seq/intensities`. The results are made into a summary table.
 
 `plate`: labeled by the mix of individual cell lines  
 `well`: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).  
@@ -61,25 +59,9 @@ nuclei_table[which(nuclei_table$nnuclei == 20),]
 
 ## Printing images for inspection
 
-**This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images_inspect.**
+**This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images-inspect-multiple-nuclei**
 
-First select samples for inspection. The code below selects from plate `18511_18855` the samples that have two nuclei detected.
-
-```{r}
-cases <- nuclei_table[which(nuclei_table$nnuclei == 2 & nuclei_table$plate == "18511_18855"),]
-```
-
-Extract the wells labels and convert to a character variable.
-
-```{r}
-wells <- as.character(cases$well)
-
-wells <- c("00012","00032","00044","00047","00051","00052","00067","00076","00085","00088","00096")
-
-print(wells)
-```
-
-The code below will save images in png format at `/project2/gilad/fucci-seq/images_inspect`.
+The code below will save images in png format at `/project2/gilad/fucci-seq/images-inspect-multiple-nuclei`.
 
 ```{r, eval = FALSE}
 #' @param wells vector of wells ID (use the format specified above).
@@ -89,7 +71,7 @@ print_png <- function(plate, wells) {
   for (index in 1:length(wells)) {
     id <- wells[index]
     dir_images_data_pl <- paste0("/project2/gilad/fucci-seq/images_curated/",plate,"/")
-    dir_output <- "/project2/gilad/fucci-seq/images_inspect/"
+    dir_output <- "/project2/gilad/fucci-seq/images-inspect-multiple-nuclei/"
     bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
     dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
     gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
@@ -116,8 +98,6 @@ for (index in 1:length(plates)) {
   wells <- as.character(cases$well)
   print_png(plate, wells) 
 }
-
-
 ```
 
 
