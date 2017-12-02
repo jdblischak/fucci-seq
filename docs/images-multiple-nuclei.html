@@ -317,14 +317,13 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-11-02</p>
+<p><strong>Last updated:</strong> 2017-12-01</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5e0bfad</p>
+<p><strong>Code version:</strong> a7566a3</p>
 <div id="load-data" class="section level2">
 <h2>Load data</h2>
-<p>Load image QC table - for now it has only number of nuclei detected in each sample now. This table does not include all of the single cell samples, and the ones that are not included are the samples classifed as no DNA content in DAPI images.</p>
-<p>The summary table contains three columns:</p>
+<p>Load nuclei detection results directly from image analysis output <code>/project2/gilad/fucci-seq/intensities</code>. The results are made into a summary table.</p>
 <p><code>plate</code>: labeled by the mix of individual cell lines<br />
 <code>well</code>: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).<br />
 <code>nnuclei</code>: number of nuclei detected in a single cell sample</p>
@@ -333,31 +332,21 @@ shared across the workflowr files. -->
 with(nuclei_table, table(nnuclei))</code></pre>
 <pre><code>nnuclei
    0    1    2    3    4    5    6    7    8   12   20 
-   4 1029  112   44   15   13    1    2    2    1    1 </code></pre>
+   4 1264  141   53   21   14    2    2    2    1    1 </code></pre>
 <p>Inspect samples with 12 nuclei.</p>
 <pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 12),]</code></pre>
-<pre><code>        nnuclei  well       plate
-0004812      12 00048 19160_18870</code></pre>
+<pre><code>              plate nnuclei image
+0004815 19160_18870      12 00048</code></pre>
 <p>Inspect samples with 20 nuclei.</p>
 <pre class="r"><code>nuclei_table[which(nuclei_table$nnuclei == 20),]</code></pre>
-<pre><code>       nnuclei  well       plate
-000636      20 00063 18870_19160</code></pre>
+<pre><code>             plate nnuclei image
+000637 18870_19160      20 00063</code></pre>
 <hr />
 </div>
 <div id="printing-images-for-inspection" class="section level2">
 <h2>Printing images for inspection</h2>
-<p><strong>This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images_inspect.</strong></p>
-<p>First select samples for inspection. The code below selects from plate <code>18511_18855</code> the samples that have two nuclei detected.</p>
-<pre class="r"><code>cases &lt;- nuclei_table[which(nuclei_table$nnuclei == 2 &amp; nuclei_table$plate == &quot;18511_18855&quot;),]</code></pre>
-<p>Extract the wells labels and convert to a character variable.</p>
-<pre class="r"><code>wells &lt;- as.character(cases$well)
-
-wells &lt;- c(&quot;00012&quot;,&quot;00032&quot;,&quot;00044&quot;,&quot;00047&quot;,&quot;00051&quot;,&quot;00052&quot;,&quot;00067&quot;,&quot;00076&quot;,&quot;00085&quot;,&quot;00088&quot;,&quot;00096&quot;)
-
-print(wells)</code></pre>
-<pre><code> [1] &quot;00012&quot; &quot;00032&quot; &quot;00044&quot; &quot;00047&quot; &quot;00051&quot; &quot;00052&quot; &quot;00067&quot; &quot;00076&quot;
- [9] &quot;00085&quot; &quot;00088&quot; &quot;00096&quot;</code></pre>
-<p>The code below will save images in png format at <code>/project2/gilad/fucci-seq/images_inspect</code>.</p>
+<p><strong>This section is for record keeping. All images for samples with more than 1 nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images-inspect-multiple-nuclei</strong></p>
+<p>The code below will save images in png format at <code>/project2/gilad/fucci-seq/images-inspect-multiple-nuclei</code>.</p>
 <pre class="r"><code>#&#39; @param wells vector of wells ID (use the format specified above).
 #&#39; @param plate plate ID
 
@@ -365,7 +354,7 @@ print_png &lt;- function(plate, wells) {
   for (index in 1:length(wells)) {
     id &lt;- wells[index]
     dir_images_data_pl &lt;- paste0(&quot;/project2/gilad/fucci-seq/images_curated/&quot;,plate,&quot;/&quot;)
-    dir_output &lt;- &quot;/project2/gilad/fucci-seq/images_inspect/&quot;
+    dir_output &lt;- &quot;/project2/gilad/fucci-seq/images-inspect-multiple-nuclei/&quot;
     bright &lt;- readImage(paste0(dir_images_data_pl, &quot;BRIGHT/&quot;, id, &quot;.TIFF&quot;))
     dapi &lt;- readImage(paste0(dir_images_data_pl, &quot;DAPI/&quot;, id, &quot;.TIFF&quot;))
     gfp &lt;- readImage(paste0(dir_images_data_pl, &quot;GFP/&quot;, id, &quot;.TIFF&quot;))
@@ -392,17 +381,23 @@ for (index in 1:length(plates)) {
   wells &lt;- as.character(cases$well)
   print_png(plate, wells) 
 }</code></pre>
+<div id="single-cell-using-manual-inspection" class="section level3">
+<h3>Single cell using manual inspection</h3>
+<p>The distortion during the sorting makes the shape not as circular, resulting in mis-identification.</p>
+<p>18511_18855.00012 18511_18855.00052 18511_18855.00067 18855_19098.00005 18855_19098.00009 18855_19098.00013 18855_19098.00039 18855_19101.00021 18855_19101.00038 18855_19101.00063 18855_19160.00079 18870_18855.00060 18870_19101.00092 18870_19160.00039 19098_18511.00050 19098_18870.00051 19098_18870.00063 19098_19160.00046 19101_19098.00006 19101_19098.00054 19101_19098.00078 19160_18511.00005 19160_18511.00021 19160_18511.00024 19160_18511.00031 19160_18511.00038 19160_18511.00045 19160_18870.00002 19160_18870.00005 19160_18870.00011 19160_18870.00021 19160_18870.00024 19160_18870.00038 19160_18870.00039 19160_18870.00051 19160_18870.00056 19160_18870.00071 19160_18870.00078 19160_18870.00079 19160_18870.00080 19160_18870.00081 19160_18870.00091 19160_18870.00094</p>
 <hr />
+</div>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-redhat-linux-gnu (64-bit)
+Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -416,9 +411,9 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 loaded via a namespace (and not attached):
- [1] compiler_3.4.1  backports_1.1.1 magrittr_1.5    rprojroot_1.2  
+ [1] compiler_3.4.1  backports_1.0.5 magrittr_1.5    rprojroot_1.2  
  [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.13   
- [9] stringi_1.1.5   rmarkdown_1.6   knitr_1.17      git2r_0.19.0   
+ [9] stringi_1.1.2   rmarkdown_1.6   knitr_1.16      git2r_0.19.0   
 [13] stringr_1.2.0   digest_0.6.12   evaluate_0.10.1</code></pre>
 </div>
 
