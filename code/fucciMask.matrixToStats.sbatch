@@ -10,7 +10,7 @@
 #SBATCH --partition=gilad
 #SBATCH --account=pi-gilad
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=5GB
 
 set -e
