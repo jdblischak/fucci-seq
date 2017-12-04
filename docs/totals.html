@@ -324,10 +324,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-11-29</p>
+<p><strong>Last updated:</strong> 2017-12-04</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 3d5d193</p>
+<p><strong>Code version:</strong> 68d4fcc</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <pre class="r"><code>library(&quot;dplyr&quot;)</code></pre>
@@ -406,19 +406,84 @@ Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(N
 Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
   Consider &#39;structure(list(), *)&#39; instead.</code></pre>
 <p><img src="figure/totals.Rmd/distribution-sequencing-depth-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Mapped reads per cell</p>
+<pre class="r"><code>ggplot(pData(eset), aes(x = experiment, y = mapped, color = experiment)) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = &quot;C1 chip&quot;, y = &quot;Number of reads&quot;,
+       title = &quot;Number of mapped sequences per single cell&quot;) +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.
+
+Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
+  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
+<p><img src="figure/totals.Rmd/mapped-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Sum of sequences across the 96 single cells per C1 chip.</p>
 <pre class="r"><code>total_per_experiment &lt;- pData(eset) %&gt;%
   group_by(experiment) %&gt;%
-  summarize(raw = sum(raw),
-            mapped = sum(mapped),
-            molecules = sum(molecules))
+  summarize(raw = sum(raw) / 10^6,
+            mapped = sum(mapped) / 10^6,
+            molecules = sum(molecules) / 10^6)
 datatable(total_per_experiment,
           options = list(pageLength = nrow(total_per_experiment)),
           colnames = c(&quot;C1 chip&quot;, &quot;Number of raw sequences&quot;,
                        &quot;Number of mapped&quot;,
                        &quot;Number of molecules&quot;))</code></pre>
 <div id="htmlwidget-b8e0c2e2742a5382bafd" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b8e0c2e2742a5382bafd">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],["20170905","20170906","20170907","20170908","20170910","20170912","20170913","20170914","20170915","20170916","20170917","20170919","20170920","20170921","20170922","20170924"],[181680776,163710470,159038430,198933268,218409798,201877066,199553010,184324283,182292193,177823273,154760077,176811921,170755170,195326862,194436579,164030729],[85017829,71698160,64146014,73459066,84276806,85720928,70672576,75911338,64597313,55577163,65480526,67847801,69986907,81872748,64713019,76978940],[6827817,7160486,6017162,8577696,8728836,8318805,6408526,7962425,7693650,7435478,6342408,7555793,7007813,9173321,7318666,8373499]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>C1 chip<\/th>\n      <th>Number of raw sequences<\/th>\n      <th>Number of mapped<\/th>\n      <th>Number of molecules<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":16,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,16,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-b8e0c2e2742a5382bafd">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],["20170905","20170906","20170907","20170908","20170910","20170912","20170913","20170914","20170915","20170916","20170917","20170919","20170920","20170921","20170922","20170924"],[181.680776,163.71047,159.03843,198.933268,218.409798,201.877066,199.55301,184.324283,182.292193,177.823273,154.760077,176.811921,170.75517,195.326862,194.436579,164.030729],[85.017829,71.69816,64.146014,73.459066,84.276806,85.720928,70.672576,75.911338,64.597313,55.577163,65.480526,67.847801,69.986907,81.872748,64.713019,76.97894],[6.827817,7.160486,6.017162,8.577696,8.728836,8.318805,6.408526,7.962425,7.69365,7.435478,6.342408,7.555793,7.007813,9.173321,7.318666,8.373499]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>C1 chip<\/th>\n      <th>Number of raw sequences<\/th>\n      <th>Number of mapped<\/th>\n      <th>Number of molecules<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":16,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,16,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>ggplot(melt(total_per_experiment, id.vars = &quot;experiment&quot;,
             variable.name = &quot;type&quot;, value.name = &quot;count&quot;),
        aes(x = experiment, y = count, color = type)) +
@@ -507,18 +572,19 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] Biobase_2.38.0      BiocGenerics_0.24.0 reshape2_1.4.2     
-[4] ggplot2_2.2.0       DT_0.2              dplyr_0.7.0        
+[1] bindrcpp_0.2        Biobase_2.38.0      BiocGenerics_0.24.0
+[4] reshape2_1.4.2      ggplot2_2.2.0       DT_0.2             
+[7] dplyr_0.7.0        
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13     knitr_1.16       magrittr_1.5     cowplot_0.8.0   
- [5] munsell_0.4.3    colorspace_1.3-2 R6_2.2.0         rlang_0.1.2     
- [9] plyr_1.8.4       stringr_1.2.0    tools_3.4.1      grid_3.4.1      
-[13] gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6  lazyeval_0.2.0  
-[17] yaml_2.1.14      rprojroot_1.2    digest_0.6.12    assertthat_0.1  
-[21] tibble_1.3.3     htmlwidgets_0.9  glue_1.1.1       evaluate_0.10.1 
-[25] rmarkdown_1.6    labeling_0.3     stringi_1.1.2    compiler_3.4.1  
-[29] scales_0.4.1     backports_1.0.5  jsonlite_1.4    </code></pre>
+ [1] Rcpp_0.12.13     bindr_0.1        knitr_1.16       magrittr_1.5    
+ [5] cowplot_0.8.0    munsell_0.4.3    colorspace_1.3-2 R6_2.2.0        
+ [9] rlang_0.1.2      plyr_1.8.4       stringr_1.2.0    tools_3.4.1     
+[13] grid_3.4.1       gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6 
+[17] lazyeval_0.2.0   yaml_2.1.14      rprojroot_1.2    digest_0.6.12   
+[21] assertthat_0.1   tibble_1.3.3     htmlwidgets_0.9  glue_1.1.1      
+[25] evaluate_0.10.1  rmarkdown_1.6    labeling_0.3     stringi_1.1.2   
+[29] compiler_3.4.1   scales_0.4.1     backports_1.0.5  jsonlite_1.4    </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-11-29</p>
+<p><strong>Last updated:</strong> 2017-12-04</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2582fb0</p>
+<p><strong>Code version:</strong> 68d4fcc</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <pre class="r"><code>library(&quot;cowplot&quot;)
@@ -342,7 +342,7 @@ pData(eset)$experiment &lt;- as.factor(pData(eset)$experiment)</code></pre>
 <h2>Reads versus molecules</h2>
 <pre class="r"><code>conv_hs_c1 &lt;- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
                                      color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = &quot;Total read count&quot;,
        y = &quot;Total molecule count&quot;,
        title = &quot;Endogenous genes by C1 chip&quot;) +
@@ -351,7 +351,7 @@ pData(eset)$experiment &lt;- as.factor(pData(eset)$experiment)</code></pre>
   Consider &#39;structure(list(), *)&#39; instead.</code></pre>
 <pre class="r"><code>conv_hs_ind &lt;- ggplot(pData(eset), aes(x = reads_hs, y = mol_hs,
                                       color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = &quot;Dark2&quot;) +
   labs(x = &quot;Total read count&quot;,
        y = &quot;Total molecule count&quot;,
@@ -373,7 +373,7 @@ Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(N
   Consider &#39;structure(list(), *)&#39; instead.</code></pre>
 <pre class="r"><code>conv_ercc_c1 &lt;- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
                                         color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = &quot;Total read count&quot;,
        y = &quot;Total molecule count&quot;,
        title = &quot;ERCC genes by C1 chip&quot;) +
@@ -382,11 +382,11 @@ Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(N
   Consider &#39;structure(list(), *)&#39; instead.</code></pre>
 <pre class="r"><code>conv_ercc_ind &lt;- ggplot(pData(eset), aes(x = reads_ercc, y = mol_ercc,
                                          color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = &quot;Dark2&quot;) +
   labs(x = &quot;Total read count&quot;,
        y = &quot;Total molecule count&quot;,
-       title = &quot;Endogenous genes by individual&quot;) +
+       title = &quot;ERCC genes by individual&quot;) +
   theme(legend.position = &quot;none&quot;)</code></pre>
 <pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
   Consider &#39;structure(list(), *)&#39; instead.
@@ -919,7 +919,7 @@ Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(N
 </div>
 <pre class="r"><code>gene_v_ercc_c1 &lt;- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
                         color = experiment)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   labs(x = &quot;Total gene molecule-counts per sample&quot;,
        y = &quot;Total ERCC molecule-counts per sample&quot;,
        title = &quot;C1 chip&quot;) +
@@ -928,7 +928,7 @@ Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(N
   Consider &#39;structure(list(), *)&#39; instead.</code></pre>
 <pre class="r"><code>gene_v_ercc_ind &lt;- ggplot(pData(eset), aes(x = mol_hs, y = mol_ercc,
                                            color = chip_id)) +
-  geom_point() +
+  geom_point(alpha = 1/2) +
   scale_color_brewer(palette = &quot;Dark2&quot;) +
   labs(x = &quot;Total gene molecule-counts per sample&quot;,
        y = &quot;Total ERCC molecule-counts per sample&quot;,
