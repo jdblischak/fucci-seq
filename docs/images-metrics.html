@@ -317,10 +317,11 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-12-01</p>
+<p><strong>Last updated:</strong> 2017-12-03</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2333828</p>
+<p><strong>Code version:</strong> 80aa9e9</p>
+<hr />
 <div id="introductionbackground" class="section level2">
 <h2>Introduction/background</h2>
 <p><span class="math inline">\(~\)</span></p>
@@ -419,10 +420,11 @@ ints_subset &lt;- ints_subset %&gt;% group_by(plate) %&gt;%
          dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
          dapi_3quant.median=ntile(dapi.median.log10sum,3),
          dapi_4quant.median=ntile(dapi.median.log10sum,4))</code></pre>
+<hr />
+<p><span class="math inline">\(~\)</span></p>
 </div>
-<div id="section" class="section level2">
-<h2><span class="math inline">\(~\)</span></h2>
-<p><span class="math inline">\(~\)</span> ## Compare the two methods</p>
+<div id="compare-the-two-methods" class="section level2">
+<h2>Compare the two methods</h2>
 <p><span class="math inline">\(~\)</span></p>
 <p><em>Mean versus median for background</em>: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there’s not an obvious trend for more or less right-skewed or left-skewd intensity distribution. <span class="math inline">\(~\)</span></p>
 <p><img src="figure/images-metrics.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -624,7 +626,7 @@ other attached packages:
 [7] dplyr_0.7.0         data.table_1.10.4  
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13     knitr_1.16       magrittr_1.5     munsell_0.4.3   
+ [1] Rcpp_0.12.14     knitr_1.16       magrittr_1.5     munsell_0.4.3   
  [5] colorspace_1.3-2 R6_2.2.0         rlang_0.1.2      stringr_1.2.0   
  [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
 [13] git2r_0.19.0     htmltools_0.3.6  lazyeval_0.2.0   yaml_2.1.14     
