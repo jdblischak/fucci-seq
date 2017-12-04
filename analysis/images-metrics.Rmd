@@ -27,6 +27,7 @@ knitr::read_chunk("chunks.R")
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+---
 
 
 ## Introduction/background
@@ -140,10 +141,13 @@ ints_subset <- ints_subset %>% group_by(plate) %>%
          dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
          dapi_3quant.median=ntile(dapi.median.log10sum,3),
          dapi_4quant.median=ntile(dapi.median.log10sum,4))
+
 ```
-$~$
+
 ---
+
 $~$
+
 ## Compare the two methods
 
 $~$
