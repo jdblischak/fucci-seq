@@ -1,0 +1,113 @@
+---
+title: "Inspect samples detected as absent or not having a nucleus"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Load packages and data 
+
+```{r}
+library(knitr)
+```
+
+Load nuclei detection results directly from image analysis output `/project2/gilad/fucci-seq/intensities`. The results are made into a summary table.
+
+`plate`: labeled by the mix of individual cell lines  
+`image`: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).  
+`nnuclei`: number of nuclei detected in a single cell sample  
+
+```{r, eval = FALSE}
+fls <- list.files("/project2/gilad/fucci-seq/intensities", pattern = "rds", full.names = TRUE)
+
+nuclei_table <- do.call(rbind, lapply(1:length(fls), function(index) {
+  tmp <- readRDS(fls[[index]])
+  plate <- strsplit(strsplit(fls[index], split="/")[[1]][[6]], 
+                    split=".", fixed = TRUE)[[1]][[1]]
+  data.frame(plate=plate, nnuclei=tmp, image=names(tmp))
+}))
+
+saveRDS(nuclei_table, "/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rds")
+```
+
+Inspect samples
+
+```{r}
+nuclei_table <- readRDS("/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rds")
+kable(nuclei_table[which(nuclei_table$nnuclei==0|is.na(nuclei_table$nnuclei)),])
+```
+
+---
+
+## Printing images for inspection
+
+**This section is for record keeping. All images for samples with no nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images-inspect-zero-nucleus.**
+
+The code below will save images in png format at `/project2/gilad/fucci-seq/images-inspect-zero-nucleus`.
+
+```{r, eval = FALSE}
+#' @param wells vector of wells ID (use the format specified above).
+#' @param plate plate ID
+
+print_png <- function(plate, wells) {
+  for (index in 1:length(wells)) {
+    id <- wells[index]
+    dir_images_data_pl <- paste0("/project2/gilad/fucci-seq/images_curated/",plate,"/")
+    dir_output <- "/project2/gilad/fucci-seq/images-inspect-zero-nucleus/"
+    bright <- readImage(paste0(dir_images_data_pl, "BRIGHT/", id, ".TIFF"))
+    dapi <- readImage(paste0(dir_images_data_pl, "DAPI/", id, ".TIFF"))
+    gfp <- readImage(paste0(dir_images_data_pl, "GFP/", id, ".TIFF"))
+    rfp <- readImage(paste0(dir_images_data_pl, "RFP/", id, ".TIFF"))
+    
+    writeImage(bright, paste0(dir_output, plate,".",id,".bright.png"))
+    writeImage(dapi, paste0(dir_output, plate,".",id,".dapi.png"))
+    writeImage(gfp, paste0(dir_output, plate,".",id,".gfp.png"))
+    writeImage(rfp, paste0(dir_output, plate,".",id,".rfp.png"))
+    # combo <- combine(dapi, bright, gfp, rfp)
+    # writeImage(combo, paste0(dir_output, plate,".",id,".combo.png"))
+  }
+}
+
+
+tmp_table <- nuclei_table[which(nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)),]
+plates <- unique(as.character(tmp_table$plate))
+for (index in 1:length(plates)) {
+  plate <- plates[index]
+  cases <- nuclei_table[which( (nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)) & nuclei_table$plate == plate),]
+  wells <- as.character(cases$image)
+  print_png(plate, wells) 
+}
+```
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+

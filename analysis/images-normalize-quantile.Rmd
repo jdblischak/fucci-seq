@@ -1,0 +1,573 @@
+---
+title: "Quantile-normalize intensity measurements"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Introduction
+
+Previously when investigating measurement variation (GFP/RFP/FAPI), we learned that there's significant variation between batches in the distributions of background-corrected pixel intensites. See [here](../docs/images-qc-labels.html).
+
+In this document, I apply quantile normalization to intensity measurements. Bad news, it did not work well. While quantile normalization helps to remove variation between batches in intensity measurements, but by doing so, we increases the variation between individuals. The cells do not form any clusters in the Green versus Red plot. In hindsight, this seems to make sense. By normalizing samples within plate, we artifically inflated differences between individuals...
+
+Next to try linear mixed model...
+
+---
+
+## Load packages and data
+
+```{r, message=FALSE, warning=FALSE}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+
+plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
+            "18870_18855","18870_19101","18870_19160","19098_18511",
+            "19098_18870","19098_19160","19101_18511","19101_19098",
+            "19160_18870","19101_19160","19160_18511", "18855_19098")
+
+##Combine intensity stats from different plates.
+ints <- do.call(rbind, lapply(1:length(plates), function(index) {
+  tmp <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
+  tmp <- data.frame(plate=plates[index], 
+                    image=as.character(droplevels(tmp$wellID)),
+    rfp.back.zoom.mean=tmp$rfp.back.zoom.mean,
+    rfp.back.zoom.median=tmp$rfp.back.zoom.q05,
+    gfp.back.zoom.mean=tmp$gfp.back.zoom.mean,
+    gfp.back.zoom.median=tmp$gfp.back.zoom.q05,
+    dapi.back.zoom.mean=tmp$dapi.back.mean,
+    dapi.back.zoom.median=tmp$dapi.back.q05,
+    rfp.mean.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.mean)*size.zoom)),
+    gfp.mean.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.mean)*size.zoom)),
+    dapi.mean.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.mean)*size)),
+    rfp.median.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.q05)*size.zoom)),
+    gfp.median.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.q05)*size.zoom)),
+    dapi.median.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.q05)*size)) )
+
+  tmp$rfp.mean.log10sum[which(tmp$rfp.mean.log10sum == "NaN")] <- min(tmp$rfp.mean.log10sum, na.rm=TRUE)
+  tmp$gfp.mean.log10sum[which(tmp$gfp.mean.log10sum == "NaN")] <- min(tmp$gfp.mean.log10sum, na.rm=TRUE)
+  tmp$dapi.mean.log10sum[which(tmp$dapi.mean.log10sum == "NaN")] <- min(tmp$dapi.mean.log10sum, na.rm=TRUE)
+  tmp$rfp.median.log10sum[which(tmp$rfp.median.log10sum == "NaN")] <- min(tmp$rfp.median.log10sum, na.rm=TRUE)
+  tmp$gfp.median.log10sum[which(tmp$gfp.median.log10sum == "NaN")] <- min(tmp$gfp.median.log10sum, na.rm=TRUE)
+  tmp$dapi.median.log10sum[which(tmp$dapi.median.log10sum == "NaN")] <- min(tmp$dapi.median.log10sum, na.rm=TRUE)
+
+  return(tmp)  
+}) )
+
+##Load the expression set info.
+eset_fls <- list.files("../data/eset", full.names=TRUE)
+
+anno <- do.call(rbind, lapply(1:length(eset_fls), function(index) {
+  eset_index <- readRDS(eset_fls[[index]])
+  pdata_index <- pData(eset_index)
+  return(pdata_index)
+}))
+
+# make unique id in both
+ints$unique <- paste0(ints$plate,"_",as.character(ints$image))
+anno$unique <- paste0(anno$image_individual,"_", sprintf("%05d",as.numeric(anno$image_label)))
+
+# subset annotation file
+subset_index <- which(anno$unique %in% ints$unique)
+anno_subset <- anno[subset_index,]
+
+# subset intensities
+ints_subset_index <- match(anno_subset$unique, ints$unique)
+ints_subset <- ints[ints_subset_index,]
+
+#all.equal(anno_subset$unique, ints_subset$unique)
+
+ints_subset$chip_id <- anno_subset$chip_id
+
+ints_subset <- ints_subset %>% group_by(plate) %>%
+  mutate(dapi_3quant.mean=ntile(dapi.mean.log10sum,3),
+         dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
+         dapi_3quant.median=ntile(dapi.median.log10sum,3),
+         dapi_4quant.median=ntile(dapi.median.log10sum,4))
+```
+$~$
+---
+$~$
+
+## Densit plots
+
+$~$
+
+First, look at the distribution of all batches combined versus each batch. 
+
+$~$
+
+```{r, echo = FALSE}
+plot_grid(
+  ggplot(ints_subset, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=rfp.median.log10sum, col = as.factor(plate))) +
+    labs(title = "RFP by plate",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Red channel log10 pixel sum", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_subset, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=gfp.median.log10sum, col = as.factor(plate))) +
+    labs(title = "GFP by plate",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Green channel log10 pixel sum", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_subset, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=dapi.median.log10sum, col = as.factor(plate))) +
+    labs(title = "DAPI by plate",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="DAPI channel log10 pixel sum", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+$~$
+---
+$~$
+## Normalization
+
+$~$
+
+Code for one single sample
+
+$~$
+
+```{r}
+my_quantnorm <- function(reference, sample, span=.01) {
+  # quantiles for intensities all samples across plates
+  quants_reference <- quantile(reference, probs=seq(0,1,span))
+  # intensities for a given plate
+  # quantiles for intensities at each plate
+  quants_sample <- quantile(sample, probs=seq(0,1,span))
+  # empty vector for normalized values
+  sample_normed <- vector("numeric", length=length(sample))
+  
+  for (index in 1:length(sample)) {
+    # compare the sample intensity values with the refernece sample intensity values 
+    # at each quantile; get the closes reference quantlie in terms of measurement values
+    sample_order <- names(which.min(abs(sample[index]-quants_sample)))
+    # get the reference intensity value of the closet quantile
+    ref_order_value <- reference[which(names(quants_reference)==sample_order)] 
+    # assign the reference intensity value to the sample
+    sample_normed[index] <- ref_order_value 
+  }
+  return(sample_normed)
+}
+```
+
+**Choose smoothing parameter for RFP**
+
+```{r, echo = FALSE}
+ints_subset$plate <- as.character(ints_subset$plate)
+ints_rfp <- data.frame(plate=ints_subset$plate,
+                       rfp.median.log10sum = ints_subset$rfp.median.log10sum)
+ints_rfp$span1 <- NULL
+ints_rfp$span2 <- NULL
+ints_rfp$span3 <- NULL
+ints_rfp$span4 <- NULL
+
+for (index in 1:length(unique(ints_rfp$plate))) {
+  plate <- unique(ints_rfp$plate)[index]
+#  print(plate)
+  tmp <- my_quantnorm(reference = ints_rfp$rfp.median.log10sum,
+                      sample = ints_rfp$rfp.median.log10sum[ints_rfp$plate == plate],
+                      span=.02)
+  ints_rfp$span1[ints_rfp$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_rfp$rfp.median.log10sum,
+                      sample = ints_rfp$rfp.median.log10sum[ints_rfp$plate == plate],
+                      span=.01)
+  ints_rfp$span2[ints_rfp$plate == plate] <- tmp
+
+  tmp <- my_quantnorm(reference = ints_rfp$rfp.median.log10sum,
+                      sample = ints_rfp$rfp.median.log10sum[ints_rfp$plate == plate],
+                      span=.005)
+  ints_rfp$span3[ints_rfp$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_rfp$rfp.median.log10sum,
+                    sample = ints_rfp$rfp.median.log10sum[ints_rfp$plate == plate],
+                    span=.001)
+  ints_rfp$span4[ints_rfp$plate == plate] <- tmp
+}
+
+plot_grid(
+  ggplot(ints_rfp, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span1, col = as.factor(plate))) +
+    labs(title = "Span=.02",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_rfp, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span2, col = as.factor(plate))) +
+    labs(title = "Span=.01",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_rfp, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span3, col = as.factor(plate))) +
+    labs(title = "Span=.005",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_rfp, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span4, col = as.factor(plate))) +
+    labs(title = "Span=.001",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+$~$
+
+**Choose smoothing parameter for GFP**
+
+$~$
+
+```{r, echo = FALSE}
+ints_subset$plate <- as.character(ints_subset$plate)
+ints_gfp <- data.frame(plate=ints_subset$plate,
+                       gfp.median.log10sum = ints_subset$gfp.median.log10sum)
+ints_gfp$span1 <- NULL
+ints_gfp$span2 <- NULL
+ints_gfp$span3 <- NULL
+ints_gfp$span4 <- NULL
+
+for (index in 1:length(unique(ints_gfp$plate))) {
+  plate <- unique(ints_gfp$plate)[index]
+#  print(plate)
+  tmp <- my_quantnorm(reference = ints_gfp$gfp.median.log10sum,
+                      sample = ints_gfp$gfp.median.log10sum[ints_gfp$plate == plate],
+                      span=.02)
+  ints_gfp$span1[ints_gfp$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_gfp$gfp.median.log10sum,
+                      sample = ints_gfp$gfp.median.log10sum[ints_gfp$plate == plate],
+                      span=.01)
+  ints_gfp$span2[ints_gfp$plate == plate] <- tmp
+
+  tmp <- my_quantnorm(reference = ints_gfp$gfp.median.log10sum,
+                      sample = ints_gfp$gfp.median.log10sum[ints_gfp$plate == plate],
+                      span=.005)
+  ints_gfp$span3[ints_gfp$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_gfp$gfp.median.log10sum,
+                    sample = ints_gfp$gfp.median.log10sum[ints_gfp$plate == plate],
+                    span=.001)
+  ints_gfp$span4[ints_gfp$plate == plate] <- tmp
+}
+
+plot_grid(
+  ggplot(ints_gfp, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span1, col = as.factor(plate))) +
+    labs(title = "Span=.02",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_gfp, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span2, col = as.factor(plate))) +
+    labs(title = "Span=.01",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_gfp, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span3, col = as.factor(plate))) +
+    labs(title = "Span=.005",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_gfp, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span4, col = as.factor(plate))) +
+    labs(title = "Span=.001",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+$~$
+
+**Choose smoothing parameter for DAPI**
+
+$~$
+
+```{r, echo = FALSE}
+ints_subset$plate <- as.character(ints_subset$plate)
+ints_dapi <- data.frame(plate=ints_subset$plate,
+                       dapi.median.log10sum = ints_subset$dapi.median.log10sum)
+ints_dapi$span1 <- NULL
+ints_dapi$span2 <- NULL
+ints_dapi$span3 <- NULL
+ints_dapi$span4 <- NULL
+
+for (index in 1:length(unique(ints_dapi$plate))) {
+  plate <- unique(ints_dapi$plate)[index]
+#  print(plate)
+  tmp <- my_quantnorm(reference = ints_dapi$dapi.median.log10sum,
+                      sample = ints_dapi$dapi.median.log10sum[ints_dapi$plate == plate],
+                      span=.02)
+  ints_dapi$span1[ints_dapi$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_dapi$dapi.median.log10sum,
+                      sample = ints_dapi$dapi.median.log10sum[ints_dapi$plate == plate],
+                      span=.01)
+  ints_dapi$span2[ints_dapi$plate == plate] <- tmp
+
+  tmp <- my_quantnorm(reference = ints_dapi$dapi.median.log10sum,
+                      sample = ints_dapi$dapi.median.log10sum[ints_dapi$plate == plate],
+                      span=.005)
+  ints_dapi$span3[ints_dapi$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_dapi$dapi.median.log10sum,
+                    sample = ints_dapi$dapi.median.log10sum[ints_dapi$plate == plate],
+                    span=.001)
+  ints_dapi$span4[ints_dapi$plate == plate] <- tmp
+}
+
+plot_grid(
+  ggplot(ints_dapi, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span1, col = as.factor(plate))) +
+    labs(title = "Span=.02",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_dapi, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span2, col = as.factor(plate))) +
+    labs(title = "Span=.01",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_dapi, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span3, col = as.factor(plate))) +
+    labs(title = "Span=.005",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_dapi, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=span4, col = as.factor(plate))) +
+    labs(title = "Span=.001",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+$~$
+
+**Normalize intensity for each channel**
+
+$~$
+
+DAPI choose .005; Green choose .005; Red choose .01
+
+$~$
+
+```{r, echo = FALSE}
+ints_subset$plate <- as.character(ints_subset$plate)
+ints_normed <- data.frame(plate=ints_subset$plate,
+                          chip_id=ints_subset$chip_id,
+                       dapi.median.log10sum = ints_subset$dapi.median.log10sum,
+                       rfp.median.log10sum = ints_subset$rfp.median.log10sum,
+                       gfp.median.log10sum = ints_subset$gfp.median.log10sum)
+ints_normed$rfp.normed <- NULL
+ints_normed$gfp.normed <- NULL
+ints_normed$dapi.normed <- NULL
+
+for (index in 1:length(unique(ints_normed$plate))) {
+  plate <- unique(ints_normed$plate)[index]
+
+  tmp <- my_quantnorm(reference = ints_normed$dapi.median.log10sum,
+                      sample = ints_normed$dapi.median.log10sum[ints_normed$plate == plate],
+                      span=.005)
+  ints_normed$dapi.normed[ints_dapi$plate == plate] <- tmp
+
+  tmp <- my_quantnorm(reference = ints_normed$rfp.median.log10sum,
+                      sample = ints_normed$rfp.median.log10sum[ints_normed$plate == plate],
+                      span=.01)
+  ints_normed$rfp.normed[ints_normed$plate == plate] <- tmp
+  
+  tmp <- my_quantnorm(reference = ints_normed$gfp.median.log10sum,
+                    sample = ints_normed$gfp.median.log10sum[ints_normed$plate == plate],
+                    span=.005)
+  ints_normed$gfp.normed[ints_normed$plate == plate] <- tmp
+}
+```
+
+$~$
+
+**Before normalization**
+
+$~$
+
+```{r, fig.width=12, fig.height=5, echo = FALSE}
+plot_grid(
+  ggplot(ints_normed, aes(x=gfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=gfp.normed, col = as.factor(plate))) +
+    labs(title = "GFP",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Raw GFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_normed, aes(x=rfp.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=rfp.normed, col = as.factor(plate))) +
+    labs(title = "RFP",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Raw RFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_normed, aes(x=dapi.median.log10sum), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=dapi.normed, col = as.factor(plate))) +
+    labs(title = "DAPI",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Raw DAPI intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+
+**After normalization**
+
+$~$
+
+```{r, fig.width=12, fig.height=5, echo = FALSE}
+plot_grid(
+  ggplot(ints_normed, aes(x=gfp.normed), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=gfp.normed, col = as.factor(plate))) +
+    labs(title = "GFP",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed GFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_normed, aes(x=rfp.normed), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=rfp.normed, col = as.factor(plate))) +
+    labs(title = "RFP",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed RFP intensity", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  ggplot(ints_normed, aes(x=dapi.normed), col="black") + 
+    geom_density(alpha = .5, cex = .7) + 
+    geom_density(aes(x=dapi.normed, col = as.factor(plate))) +
+    labs(title = "DAPI",
+         subtitle = "Black line indicates distribution aggregating plates",
+         x="Normed DAPI intensities", y = "Density") + 
+    theme_gray() + theme(legend.position="none"),
+  nrow = 2)
+```
+$~$
+
+**Green versus Red by individual: after normalization**
+
+$~$
+
+```{r, fig.width=12, fig.height=5, echo = FALSE}
+ints_normed <- ints_normed %>% 
+  mutate(dapi_4quant=ntile(dapi.normed,4),
+         dapi_3quant=ntile(dapi.normed,3))
+
+plot_grid(
+  ggplot(ints_normed, aes(x=rfp.normed,y=gfp.normed, col=as.factor(dapi_4quant))) +
+    geom_point(alpha = .5, cex = .7) + 
+    facet_wrap(~as.factor(chip_id), ncol=3) + 
+    labs(title = "Normalized intensities labeled by DAPI 4-quantiles",
+         x="RFP", y = "GFP") + theme_gray(), 
+  ggplot(ints_normed, aes(x=rfp.normed,y=gfp.normed, col=as.factor(dapi_3quant))) +
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~as.factor(chip_id), ncol=3) + 
+  labs(title = "Normalized intensities labeled by DAPI 3-quantiles",
+       x="RFP", y = "GFP") + theme_gray(), ncol=2)
+```
+
+Use before normalization dapi quantiles
+
+```{r, fig.width=12, fig.height=5, echo = FALSE}
+ints_normed <- ints_normed %>% 
+  mutate(dapi_4quant=ntile(dapi.median.log10sum,4),
+         dapi_3quant=ntile(dapi.median.log10sum,3))
+
+plot_grid(
+  ggplot(ints_normed, aes(x=rfp.normed,y=gfp.normed, col=as.factor(dapi_4quant))) +
+    geom_point(alpha = .5, cex = .7) + 
+    facet_wrap(~as.factor(chip_id), ncol=3) + 
+    labs(title = "Normalized intensities labeled by DAPI 4-quantiles",
+         x="RFP", y = "GFP") + theme_gray(), 
+  ggplot(ints_normed, aes(x=rfp.normed,y=gfp.normed, col=as.factor(dapi_3quant))) +
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~as.factor(chip_id), ncol=3) + 
+  labs(title = "Normalized intensities labeled by DAPI 3-quantiles",
+       x="RFP", y = "GFP") + theme_gray(), ncol=2)
+```
+
+$~$
+
+**Green versus Red by individual: before normlaization**
+
+$~$
+
+```{r, fig.width=12, fig.height=5, echo = FALSE}
+ints_normed <- ints_normed %>% 
+  mutate(dapi_4quant=ntile(dapi.sum.zoom.mean.log10,4),
+         dapi_3quant=ntile(dapi.sum.zoom.mean.log10,3))
+
+plot_grid(
+  ggplot(ints_normed, aes(x=rfp.sum.zoom.mean.log10,
+                          y=gfp.sum.zoom.mean.log10, col=as.factor(dapi_4quant))) +
+    geom_point(alpha = .5, cex = .7) + 
+    facet_wrap(~as.factor(chip_id), ncol=3) + 
+    labs(title = "Raw intensities labeled by DAPI 4-quantiles",
+         x="RFP", y = "GFP") + theme_gray(), 
+  ggplot(ints_normed, aes(x=rfp.sum.zoom.mean.log10,
+                          y=gfp.sum.zoom.mean.log10, col=as.factor(dapi_3quant))) +
+  geom_point(alpha = .5, cex = .7) + 
+  facet_wrap(~as.factor(chip_id), ncol=3) + 
+  labs(title = "Raw intensities labeled by DAPI 3-quantiles",
+       x="RFP", y = "GFP") + theme_gray(), ncol=2)
+```
+
+---
+
+## Session information
+
+```{r, echo=FALSE}
+sessionInfo()
+```
+

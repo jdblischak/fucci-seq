@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Inspect samples detected as absent or not having a nucleus</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Inspect samples detected as absent or not having a nucleus</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-12-01</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> df49739</p>
+<div id="load-packages-and-data" class="section level2">
+<h2>Load packages and data</h2>
+<pre class="r"><code>library(knitr)</code></pre>
+<p>Load nuclei detection results directly from image analysis output <code>/project2/gilad/fucci-seq/intensities</code>. The results are made into a summary table.</p>
+<p><code>plate</code>: labeled by the mix of individual cell lines<br />
+<code>image</code>: labels assigned by the JULI imaging system. These will be converted to correspond to C1 plate labels (rows and columns).<br />
+<code>nnuclei</code>: number of nuclei detected in a single cell sample</p>
+<pre class="r"><code>fls &lt;- list.files(&quot;/project2/gilad/fucci-seq/intensities&quot;, pattern = &quot;rds&quot;, full.names = TRUE)
+
+nuclei_table &lt;- do.call(rbind, lapply(1:length(fls), function(index) {
+  tmp &lt;- readRDS(fls[[index]])
+  plate &lt;- strsplit(strsplit(fls[index], split=&quot;/&quot;)[[1]][[6]], 
+                    split=&quot;.&quot;, fixed = TRUE)[[1]][[1]]
+  data.frame(plate=plate, nnuclei=tmp, image=names(tmp))
+}))
+
+saveRDS(nuclei_table, &quot;/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rds&quot;)</code></pre>
+<p>Inspect samples</p>
+<pre class="r"><code>nuclei_table &lt;- readRDS(&quot;/project2/gilad/joycehsiao/fucci-seq/output/image-qc.rds&quot;)
+kable(nuclei_table[which(nuclei_table$nnuclei==0|is.na(nuclei_table$nnuclei)),])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">plate</th>
+<th align="right">nnuclei</th>
+<th align="left">image</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>00010</td>
+<td align="left">18511_18855</td>
+<td align="right">NA</td>
+<td align="left">00010</td>
+</tr>
+<tr class="even">
+<td>00048</td>
+<td align="left">18511_18855</td>
+<td align="right">NA</td>
+<td align="left">00048</td>
+</tr>
+<tr class="odd">
+<td>000071</td>
+<td align="left">18855_19098</td>
+<td align="right">NA</td>
+<td align="left">00007</td>
+</tr>
+<tr class="even">
+<td>000481</td>
+<td align="left">18855_19098</td>
+<td align="right">NA</td>
+<td align="left">00048</td>
+</tr>
+<tr class="odd">
+<td>000712</td>
+<td align="left">18855_19101</td>
+<td align="right">NA</td>
+<td align="left">00071</td>
+</tr>
+<tr class="even">
+<td>000882</td>
+<td align="left">18855_19101</td>
+<td align="right">NA</td>
+<td align="left">00088</td>
+</tr>
+<tr class="odd">
+<td>000463</td>
+<td align="left">18855_19160</td>
+<td align="right">NA</td>
+<td align="left">00046</td>
+</tr>
+<tr class="even">
+<td>000164</td>
+<td align="left">18870_18511</td>
+<td align="right">0</td>
+<td align="left">00016</td>
+</tr>
+<tr class="odd">
+<td>000314</td>
+<td align="left">18870_18511</td>
+<td align="right">NA</td>
+<td align="left">00031</td>
+</tr>
+<tr class="even">
+<td>000324</td>
+<td align="left">18870_18511</td>
+<td align="right">NA</td>
+<td align="left">00032</td>
+</tr>
+<tr class="odd">
+<td>000604</td>
+<td align="left">18870_18511</td>
+<td align="right">NA</td>
+<td align="left">00060</td>
+</tr>
+<tr class="even">
+<td>000684</td>
+<td align="left">18870_18511</td>
+<td align="right">NA</td>
+<td align="left">00068</td>
+</tr>
+<tr class="odd">
+<td>000844</td>
+<td align="left">18870_18511</td>
+<td align="right">NA</td>
+<td align="left">00084</td>
+</tr>
+<tr class="even">
+<td>000165</td>
+<td align="left">18870_18855</td>
+<td align="right">NA</td>
+<td align="left">00016</td>
+</tr>
+<tr class="odd">
+<td>000785</td>
+<td align="left">18870_18855</td>
+<td align="right">NA</td>
+<td align="left">00078</td>
+</tr>
+<tr class="even">
+<td>000096</td>
+<td align="left">18870_19101</td>
+<td align="right">NA</td>
+<td align="left">00009</td>
+</tr>
+<tr class="odd">
+<td>000666</td>
+<td align="left">18870_19101</td>
+<td align="right">NA</td>
+<td align="left">00066</td>
+</tr>
+<tr class="even">
+<td>000756</td>
+<td align="left">18870_19101</td>
+<td align="right">NA</td>
+<td align="left">00075</td>
+</tr>
+<tr class="odd">
+<td>000177</td>
+<td align="left">18870_19160</td>
+<td align="right">NA</td>
+<td align="left">00017</td>
+</tr>
+<tr class="even">
+<td>000529</td>
+<td align="left">19098_18870</td>
+<td align="right">NA</td>
+<td align="left">00052</td>
+</tr>
+<tr class="odd">
+<td>0000710</td>
+<td align="left">19098_19160</td>
+<td align="right">NA</td>
+<td align="left">00007</td>
+</tr>
+<tr class="even">
+<td>0002010</td>
+<td align="left">19098_19160</td>
+<td align="right">NA</td>
+<td align="left">00020</td>
+</tr>
+<tr class="odd">
+<td>0002610</td>
+<td align="left">19098_19160</td>
+<td align="right">NA</td>
+<td align="left">00026</td>
+</tr>
+<tr class="even">
+<td>0004910</td>
+<td align="left">19098_19160</td>
+<td align="right">NA</td>
+<td align="left">00049</td>
+</tr>
+<tr class="odd">
+<td>0008410</td>
+<td align="left">19098_19160</td>
+<td align="right">0</td>
+<td align="left">00084</td>
+</tr>
+<tr class="even">
+<td>0004211</td>
+<td align="left">19101_18511</td>
+<td align="right">NA</td>
+<td align="left">00042</td>
+</tr>
+<tr class="odd">
+<td>0005411</td>
+<td align="left">19101_18511</td>
+<td align="right">NA</td>
+<td align="left">00054</td>
+</tr>
+<tr class="even">
+<td>0005611</td>
+<td align="left">19101_18511</td>
+<td align="right">NA</td>
+<td align="left">00056</td>
+</tr>
+<tr class="odd">
+<td>0001613</td>
+<td align="left">19101_19160</td>
+<td align="right">NA</td>
+<td align="left">00016</td>
+</tr>
+<tr class="even">
+<td>0002513</td>
+<td align="left">19101_19160</td>
+<td align="right">NA</td>
+<td align="left">00025</td>
+</tr>
+<tr class="odd">
+<td>0002613</td>
+<td align="left">19101_19160</td>
+<td align="right">NA</td>
+<td align="left">00026</td>
+</tr>
+<tr class="even">
+<td>0002813</td>
+<td align="left">19101_19160</td>
+<td align="right">NA</td>
+<td align="left">00028</td>
+</tr>
+<tr class="odd">
+<td>0003313</td>
+<td align="left">19101_19160</td>
+<td align="right">NA</td>
+<td align="left">00033</td>
+</tr>
+<tr class="even">
+<td>0003015</td>
+<td align="left">19160_18870</td>
+<td align="right">0</td>
+<td align="left">00030</td>
+</tr>
+<tr class="odd">
+<td>0003215</td>
+<td align="left">19160_18870</td>
+<td align="right">0</td>
+<td align="left">00032</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="printing-images-for-inspection" class="section level2">
+<h2>Printing images for inspection</h2>
+<p><strong>This section is for record keeping. All images for samples with no nucleus detected have been converted to PNG format and stored in /project2/gilad/fucci-seq/images-inspect-zero-nucleus.</strong></p>
+<p>The code below will save images in png format at <code>/project2/gilad/fucci-seq/images-inspect-zero-nucleus</code>.</p>
+<pre class="r"><code>#&#39; @param wells vector of wells ID (use the format specified above).
+#&#39; @param plate plate ID
+
+print_png &lt;- function(plate, wells) {
+  for (index in 1:length(wells)) {
+    id &lt;- wells[index]
+    dir_images_data_pl &lt;- paste0(&quot;/project2/gilad/fucci-seq/images_curated/&quot;,plate,&quot;/&quot;)
+    dir_output &lt;- &quot;/project2/gilad/fucci-seq/images-inspect-zero-nucleus/&quot;
+    bright &lt;- readImage(paste0(dir_images_data_pl, &quot;BRIGHT/&quot;, id, &quot;.TIFF&quot;))
+    dapi &lt;- readImage(paste0(dir_images_data_pl, &quot;DAPI/&quot;, id, &quot;.TIFF&quot;))
+    gfp &lt;- readImage(paste0(dir_images_data_pl, &quot;GFP/&quot;, id, &quot;.TIFF&quot;))
+    rfp &lt;- readImage(paste0(dir_images_data_pl, &quot;RFP/&quot;, id, &quot;.TIFF&quot;))
+    
+    writeImage(bright, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.bright.png&quot;))
+    writeImage(dapi, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.dapi.png&quot;))
+    writeImage(gfp, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.gfp.png&quot;))
+    writeImage(rfp, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.rfp.png&quot;))
+    # combo &lt;- combine(dapi, bright, gfp, rfp)
+    # writeImage(combo, paste0(dir_output, plate,&quot;.&quot;,id,&quot;.combo.png&quot;))
+  }
+}
+
+
+tmp_table &lt;- nuclei_table[which(nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)),]
+plates &lt;- unique(as.character(tmp_table$plate))
+for (index in 1:length(plates)) {
+  plate &lt;- plates[index]
+  cases &lt;- nuclei_table[which( (nuclei_table$nnuclei == 0 | is.na(nuclei_table$nnuclei)) &amp; nuclei_table$plate == plate),]
+  wells &lt;- as.character(cases$image)
+  print_png(plate, wells) 
+}</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] knitr_1.16
+
+loaded via a namespace (and not attached):
+ [1] compiler_3.4.1  backports_1.0.5 magrittr_1.5    rprojroot_1.2  
+ [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.13   
+ [9] stringi_1.1.2   rmarkdown_1.6   highr_0.6       git2r_0.19.0   
+[13] stringr_1.2.0   digest_0.6.12   evaluate_0.10.1</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

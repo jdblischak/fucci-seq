@@ -75,8 +75,11 @@ fucciMask.convertToMatrix <- function (plate) {
       gfp <- df_ints$imageOutput$gfp
       gfp <- gfp@.Data
 
+      dapi <- df_ints$imageOutput$dapi
+      dapi <- dapi@.Data
+
       ints_tmp <- data.frame(label=c(label), label.zoom=c(label.zoom),
-                         rfp = c(rfp), gfp = c(gfp))
+                         rfp = c(rfp), gfp = c(gfp), dapi=c(dapi))
       saveRDS(ints_tmp,
               file = paste0(dir_output, "/", plate, ".", singles[index],".tmp.rds"))
   }

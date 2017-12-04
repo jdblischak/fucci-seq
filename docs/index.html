@@ -20,8 +20,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -31,12 +31,10 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs) {
-  hljs.configure({languages: []});
-  hljs.initHighlightingOnLoad();
-  if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-  }
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
 }
 </script>
 
@@ -219,13 +217,24 @@ div.section {
 <div id="image-analysis" class="section level2">
 <h2>Image analysis</h2>
 <ul>
+<li><p><a href="images-process.html">Processing images - from images to intensities</a></p></li>
+<li>Image intensities
+<ul>
 <li><a href="confess-prelim.html">CONFESS preliminary results</a></li>
-<li><a href="images-process.html">Processing images - from images to intensities</a></li>
 <li><a href="images-qc.html">QC analysis</a></li>
 <li><a href="images-qc-followup.html">QC anaysis follow-up using alternative metrics for signals</a></li>
 <li><a href="images-qc-labels.html">Measurements variation by individual labels</a></li>
-<li><p><a href="images-multiple-nuclei.html">Inspect images with multiple nuclei</a></p></li>
-<li><p><a href="images-metrics.html">QC analysis - investigate different intensity metrics</a></p></li>
+<li><a href="images-metrics.html">Compare different intensity metrics (background mean-adjusted vs median-adjusted)</a></li>
+</ul></li>
+<li>Normalize intensities by batch
+<ul>
+<li><a href="images-normalize-quantile.html">Quantile normalization</a></li>
+</ul></li>
+<li>Image inspection
+<ul>
+<li><a href="images-multiple-nuclei.html">Inspect images with multiple nuclei</a></li>
+<li><a href="images-zero-nuclei.html">Inspect images with no nucleus</a></li>
+</ul></li>
 </ul>
 </div>
 <div id="qc" class="section level2">

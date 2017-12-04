@@ -10,15 +10,24 @@ Website to share results of fucci-seq project.
 
 ## Image analysis
 
-* [CONFESS preliminary results](confess-prelim.html)
 * [Processing images - from images to intensities](images-process.html)
-* [QC analysis](images-qc.html)
-* [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
-* [Measurements variation by individual labels](images-qc-labels.html)
-* [Inspect images with multiple nuclei](images-multiple-nuclei.html)
-* [QC analysis - investigate different intensity metrics](images-metrics.html)
+
+* Image intensities
+    * [CONFESS preliminary results](confess-prelim.html)
+    * [QC analysis](images-qc.html)
+    * [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
+    * [Measurements variation by individual labels](images-qc-labels.html)
+    * [Compare different intensity metrics (background mean-adjusted vs median-adjusted)](images-metrics.html)
+
+* Normalize intensities by batch
+    * [Quantile normalization](images-normalize-quantile.html)
+
+* Image inspection
+    * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
+    * [Inspect images with no nucleus](images-zero-nuclei.html)
 
 ## QC
 
 * [Sequencing depth](totals.html)
 * [Reads versus molecules](reads-v-molecules.html)
+

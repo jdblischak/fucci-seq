@@ -59,8 +59,6 @@ Step 2: Combine images from all channels
 Step 3: Compute summary metrics for image intensities
 
 
----
-
 ## Detect nucleus outline
 
 [fucciMask.R](/project2/gilad/joycehsiao/fucci-seq/code/fucciMask.R) processes data for one plate at a time, from reading in images from all four channels (`/project2/gilad/fucci-seq/images_curated/plateID`), detecting nucleus edge using DAPI channel, outputing cropped images fro each channel (`/scratch/midway2/joycehsiao/fucci-seq/images_processed`), to saving matrices identifying areas inside nucleus (`/project2/gilad/fucci-seq/intensities/plateID/*.ints.rds`), matrices containing pixel intensities for each channel (`/project2/gilad/fucci-seq/intensities/plateID/*.ints.rds`) and matrices containg the number of nuclei detected for each sample (`project2/gilad/fucci-seq/intensities/*.rds`).  
@@ -94,5 +92,4 @@ bash submit-fucciMask.combineImages.sh
 ```
 bash submit-intensity.summarize.sh
 ```
-
 

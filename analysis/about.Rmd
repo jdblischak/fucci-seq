@@ -5,4 +5,4 @@ output:
     toc: false
 ---
 
-Describe your project.
+Learning cell cycle phase using single cell RNA-seq data.
