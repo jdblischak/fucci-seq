@@ -317,10 +317,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-12-03</p>
+<p><strong>Last updated:</strong> 2017-12-11</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 80aa9e9</p>
+<p><strong>Code version:</strong> aa65c7f</p>
 <hr />
 <div id="introductionbackground" class="section level2">
 <h2>Introduction/background</h2>
@@ -347,75 +347,58 @@ log10 \sum_{(i,j) \in fore} \Big( F_{ij}^{fore} - median_{(i,j) \in back}(F_{ij}
 </div>
 <div id="load-packages-and-data" class="section level2">
 <h2>Load packages and data</h2>
-<pre class="r"><code>library(data.table)
-library(dplyr)
-library(ggplot2)
-library(cowplot)
-library(wesanderson)
-library(RColorBrewer)
-library(Biobase)
+<pre><code>Warning: Installed Rcpp (0.12.14) different from Rcpp used to build dplyr (0.12.10).
+Please reinstall dplyr to avoid random crashes or undefined behavior.</code></pre>
+<pre><code>
+Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:data.table&#39;:
 
-plates &lt;- c(&quot;18511_18855&quot;,&quot;18855_19101&quot;,&quot;18855_19160&quot;,&quot;18870_18511&quot;,
-            &quot;18870_18855&quot;,&quot;18870_19101&quot;,&quot;18870_19160&quot;,&quot;19098_18511&quot;,
-            &quot;19098_18870&quot;,&quot;19098_19160&quot;,&quot;19101_18511&quot;,&quot;19101_19098&quot;,
-            &quot;19160_18870&quot;,&quot;19101_19160&quot;,&quot;19160_18511&quot;, &quot;18855_19098&quot;)
+    between, first, last</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
 
+    filter, lag</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
 
-##Combine intensity stats from different plates.
-ints &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
-  tmp &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
-  tmp &lt;- data.frame(plate=plates[index], 
-                    image=as.character(droplevels(tmp$wellID)),
-    rfp.back.zoom.mean=tmp$rfp.back.zoom.mean,
-    rfp.back.zoom.median=tmp$rfp.back.zoom.q05,
-    gfp.back.zoom.mean=tmp$gfp.back.zoom.mean,
-    gfp.back.zoom.median=tmp$gfp.back.zoom.q05,
-    dapi.back.zoom.mean=tmp$dapi.back.mean,
-    dapi.back.zoom.median=tmp$dapi.back.q05,
-    rfp.mean.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.mean)*size.zoom)),
-    gfp.mean.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.mean)*size.zoom)),
-    dapi.mean.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.mean)*size)),
-    rfp.median.log10sum=with(tmp, log10((rfp.fore.zoom.mean-rfp.back.zoom.q05)*size.zoom)),
-    gfp.median.log10sum=with(tmp, log10((gfp.fore.zoom.mean-gfp.back.zoom.q05)*size.zoom)),
-    dapi.median.log10sum=with(tmp, log10((dapi.fore.mean-dapi.back.q05)*size)) )
+    intersect, setdiff, setequal, union</code></pre>
+<pre><code>
+Attaching package: &#39;cowplot&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:ggplot2&#39;:
 
-  tmp$rfp.mean.log10sum[which(tmp$rfp.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$rfp.mean.log10sum, na.rm=TRUE)
-  tmp$gfp.mean.log10sum[which(tmp$gfp.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$gfp.mean.log10sum, na.rm=TRUE)
-  tmp$dapi.mean.log10sum[which(tmp$dapi.mean.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$dapi.mean.log10sum, na.rm=TRUE)
-  tmp$rfp.median.log10sum[which(tmp$rfp.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$rfp.median.log10sum, na.rm=TRUE)
-  tmp$gfp.median.log10sum[which(tmp$gfp.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$gfp.median.log10sum, na.rm=TRUE)
-  tmp$dapi.median.log10sum[which(tmp$dapi.median.log10sum == &quot;NaN&quot;)] &lt;- min(tmp$dapi.median.log10sum, na.rm=TRUE)
+    ggsave</code></pre>
+<pre><code>Loading required package: BiocGenerics</code></pre>
+<pre><code>Loading required package: parallel</code></pre>
+<pre><code>
+Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:parallel&#39;:
 
-  return(tmp)  
-}) )
-saveRDS(ints, &quot;/project2/gilad/fucci-seq/intensities_matrix2stats/ints.rds&quot;)
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB</code></pre>
+<pre><code>The following objects are masked from &#39;package:dplyr&#39;:
 
-##Load the expression set info.
-eset_fls &lt;- list.files(&quot;../data/eset&quot;, full.names=TRUE)
+    combine, intersect, setdiff, union</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
 
-anno &lt;- do.call(rbind, lapply(1:length(eset_fls), function(index) {
-  eset_index &lt;- readRDS(eset_fls[[index]])
-  pdata_index &lt;- pData(eset_index)
-  return(pdata_index)
-}))
+    IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
 
-# make unique id in both
-ints$unique &lt;- paste0(ints$plate,&quot;_&quot;,as.character(ints$image))
-anno$unique &lt;- paste0(anno$image_individual,&quot;_&quot;, sprintf(&quot;%05d&quot;,as.numeric(anno$image_label)))
+    anyDuplicated, append, as.data.frame, cbind, colMeans,
+    colnames, colSums, do.call, duplicated, eval, evalq, Filter,
+    Find, get, grep, grepl, intersect, is.unsorted, lapply,
+    lengths, Map, mapply, match, mget, order, paste, pmax,
+    pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce,
+    rowMeans, rownames, rowSums, sapply, setdiff, sort, table,
+    tapply, union, unique, unsplit, which, which.max, which.min</code></pre>
+<pre><code>Welcome to Bioconductor
 
-# subset annotation file
-subset_index &lt;- which(anno$unique %in% ints$unique)
-anno_subset &lt;- anno[subset_index,]
+    Vignettes contain introductory material; view with
+    &#39;browseVignettes()&#39;. To cite Bioconductor, see
+    &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>ints &lt;- readRDS(file=&quot;/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds&quot;)
 
-# subset intensities
-ints_subset_index &lt;- match(anno_subset$unique, ints$unique)
-ints_subset &lt;- ints[ints_subset_index,]
-
-#all.equal(anno_subset$unique, ints_subset$unique)
-
-ints_subset$chip_id &lt;- anno_subset$chip_id
-
-ints_subset &lt;- ints_subset %&gt;% group_by(plate) %&gt;%
+# compute quantile labels for DAPI
+ints &lt;- ints %&gt;% group_by(plate) %&gt;%
   mutate(dapi_3quant.mean=ntile(dapi.mean.log10sum,3),
          dapi_4quant.mean=ntile(dapi.mean.log10sum,4),
          dapi_3quant.median=ntile(dapi.median.log10sum,3),
@@ -427,175 +410,29 @@ ints_subset &lt;- ints_subset %&gt;% group_by(plate) %&gt;%
 <h2>Compare the two methods</h2>
 <p><span class="math inline">\(~\)</span></p>
 <p><em>Mean versus median for background</em>: Consider mean minus median, large values suggest a right-skewed distribution for the sample wherein there are a few high-intensity pixels in the background intensities, and small values suggest a left-skewed distribution wherein there are a few low-intensity pixels in the background intensities. Compare between the three channels, RFP has the largest number of samples with right-skewed distribution, suggest that for these samples, RFP background intensity is overestimated and influenced by high-intensity extreme values. On the other hand, GFP compared to RFP has larger number of samples with left-skewed distribution, suggesting that GFP background intensity is underestimated and influenced by low-intensity exterme value. In image terms, we say that RFP background is generally dark and hence likely to be influenced by a few high-intensity pixels; and, GFP background is generally bright and hence likely to be influenced by a few low-intensity pixels. Note that bright and dark here are on absolute scale; brightest = pixel intensity = 1, and darkes = pixel intensity = 0. In addition, we note that for DAPI, there’s not an obvious trend for more or less right-skewed or left-skewd intensity distribution. <span class="math inline">\(~\)</span></p>
-<p><img src="figure/images-metrics.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p><span class="math inline">\(~\)</span></p>
-<p><em>Plotting background corrected foreground intensities</em>: baased on our previous observation, it is not surprise that there’s little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity. <span class="math inline">\(~\)</span> <img src="figure/images-metrics.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /> <span class="math inline">\(~\)</span></p>
+<p><em>Plotting background corrected foreground intensities</em>: baased on our previous observation, it is not surprise that there’s little difference for DAPI channel between background-mean corrected versus background-median corrected intensity values. Furthermore, as expected, for RFP median-corrected intensity values are higher than mean intensity values, suggesting that median-corrected intensity correct for the under-estimation of background intensity in the mean-corrected intensity. And, for GFP median-corrected intensity values are lower than mean intensity values, suggesting that median-corrected intensity correct for the over-estimation of background intensity in the mean-corrected intensity.</p>
+<p><span class="math inline">\(~\)</span></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><span class="math inline">\(~\)</span></p>
 <p>Green vs. Red and label samples with DAPI quantiles: not much difference between background mean-corrected versus background median-corrected.</p>
 <p><span class="math inline">\(~\)</span></p>
-<pre><code>Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.
-
-Warning in structure(NULL, class = &quot;waiver&quot;): Calling &#39;structure(NULL, *)&#39; is deprecated, as NULL cannot have attributes.
-  Consider &#39;structure(list(), *)&#39; instead.</code></pre>
-<p><img src="figure/images-metrics.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-5-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="density-by-plate" class="section level2">
 <h2>Density by plate</h2>
 <p><span class="math inline">\(~\)</span></p>
 <p>Not too different between mean and median adjusted.</p>
-<p><img src="figure/images-metrics.Rmd/unnamed-chunk-5-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="density-by-individual" class="section level2">
 <h2>Density by individual</h2>
 <p><span class="math inline">\(~\)</span></p>
 <p>Also not too different between individuals.</p>
-<p><img src="figure/images-metrics.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-metrics.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -622,7 +459,7 @@ attached base packages:
 
 other attached packages:
 [1] Biobase_2.38.0      BiocGenerics_0.24.0 RColorBrewer_1.1-2 
-[4] wesanderson_0.3.2   cowplot_0.8.0       ggplot2_2.2.0      
+[4] wesanderson_0.3.2   cowplot_0.8.0       ggplot2_2.2.1      
 [7] dplyr_0.7.0         data.table_1.10.4  
 
 loaded via a namespace (and not attached):
