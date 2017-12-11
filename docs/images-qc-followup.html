@@ -317,17 +317,17 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-11-02</p>
+<p><strong>Last updated:</strong> 2017-12-11</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> ceccc00</p>
+<p><strong>Code version:</strong> ff5a8ce</p>
 <hr />
 <div id="background-and-summary" class="section level2">
 <h2>Background and summary</h2>
 <p>In the current analysis, we computed corrected signal for each channel as follows:</p>
 <pre><code>(foreground mean intensity - background mean intenstiy)*mask size</code></pre>
-<p>The <code>mask size</code> is defined as: Denote the center of the nucleus as <code>(cx,cy)</code>, then the mask area is <code>(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))</code>. The maximum mask size is 10,000.</p>
-<p>This metric for summarizing pixel intensity factors into the quantity of cell cycle protein, and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantify of cell cycle protein.</p>
+<p>This is equivalent to computing the sum of pixel intensities after substracting background mean intensity from each pixel in the mask. The <code>mask size</code> is defined as: Denote the center of the nucleus as <code>(cx,cy)</code>, then the mask area is <code>(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))</code>. The maximum mask size is 10,000.</p>
+<p>This metric for summarizing pixel intensity factors into the quantity of cell cycle protein (green and red), and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantity of cell cycle protein (green and red).</p>
 <p>Results:</p>
 <ol style="list-style-type: decimal">
 <li><p>In about 10 to 15 single cell samples, the background intensity is greater than the foreground intensity by a small amount (~.001) in the Red or the Green channel. we need to check to see if there are signals at all for these samples in any of channles. If there’s any signal, then we’ll set the channel with no signal to the lowest possible intensity value.</p></li>
@@ -342,94 +342,32 @@ shared across the workflowr files. -->
 </ol>
 <hr />
 </div>
-<div id="loading-data-and-packages" class="section level2">
-<h2>Loading data and packages</h2>
-<pre class="r"><code>library(dplyr)
-library(ggplot2)
-library(cowplot)
-library(wesanderson)
-library(RColorBrewer)</code></pre>
-<p>Name all plates.</p>
-<pre class="r"><code>plates &lt;- c(&quot;18511_18855&quot;,&quot;18855_19101&quot;,&quot;18855_19160&quot;,&quot;18870_18511&quot;,
-            &quot;18870_18855&quot;,&quot;18870_19101&quot;,&quot;18870_19160&quot;,&quot;19098_18511&quot;,
-            &quot;19098_18870&quot;,&quot;19098_19160&quot;,&quot;19101_18511&quot;,&quot;19101_19098&quot;,
-            &quot;19160_18870&quot;,&quot;19101_19160&quot;,&quot;19160_18511&quot;, &quot;18855_19098&quot;)</code></pre>
-<p>Combine intensity stats from different plates.</p>
-<pre class="r"><code>#tmp &lt;- readRDS(&quot;/project2/gilad/fucci-seq/intensities_stats/18511_18855.stats.rds&quot;)
-ints &lt;- do.call(rbind, lapply(1:length(plates), function(index) {
-  ints &lt;- readRDS(paste0(&quot;/project2/gilad/fucci-seq/intensities_stats/&quot;,plates[index],&quot;.stats.rds&quot;))
-  data.frame(plate=plates[index], well=ints$wellID, 
-             rfp.sum.zoom=ints$rfp.sum.zoom, 
-             gfp.sum.zoom=ints$gfp.sum.zoom, 
-             dapi.sum.zoom=ints$dapi.sum.zoom)
-}) )
-ints &lt;- ints %&gt;% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
-                        dapi_3quant=ntile(dapi.sum.zoom,3))
-saveRDS(ints, file =  &quot;/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds&quot;)</code></pre>
-<p>Load the above intensity stats rds.</p>
-<pre class="r"><code>ints &lt;- readRDS(file = &quot;/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds&quot;)</code></pre>
+<div id="loading-data" class="section level2">
+<h2>Loading data</h2>
+<pre><code>Warning: Installed Rcpp (0.12.14) different from Rcpp used to build dplyr (0.12.10).
+Please reinstall dplyr to avoid random crashes or undefined behavior.</code></pre>
+<p>Import combined intensity data (see <a href="/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R">combine-intensity-data.R</a>).</p>
+<pre class="r"><code>ints &lt;- readRDS(file=&quot;/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds&quot;)
+
+# compute sum of intensities
+ints$dapi.sum.zoom &lt;- with(ints, (dapi.fore.zoom.mean-dapi.back.zoom.mean)*10000)
+ints$rfp.sum.zoom &lt;- with(ints, (rfp.fore.zoom.mean-rfp.back.zoom.mean)*10000)
+ints$gfp.sum.zoom &lt;- with(ints, (gfp.fore.zoom.mean-gfp.back.zoom.mean)*10000)</code></pre>
 <hr />
 </div>
 <div id="dapi-versus-greenred" class="section level2">
 <h2>DAPI versus Green/Red</h2>
 <div id="pixel-sum" class="section level3">
 <h3>Pixel sum</h3>
-<pre class="r"><code>plot_grid(
-ggplot(ints, aes(x=dapi.sum.zoom, y = rfp.sum.zoom)) + 
-  geom_point(col = &quot;red&quot;, alpha = .5, cex = .7) + 
-  labs(title = &quot;Red versus DAPI&quot;,
-       subtitle = &quot;pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Red channel&quot;) ,
-ggplot(ints, aes(x=dapi.sum.zoom, y = gfp.sum.zoom)) + 
-  geom_point(col = &quot;green&quot;, alpha = .5, cex = .7) + 
-  labs(title = &quot;Green versus DAPI&quot;,
-       subtitle = &quot;pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Green channel&quot;) )</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-5-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-3-1.png" width="864" style="display: block; margin: auto;" /></p>
 </div>
 <div id="log-10-pixel-sum" class="section level3">
 <h3>log 10 pixel sum</h3>
-<pre class="r"><code>plot_grid(
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
-  geom_point(col = &quot;red&quot;, alpha = .5, cex = .7) + 
-  labs(title = &quot;Red versus DAPI&quot;,
-       subtitle=&quot;log10 pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Red channel&quot;),
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
-  geom_point(col = &quot;green&quot;, alpha = .5, cex = .7) + 
-  labs(title = &quot;Green versus DAPI&quot;,
-       subtitle = &quot;log10 pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Green channel&quot;)  )</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 16 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-6-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-4-1.png" width="864" style="display: block; margin: auto;" /></p>
 </div>
 <div id="by-plate" class="section level3">
 <h3>By plate</h3>
-<pre class="r"><code>ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
-  geom_point(col = &quot;red&quot;, alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Red versus DAPI&quot;,
-       subtitle = &quot;log10 pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Red channel&quot;)  </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 8 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
-  geom_point(col = &quot;green&quot;, alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Green versus DAPI&quot;,
-       subtitle = &quot;log10 pixel sum&quot;, 
-       x=&quot;DAPI channel&quot;, y = &quot;Green channel&quot;)  </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 16 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
@@ -438,133 +376,35 @@ ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) +
 <div id="across-plates" class="section level3">
 <h3>Across plates</h3>
 <p>Compute DAPI quantiles across plates.</p>
-<pre class="r"><code>ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
-  geom_point(alpha = .5, cex = .7) + 
-  labs(title = &quot;Samples binned by DAPI 3 quantiles&quot;, 
-       x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-  scale_color_manual(values=c(&quot;blue&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced
-
-Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-8-1.png" width="576" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
-    geom_point(alpha = .5, cex = .7) + 
-    labs(title = &quot;Samples binned by DAPI 4 quantiles&quot;, 
-         x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-    scale_color_manual(values=c(&quot;blue&quot;, &quot;forestgreen&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-8-2.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ints &lt;- ints %&gt;% mutate(dapi_4quant=ntile(dapi.mean.log10sum,4),
+                          dapi_3quant=ntile(dapi.mean.log10sum,3))</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-7-2.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="by-plate-overall-dapi-quantiles" class="section level3">
 <h3>By plate, overall DAPI quantiles</h3>
 <p>Compute DAPI quantiles across plates.</p>
-<pre class="r"><code>ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
-  geom_point(alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Samples binned by DAPI 4 quantiles&quot;, 
-       x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-  scale_color_manual(values=c(&quot;blue&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced
-
-Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-9-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
-  geom_point(alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Samples binned by DAPI 4 quantiles&quot;, 
-       x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-  scale_color_manual(values=c(&quot;blue&quot;, &quot;forestgreen&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-9-2.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-8-1.png" width="768" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-8-2.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
 <div id="by-plate-plate-specific-dapi-quantiles" class="section level3">
 <h3>By plate, plate-specific DAPI quantiles</h3>
 <p>Compute DAPI quantiles in each plate.</p>
-<pre class="r"><code>ints_tmp &lt;- ints %&gt;% group_by(plate) %&gt;% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
-                          dapi_3quant=ntile(dapi.sum.zoom,3))</code></pre>
-<pre class="r"><code>ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
-  geom_point(alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Samples binned by DAPI 3 quantiles&quot;,
-       x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-  scale_color_manual(values=c(&quot;blue&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced
-
-Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
-  geom_point(alpha = .5, cex = .7) + 
-  facet_wrap(~plate, ncol=4) +
-  labs(title = &quot;Samples binned by DAPI 4 quantiles&quot;, 
-       x=&quot;Green channel log10 pixel sum&quot;, y = &quot;Red channel log10 pixel sum&quot;) +
-  scale_color_manual(values=c(&quot;blue&quot;, &quot;forestgreen&quot;, &quot;darkorange&quot;, &quot;red&quot;)) + theme_gray() </code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced
-
-Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 22 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-11-2.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ints_tmp &lt;- ints %&gt;% group_by(plate) %&gt;% mutate(dapi_4quant=ntile(dapi.mean.log10sum,4),
+                          dapi_3quant=ntile(dapi.mean.log10sum,3))</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-10-2.png" width="768" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
 <div id="density-distribution" class="section level2">
 <h2>Density distribution</h2>
-<div id="dapi-3-quantiles" class="section level3">
-<h3>DAPI 3 quantiles</h3>
-<pre class="r"><code>ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = &quot;red&quot;, alpha=.5) +
-  facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
-  labs(title = &quot;Red by DAPI quantiles&quot;, x = &quot;Red signal (fore-back)&quot;)</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 8 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = &quot;green&quot;, alpha=.5) +
-  facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
-  labs(title = &quot;Green by DAPI quantiles&quot;, x = &quot;Red signal (fore-back)&quot;)</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 16 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-12-2.png" width="768" style="display: block; margin: auto;" /></p>
+<div id="dapi-3-quantiles-across-plates" class="section level3">
+<h3>DAPI 3 quantiles across plates</h3>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-11-2.png" width="768" style="display: block; margin: auto;" /></p>
 </div>
-<div id="dapi-4-quantiles" class="section level3">
-<h3>DAPI 4 quantiles</h3>
-<pre class="r"><code>ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = &quot;red&quot;, alpha=.5) +
-  facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
-  labs(title = &quot;Red by DAPI quantiles&quot;, x = &quot;Red signal (fore-back)&quot;)</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 8 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = &quot;green&quot;, alpha=.5) +
-  facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
-  labs(title = &quot;Green by DAPI quantiles&quot;, x = &quot;Red signal (fore-back)&quot;)</code></pre>
-<pre><code>Warning in fun(x, ...): NaNs produced</code></pre>
-<pre><code>Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
-<pre><code>Warning: Removed 16 rows containing non-finite values (stat_density).</code></pre>
-<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-13-2.png" width="768" style="display: block; margin: auto;" /></p>
+<div id="dapi-4-quantiles-across-plates" class="section level3">
+<h3>DAPI 4 quantiles across plates</h3>
+<p><img src="figure/images-qc-followup.Rmd/unnamed-chunk-12-1.png" width="768" style="display: block; margin: auto;" /><img src="figure/images-qc-followup.Rmd/unnamed-chunk-12-2.png" width="768" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
@@ -573,11 +413,12 @@ Warning in FUN(X[[i]], ...): NaNs produced</code></pre>
 <!-- Insert the session information into the document -->
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-redhat-linux-gnu (64-bit)
+Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -591,18 +432,17 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] RColorBrewer_1.1-2 wesanderson_0.3.4  cowplot_0.8.0     
-[4] ggplot2_2.2.1      dplyr_0.7.4       
+[1] RColorBrewer_1.1-2 wesanderson_0.3.2  cowplot_0.8.0     
+[4] ggplot2_2.2.1      dplyr_0.7.0       
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13     knitr_1.17       bindr_0.1        magrittr_1.5    
- [5] munsell_0.4.3    colorspace_1.3-2 R6_2.2.2         rlang_0.1.2     
- [9] plyr_1.8.4       stringr_1.2.0    tools_3.4.1      grid_3.4.1      
-[13] gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6  lazyeval_0.2.0  
-[17] yaml_2.1.14      rprojroot_1.2    digest_0.6.12    assertthat_0.2.0
-[21] tibble_1.3.4     bindrcpp_0.2     glue_1.1.1       evaluate_0.10.1 
-[25] rmarkdown_1.6    labeling_0.3     stringi_1.1.5    compiler_3.4.1  
-[29] scales_0.5.0     backports_1.1.1  pkgconfig_2.0.1 </code></pre>
+ [1] Rcpp_0.12.14     knitr_1.16       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 R6_2.2.0         rlang_0.1.2      stringr_1.2.0   
+ [9] plyr_1.8.4       tools_3.4.1      grid_3.4.1       gtable_0.2.0    
+[13] git2r_0.19.0     htmltools_0.3.6  yaml_2.1.14      lazyeval_0.2.0  
+[17] rprojroot_1.2    digest_0.6.12    assertthat_0.1   tibble_1.3.3    
+[21] glue_1.1.1       evaluate_0.10.1  rmarkdown_1.6    labeling_0.3    
+[25] stringi_1.1.2    compiler_3.4.1   scales_0.4.1     backports_1.0.5 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
