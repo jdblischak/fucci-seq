@@ -36,8 +36,7 @@ In the current analysis, we computed corrected signal for each channel as follow
 ```
 (foreground mean intensity - background mean intenstiy)*mask size
 ```
-
-The `mask size` is defined as: Denote the center of the nucleus as `(cx,cy)`, then the mask area is `(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))`. The maximum mask size is 10,000.
+This is equivalent to computing the sum of pixel intensities after substracting background mean intensity from each pixel in the mask. The `mask size` is defined as: Denote the center of the nucleus as `(cx,cy)`, then the mask area is `(max(1,cx-50):min(cx+50,nrow), max(1,cy-50):min(cy+50,ncol))`. The maximum mask size is 10,000.
 
 This metric for summarizing pixel intensity factors into the quantity of cell cycle protein (green and red), and indirectly, the cell size. While, previously our metric of mean pixel intensity does not account for the quantity of cell cycle protein (green and red).
 
@@ -45,7 +44,6 @@ This metric for summarizing pixel intensity factors into the quantity of cell cy
 Results:
 
 1. In about 10 to 15 single cell samples, the background intensity is greater than the foreground intensity by a small amount (~.001) in the Red or the Green channel. we need to check to see if there are signals at all for these samples in any of channles. If there's any signal, then we'll set the channel with no signal to the lowest possible intensity value.
-
 
 2. On log10 scale of pixel sum intensity, we are able to observe the separation of single cell samples on Red channel and also on Green channel. And, interestly, in figures plotting Red against Green, we observe three clusters roughly correspond to low, medium and high DAPI. 
 
@@ -62,9 +60,9 @@ Results:
 
 ---
 
-## Loading data and packages
+## Loading data
 
-```{r, message=FALSE}
+```{r, message=FALSE, echo = FALSE}
 library(dplyr)
 library(ggplot2)
 library(cowplot)
@@ -72,35 +70,15 @@ library(wesanderson)
 library(RColorBrewer)
 ```
 
-Name all plates.
+Import combined intensity data (see [combine-intensity-data.R](/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R)).
 
 ```{r}
-plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
-            "18870_18855","18870_19101","18870_19160","19098_18511",
-            "19098_18870","19098_19160","19101_18511","19101_19098",
-            "19160_18870","19101_19160","19160_18511", "18855_19098")
-```
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
 
-Combine intensity stats from different plates.
-
-```{r, eval = FALSE}
-#tmp <- readRDS("/project2/gilad/fucci-seq/intensities_stats/18511_18855.stats.rds")
-ints <- do.call(rbind, lapply(1:length(plates), function(index) {
-  ints <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
-  data.frame(plate=plates[index], well=ints$wellID, 
-             rfp.sum.zoom=ints$rfp.sum.zoom, 
-             gfp.sum.zoom=ints$gfp.sum.zoom, 
-             dapi.sum.zoom=ints$dapi.sum.zoom)
-}) )
-ints <- ints %>% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
-                        dapi_3quant=ntile(dapi.sum.zoom,3))
-saveRDS(ints, file =  "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds")
-```
-
-Load the above intensity stats rds.
-
-```{r}
-ints <- readRDS(file = "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds")
+# compute sum of intensities
+ints$dapi.sum.zoom <- with(ints, (dapi.fore.zoom.mean-dapi.back.zoom.mean)*10000)
+ints$rfp.sum.zoom <- with(ints, (rfp.fore.zoom.mean-rfp.back.zoom.mean)*10000)
+ints$gfp.sum.zoom <- with(ints, (gfp.fore.zoom.mean-gfp.back.zoom.mean)*10000)
 ```
 
 ---
@@ -109,7 +87,7 @@ ints <- readRDS(file = "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rd
 
 ### Pixel sum
 
-```{r, fig.width=9, fig.height=4}
+```{r, fig.width=9, fig.height=4, echo = FALSE}
 plot_grid(
 ggplot(ints, aes(x=dapi.sum.zoom, y = rfp.sum.zoom)) + 
   geom_point(col = "red", alpha = .5, cex = .7) + 
@@ -125,14 +103,14 @@ ggplot(ints, aes(x=dapi.sum.zoom, y = gfp.sum.zoom)) +
 
 ### log 10 pixel sum
 
-```{r, fig.width=9, fig.height=4}
+```{r, fig.width=9, fig.height=4, echo = FALSE}
 plot_grid(
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
+ggplot(ints, aes(x=dapi.mean.log10sum, y = rfp.mean.log10sum)) + 
   geom_point(col = "red", alpha = .5, cex = .7) + 
   labs(title = "Red versus DAPI",
        subtitle="log10 pixel sum", 
        x="DAPI channel", y = "Red channel"),
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
+ggplot(ints, aes(x=dapi.mean.log10sum, y = gfp.mean.log10sum)) + 
   geom_point(col = "green", alpha = .5, cex = .7) + 
   labs(title = "Green versus DAPI",
        subtitle = "log10 pixel sum", 
@@ -141,8 +119,8 @@ ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) +
 
 ### By plate
 
-```{r, fig.width=7, fig.height=7}
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) + 
+```{r, fig.width=7, fig.height=7, echo = FALSE}
+ggplot(ints, aes(x=dapi.mean.log10sum, y = rfp.mean.log10sum)) + 
   geom_point(col = "red", alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Red versus DAPI",
@@ -150,7 +128,7 @@ ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(rfp.sum.zoom))) +
        x="DAPI channel", y = "Red channel")  
 
 
-ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) + 
+ggplot(ints, aes(x=dapi.mean.log10sum, y = gfp.mean.log10sum)) + 
   geom_point(col = "green", alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Green versus DAPI",
@@ -168,36 +146,41 @@ ggplot(ints, aes(x=log10(dapi.sum.zoom), y = log10(gfp.sum.zoom))) +
 
 Compute DAPI quantiles across plates.
 
-```{r, fig.width=6, fig.height=5}
-ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+```{r}
+ints <- ints %>% mutate(dapi_4quant=ntile(dapi.mean.log10sum,4),
+                          dapi_3quant=ntile(dapi.mean.log10sum,3))
+```
+
+$~$
+
+```{r, fig.width=6, fig.height=5, echo = FALSE}
+ggplot(ints, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_3quant))) + 
   geom_point(alpha = .5, cex = .7) + 
   labs(title = "Samples binned by DAPI 3 quantiles", 
        x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
   scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
    
 
-ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+ggplot(ints, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_4quant))) + 
     geom_point(alpha = .5, cex = .7) + 
     labs(title = "Samples binned by DAPI 4 quantiles", 
          x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
     scale_color_manual(values=c("blue", "forestgreen", "darkorange", "red")) + theme_gray() 
-     
 ```
 
 ### By plate, overall DAPI quantiles
 
 Compute DAPI quantiles across plates.
 
-```{r, fig.width=8, fig.height=7}
-ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+```{r, fig.width=8, fig.height=7, echo = FALSE}
+ggplot(ints, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_3quant))) + 
   geom_point(alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Samples binned by DAPI 4 quantiles", 
        x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
   scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
    
-
-ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+ggplot(ints, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_4quant))) + 
   geom_point(alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Samples binned by DAPI 4 quantiles", 
@@ -212,19 +195,21 @@ ggplot(ints, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor
 Compute DAPI quantiles in each plate.
 
 ```{r}
-ints_tmp <- ints %>% group_by(plate) %>% mutate(dapi_4quant=ntile(dapi.sum.zoom,4),
-                          dapi_3quant=ntile(dapi.sum.zoom,3))
+ints_tmp <- ints %>% group_by(plate) %>% mutate(dapi_4quant=ntile(dapi.mean.log10sum,4),
+                          dapi_3quant=ntile(dapi.mean.log10sum,3))
 ```
 
-```{r, fig.width=8, fig.height=7}
-ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_3quant))) + 
+$~$
+
+```{r, fig.width=8, fig.height=7, echo = FALSE}
+ggplot(ints_tmp, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_3quant))) + 
   geom_point(alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Samples binned by DAPI 3 quantiles",
        x="Green channel log10 pixel sum", y = "Red channel log10 pixel sum") +
   scale_color_manual(values=c("blue", "darkorange", "red")) + theme_gray() 
    
-ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.factor(dapi_4quant))) + 
+ggplot(ints_tmp, aes(x=gfp.mean.log10sum, y = rfp.mean.log10sum, col = as.factor(dapi_4quant))) + 
   geom_point(alpha = .5, cex = .7) + 
   facet_wrap(~plate, ncol=4) +
   labs(title = "Samples binned by DAPI 4 quantiles", 
@@ -238,27 +223,27 @@ ggplot(ints_tmp, aes(x=log10(gfp.sum.zoom), y = log10(rfp.sum.zoom), col = as.fa
 ## Density distribution
 
 
-### DAPI 3 quantiles
+### DAPI 3 quantiles across plates
 
-```{r, fig.width=8, fig.height=3}
-ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = "red", alpha=.5) +
+```{r, fig.width=8, fig.height=3, echo = FALSE}
+ggplot(data=ints, aes(x=rfp.mean.log10sum)) + geom_density(fill = "red", alpha=.5) +
   facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
   labs(title = "Red by DAPI quantiles", x = "Red signal (fore-back)")
 
-ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = "green", alpha=.5) +
+ggplot(data=ints, aes(x=gfp.mean.log10sum)) + geom_density(fill = "green", alpha=.5) +
   facet_wrap(~as.factor(dapi_3quant), nrow=1) + 
   labs(title = "Green by DAPI quantiles", x = "Red signal (fore-back)")
 ```
 
 
-### DAPI 4 quantiles
+### DAPI 4 quantiles across plates
 
-```{r, fig.width=8, fig.height=3}
-ggplot(data=ints, aes(x=log10(rfp.sum.zoom))) + geom_density(fill = "red", alpha=.5) +
+```{r, fig.width=8, fig.height=3, echo = FALSE}
+ggplot(data=ints, aes(x=rfp.mean.log10sum)) + geom_density(fill = "red", alpha=.5) +
   facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
   labs(title = "Red by DAPI quantiles", x = "Red signal (fore-back)")
 
-ggplot(data=ints, aes(x=log10(gfp.sum.zoom))) + geom_density(fill = "green", alpha=.5) +
+ggplot(data=ints, aes(x=gfp.mean.log10sum)) + geom_density(fill = "green", alpha=.5) +
   facet_wrap(~as.factor(dapi_4quant), nrow=1) + 
   labs(title = "Green by DAPI quantiles", x = "Red signal (fore-back)")
 ```
