@@ -100,21 +100,21 @@ $~$
 
 ```{r, echo = FALSE}
 plot_grid(
-  ggplot(ints_subset, aes(x=rfp.median.log10sum), col="black") + 
+  ggplot(ints, aes(x=rfp.median.log10sum), col="black") + 
     geom_density(alpha = .5, cex = .7) + 
     geom_density(aes(x=rfp.median.log10sum, col = as.factor(plate))) +
     labs(title = "RFP by plate",
          subtitle = "Black line indicates distribution aggregating plates",
          x="Red channel log10 pixel sum", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_subset, aes(x=gfp.median.log10sum), col="black") + 
+  ggplot(ints, aes(x=gfp.median.log10sum), col="black") + 
     geom_density(alpha = .5, cex = .7) + 
     geom_density(aes(x=gfp.median.log10sum, col = as.factor(plate))) +
     labs(title = "GFP by plate",
          subtitle = "Black line indicates distribution aggregating plates",
          x="Green channel log10 pixel sum", y = "Density") + 
     theme_gray() + theme(legend.position="none"),
-  ggplot(ints_subset, aes(x=dapi.median.log10sum), col="black") + 
+  ggplot(ints, aes(x=dapi.median.log10sum), col="black") + 
     geom_density(alpha = .5, cex = .7) + 
     geom_density(aes(x=dapi.median.log10sum, col = as.factor(plate))) +
     labs(title = "DAPI by plate",
@@ -169,9 +169,9 @@ $~$
 $~$
 
 ```{r, echo = FALSE}
-ints_subset$plate <- as.character(ints_subset$plate)
-ints_rfp <- data.frame(plate=ints_subset$plate,
-                       rfp.median.log10sum = ints_subset$rfp.median.log10sum)
+ints$plate <- as.character(ints$plate)
+ints_rfp <- data.frame(plate=ints$plate,
+                       rfp.median.log10sum = ints$rfp.median.log10sum)
 ints_rfp$span1 <- NULL
 ints_rfp$span2 <- NULL
 ints_rfp$span3 <- NULL
@@ -240,9 +240,9 @@ $~$
 $~$
 
 ```{r, echo = FALSE}
-ints_subset$plate <- as.character(ints_subset$plate)
-ints_gfp <- data.frame(plate=ints_subset$plate,
-                       gfp.median.log10sum = ints_subset$gfp.median.log10sum)
+ints$plate <- as.character(ints$plate)
+ints_gfp <- data.frame(plate=ints$plate,
+                       gfp.median.log10sum = ints$gfp.median.log10sum)
 ints_gfp$span1 <- NULL
 ints_gfp$span2 <- NULL
 ints_gfp$span3 <- NULL
@@ -311,9 +311,9 @@ $~$
 $~$
 
 ```{r, echo = FALSE}
-ints_subset$plate <- as.character(ints_subset$plate)
-ints_dapi <- data.frame(plate=ints_subset$plate,
-                       dapi.median.log10sum = ints_subset$dapi.median.log10sum)
+ints$plate <- as.character(ints$plate)
+ints_dapi <- data.frame(plate=ints$plate,
+                       dapi.median.log10sum = ints$dapi.median.log10sum)
 ints_dapi$span1 <- NULL
 ints_dapi$span2 <- NULL
 ints_dapi$span3 <- NULL
@@ -385,12 +385,12 @@ $~$
 
 ```{r, echo = FALSE}
 #DAPI choose .005; Green choose .005; Red choose .005
-ints_subset$plate <- as.character(ints_subset$plate)
-ints_normed <- data.frame(plate=ints_subset$plate,
-                          chip_id=ints_subset$chip_id,
-                       dapi.median.log10sum = ints_subset$dapi.median.log10sum,
-                       rfp.median.log10sum = ints_subset$rfp.median.log10sum,
-                       gfp.median.log10sum = ints_subset$gfp.median.log10sum)
+ints$plate <- as.character(ints$plate)
+ints_normed <- data.frame(plate=ints$plate,
+                          chip_id=ints$chip_id,
+                       dapi.median.log10sum = ints$dapi.median.log10sum,
+                       rfp.median.log10sum = ints$rfp.median.log10sum,
+                       gfp.median.log10sum = ints$gfp.median.log10sum)
 ints_normed$rfp.normed <- NULL
 ints_normed$gfp.normed <- NULL
 ints_normed$dapi.normed <- NULL
@@ -602,26 +602,26 @@ $~$
 
 ```{r, echo = FALSE}
 # constructs reference
-quant_reference_rfp <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints_subset$plate))), function(index) {
-  plate <- unique(as.character(ints_subset$plate))[index]
-  quantile(ints_subset$rfp.median.log10sum[ints_subset$plate == plate], prob=seq(0,1,.005))
+quant_reference_rfp <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints$plate))), function(index) {
+  plate <- unique(as.character(ints$plate))[index]
+  quantile(ints$rfp.median.log10sum[ints$plate == plate], prob=seq(0,1,.005))
 })))
-quant_reference_gfp <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints_subset$plate))), function(index) {
-  plate <- unique(as.character(ints_subset$plate))[index]
-  quantile(ints_subset$gfp.median.log10sum[ints_subset$plate == plate], prob=seq(0,1,.005))
+quant_reference_gfp <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints$plate))), function(index) {
+  plate <- unique(as.character(ints$plate))[index]
+  quantile(ints$gfp.median.log10sum[ints$plate == plate], prob=seq(0,1,.005))
 })))
-quant_reference_dapi <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints_subset$plate))), function(index) {
-  plate <- unique(as.character(ints_subset$plate))[index]
-  quantile(ints_subset$dapi.median.log10sum[ints_subset$plate == plate], prob=seq(0,1,.005))
+quant_reference_dapi <- rowMeans(do.call(cbind, lapply(1:length(unique(as.character(ints$plate))), function(index) {
+  plate <- unique(as.character(ints$plate))[index]
+  quantile(ints$dapi.median.log10sum[ints$plate == plate], prob=seq(0,1,.005))
 })))
 
 
 #DAPI choose .005; Green choose .005; Red choose .005
-ints_normed_2 <- data.frame(plate=ints_subset$plate,
-                          chip_id=ints_subset$chip_id,
-                       dapi.median.log10sum = ints_subset$dapi.median.log10sum,
-                       rfp.median.log10sum = ints_subset$rfp.median.log10sum,
-                       gfp.median.log10sum = ints_subset$gfp.median.log10sum)
+ints_normed_2 <- data.frame(plate=ints$plate,
+                          chip_id=ints$chip_id,
+                       dapi.median.log10sum = ints$dapi.median.log10sum,
+                       rfp.median.log10sum = ints$rfp.median.log10sum,
+                       gfp.median.log10sum = ints$gfp.median.log10sum)
 ints_normed_2$rfp.normed <- NULL
 ints_normed_2$gfp.normed <- NULL
 ints_normed_2$dapi.normed <- NULL 
