@@ -1,5 +1,5 @@
 ---
-title: "Intensities by individuals"
+title: "Intensities by individual ID and plate"
 author: "Joyce Hsiao"
 output: html_document
 ---
@@ -37,9 +37,9 @@ In addition, in the across-plate results, the DAPI distributions have similar sh
 For normalization approach, we can use mean correction approaches for DAPI. While, for Green/Red, it's less obvious what would be a good approach. Let me try `qsmooth` and see....
 
 
-## Load packages and data
+## Load data
 
-```{r, message=FALSE}
+```{r, echo = FALSE}
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -49,103 +49,51 @@ library(RColorBrewer)
 library(Biobase)
 ```
 
-Name all plates.
-
 ```{r}
-plates <- c("18511_18855","18855_19101","18855_19160","18870_18511",
-            "18870_18855","18870_19101","18870_19160","19098_18511",
-            "19098_18870","19098_19160","19101_18511","19101_19098",
-            "19160_18870","19101_19160","19160_18511", "18855_19098")
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
 ```
 
-Combine intensity stats from different plates.
-
-```{r, eval = TRUE}
-# make the negative ones be the samllest one within its own plate
-ints <- do.call(rbind, lapply(1:length(plates), function(index) {
-  tmp <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
-  tmp <- data.frame(plate=plates[index], 
-                    well=as.character(droplevels(tmp$wellID)),
-         rfp.sum.zoom.mean.log10=log10(tmp$rfp.sum.zoom.mean),
-         gfp.sum.zoom.mean.log10=log10(tmp$gfp.sum.zoom.mean),
-         dapi.sum.zoom.mean.log10=log10(tmp$dapi.sum.zoom.mean))
-
-  tmp$rfp.sum.zoom.mean.log10[which(tmp$rfp.sum.zoom.mean.log10 == "NaN")] <- min(tmp$rfp.sum.zoom.mean.log10, na.rm=TRUE)
-  tmp$gfp.sum.zoom.mean.log10[which(tmp$gfp.sum.zoom.mean.log10 == "NaN")] <- min(tmp$gfp.sum.zoom.mean.log10, na.rm=TRUE)
-  tmp$dapi.sum.zoom.mean.log10[which(tmp$dapi.sum.zoom.mean.log10 == "NaN")] <- min(tmp$dapi.sum.zoom.mean.log10, na.rm=TRUE)
-  return(tmp)  
-}) )
-ints <- ints %>% mutate(dapi_4quant=ntile(dapi.sum.zoom.mean.log10,4),
-                        dapi_3quant=ntile(dapi.sum.zoom.mean.log10,3))
-saveRDS(ints, file =  "/project2/gilad/joycehsiao/fucci-seq/output/ints.long.rds")
-```
-
-
-Load the expression set info.
-
-```{r}
-eset_fls <- list.files("../data/eset", full.names=TRUE)
-
-anno <- do.call(rbind, lapply(1:length(eset_fls), function(index) {
-  eset_index <- readRDS(eset_fls[[index]])
-  pdata_index <- pData(eset_index)
-  return(pdata_index)
-}))
-
-# make unique id in both
-ints$unique <- paste0(ints$plate,"_",as.numeric(ints$well))
-anno$unique <- paste0(anno$image_individual,"_",anno$image_label)
-
-subset_index1 <- which(anno$unique %in% ints$unique)
-anno_subset <- anno[subset_index1,]
-
-subset_index2 <- match(anno_subset$unique, ints$unique)
-ints_tmp <- ints[subset_index2,]
-all.equal(ints_tmp$unique, anno_subset$unique)
-
-ints_tmp$chip_id <- anno_subset$chip_id
-
-# compute plate specific DAPI quantiles
-ints_tmp2 <- ints_tmp %>% group_by(plate) %>% mutate(dapi_4quant_plate=ntile(dapi.sum.zoom.mean.log10,4),
-                          dapi_3quant_plate=ntile(dapi.sum.zoom.mean.log10,3))
-```
-
+---
 
 ## By plate
 
+$~$
 
-```{r}
-ggplot(ints_tmp2, aes(x=gfp.sum.zoom.mean.log10,col = as.factor(plate))) + 
+```{r, ecoh = FALSE}
+ggplot(ints, aes(x=gfp.mean.log10sum,col = as.factor(plate))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "Green (log10 pixel sum) by plate",
        x="Green channel log10 pixel sum", y = "Density") + theme_gray() 
 
-ggplot(ints_tmp2, aes(x=rfp.sum.zoom.mean.log10,col = as.factor(plate))) + 
+ggplot(ints, aes(x=rfp.mean.log10sum,col = as.factor(plate))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "Red (log10 pixel sum) by plate",
        x="Red channel log10 pixel sum", y = "Density") + theme_gray() 
 
-ggplot(ints_tmp2, aes(x=dapi.sum.zoom.mean.log10,col = as.factor(plate))) + 
+ggplot(ints, aes(x=dapi.mean.log10sum,col = as.factor(plate))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "DAPI (log10 pixel sum) by plate",
        x="DAPI channel log10 pixel sum", y = "Density") + theme_gray() 
 ```
 
+---
 
 ## By individual
 
+$~$
+
 ```{r}
-ggplot(ints_tmp2, aes(x=gfp.sum.zoom.mean.log10,col = as.factor(chip_id))) + 
+ggplot(ints, aes(x=gfp.mean.log10sum,col = as.factor(chip_id))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "Green (log10 pixel sum) by individual",
        x="Green channel log10 pixel sum", y = "Density") + theme_gray() 
 
-ggplot(ints_tmp2, aes(x=rfp.sum.zoom.mean.log10,col = as.factor(chip_id))) + 
+ggplot(ints, aes(x=rfp.mean.log10sum,col = as.factor(chip_id))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "Red (log10 pixel sum) by individual",
        x="Red channel log10 pixel sum", y = "Density") + theme_gray() 
 
-ggplot(ints_tmp2, aes(x=dapi.sum.zoom.mean.log10,col = as.factor(chip_id))) + 
+ggplot(ints, aes(x=dapi.mean.log10sum,col = as.factor(chip_id))) + 
   geom_density(alpha = .5, cex = .7) + 
   labs(title = "DAPI (log10 pixel sum) by individual",
        x="DAPI channel log10 pixel sum", y = "Density") + theme_gray() 
