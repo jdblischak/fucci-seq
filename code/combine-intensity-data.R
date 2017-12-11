@@ -20,6 +20,9 @@ ints <- do.call(rbind, lapply(1:length(plates), function(index) {
   tmp <- readRDS(paste0("/project2/gilad/fucci-seq/intensities_stats/",plates[index],".stats.rds"))
   tmp <- data.frame(plate=plates[index],
                     image=as.character(droplevels(tmp$wellID)),
+                    size=tmp$size,
+                    perimeter=tmp$perimeter,
+                    eccentricity=tmp$eccentricity,
                     rfp.fore.zoom.mean=tmp$rfp.fore.zoom.mean,
                     rfp.fore.zoom.median=tmp$rfp.fore.zoom.q05,
                     gfp.fore.zoom.mean=tmp$gfp.fore.zoom.mean,
