@@ -1,0 +1,333 @@
+---
+title: "Intensity within and across plates"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Introduction/summary
+
+1. Intensity distribution within each individual: for all three channels, we observe variation between single cell samples from the six individuals in both mean and variance; further, within each individual, the differences between single cell samples from different plates are dramatic, in both mean and variance.
+
+2. Intensity correlation for each individual: high correlation between DAPI and GFP but not as much for between DAPI and RFP or between RFP and GREEN
+
+3. Trying out PCA: The first PC explains 63% of variation in the data, and the second PC explains 27% of variation in the data. First PC correlated with RFP, GFP and DAPI and also correlated with nucleus size. The direction of correlation is the same for size and intensity metrics. Also, first PC is not correlated with batch, individual labels, perimeter or eccentricity.
+
+---
+
+## Load data
+
+$~$
+
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+library(scales)
+```
+
+```{r}
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
+```
+
+---
+
+## Individual variation within plate and across plates
+
+**RFP**
+
+```{r, fig.width=11, echo = FALSE}
+plot_grid(
+  ggplot(ints, 
+          aes(x=chip_id, y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot(),
+  ggplot(ints,
+          aes(x=plate, y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+$~$
+
+**GFP**
+
+```{r, fig.width=11, echo = FALSE}
+plot_grid(
+  ggplot(ints, 
+          aes(x=chip_id, y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot(),
+  ggplot(ints,
+          aes(x=plate, y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+$~$
+
+**DAPI**
+
+$~$
+
+```{r, fig.width=11, echo = FALSE}
+plot_grid(
+  ggplot(ints, 
+          aes(x=chip_id, y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot(),
+  ggplot(ints,
+          aes(x=plate, y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+---
+
+## Intensity correlation
+
+$~$
+
+```{r, echo = FALSE}
+ggplot(ints, aes(x=rfp.median.log10sum,
+                        y=gfp.median.log10sum,
+                        col=as.factor(chip_id))) +
+  geom_point(cex=.6) + ylim(-1,4) +
+  facet_wrap(~as.factor(chip_id), nrow=3) +
+  ggtitle("RFP vs. GFP") + xlab("RFP") + ylab("GFP")
+
+ggplot(ints, aes(x=gfp.median.log10sum,
+                        y=dapi.median.log10sum,
+                        col=as.factor(chip_id))) +
+  geom_point(cex=.6) + ylim(-1,4) +
+  facet_wrap(~as.factor(chip_id), nrow=3) +
+  ggtitle("DAPI vs. GFP") + xlab("GFP") + ylab("DAPI")
+
+ggplot(ints, aes(x=rfp.median.log10sum,
+                        y=dapi.median.log10sum,
+                        col=as.factor(chip_id))) +
+  geom_point(cex=.6) + ylim(-1,4) +
+  facet_wrap(~as.factor(chip_id), nrow=3) +
+  ggtitle("DAPI vs. RFP") + xlab("RFP") + ylab("DAPI")
+```
+
+---
+
+## PCA
+
+Proportion of variance explained by the 3 PCS.
+
+```{r, echo = FALSE}
+tmp <- subset(ints, select=c(rfp.median.log10sum, 
+                                    gfp.median.log10sum,
+                                    dapi.median.log10sum))
+pca <- prcomp(tmp, scale.=TRUE, center = TRUE)
+var_prop <- (pca$sdev^2)/sum(pca$sdev^2)
+print(var_prop)
+```
+
+**RFP versus PCs**
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+tmp2 <- data.frame(pca$x, plate=ints$plate,
+                   chip_id=ints$chip_id,
+                   rfp.median.log10sum=ints$rfp.median.log10sum,
+                   gfp.median.log10sum=ints$gfp.median.log10sum,
+                   dapi.median.log10sum=ints$dapi.median.log10sum)
+
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=rfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=rfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=rfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**GFP versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=gfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=gfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=gfp.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**DAPI versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=dapi.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=dapi.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=dapi.median.log10sum,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**Plate versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=ints$plate,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=ints$plate,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=ints$plate,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**Individual label versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=ints$chip_id,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=ints$chip_id,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=ints$chip_id,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**Nucleus size versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=log10(ints$size),
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=log10(ints$size),
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=log10(ints$size),
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**Eccentricity versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=ints$eccentricity,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=ints$eccentricity,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=ints$eccentricity,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+**Perimeter versus PCs**
+
+$~$
+
+```{r, echo = FALSE, fig.width=12, fig.height=10}
+plot_grid(
+  ggplot(tmp2, aes(y=PC1, x=ints$perimeter,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC2, x=ints$perimeter,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  ggplot(tmp2, aes(y=PC3, x=ints$perimeter,
+                    col=as.factor(chip_id))) +
+    geom_point(cex=.6, alpha= .7),
+  nrow=2)
+```
+
+$~$
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
