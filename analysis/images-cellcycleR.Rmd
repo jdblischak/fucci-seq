@@ -1,0 +1,368 @@
+---
+title: "parametric cellcycleR for image intensities"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+---
+
+## Introduction/Summary
+
+$~$
+
+In this document, we assess the fit of `cellcycleR` across all samples and all batches. The idea is to assess the deviations from model fit for each individual and each batch. From the structure of deviation from the model fit, we can learn major sources of variation and develop strategies for removing unwanted variation accordingly.
+
+$~$
+
+### Data Preparation
+
+$~$
+
+**Step 1: Correct for backgorund noise**: 
+
+We correct for background intensity by substracting from each pixel the background median intensity. Then we sum up the background-corrected intensities and then take log transformation of the sum. log transformation is frequently used in image transformation for increasing contrast of the image, especially for regions with low pixel intensity.
+
+$F$: Pixel intensity matrix for in each FUCCI image. 
+
+$F^{f}$: Fluorescent intensity values located inside the defined forground area. Set to be $100 \times 100$ area centered at the nucleus.
+
+$F^{b}$: Fluorescent intensity values for pixels in the background area. 
+
+$N^f$ and $N^b$: Mumber of pixels located in the foreground and background area, respectively. 
+
+$$
+I = log10 \sum_{pixels \,\,\in \,\,foreground} \big( F^{f} - median (F^{b}) \big) 
+$$
+
+$~$
+
+**Step 2: Standardize background-corrected intensities**: 
+
+For GFP, RFP, and DAPI separatley, standardize background-corrected fluorescent intensity measurements as follows.
+
+$I_{nj}$: Background-correctd intensity values in single cell sample $n$ and batch $j$.
+
+$\bar{I}$: Mean background-correctd intensity values across sample $n=1,\dots, N$ and batches $j=1,\dots,J$.
+
+$S$: Standard deviation of background-corrected intensity values $I_{nj}$. 
+
+
+$$
+Z = \frac{I_{nj} - \bar{I}}{S}
+$$
+
+$~$
+
+### Results
+
+1. Fit 200 interations. loglik = -3369.
+
+2. Fit appears to be better for RFP than for GFP and DAPI.
+
+3. Considering clustering of samples in the bivariate distribution of Red and Gree intensities. The sample clusters appear to coincide with the estimated cell times. 
+
+4. Consider residual intensities at the individual level, variation around the mean for all three channles is smaller than the observed intensity.
+
+5. Consider residual intensity at the batch level within each individual, standard deviations are smaller for Red than for Green and DAPI. Moreover, for the most part, means of the residuals center at the mean for all channels, and more so for Red than for Green across the batches. These results suggest that there's no need to fit a batch-level model for intensities.
+
+6. Consider residual intensity at the batch level. For RFP, there's not much variation between batches. For GFP, the variation of residual intensities is the largest for plate `18511_18855` and plate `19160_18870`. The plate `18511_18855` was the first one done in imaging, and the plate `19160_18870` contains the most bubbles on the plates based on imaging results.
+
+$~$
+
+### Next steps
+
+1. Assess model convergence conditions: run 10 times on 500 iterations; compare model convergences between different starting points (instead of random time, assign fixed time).
+
+$~$
+
+---
+
+## Load data
+
+$~$
+
+Import combined intensity data (see [combine-intensity-data.R](/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R)).
+
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+library(ggplot2)
+library(cellcycleR)
+library(data.table)
+library(dplyr)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+```
+
+$~$
+
+```{r}
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
+```
+
+```{r, echo = FALSE, eval = TRUE}
+ints$rfp.z <- scale(ints$rfp.median.log10sum, center=TRUE, scale=TRUE)
+ints$gfp.z <- scale(ints$gfp.median.log10sum, center=TRUE, scale=TRUE)
+ints$dapi.z <- scale(ints$dapi.median.log10sum, center=TRUE, scale=TRUE)
+
+ints_tmp <- data.frame(rfp.z=ints$rfp.z,
+                       gfp.z=ints$gfp.z,
+                       dapi.z=ints$dapi.z)
+```
+
+```{r, echo = FALSE, eval = FALSE}
+# cellcycleR analysis
+out <- sin_cell_ordering_class(as.matrix(ints_tmp), 
+                                   celltime_levels=200, num_iter=200)
+saveRDS(out, file = "/project2/gilad/joycehsiao/fucci-seq/output/images-cellcycleR.Rmd/out.rds")
+```
+
+```{r, echo = FALSE, eval = TRUE}
+out <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/output/images-cellcycleR.Rmd/out.rds")
+
+# compute predicted intensities at given time
+# get predicted value at each time interval
+ints_pred <- data.frame(red = out$amp[1]*sin(out$cell_times + out$phi[1]),
+                        green = out$amp[2]*sin(out$cell_times + out$phi[2]),
+                        dapi = out$amp[3]*sin(out$cell_times + out$phi[3]))
+
+# compute residual
+ints_resid <- ints_tmp - ints_pred
+ints_resid$plate <- ints$plate
+ints_resid$chip_id <- ints$chip_id
+
+inds <- unique(ints_resid$chip_id)
+
+ints_tmp$chip_id <- ints$chip_id
+ints_tmp$plate <- ints$plate
+```
+
+$~$
+
+---
+
+## Estimated cell time
+
+$~$
+
+### Observed intensity by time
+
+$~$
+
+```{r, echo = FALSE, fig.width=9, fig.height=8}
+par(mfrow=c(2,2))
+plot(ints_tmp[order(out$cell_times),"rfp.z"], type="l", col = "firebrick1",
+     ylim=c(-6.5,2.1), ylab = "RFP")
+points(ints_pred$red[order(out$cell_times)], pch=16, col="grey30", cex=.6)
+
+plot(ints_tmp[,"gfp.z"], type="l", col = "forestgreen",
+     ylim=c(-6.5,2.1), ylab = "GFP")
+points(ints_pred$green[order(out$cell_times)], pch=16, col="grey30", cex=.6)
+
+plot(ints_tmp[,"dapi.z"], type="l", col = "royalblue",
+     ylim=c(-6.5,2.1), ylab = "DAPI")
+points(ints_pred$dapi[order(out$cell_times)], pch=16, col="grey30", cex=.6) 
+title("Observed intensities vs. estimated cell times", outer = TRUE, line = -2)
+```
+
+$~$
+
+### Residuals by cell time
+
+$~$
+
+```{r, echo = FALSE, fig.width=9, fig.height=8}
+par(mfrow=c(2,2))
+plot(ints_resid[order(out$cell_times), "rfp.z"], type="l", col = "firebrick1", ylim=c(-6.5,2.1),
+     ylab = "RFP")
+abline(h=0, lty=2)
+plot(ints_resid[order(out$cell_times), "gfp.z"], type="l", col = "forestgreen", ylim=c(-6.5,2.1),
+     ylab = "GFP")
+abline(h=0, lty=2)
+plot(ints_resid[order(out$cell_times), "dapi.z"], type="l", col = "royalblue", ylim=c(-6.5,2.1),
+     ylab = "DAPI")
+abline(h=0, lty=2)
+title("Residual intensities vs. estimated cell times", outer = TRUE, line = -2)
+```
+
+$~$
+
+### Red/Green by cell time
+
+$~$
+
+```{r, echo = FALSE, fig.width=7, fig.height=5}
+ints_tmp$cell_times <- out$cell_times
+ints_tmp <- ints_tmp %>% mutate(time_bin = ntile(cell_times, 5))
+
+ggplot(ints_tmp, aes(x=rfp.z, y = gfp.z)) +
+  geom_point(alpha=.7, aes(col=as.factor(time_bin)))  + scale_colour_grey() +
+  xlab("GFP standardized intensity") +
+  ylab("RFP standardized intensity") +
+  ggtitle("Intensity binned by predicted cell time")
+```
+
+---
+
+## Residuals distributions
+
+$~$
+
+### By individual
+
+$~$
+
+```{r, echo = FALSE, fig.width=9, fig.height=4, warning=FALSE}
+plot_grid(
+  ggplot(ints_tmp, aes(x=chip_id,
+                    y=rfp.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("RFP observed"),
+  ggplot(ints_resid, aes(x=chip_id,
+                    y=rfp.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("RFP residuals"), ncol = 2)
+
+
+plot_grid(
+  ggplot(ints_tmp, aes(x=chip_id,
+                    y=gfp.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("GFP observed"),
+  ggplot(ints_resid, aes(x=chip_id,
+                    y=gfp.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("GFP residuals"), ncol = 2)
+
+
+plot_grid(
+  ggplot(ints_tmp, aes(x=chip_id,
+                    y=dapi.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("DAPI observed"),
+  ggplot(ints_resid, aes(x=chip_id,
+                    y=dapi.z,
+                    col=chip_id)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("DAPI residuals"), ncol = 2)
+```
+
+$~$
+
+### By individual and batch
+
+$~$
+
+```{r, echo = FALSE, fig.width=8, fig.height=6, warning=FALSE}
+ggplot(ints_resid, aes(x=plate,
+                  y=rfp.z,
+                  col=plate)) +
+  geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+  facet_wrap(~chip_id, ncol=3) + 
+  ylab("Residual intensity") + ggtitle("RFP residual intensity")
+```
+
+$~$
+
+```{r, echo = FALSE, fig.width=8, fig.height=6}
+ggplot(ints_resid, aes(x=plate,
+                  y=gfp.z,
+                  col=plate)) +
+  geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+  facet_wrap(~chip_id, ncol=3) + 
+  ylab("Residual intensity") + ggtitle("GFP residual intensity")
+```
+
+$~$
+
+```{r, echo = FALSE, fig.width=8, fig.height=6, warning=FALSE}
+ggplot(ints_resid, aes(x=plate,
+                  y=dapi.z,
+                  col=plate)) +
+  geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+  facet_wrap(~chip_id, ncol=3) + 
+  ylab("Residual intensity") + ggtitle("DAPI residual intensity")
+```
+
+$~$
+
+### By batch
+
+$~$
+
+```{r, echo = FALSE, fig.width=10, fig.height=7, warning=FALSE}
+plot_grid(
+  ggplot(ints_tmp, aes(x=plate,
+                    y=rfp.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("RFP observed"),
+  ggplot(ints_tmp, aes(x=plate,
+                    y=gfp.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("GFP observed"),
+  ggplot(ints_tmp, aes(x=plate,
+                    y=dapi.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Observed intensity") + ggtitle("DAPI observed"), ncol=2)
+
+
+plot_grid(
+  ggplot(ints_resid, aes(x=plate,
+                    y=rfp.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("RFP residual"),
+  ggplot(ints_resid, aes(x=plate,
+                    y=gfp.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("GFP residual"),
+  ggplot(ints_resid, aes(x=plate,
+                    y=dapi.z,
+                    col=plate)) +
+    geom_boxplot() + ylim(-6,2) + geom_hline(aes(yintercept=0)) +
+    ylab("Residual intensity") + ggtitle("DAPI residual"), ncol=2)
+```
+
+$~$
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
