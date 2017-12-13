@@ -1,0 +1,117 @@
+---
+title: "Data overview"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+All processed data are stored as `expressionSet` objects in `data/eset`. Below shows how to extract information from an `expressionSet` object.
+
+$~$
+
+```{r, message=FALSE}
+library(knitr)
+library(Biobase)
+```
+
+$~$
+
+To combine all `expressionSet` objects in the folder, 
+
+```{r}
+fname <- Sys.glob("../data/eset/*.rds")
+eset <- Reduce(combine, Map(readRDS, fname))
+```
+
+$~$
+
+To view the sample metadata labels,
+
+```{r}
+kable(varMetadata(phenoData(eset)))
+```
+
+$~$
+
+To view the feature (gene) metadata labels,
+
+```{r}
+kable(varMetadata(featureData(eset)))
+```
+
+$~$
+
+To extract count data,
+
+```
+exprs(eset)
+```
+
+There are 20,421 genes and 1,536 single cell samples in the raw data.
+
+```{r, echo = TRUE}
+dim(exprs(eset))
+```
+
+$~$
+
+To extract feature/gene information,
+
+```
+fData(eset)
+```
+
+The features include FUCCI transgenes (EGFP and mCherry), ERCC spike-in controls, and endogenoeus genes (ENSG).
+
+```{r}
+head(fData(eset))
+```
+
+$~$
+
+To extract sample information,
+
+```
+pData(eset)
+```
+
+The rows contain single cell samples. Row names indicate the experiment date (we had one C1 plate per day), and C1 well ID.
+
+```{r}
+head(pData(eset))
+```
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
