@@ -1,0 +1,247 @@
+---
+title: "Investigate intensity against some cell shape metrics"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Introduction/background
+
+Here we investigated the relationship between intensity measures and nuclei shape measures. We particularly focus on DAPI intensitiy measures which are computed solely from the pixels enclosed in the nuclei boundaries.
+
+Results: 
+
+1. DAPI intensities are skewed. This is confirmed in the visual inspectation of the images. We see some spotty pixels with much higher intensities with the rest of the pixels - or a spike in intensities so to speak.
+
+2. Nucleus size is highly correlated with perimeter as expected. However, note several outlier cases in which several cells with the same size were detected to have drastically different perimeter. Need to pull these cases and see what's up!
+
+3. Nucleus size is not correlated with eccentricty and neither is perimeter as expected. 
+
+4. DAPI median-based measures (background median corrected) correlate better with cell shape measures - the patterns make more sense. Notatbly higher correlation between median-based measures and cell shape measures compared to mean-based measures. 
+
+5. Consider the two intensity channels RFP and GFP. It seems that the GFP intensities are somehow correlated with the nucleus size, but the RFP does not correlate with these cell shape measures at all.
+
+Next step:
+
+1. Compute cell size based on each channel...
+
+---
+
+## Load data
+
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+```
+
+Import combined intensity data (see [combine-intensity-data.R](/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R)).
+
+```{r}
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
+```
+
+$~$
+
+---
+
+$~$
+
+## DAPI and shape
+
+$~$
+
+Compare DAPI metrics after background mean correction versus after background median correction.
+
+```{r, echo = FALSE, fig.width=7, fig.height=6}
+plot(x=ints$dapi.mean.log10sum,
+     y=ints$dapi.median.log10sum,
+     xlab = "mean-based", ylab = "median-based",
+     main = "DAPI intensity")
+```
+
+$~$
+
+Various shape metrics
+
+```{r,echo=FALSE, fig.width=9, fig.height=8}
+par(mfrow=c(2,2))
+plot(x=ints$size,
+     y=ints$perimeter, pch=16, col="gray30", cex=.6,
+     xlab = "size", ylab = "perimeter")
+plot(x=ints$size, pch=16, col="gray30", cex=.6,
+     y=ints$eccentricity,
+     xlab = "size", ylab = "eccentricity")
+plot(x=ints$perimeter,
+     y=ints$eccentricity, pch=16, col="gray30", cex=.6,
+     xlab = "perimter", ylab = "eccentricity")
+title(main = "Shape measures", outer = TRUE, line=-2)
+
+
+par(mfrow=c(2,2))
+plot(y=ints$dapi.mean.log10sum,
+     x=ints$size, ylim=c(0,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$dapi.mean.log10sum), col="blue")
+plot(y=ints$dapi.mean.log10sum,
+     x=ints$perimeter, ylim=c(0,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$dapi.mean.log10sum), col="blue")
+plot(y=ints$dapi.mean.log10sum,
+     x=ints$eccentricity, ylim=c(0,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$dapi.mean.log10sum), col="blue")
+title(main = "mean-based measure", outer = TRUE, line=-2)     
+    
+par(mfrow=c(2,2))
+plot(y=ints$dapi.median.log10sum,
+     x=ints$size, ylim=c(0,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$dapi.median.log10sum), col="blue")
+plot(y=ints$dapi.median.log10sum,
+     x=ints$perimeter, ylim=c(0,4), pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$dapi.median.log10sum), col="blue")
+plot(y=ints$dapi.median.log10sum,
+     x=ints$eccentricity, ylim=c(0,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$dapi.median.log10sum), col="blue")
+title(main = "median-based measure", outer = TRUE, line=-2)     
+    
+```
+
+
+
+---
+
+## RFP and shape
+
+$~$
+
+```{r,echo=FALSE, fig.width=9, fig.height=8}
+par(mfrow=c(2,2))
+plot(y=ints$rfp.mean.log10sum,
+     x=ints$size, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$rfp.mean.log10sum), col="blue")
+plot(y=ints$rfp.mean.log10sum,
+     x=ints$perimeter, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$rfp.mean.log10sum), col="blue")
+plot(y=ints$rfp.mean.log10sum,
+     x=ints$eccentricity, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$rfp.mean.log10sum), col="blue")
+title(main = "mean-based measure versus shape metrics", outer = TRUE, line=-2)     
+    
+
+par(mfrow=c(2,2))
+plot(y=ints$rfp.median.log10sum,
+     x=ints$size, ylim=c(-1,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$rfp.median.log10sum), col="blue")
+plot(y=ints$rfp.median.log10sum,
+     x=ints$perimeter, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$rfp.median.log10sum), col="blue")
+plot(y=ints$rfp.median.log10sum,
+     x=ints$eccentricity, ylim=c(-1,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$rfp.median.log10sum), col="blue")
+title(main = "median-based measure versus shape metrics", outer = TRUE, line=-2)     
+```
+
+---
+
+
+## GFP and shape
+
+```{r,echo=FALSE, fig.width=9, fig.height=8}
+par(mfrow=c(2,2))
+plot(y=ints$gfp.mean.log10sum,
+     x=ints$size, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$gfp.mean.log10sum), col="blue")
+plot(y=ints$gfp.mean.log10sum,
+     x=ints$perimeter, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$gfp.mean.log10sum), col="blue")
+plot(y=ints$gfp.mean.log10sum,
+     x=ints$eccentricity, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "mean-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$gfp.mean.log10sum), col="blue")
+title(main = "mean-based measure versus shape metrics", outer = TRUE, line=-2)     
+    
+
+par(mfrow=c(2,2))
+plot(y=ints$gfp.median.log10sum,
+     x=ints$size, ylim=c(-1,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "size")
+lines(lowess(ints$size,
+             ints$gfp.median.log10sum), col="blue")
+plot(y=ints$gfp.median.log10sum,
+     x=ints$perimeter, ylim=c(-1,4), pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "perimeter")
+lines(lowess(ints$perimeter,
+             ints$gfp.median.log10sum), col="blue")
+plot(y=ints$gfp.median.log10sum,
+     x=ints$eccentricity, ylim=c(-1,4),pch=16, col="gray30", cex=.6,
+     ylab = "median-based intensities", xlab = "eccentricity")
+lines(lowess(ints$eccentricity,
+             ints$gfp.median.log10sum), col="blue")
+title(main = "median-based measure versus shape metrics", outer = TRUE, line=-2)  
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+

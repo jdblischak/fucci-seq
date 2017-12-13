@@ -39,12 +39,12 @@ In this document, I report results for four different FUCCI plates (18855_18511,
 Load RDS.
 
 ```{r}
-confess_18855_18511_crop1 <- readRDS(file = "../data/18855_18511_crop_09052017.rds")
-confess_18855_18511_crop2 <- readRDS(file = "../data/18855_18511_crop_09072017.rds")
-confess_18870_18855 <- readRDS(file = "../data/18870_18855_crop_09072017.rds")
+confess_18855_18511_crop1 <- readRDS(file = "../data/confess-rds/18855_18511_crop_09052017.rds")
+confess_18855_18511_crop2 <- readRDS(file = "../data/confess-rds/18855_18511_crop_09072017.rds")
+confess_18870_18855 <- readRDS(file = "../data/confess-rds/18870_18855_crop_09072017.rds")
 
-confess_18870_19101 <- readRDS(file = "../data/18870_19101_crop_09122017.rds")
-confess_19101_19098 <- readRDS(file = "../data/19101_19098_crop_09122017.rds")
+confess_18870_19101 <- readRDS(file = "../data/confess-rds/18870_19101_crop_09122017.rds")
+confess_19101_19098 <- readRDS(file = "../data/confess-rds/19101_19098_crop_09122017.rds")
 ```
 
 Functions for exploratory data analysis.

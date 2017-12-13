@@ -13,14 +13,21 @@ Website to share results of fucci-seq project.
 * [Processing images - from images to intensities](images-process.html)
 
 * Image intensities
-    * [CONFESS preliminary results](confess-prelim.html)
-    * [QC analysis](images-qc.html)
-    * [QC anaysis follow-up using alternative metrics for signals](images-qc-followup.html)
-    * [Measurements variation by individual labels](images-qc-labels.html)
-    * [Compare different intensity metrics (background mean-adjusted vs median-adjusted)](images-metrics.html)
+    * [CONFESS results](confess-prelim.html)
+    * [QC analysis including no. nuclei detected, DAPI, and intensity variation](images-qc.html)
+    * [Explore using log10 sum pixel intensity for signal metrics](images-qc-followup.html)
+    * [Compare correction approaches using median versus mean background](images-metrics.html)
+    
+* Shape metrics
+    * [Nucleus shape metrics versus intensities](images-metrics-cell-shape.html)
 
 * Normalize intensities by batch
-    * [Quantile normalization](images-normalize-quantile.html)
+    * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
+    * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
+    * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
+    
+* Fitting cellcycleR
+    * [Parametric model across plates and individuals](images-cellcycleR.html)
 
 * Image inspection
     * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
