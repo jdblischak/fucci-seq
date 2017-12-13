@@ -7,6 +7,12 @@ output:
 
 Website to share results of fucci-seq project.
 
+## Overview
+
+* [Data description](data-overview.html)
+
+
+---
 
 ## Image analysis
 
@@ -28,10 +34,14 @@ Website to share results of fucci-seq project.
     
 * Fitting cellcycleR
     * [Parametric model across plates and individuals](images-cellcycleR.html)
+    * [Model convergence assessment](images-cellcycleR-convergence.html)
+    
 
 * Image inspection
     * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
     * [Inspect images with no nucleus](images-zero-nuclei.html)
+
+---
 
 ## QC
 
