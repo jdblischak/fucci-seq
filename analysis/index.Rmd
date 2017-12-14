@@ -11,6 +11,11 @@ Website to share results of fucci-seq project.
 
 * [Data description](data-overview.html)
 
+---
+
+## Combined analysis
+
+* [Make combined data](combine-images-intensities.html)
 
 ---
 
@@ -45,6 +50,7 @@ Website to share results of fucci-seq project.
 
 ## QC
 
-* [Sequencing depth](totals.html)
-* [Reads versus molecules](reads-v-molecules.html)
+* [Sample QC criteria](sampleqc.html)  
+* [Sequencing depth](totals.html)  
+* [Reads versus molecules](reads-v-molecules.html)  
 
