@@ -20,8 +20,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -31,10 +31,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -221,6 +223,13 @@ div.section {
 </ul>
 <hr />
 </div>
+<div id="combined-analysis" class="section level2">
+<h2>Combined analysis</h2>
+<ul>
+<li><a href="combine-images-intensities.html">Make combined data</a></li>
+</ul>
+<hr />
+</div>
 <div id="image-analysis" class="section level2">
 <h2>Image analysis</h2>
 <ul>
@@ -258,7 +267,10 @@ div.section {
 <div id="qc" class="section level2">
 <h2>QC</h2>
 <ul>
-<li><a href="totals.html">Sequencing depth</a></li>
+<li><a href="sampleqc.html">Sample QC criteria</a><br />
+</li>
+<li><a href="totals.html">Sequencing depth</a><br />
+</li>
 <li><a href="reads-v-molecules.html">Reads versus molecules</a></li>
 </ul>
 </div>
