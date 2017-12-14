@@ -1,5 +1,5 @@
 ---
-title: "sampleqc"
+title: "Sample QC"
 author: "Po-Yuan Tung"
 date: 2017-11-28
 output: html_document
@@ -45,7 +45,10 @@ eset <- Reduce(combine, Map(readRDS, fname))
 anno <- pData(eset)
 ```
 
-## Total mapped reads reads
+---
+
+## Total mapped reads 
+
 Note: Using the 15% cutoff of samples with no cells excludes all the samples
 
 ```{r total-reads}
@@ -71,6 +74,8 @@ plot_reads <- ggplot(anno[anno$cell_number == 0 |
 
 plot_reads
 ```
+
+---
 
 ## Unmapped ratios
 Note: Using the 30 % cutoff of samples with no cells excludes all the samples
@@ -125,6 +130,7 @@ plot_grid(unmapped_exp + theme(legend.position = "none"),
           labels = letters[1:2])
 ```
 
+---
 
 ## ERCC percentage 
 
@@ -179,7 +185,10 @@ plot_grid(ercc_exp + theme(legend.position = "none"),
           labels = letters[1:2])
 ```
 
+---
+
 ## Number of genes detected 
+
 ```{r gene-number}
 ## cut off 
 cut_off_genes <- quantile(anno[anno$cell_number == 0,"detect_hs"], 0.85)
@@ -204,7 +213,10 @@ plot_gene <- ggplot(anno[anno$cell_number == 0 |
 plot_gene
 ```
 
+---
+
 ## FUCCI transgene 
+
 ```{r fucci}
 ## plot molecule number of egfp and mCherry 
 egfp_mol <- ggplot(anno[anno$cell_number == 0 |
@@ -224,9 +236,12 @@ plot_grid(egfp_mol + theme(legend.position = c(.5,.9)),
           labels = letters[1:2])
 ```
 
+---
 
 ## Linear Discriminat Analysis
+
 ### Total molecule vs concentration 
+
 ```{r lda, fig.width=12, fig.height=6}
 library(MASS)
 ## create 3 groups according to cell number
@@ -268,6 +283,7 @@ plot_grid(plot_before + theme(legend.position=c(.8,.85)),
 ```
 
 ### Reads to molecule conversion
+
 ```{r convertion, fig.width=12, fig.height=6}
 ## calculate convertion
 anno$ercc_conversion <- anno$mol_ercc / anno$reads_ercc
@@ -289,7 +305,7 @@ data$data_ercc_lda_p <- data_ercc_lda_p
 
 
 ## cutoff
-out_ercc_con <- anno %>% filter(cell_number == "1", ercc_conversion > .094)
+#out_ercc_con <- anno %>% filter(cell_number == "1", ercc_conversion > .094)
 
 anno$conversion_outlier <- anno$cell_number == 1 & anno$ercc_conversion > .094
 
@@ -395,3 +411,72 @@ plot_grid(reads_unmapped_num + theme(legend.position = c(.7,.9)),
           reads_spike_num + theme(legend.position = "none"),
           labels = letters[3:4])
 ```
+
+
+---
+
+## Output filters
+
+$~$
+
+These filters are later combined with metadata in our `eset` objects.
+
+$~$
+
+```{r, echo = TRUE, eval=FALSE}
+exps <- unique(anno$experiment)
+for (index in 1:length(exps)) {
+  tmp <- subset(anno, 
+                experiment == exps[index],
+                select=c(cut_off_reads, unmapped_ratios, cut_off_unmapped,
+                         ercc_percentage, cut_off_ercc, cut_off_genes,
+                         ercc_conversion, conversion,
+                         conversion_outlier, filter_all))
+  tmp <- data.frame(sample_id=rownames(tmp), tmp)
+  write.table(tmp, 
+              file = paste0("output/sampleqc.Rmd/",exps[index],".txt"), 
+              sep = "\t", quote = FALSE, col.names = TRUE, row.names = F)
+}
+
+# to import each text
+#library(data.table)
+#b <- fread("output/sampleqc.Rmd/20170905.txt", header=T)
+
+pheno_labels <- rbind (
+  c("cut_off_reads", 
+    "QC filter: number of mapped reads > 85th percentile among zero-cell samples"),
+  c("unmapped_ratios", 
+    "QC filter: among reads with a valid UMI, number of unmapped/number of mapped (unmapped/umi)"),
+  c("cut_off_unmapped",
+    "QC filter: unmapped ratio < 30th percentile among zero-cell samples"),
+  c("ercc_percentage",
+    "QC filter: number of reads mapped to ERCC/total sample mapped reads (reads_ercc/mapped)"),
+  c("cut_off_ercc",
+    "QC filter: ercc percentage < 15th percentile among zero-cell samples"),
+  c("cut_off_genes",
+    "QC filter: number of endogeneous genes with at least one molecule (detect_hs) > 85th percentile among zero-cell samples"),
+  c("ercc_conversion",
+    "QC filter: among ERCC, number of molecules/number of mapped reads (mol_ercc/reads_ercc)"),
+  c("conversion", 
+    "QC filter: among endogeneous genes, number of molecules/number of mapped reads (mol_hs/reads_hs)"),
+  c("conversion_outlier", 
+    "QC filter: microscoy detects 1 cell AND ERCC conversion rate > .094"),
+  c("filter_all", 
+    "QC filter: Does the sample pass all the QC filters? cell_number==1, mol_egfp >0, valid_id==1, cut_off_reads==TRUE, cut_off_ercc==TRUE, cut_off_genes=TRUE"))
+
+write.table(pheno_labels, 
+            file = paste0("../output/sampleqc.Rmd/pheno_labels.txt"), 
+            sep = "\t", quote = FALSE, col.names = F, row.names = F)
+
+#b <- fread("../output/sampleqc.Rmd/pheno_labels.txt", header=F)
+```
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
