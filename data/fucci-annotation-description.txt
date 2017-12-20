@@ -32,3 +32,13 @@ avg_dp	verifyBamID: The average sequencing depth that covered a SNP
 min_dp	verifyBamID: A minimun depth threshold for QC only (affects snps_w_min)
 snps_w_min	verifyBamID: The number of SNPs that had the minimum depth (min_dp); QC only
 valid_id	verifyBamID: Is the predicted individual 1 of the 2 added to the C1 chip?
+cut_off_reads	QC filter: number of mapped reads > 85th percentile among zero-cell samples
+unmapped_ratios	QC filter: among reads with a valid UMI, number of unmapped/number of mapped (unmapped/umi)
+cut_off_unmapped	QC filter: unmapped ratio < 30th percentile among zero-cell samples
+ercc_percentage	QC filter: number of reads mapped to ERCC/total sample mapped reads (reads_ercc/mapped)
+cut_off_ercc	QC filter: ercc percentage < 15th percentile among zero-cell samples
+cut_off_genes	QC filter: number of endogenous genes with at least one molecule (detect_hs) > 85th percentile among zero-cell samples
+ercc_conversion	QC filter: among ERCC, number of molecules/number of mapped reads (mol_ercc/reads_ercc)
+conversion	QC filter: among endogenous genes, number of molecules/number of mapped reads (mol_hs/reads_hs)
+conversion_outlier	QC filter: microscopy detects 1 cell AND ERCC conversion rate > .094
+filter_all	QC filter: Does the sample pass all the QC filters? cell_number==1, mol_egfp >0, valid_id==1, cut_off_reads==TRUE, cut_off_ercc==TRUE, cut_off_genes=TRUE

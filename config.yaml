@@ -14,6 +14,10 @@
 # to store the final data files.
 dir_data: data/
 
+# Enter the path (absolute or relative to the Snakefile) to the local directory
+# to store intermediate output data files.
+dir_output: output/
+
 # Enter the absolute path to an external directory to store intermediate files.
 # It should also contain a subdirectory fastq/ which contains the raw gzipped
 # FASTQ files.
