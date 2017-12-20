@@ -1,0 +1,68 @@
+Argument 1: 3
+Argument 2: 1
+Loading required package: binhf
+Loading required package: wavethresh
+Loading required package: MASS
+WaveThresh: R wavelet software, release 4.6.8, installed
+
+Copyright Guy Nason and others 1993-2016
+
+Note: nlevels has been renamed to nlevelsWT
+
+Loading required package: adlift
+Loading required package: EbayesThresh
+
+ **********************************************
+ adlift: a package to perform wavelet lifting schemes
+
+ --- Written by Matt Nunes and Marina Knight ---
+   Current package version:  1.3-3  ( 2017-09-13 ) 
+
+             -+ packaged by MAN +-           
+ **********************************************
+ 
+ adlift 1.3-3 loaded
+
+
+Attaching package: ‘adlift’
+
+The following object is masked from ‘package:EbayesThresh’:
+
+    postmean.cauchy
+
+
+ **********************************************
+ binhf: Haar-Fisz functions for binomial data
+
+ --- Written by Matt Nunes ---
+   Current package version:  1.0-1  ( 24/04/2014 ) 
+
+ 
+ **********************************************
+ 
+ binhf 1.0-1 loaded
+
+
+Attaching package: ‘binhf’
+
+The following objects are masked from ‘package:EbayesThresh’:
+
+    negloglik.laplace, wandafromx
+
+The following object is masked from ‘package:wavethresh’:
+
+    madmad
+
+The following object is masked from ‘package:base’:
+
+    norm
+
+Loading required package: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Loading required package: parallel
