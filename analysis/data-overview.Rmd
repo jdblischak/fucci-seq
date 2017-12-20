@@ -29,16 +29,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ---
 
-All processed data are stored as `expressionSet` objects in `data/eset`. Below shows how to extract information from an `expressionSet` object.
+## Quick start
+
+We store feature-level (gene) read count and molecule count in `expressionSet` (`data/eset`) objects, which also contain sample metadata (e.g., assigned indivdual ID, cDNA concentraion) and quality filtering criteria (e.g., number of reads mapped to FUCCI transgenes, ERCC conversion rate). Data from different C1 plates are stored in separate `eset` objects:
 
 $~$
+
+To combine `eset` objects from the different C1 plates:
+
+`eset <- Reduce(combine, Map(readRDS, Sys.glob("../data/eset/*.rds")))`
+
+$~$
+
+To access data stored in  `expressionSet`:
+
+* `exprs(eset)`: access count data, 20,421 features by 1,536 single cell samples.
+
+* `pData(eset)`: access sample metadata. Returns data.frame of 1,536 samples by 43 labels. Use `varMetadata(phenoData(eset))` to view label descriptions. 
+
+* `fData(eset)`: access feature metadata. Returns data.frame of 20,421 features by 6 labels. Use `varMetadata(featureData(eset))` to view label descriptions. 
+
+
+---
+
+## Label description
+
+Load related packages.
 
 ```{r, message=FALSE}
 library(knitr)
 library(Biobase)
 ```
-
-$~$
 
 To combine all `expressionSet` objects in the folder, 
 
@@ -47,65 +68,25 @@ fname <- Sys.glob("../data/eset/*.rds")
 eset <- Reduce(combine, Map(readRDS, fname))
 ```
 
-$~$
+View the sample metadata labels,
 
-To view the sample metadata labels,
+```
+varMetadata(phenoData(eset))
+```
 
-```{r}
+```{r, eval = TRUE, echo = FALSE}
 kable(varMetadata(phenoData(eset)))
 ```
 
-$~$
+View the feature (gene) metadata labels,
 
-To view the feature (gene) metadata labels,
+```
+varMetadata(featureData(eset))
+```
 
-```{r}
+```{r, eval=TRUE, echo = FALSE}
 kable(varMetadata(featureData(eset)))
 ```
-
-$~$
-
-To extract count data,
-
-```
-exprs(eset)
-```
-
-There are 20,421 genes and 1,536 single cell samples in the raw data.
-
-```{r, echo = TRUE}
-dim(exprs(eset))
-```
-
-$~$
-
-To extract feature/gene information,
-
-```
-fData(eset)
-```
-
-The features include FUCCI transgenes (EGFP and mCherry), ERCC spike-in controls, and endogenoeus genes (ENSG).
-
-```{r}
-head(fData(eset))
-```
-
-$~$
-
-To extract sample information,
-
-```
-pData(eset)
-```
-
-The rows contain single cell samples. Row names indicate the experiment date (we had one C1 plate per day), and C1 well ID.
-
-```{r}
-head(pData(eset))
-```
-
-
 
 ---
 
