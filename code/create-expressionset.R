@@ -14,13 +14,14 @@ suppressPackageStartupMessages(library("stringr"))
 
 # Input arguments
 args <- commandArgs(trailingOnly = TRUE)
-stopifnot(length(args) == 6, file.exists(args[1:5]))
+stopifnot(length(args) == 7, file.exists(args[1:6]))
 f_molecules <- args[1]
 f_lab <- args[2]
 f_totals <- args[3]
 f_verify <- args[4]
 f_saf <- args[5]
-f_rds <- args[6]
+f_qc <- args[6]
+f_rds <- args[7]
 
 # Assay data: molecules counts -------------------------------------------------
 
@@ -45,6 +46,8 @@ stopifnot(lab$sample == totals$sample,
 # Calculate genes detected
 detect_ercc <- colSums(assay[grepl("ERCC", rownames(assay)), ] > 0)
 detect_hs <- colSums(assay[grepl("ENSG", rownames(assay)), ] > 0)
+# QC metrics - https://jdblischak.github.io/fucci-seq/sampleqc.html
+qc <- fread(f_qc, data.table = FALSE) %>% arrange(sample_id)
 
 pheno <- cbind(lab %>% select(-sample),
                totals %>% select(-(sample:well)),
@@ -52,6 +55,7 @@ pheno <- cbind(lab %>% select(-sample),
                verify %>% select(-sample))
 # Determine if predicted individual is one of the ones added to that C1 chip
 pheno <- pheno %>% mutate(valid_id = chip_id %in% c(individual.1, individual.2))
+pheno <- cbind(pheno, qc %>% select(-sample_id))
 rownames(pheno) <- colnames(assay)
 
 metadata <- data.frame(labelDescription = c(
@@ -91,7 +95,18 @@ metadata <- data.frame(labelDescription = c(
   "verifyBamID: The average sequencing depth that covered a SNP",
   "verifyBamID: A minimun depth threshold for QC only (affects snps_w_min)",
   "verifyBamID: The number of SNPs that had the minimum depth (min_dp); QC only",
-  "verifyBamID: Is the predicted individual 1 of the 2 added to the C1 chip?"
+  "verifyBamID: Is the predicted individual 1 of the 2 added to the C1 chip?",
+  # QC
+  "QC filter: number of mapped reads > 85th percentile among zero-cell samples",
+  "QC filter: among reads with a valid UMI, number of unmapped/number of mapped (unmapped/umi)",
+  "QC filter: unmapped ratio < 30th percentile among zero-cell samples",
+  "QC filter: number of reads mapped to ERCC/total sample mapped reads (reads_ercc/mapped)",
+  "QC filter: ercc percentage < 15th percentile among zero-cell samples",
+  "QC filter: number of endogenous genes with at least one molecule (detect_hs) > 85th percentile among zero-cell samples",
+  "QC filter: among ERCC, number of molecules/number of mapped reads (mol_ercc/reads_ercc)",
+  "QC filter: among endogenous genes, number of molecules/number of mapped reads (mol_hs/reads_hs)",
+  "QC filter: microscopy detects 1 cell AND ERCC conversion rate > .094",
+  "QC filter: Does the sample pass all the QC filters? cell_number==1, mol_egfp >0, valid_id==1, cut_off_reads==TRUE, cut_off_ercc==TRUE, cut_off_genes=TRUE"
 ))
 rownames(metadata) <- c(colnames(pheno))
 pheno_anno <- new("AnnotatedDataFrame", data = pheno, varMetadata = metadata)

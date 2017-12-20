@@ -48,6 +48,7 @@ ensembl_genome_hs = config["ensembl_genome_hs"]
 
 # Paths to data (must end with forward slash)
 dir_data = config["dir_data"]
+dir_output = config["dir_output"]
 dir_external = config["dir_external"]
 dir_fq = dir_external + "fastq/"
 dir_fq_combin = dir_external + "fastq-combined/"
@@ -350,13 +351,15 @@ rule expressionset:
            totals = dir_data + "totals/{chip}.txt",
            molecules = dir_data + "molecules/{chip}.txt.gz",
            verify = dir_data + "verify/{chip}.txt",
-           saf = dir_genome + ensembl_exons
+           saf = dir_genome + ensembl_exons,
+           qc = dir_output + "sampleqc.Rmd/{chip}.txt"
     output: dir_data + "eset/{chip}.rds"
     shell: "Rscript code/create-expressionset.R {input.molecules} \
                                                 {input.lab} \
                                                 {input.totals} \
                                                 {input.verify} \
                                                 {input.saf} \
+                                                {input.qc} \
                                                 {output}"
 
 rule counts_combined:
