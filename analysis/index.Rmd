@@ -54,3 +54,4 @@ Website to share results of fucci-seq project.
 * [Sequencing depth](totals.html)  
 * [Reads versus molecules](reads-v-molecules.html)  
 
+* [gene filtering](gene-filtering.html)
