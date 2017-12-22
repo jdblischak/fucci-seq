@@ -121,7 +121,7 @@ library(Biobase)
 $~$
 
 ```{r}
-ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
+ints <- readRDS(file="../data/intensity.rds")
 ```
 
 ```{r, echo = FALSE, eval = TRUE}
@@ -138,11 +138,11 @@ ints_tmp <- data.frame(rfp.z=ints$rfp.z,
 # cellcycleR analysis
 out <- sin_cell_ordering_class(as.matrix(ints_tmp), 
                                    celltime_levels=200, num_iter=200)
-saveRDS(out, file = "/project2/gilad/joycehsiao/fucci-seq/output/images-cellcycleR.Rmd/out.rds")
+saveRDS(out, file = "../output/images-cellcycleR.Rmd/out.rds")
 ```
 
 ```{r, echo = FALSE, eval = TRUE}
-out <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/output/images-cellcycleR.Rmd/out.rds")
+out <- readRDS(file="../output/images-cellcycleR.Rmd/out.rds")
 
 # compute predicted intensities at given time
 # get predicted value at each time interval
