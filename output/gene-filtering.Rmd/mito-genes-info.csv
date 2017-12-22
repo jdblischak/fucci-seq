@@ -1,0 +1,1151 @@
+ensembl_gene_id,chromosome_name,external_gene_name,transcript_count,description
+ENSG00000002330,11,BAD,7,BCL2-associated agonist of cell death [Source:HGNC Symbol;Acc:936]
+ENSG00000002549,4,LAP3,10,leucine aminopeptidase 3 [Source:HGNC Symbol;Acc:18449]
+ENSG00000003509,2,NDUFAF7,13,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 7 [Source:HGNC Symbol;Acc:28816]"
+ENSG00000004059,7,ARF5,6,ADP-ribosylation factor 5 [Source:HGNC Symbol;Acc:658]
+ENSG00000004142,17,POLDIP2,2,"polymerase (DNA-directed), delta interacting protein 2 [Source:HGNC Symbol;Acc:23781]"
+ENSG00000004455,1,AK2,13,adenylate kinase 2 [Source:HGNC Symbol;Acc:362]
+ENSG00000004779,16,NDUFAB1,5,"NADH dehydrogenase (ubiquinone) 1, alpha/beta subcomplex, 1, 8kDa [Source:HGNC Symbol;Acc:7694]"
+ENSG00000004799,7,PDK4,5,"pyruvate dehydrogenase kinase, isozyme 4 [Source:HGNC Symbol;Acc:8812]"
+ENSG00000004864,7,SLC25A13,9,"solute carrier family 25 (aspartate/glutamate carrier), member 13 [Source:HGNC Symbol;Acc:10983]"
+ENSG00000004961,X,HCCS,3,holocytochrome c synthase [Source:HGNC Symbol;Acc:4837]
+ENSG00000005022,X,SLC25A5,4,"solute carrier family 25 (mitochondrial carrier; adenine nucleotide translocator), member 5 [Source:HGNC Symbol;Acc:10991]"
+ENSG00000005059,4,CCDC109B,5,coiled-coil domain containing 109B [Source:HGNC Symbol;Acc:26076]
+ENSG00000005187,16,ACSM3,15,acyl-CoA synthetase medium-chain family member 3 [Source:HGNC Symbol;Acc:10522]
+ENSG00000005469,7,CROT,7,carnitine O-octanoyltransferase [Source:HGNC Symbol;Acc:2366]
+ENSG00000005882,17,PDK2,15,"pyruvate dehydrogenase kinase, isozyme 2 [Source:HGNC Symbol;Acc:8810]"
+ENSG00000006282,17,SPATA20,26,spermatogenesis associated 20 [Source:HGNC Symbol;Acc:26125]
+ENSG00000006530,7,AGK,11,acylglycerol kinase [Source:HGNC Symbol;Acc:21869]
+ENSG00000006695,17,COX10,6,cytochrome c oxidase assembly homolog 10 (yeast) [Source:HGNC Symbol;Acc:2260]
+ENSG00000006744,17,ELAC2,21,elaC ribonuclease Z 2 [Source:HGNC Symbol;Acc:14198]
+ENSG00000007202,17,KIAA0100,16,KIAA0100 [Source:HGNC Symbol;Acc:28960]
+ENSG00000007923,1,DNAJC11,14,"DnaJ (Hsp40) homolog, subfamily C, member 11 [Source:HGNC Symbol;Acc:25570]"
+ENSG00000008311,7,AASS,7,aminoadipate-semialdehyde synthase [Source:HGNC Symbol;Acc:17366]
+ENSG00000008394,12,MGST1,18,microsomal glutathione S-transferase 1 [Source:HGNC Symbol;Acc:7061]
+ENSG00000008405,12,CRY1,5,cryptochrome 1 (photolyase-like) [Source:HGNC Symbol;Acc:2384]
+ENSG00000010256,3,UQCRC1,10,ubiquinol-cytochrome c reductase core protein I [Source:HGNC Symbol;Acc:12585]
+ENSG00000011295,17,TTC19,11,tetratricopeptide repeat domain 19 [Source:HGNC Symbol;Acc:26006]
+ENSG00000011376,3,LARS2,8,"leucyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:17095]"
+ENSG00000013306,17,SLC25A39,17,"solute carrier family 25, member 39 [Source:HGNC Symbol;Acc:24279]"
+ENSG00000013583,12,HEBP1,4,heme binding protein 1 [Source:HGNC Symbol;Acc:17176]
+ENSG00000014641,2,MDH1,17,"malate dehydrogenase 1, NAD (soluble) [Source:HGNC Symbol;Acc:6970]"
+ENSG00000014824,4,SLC30A9,5,"solute carrier family 30 (zinc transporter), member 9 [Source:HGNC Symbol;Acc:1329]"
+ENSG00000014919,10,COX15,3,cytochrome c oxidase assembly homolog 15 (yeast) [Source:HGNC Symbol;Acc:2263]
+ENSG00000015475,22,BID,10,BH3 interacting domain death agonist [Source:HGNC Symbol;Acc:1050]
+ENSG00000016391,3,CHDH,3,choline dehydrogenase [Source:HGNC Symbol;Acc:24288]
+ENSG00000019186,20,CYP24A1,6,"cytochrome P450, family 24, subfamily A, polypeptide 1 [Source:HGNC Symbol;Acc:2602]"
+ENSG00000021826,2,CPS1,11,"carbamoyl-phosphate synthase 1, mitochondrial [Source:HGNC Symbol;Acc:2323]"
+ENSG00000023228,2,NDUFS1,10,"NADH dehydrogenase (ubiquinone) Fe-S protein 1, 75kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7707]"
+ENSG00000023330,3,ALAS1,6,"aminolevulinate, delta-, synthase 1 [Source:HGNC Symbol;Acc:396]"
+ENSG00000023572,1,GLRX2,3,glutaredoxin 2 [Source:HGNC Symbol;Acc:16065]
+ENSG00000025772,20,TOMM34,1,translocase of outer mitochondrial membrane 34 [Source:HGNC Symbol;Acc:15746]
+ENSG00000027001,13,MIPEP,5,mitochondrial intermediate peptidase [Source:HGNC Symbol;Acc:7104]
+ENSG00000029639,6,TFB1M,9,"transcription factor B1, mitochondrial [Source:HGNC Symbol;Acc:17037]"
+ENSG00000030110,6,BAK1,3,BCL2-antagonist/killer 1 [Source:HGNC Symbol;Acc:949]
+ENSG00000033050,7,ABCF2,6,"ATP-binding cassette, sub-family F (GCN20), member 2 [Source:HGNC Symbol;Acc:71]"
+ENSG00000035141,2,FAM136A,6,"family with sequence similarity 136, member A [Source:HGNC Symbol;Acc:25911]"
+ENSG00000036473,X,OTC,2,ornithine carbamoyltransferase [Source:HGNC Symbol;Acc:8512]
+ENSG00000042286,10,AIFM2,3,"apoptosis-inducing factor, mitochondrion-associated, 2 [Source:HGNC Symbol;Acc:21411]"
+ENSG00000043514,1,TRIT1,18,tRNA isopentenyltransferase 1 [Source:HGNC Symbol;Acc:20286]
+ENSG00000048544,6,MRPS10,1,mitochondrial ribosomal protein S10 [Source:HGNC Symbol;Acc:14502]
+ENSG00000049883,5,PTCD2,12,pentatricopeptide repeat domain 2 [Source:HGNC Symbol;Acc:25734]
+ENSG00000050393,6,MCUR1,4,mitochondrial calcium uniporter regulator 1 [Source:HGNC Symbol;Acc:21097]
+ENSG00000050426,12,LETMD1,38,LETM1 domain containing 1 [Source:HGNC Symbol;Acc:24241]
+ENSG00000053371,1,AKR7A2,5,"aldo-keto reductase family 7, member A2 (aflatoxin aldehyde reductase) [Source:HGNC Symbol;Acc:389]"
+ENSG00000054523,1,KIF1B,10,kinesin family member 1B [Source:HGNC Symbol;Acc:16636]
+ENSG00000055950,10,MRPL43,14,mitochondrial ribosomal protein L43 [Source:HGNC Symbol;Acc:14517]
+ENSG00000059573,10,ALDH18A1,5,"aldehyde dehydrogenase 18 family, member A1 [Source:HGNC Symbol;Acc:9722]"
+ENSG00000059691,4,PET112,14,PET112 homolog (yeast) [Source:HGNC Symbol;Acc:8849]
+ENSG00000060762,6,MPC1,5,mitochondrial pyruvate carrier 1 [Source:HGNC Symbol;Acc:21606]
+ENSG00000060971,3,ACAA1,20,acetyl-CoA acyltransferase 1 [Source:HGNC Symbol;Acc:82]
+ENSG00000061794,12,MRPS35,5,mitochondrial ribosomal protein S35 [Source:HGNC Symbol;Acc:16635]
+ENSG00000062485,12,CS,33,citrate synthase [Source:HGNC Symbol;Acc:2422]
+ENSG00000062582,7,MRPS24,5,mitochondrial ribosomal protein S24 [Source:HGNC Symbol;Acc:14510]
+ENSG00000063241,19,ISOC2,8,isochorismatase domain containing 2 [Source:HGNC Symbol;Acc:26278]
+ENSG00000063761,14,ADCK1,8,aarF domain containing kinase 1 [Source:HGNC Symbol;Acc:19038]
+ENSG00000063854,16,HAGH,12,hydroxyacylglutathione hydrolase [Source:HGNC Symbol;Acc:4805]
+ENSG00000064012,2,CASP8,21,"caspase 8, apoptosis-related cysteine peptidase [Source:HGNC Symbol;Acc:1509]"
+ENSG00000065057,16,NTHL1,9,nth endonuclease III-like 1 (E. coli) [Source:HGNC Symbol;Acc:8028]
+ENSG00000065154,10,OAT,8,ornithine aminotransferase [Source:HGNC Symbol;Acc:8091]
+ENSG00000065427,16,KARS,12,lysyl-tRNA synthetase [Source:HGNC Symbol;Acc:6215]
+ENSG00000065518,3,NDUFB4,6,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 4, 15kDa [Source:HGNC Symbol;Acc:7699]"
+ENSG00000065833,6,ME1,3,"malic enzyme 1, NADP(+)-dependent, cytosolic [Source:HGNC Symbol;Acc:6983]"
+ENSG00000065911,2,MTHFD2,10,"methylenetetrahydrofolate dehydrogenase (NADP+ dependent) 2, methenyltetrahydrofolate cyclohydrolase [Source:HGNC Symbol;Acc:7434]"
+ENSG00000066651,6,TRMT11,12,tRNA methyltransferase 11 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:21080]
+ENSG00000066855,8,MTFR1,15,mitochondrial fission regulator 1 [Source:HGNC Symbol;Acc:29510]
+ENSG00000066926,18,FECH,10,ferrochelatase [Source:HGNC Symbol;Acc:3647]
+ENSG00000067064,10,IDI1,5,isopentenyl-diphosphate delta isomerase 1 [Source:HGNC Symbol;Acc:5387]
+ENSG00000067221,15,STOML1,13,stomatin (EPB72)-like 1 [Source:HGNC Symbol;Acc:14560]
+ENSG00000067704,1,IARS2,5,"isoleucyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:29685]"
+ENSG00000067829,X,IDH3G,11,isocitrate dehydrogenase 3 (NAD+) gamma [Source:HGNC Symbol;Acc:5386]
+ENSG00000067992,X,PDK3,3,"pyruvate dehydrogenase kinase, isozyme 3 [Source:HGNC Symbol;Acc:8811]"
+ENSG00000068120,17,COASY,16,CoA synthase [Source:HGNC Symbol;Acc:29932]
+ENSG00000068366,X,ACSL4,12,acyl-CoA synthetase long-chain family member 4 [Source:HGNC Symbol;Acc:3571]
+ENSG00000069509,X,FUNDC1,2,FUN14 domain containing 1 [Source:HGNC Symbol;Acc:28746]
+ENSG00000069535,X,MAOB,5,monoamine oxidase B [Source:HGNC Symbol;Acc:6834]
+ENSG00000069998,22,CECR5,7,"cat eye syndrome chromosome region, candidate 5 [Source:HGNC Symbol;Acc:1843]"
+ENSG00000070081,11,NUCB2,18,nucleobindin 2 [Source:HGNC Symbol;Acc:8044]
+ENSG00000072042,14,RDH11,11,retinol dehydrogenase 11 (all-trans/9-cis/11-cis) [Source:HGNC Symbol;Acc:17964]
+ENSG00000072210,17,ALDH3A2,23,"aldehyde dehydrogenase 3 family, member A2 [Source:HGNC Symbol;Acc:403]"
+ENSG00000072506,X,HSD17B10,5,hydroxysteroid (17-beta) dehydrogenase 10 [Source:HGNC Symbol;Acc:4800]
+ENSG00000072756,3,TRNT1,11,"tRNA nucleotidyl transferase, CCA-adding, 1 [Source:HGNC Symbol;Acc:17341]"
+ENSG00000072778,17,ACADVL,39,"acyl-CoA dehydrogenase, very long chain [Source:HGNC Symbol;Acc:92]"
+ENSG00000073169,22,SELO,2,Selenoprotein O  [Source:UniProtKB/Swiss-Prot;Acc:Q9BVL4]
+ENSG00000073578,5,SDHA,19,"succinate dehydrogenase complex, subunit A, flavoprotein (Fp) [Source:HGNC Symbol;Acc:10680]"
+ENSG00000074071,16,MRPS34,3,mitochondrial ribosomal protein S34 [Source:HGNC Symbol;Acc:16618]
+ENSG00000074582,2,BCS1L,20,BC1 (ubiquinol-cytochrome c reductase) synthesis-like [Source:HGNC Symbol;Acc:1020]
+ENSG00000075239,11,ACAT1,12,acetyl-CoA acetyltransferase 1 [Source:HGNC Symbol;Acc:93]
+ENSG00000075303,7,SLC25A40,8,"solute carrier family 25, member 40 [Source:HGNC Symbol;Acc:29680]"
+ENSG00000075336,18,TIMM21,6,translocase of inner mitochondrial membrane 21 homolog (yeast) [Source:HGNC Symbol;Acc:25010]
+ENSG00000075415,12,SLC25A3,17,"solute carrier family 25 (mitochondrial carrier; phosphate carrier), member 3 [Source:HGNC Symbol;Acc:10989]"
+ENSG00000076043,11,REXO2,19,RNA exonuclease 2 [Source:HGNC Symbol;Acc:17851]
+ENSG00000076242,3,MLH1,22,mutL homolog 1 [Source:HGNC Symbol;Acc:7127]
+ENSG00000076248,12,UNG,5,uracil-DNA glycosylase [Source:HGNC Symbol;Acc:12572]
+ENSG00000076555,12,ACACB,16,acetyl-CoA carboxylase beta [Source:HGNC Symbol;Acc:85]
+ENSG00000077713,X,SLC25A43,5,"solute carrier family 25, member 43 [Source:HGNC Symbol;Acc:30557]"
+ENSG00000078070,3,MCCC1,14,methylcrotonoyl-CoA carboxylase 1 (alpha) [Source:HGNC Symbol;Acc:6936]
+ENSG00000078618,1,NRD1,14,nardilysin (N-arginine dibasic convertase) [Source:HGNC Symbol;Acc:7995]
+ENSG00000078668,8,VDAC3,13,voltage-dependent anion channel 3 [Source:HGNC Symbol;Acc:12674]
+ENSG00000080819,3,CPOX,5,coproporphyrinogen oxidase [Source:HGNC Symbol;Acc:2321]
+ENSG00000081181,14,ARG2,4,arginase 2 [Source:HGNC Symbol;Acc:664]
+ENSG00000081791,5,KIAA0141,7,KIAA0141 [Source:HGNC Symbol;Acc:28969]
+ENSG00000082212,18,ME2,5,"malic enzyme 2, NAD(+)-dependent, mitochondrial [Source:HGNC Symbol;Acc:6984]"
+ENSG00000082515,5,MRPL22,7,mitochondrial ribosomal protein L22 [Source:HGNC Symbol;Acc:14480]
+ENSG00000083099,6,LYRM2,10,LYR motif containing 2 [Source:HGNC Symbol;Acc:25229]
+ENSG00000083123,6,BCKDHB,7,"branched chain keto acid dehydrogenase E1, beta polypeptide [Source:HGNC Symbol;Acc:987]"
+ENSG00000083720,5,OXCT1,8,3-oxoacid CoA transferase 1 [Source:HGNC Symbol;Acc:8527]
+ENSG00000084090,2,STARD7,6,StAR-related lipid transfer (START) domain containing 7 [Source:HGNC Symbol;Acc:18063]
+ENSG00000084092,4,NOA1,1,nitric oxide associated 1 [Source:HGNC Symbol;Acc:28473]
+ENSG00000084754,2,HADHA,5,"hydroxyacyl-CoA dehydrogenase/3-ketoacyl-CoA thiolase/enoyl-CoA hydratase (trifunctional protein), alpha subunit [Source:HGNC Symbol;Acc:4801]"
+ENSG00000085491,1,SLC25A24,4,"solute carrier family 25 (mitochondrial carrier; phosphate carrier), member 24 [Source:HGNC Symbol;Acc:20662]"
+ENSG00000085760,2,MTIF2,12,mitochondrial translational initiation factor 2 [Source:HGNC Symbol;Acc:7441]
+ENSG00000086504,16,MRPL28,10,mitochondrial ribosomal protein L28 [Source:HGNC Symbol;Acc:14484]
+ENSG00000087008,4,ACOX3,8,"acyl-CoA oxidase 3, pristanoyl [Source:HGNC Symbol;Acc:121]"
+ENSG00000087088,19,BAX,13,BCL2-associated X protein [Source:HGNC Symbol;Acc:959]
+ENSG00000087157,17,PGS1,16,phosphatidylglycerophosphate synthase 1 [Source:HGNC Symbol;Acc:30029]
+ENSG00000087299,14,L2HGDH,7,L-2-hydroxyglutarate dehydrogenase [Source:HGNC Symbol;Acc:20499]
+ENSG00000087470,12,DNM1L,30,dynamin 1-like [Source:HGNC Symbol;Acc:2973]
+ENSG00000088179,2,PTPN4,13,"protein tyrosine phosphatase, non-receptor type 4 (megakaryocyte) [Source:HGNC Symbol;Acc:9656]"
+ENSG00000088682,16,COQ9,16,coenzyme Q9 [Source:HGNC Symbol;Acc:25302]
+ENSG00000088766,20,CRLS1,7,cardiolipin synthase 1 [Source:HGNC Symbol;Acc:16148]
+ENSG00000088888,20,MAVS,3,mitochondrial antiviral signaling protein [Source:HGNC Symbol;Acc:29233]
+ENSG00000089163,12,SIRT4,3,sirtuin 4 [Source:HGNC Symbol;Acc:14932]
+ENSG00000090263,7,MRPS33,9,mitochondrial ribosomal protein S33 [Source:HGNC Symbol;Acc:16634]
+ENSG00000090266,7,NDUFB2,16,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 2, 8kDa [Source:HGNC Symbol;Acc:7697]"
+ENSG00000090432,1,MUL1,1,mitochondrial E3 ubiquitin protein ligase 1 [Source:HGNC Symbol;Acc:25762]
+ENSG00000090857,16,PDPR,12,pyruvate dehydrogenase phosphatase regulatory subunit [Source:HGNC Symbol;Acc:30264]
+ENSG00000091140,7,DLD,14,dihydrolipoamide dehydrogenase [Source:HGNC Symbol;Acc:2898]
+ENSG00000091483,1,FH,3,fumarate hydratase [Source:HGNC Symbol;Acc:3700]
+ENSG00000093010,22,COMT,11,catechol-O-methyltransferase [Source:HGNC Symbol;Acc:2228]
+ENSG00000093144,6,ECHDC1,24,enoyl CoA hydratase domain containing 1 [Source:HGNC Symbol;Acc:21489]
+ENSG00000095321,9,CRAT,9,carnitine O-acetyltransferase [Source:HGNC Symbol;Acc:2342]
+ENSG00000096080,6,MRPS18A,3,mitochondrial ribosomal protein S18A [Source:HGNC Symbol;Acc:14515]
+ENSG00000097021,1,ACOT7,11,acyl-CoA thioesterase 7 [Source:HGNC Symbol;Acc:24157]
+ENSG00000099624,19,ATP5D,8,"ATP synthase, H+ transporting, mitochondrial F1 complex, delta subunit [Source:HGNC Symbol;Acc:837]"
+ENSG00000099795,19,NDUFB7,2,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 7, 18kDa [Source:HGNC Symbol;Acc:7702]"
+ENSG00000099800,19,TIMM13,2,translocase of inner mitochondrial membrane 13 homolog (yeast) [Source:HGNC Symbol;Acc:11816]
+ENSG00000099821,19,POLRMT,11,polymerase (RNA) mitochondrial (DNA directed) [Source:HGNC Symbol;Acc:9200]
+ENSG00000099940,22,SNAP29,3,"synaptosomal-associated protein, 29kDa [Source:HGNC Symbol;Acc:11133]"
+ENSG00000099968,22,BCL2L13,14,BCL2-like 13 (apoptosis facilitator) [Source:HGNC Symbol;Acc:17164]
+ENSG00000100033,22,PRODH,14,proline dehydrogenase (oxidase) 1 [Source:HGNC Symbol;Acc:9453]
+ENSG00000100075,22,SLC25A1,5,"solute carrier family 25 (mitochondrial carrier; citrate transporter), member 1 [Source:HGNC Symbol;Acc:10979]"
+ENSG00000100116,22,GCAT,7,glycine C-acetyltransferase [Source:HGNC Symbol;Acc:4188]
+ENSG00000100151,22,PICK1,15,protein interacting with PRKCA 1 [Source:HGNC Symbol;Acc:9394]
+ENSG00000100209,22,HSCB,7,HscB mitochondrial iron-sulfur cluster co-chaperone [Source:HGNC Symbol;Acc:28913]
+ENSG00000100216,22,TOMM22,2,translocase of outer mitochondrial membrane 22 homolog (yeast) [Source:HGNC Symbol;Acc:18002]
+ENSG00000100243,22,CYB5R3,9,cytochrome b5 reductase 3 [Source:HGNC Symbol;Acc:2873]
+ENSG00000100266,22,PACSIN2,11,protein kinase C and casein kinase substrate in neurons 2 [Source:HGNC Symbol;Acc:8571]
+ENSG00000100294,22,MCAT,4,malonyl CoA:ACP acyltransferase (mitochondrial) [Source:HGNC Symbol;Acc:29622]
+ENSG00000100300,22,TSPO,6,translocator protein (18kDa) [Source:HGNC Symbol;Acc:1158]
+ENSG00000100335,22,MIEF1,14,mitochondrial elongation factor 1 [Source:HGNC Symbol;Acc:25979]
+ENSG00000100347,22,SAMM50,7,SAMM50 sorting and assembly machinery component [Source:HGNC Symbol;Acc:24276]
+ENSG00000100348,22,TXN2,5,thioredoxin 2 [Source:HGNC Symbol;Acc:17772]
+ENSG00000100372,22,SLC25A17,18,"solute carrier family 25 (mitochondrial carrier; peroxisomal membrane protein, 34kDa), member 17 [Source:HGNC Symbol;Acc:10987]"
+ENSG00000100412,22,ACO2,7,"aconitase 2, mitochondrial [Source:HGNC Symbol;Acc:118]"
+ENSG00000100416,22,TRMU,19,tRNA 5-methylaminomethyl-2-thiouridylate methyltransferase [Source:HGNC Symbol;Acc:25481]
+ENSG00000100445,14,SDR39U1,22,"short chain dehydrogenase/reductase family 39U, member 1 [Source:HGNC Symbol;Acc:20275]"
+ENSG00000100575,14,TIMM9,10,translocase of inner mitochondrial membrane 9 homolog (yeast) [Source:HGNC Symbol;Acc:11819]
+ENSG00000100577,14,GSTZ1,19,glutathione S-transferase zeta 1 [Source:HGNC Symbol;Acc:4643]
+ENSG00000100596,14,SPTLC2,6,"serine palmitoyltransferase, long chain base subunit 2 [Source:HGNC Symbol;Acc:11278]"
+ENSG00000100601,14,ALKBH1,4,"alkB, alkylation repair homolog 1 (E. coli) [Source:HGNC Symbol;Acc:17911]"
+ENSG00000100714,14,MTHFD1,16,"methylenetetrahydrofolate dehydrogenase (NADP+ dependent) 1, methenyltetrahydrofolate cyclohydrolase, formyltetrahydrofolate synthetase [Source:HGNC Symbol;Acc:7432]"
+ENSG00000100889,14,PCK2,16,phosphoenolpyruvate carboxykinase 2 (mitochondrial) [Source:HGNC Symbol;Acc:8725]
+ENSG00000100890,14,KIAA0391,11,KIAA0391 [Source:HGNC Symbol;Acc:19958]
+ENSG00000100902,14,PSMA6,14,"proteasome (prosome, macropain) subunit, alpha type, 6 [Source:HGNC Symbol;Acc:9535]"
+ENSG00000101019,20,UQCC1,27,ubiquinol-cytochrome c reductase complex assembly factor 1 [Source:HGNC Symbol;Acc:15891]
+ENSG00000101084,20,C20orf24,7,chromosome 20 open reading frame 24 [Source:HGNC Symbol;Acc:15870]
+ENSG00000101166,20,SLMO2,4,slowmo homolog 2 (Drosophila) [Source:HGNC Symbol;Acc:15892]
+ENSG00000101181,20,MTG2,12,mitochondrial ribosome-associated GTPase 2 [Source:HGNC Symbol;Acc:16239]
+ENSG00000101247,20,NDUFAF5,16,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 5 [Source:HGNC Symbol;Acc:15899]"
+ENSG00000101349,20,PAK7,3,p21 protein (Cdc42/Rac)-activated kinase 7 [Source:HGNC Symbol;Acc:15916]
+ENSG00000101365,20,IDH3B,11,isocitrate dehydrogenase 3 (NAD+) beta [Source:HGNC Symbol;Acc:5385]
+ENSG00000101417,20,PXMP4,3,"peroxisomal membrane protein 4, 24kDa [Source:HGNC Symbol;Acc:15920]"
+ENSG00000101546,18,RBFA,5,ribosome binding factor A (putative) [Source:HGNC Symbol;Acc:26120]
+ENSG00000101986,X,ABCD1,3,"ATP-binding cassette, sub-family D (ALD), member 1 [Source:HGNC Symbol;Acc:61]"
+ENSG00000102078,X,SLC25A14,14,"solute carrier family 25 (mitochondrial carrier, brain), member 14 [Source:HGNC Symbol;Acc:10984]"
+ENSG00000102738,13,MRPS31,4,mitochondrial ribosomal protein S31 [Source:HGNC Symbol;Acc:16632]
+ENSG00000102743,13,SLC25A15,4,solute carrier family 25 (mitochondrial carrier; ornithine transporter) member 15 [Source:HGNC Symbol;Acc:10985]
+ENSG00000102763,13,VWA8,4,von Willebrand factor A domain containing 8 [Source:HGNC Symbol;Acc:29071]
+ENSG00000102897,16,LYRM1,11,LYR motif containing 1 [Source:HGNC Symbol;Acc:25074]
+ENSG00000102910,16,LONP2,9,"lon peptidase 2, peroxisomal [Source:HGNC Symbol;Acc:20598]"
+ENSG00000102967,16,DHODH,9,dihydroorotate dehydrogenase (quinone) [Source:HGNC Symbol;Acc:2867]
+ENSG00000103018,16,CYB5B,7,cytochrome b5 type B (outer mitochondrial membrane) [Source:HGNC Symbol;Acc:24374]
+ENSG00000103024,16,NME3,11,NME/NM23 nucleoside diphosphate kinase 3 [Source:HGNC Symbol;Acc:7851]
+ENSG00000103121,16,CMC2,23,C-x(9)-C motif containing 2 [Source:HGNC Symbol;Acc:24447]
+ENSG00000103150,16,MLYCD,2,malonyl-CoA decarboxylase [Source:HGNC Symbol;Acc:7150]
+ENSG00000103160,16,HSDL1,7,hydroxysteroid dehydrogenase like 1 [Source:HGNC Symbol;Acc:16475]
+ENSG00000103202,16,NME4,10,NME/NM23 nucleoside diphosphate kinase 4 [Source:HGNC Symbol;Acc:7852]
+ENSG00000103356,16,EARS2,17,"glutamyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:29419]"
+ENSG00000103423,16,DNAJA3,14,"DnaJ (Hsp40) homolog, subfamily A, member 3 [Source:HGNC Symbol;Acc:11808]"
+ENSG00000103507,16,BCKDK,10,branched chain ketoacid dehydrogenase kinase [Source:HGNC Symbol;Acc:16902]
+ENSG00000103642,15,LACTB,4,"lactamase, beta [Source:HGNC Symbol;Acc:16468]"
+ENSG00000103707,15,MTFMT,7,mitochondrial methionyl-tRNA formyltransferase [Source:HGNC Symbol;Acc:29666]
+ENSG00000104325,8,DECR1,19,"2,4-dienoyl CoA reductase 1, mitochondrial [Source:HGNC Symbol;Acc:2753]"
+ENSG00000104381,8,GDAP1,8,ganglioside induced differentiation associated protein 1 [Source:HGNC Symbol;Acc:15968]
+ENSG00000104412,8,EMC2,7,ER membrane protein complex subunit 2 [Source:HGNC Symbol;Acc:28963]
+ENSG00000104687,8,GSR,8,glutathione reductase [Source:HGNC Symbol;Acc:4623]
+ENSG00000104765,8,BNIP3L,7,BCL2/adenovirus E1B 19kDa interacting protein 3-like [Source:HGNC Symbol;Acc:1085]
+ENSG00000104823,19,ECH1,17,"enoyl CoA hydratase 1, peroxisomal [Source:HGNC Symbol;Acc:3149]"
+ENSG00000104835,19,SARS2,15,"seryl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:17697]"
+ENSG00000104907,19,TRMT1,23,tRNA methyltransferase 1 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:25980]
+ENSG00000104936,19,DMPK,19,dystrophia myotonica-protein kinase [Source:HGNC Symbol;Acc:2933]
+ENSG00000104980,19,TIMM44,12,translocase of inner mitochondrial membrane 44 homolog (yeast) [Source:HGNC Symbol;Acc:17316]
+ENSG00000105197,19,TIMM50,20,translocase of inner mitochondrial membrane 50 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:23656]
+ENSG00000105220,19,GPI,17,glucose-6-phosphate isomerase [Source:HGNC Symbol;Acc:4458]
+ENSG00000105341,19,ATP5SL,16,ATP5S-like [Source:HGNC Symbol;Acc:25496]
+ENSG00000105364,19,MRPL4,11,mitochondrial ribosomal protein L4 [Source:HGNC Symbol;Acc:14276]
+ENSG00000105379,19,ETFB,5,"electron-transfer-flavoprotein, beta polypeptide [Source:HGNC Symbol;Acc:3482]"
+ENSG00000105518,19,TMEM205,16,transmembrane protein 205 [Source:HGNC Symbol;Acc:29631]
+ENSG00000105552,19,BCAT2,12,"branched chain amino-acid transaminase 2, mitochondrial [Source:HGNC Symbol;Acc:977]"
+ENSG00000105607,19,GCDH,18,glutaryl-CoA dehydrogenase [Source:HGNC Symbol;Acc:4189]
+ENSG00000105701,19,FKBP8,16,"FK506 binding protein 8, 38kDa [Source:HGNC Symbol;Acc:3724]"
+ENSG00000105755,19,ETHE1,6,ethylmalonic encephalopathy 1 [Source:HGNC Symbol;Acc:23287]
+ENSG00000105793,7,GTPBP10,12,GTP-binding protein 10 (putative) [Source:HGNC Symbol;Acc:25106]
+ENSG00000105819,7,PMPCB,9,peptidase (mitochondrial processing) beta [Source:HGNC Symbol;Acc:9119]
+ENSG00000105953,7,OGDH,10,oxoglutarate (alpha-ketoglutarate) dehydrogenase (lipoamide) [Source:HGNC Symbol;Acc:8124]
+ENSG00000106028,7,SSBP1,14,"single-stranded DNA binding protein 1, mitochondrial [Source:HGNC Symbol;Acc:11317]"
+ENSG00000106049,7,HIBADH,4,3-hydroxyisobutyrate dehydrogenase [Source:HGNC Symbol;Acc:4907]
+ENSG00000106077,7,ABHD11,14,abhydrolase domain containing 11 [Source:HGNC Symbol;Acc:16407]
+ENSG00000106105,7,GARS,9,glycyl-tRNA synthetase [Source:HGNC Symbol;Acc:4162]
+ENSG00000106153,7,CHCHD2,2,coiled-coil-helix-coiled-coil-helix domain containing 2 [Source:HGNC Symbol;Acc:21645]
+ENSG00000106246,7,PTCD1,6,pentatricopeptide repeat domain 1 [Source:HGNC Symbol;Acc:22198]
+ENSG00000106541,7,AGR2,8,anterior gradient 2 [Source:HGNC Symbol;Acc:328]
+ENSG00000106554,7,CHCHD3,9,coiled-coil-helix-coiled-coil-helix domain containing 3 [Source:HGNC Symbol;Acc:21906]
+ENSG00000106591,7,MRPL32,4,mitochondrial ribosomal protein L32 [Source:HGNC Symbol;Acc:14035]
+ENSG00000106603,7,COA1,20,cytochrome c oxidase assembly factor 1 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:21868]
+ENSG00000107020,9,PLGRKT,4,"plasminogen receptor, C-terminal lysine transmembrane protein [Source:HGNC Symbol;Acc:23633]"
+ENSG00000107537,10,PHYH,7,phytanoyl-CoA 2-hydroxylase [Source:HGNC Symbol;Acc:8940]
+ENSG00000107745,10,MICU1,13,mitochondrial calcium uptake 1 [Source:HGNC Symbol;Acc:1530]
+ENSG00000107815,10,C10orf2,5,chromosome 10 open reading frame 2 [Source:HGNC Symbol;Acc:1160]
+ENSG00000107819,10,SFXN3,7,sideroflexin 3 [Source:HGNC Symbol;Acc:16087]
+ENSG00000107951,10,MTPAP,6,mitochondrial poly(A) polymerase [Source:HGNC Symbol;Acc:25532]
+ENSG00000107959,10,PITRM1,11,pitrilysin metallopeptidase 1 [Source:HGNC Symbol;Acc:17663]
+ENSG00000108064,10,TFAM,4,"transcription factor A, mitochondrial [Source:HGNC Symbol;Acc:11741]"
+ENSG00000108179,10,PPIF,6,peptidylprolyl isomerase F [Source:HGNC Symbol;Acc:9259]
+ENSG00000108387,17,SEPT4,29,septin 4 [Source:HGNC Symbol;Acc:9165]
+ENSG00000108439,17,PNPO,10,pyridoxamine 5'-phosphate oxidase [Source:HGNC Symbol;Acc:30260]
+ENSG00000108528,17,SLC25A11,5,"solute carrier family 25 (mitochondrial carrier; oxoglutarate carrier), member 11 [Source:HGNC Symbol;Acc:10981]"
+ENSG00000108561,17,C1QBP,7,"complement component 1, q subcomponent binding protein [Source:HGNC Symbol;Acc:1243]"
+ENSG00000108599,17,AKAP10,11,A kinase (PRKA) anchor protein 10 [Source:HGNC Symbol;Acc:368]
+ENSG00000108826,17,MRPL27,7,mitochondrial ribosomal protein L27 [Source:HGNC Symbol;Acc:14483]
+ENSG00000109016,17,DHRS7B,10,dehydrogenase/reductase (SDR family) member 7B [Source:HGNC Symbol;Acc:24547]
+ENSG00000109180,4,OCIAD1,28,OCIA domain containing 1 [Source:HGNC Symbol;Acc:16074]
+ENSG00000109390,4,NDUFC1,12,"NADH dehydrogenase (ubiquinone) 1, subcomplex unknown, 1, 6kDa [Source:HGNC Symbol;Acc:7705]"
+ENSG00000109424,4,UCP1,1,"uncoupling protein 1 (mitochondrial, proton carrier) [Source:HGNC Symbol;Acc:12517]"
+ENSG00000109475,4,RPL34,7,ribosomal protein L34 [Source:HGNC Symbol;Acc:10340]
+ENSG00000109519,4,GRPEL1,4,"GrpE-like 1, mitochondrial (E. coli) [Source:HGNC Symbol;Acc:19696]"
+ENSG00000109576,4,AADAT,8,aminoadipate aminotransferase [Source:HGNC Symbol;Acc:17929]
+ENSG00000109854,11,HTATIP2,9,"HIV-1 Tat interactive protein 2, 30kDa [Source:HGNC Symbol;Acc:16637]"
+ENSG00000109919,11,MTCH2,7,mitochondrial carrier 2 [Source:HGNC Symbol;Acc:17587]
+ENSG00000110011,11,DNAJC4,11,"DnaJ (Hsp40) homolog, subfamily C, member 4 [Source:HGNC Symbol;Acc:5271]"
+ENSG00000110074,11,FOXRED1,19,FAD-dependent oxidoreductase domain containing 1 [Source:HGNC Symbol;Acc:26927]
+ENSG00000110090,11,CPT1A,9,carnitine palmitoyltransferase 1A (liver) [Source:HGNC Symbol;Acc:2328]
+ENSG00000110435,11,PDHX,8,"pyruvate dehydrogenase complex, component X [Source:HGNC Symbol;Acc:21350]"
+ENSG00000110455,11,ACCS,14,1-aminocyclopropane-1-carboxylate synthase homolog (Arabidopsis)(non-functional) [Source:HGNC Symbol;Acc:23989]
+ENSG00000110536,11,PTPMT1,5,"protein tyrosine phosphatase, mitochondrial 1 [Source:HGNC Symbol;Acc:26965]"
+ENSG00000110717,11,NDUFS8,15,"NADH dehydrogenase (ubiquinone) Fe-S protein 8, 23kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7715]"
+ENSG00000110719,11,TCIRG1,16,"T-cell, immune regulator 1, ATPase, H+ transporting, lysosomal V0 subunit A3 [Source:HGNC Symbol;Acc:11647]"
+ENSG00000110871,12,COQ5,8,"coenzyme Q5 homolog, methyltransferase (S. cerevisiae) [Source:HGNC Symbol;Acc:28722]"
+ENSG00000110955,12,ATP5B,13,"ATP synthase, H+ transporting, mitochondrial F1 complex, beta polypeptide [Source:HGNC Symbol;Acc:830]"
+ENSG00000111012,12,CYP27B1,7,"cytochrome P450, family 27, subfamily B, polypeptide 1 [Source:HGNC Symbol;Acc:2606]"
+ENSG00000111058,12,ACSS3,7,acyl-CoA synthetase short-chain family member 3 [Source:HGNC Symbol;Acc:24723]
+ENSG00000111271,12,ACAD10,25,"acyl-CoA dehydrogenase family, member 10 [Source:HGNC Symbol;Acc:21597]"
+ENSG00000111275,12,ALDH2,4,aldehyde dehydrogenase 2 family (mitochondrial) [Source:HGNC Symbol;Acc:404]
+ENSG00000111639,12,MRPL51,7,mitochondrial ribosomal protein L51 [Source:HGNC Symbol;Acc:14044]
+ENSG00000111640,12,GAPDH,10,glyceraldehyde-3-phosphate dehydrogenase [Source:HGNC Symbol;Acc:4141]
+ENSG00000111666,12,CHPT1,10,choline phosphotransferase 1 [Source:HGNC Symbol;Acc:17852]
+ENSG00000111669,12,TPI1,9,triosephosphate isomerase 1 [Source:HGNC Symbol;Acc:12009]
+ENSG00000111696,12,NT5DC3,5,5'-nucleotidase domain containing 3 [Source:HGNC Symbol;Acc:30826]
+ENSG00000111716,12,LDHB,10,lactate dehydrogenase B [Source:HGNC Symbol;Acc:6541]
+ENSG00000111737,12,RAB35,7,"RAB35, member RAS oncogene family [Source:HGNC Symbol;Acc:9774]"
+ENSG00000111775,12,COX6A1,3,cytochrome c oxidase subunit VIa polypeptide 1 [Source:HGNC Symbol;Acc:2277]
+ENSG00000111786,12,SRSF9,6,serine/arginine-rich splicing factor 9 [Source:HGNC Symbol;Acc:10791]
+ENSG00000111843,6,TMEM14C,5,transmembrane protein 14C [Source:HGNC Symbol;Acc:20952]
+ENSG00000111911,6,HINT3,1,histidine triad nucleotide binding protein 3 [Source:HGNC Symbol;Acc:18468]
+ENSG00000112031,6,MTRF1L,11,mitochondrial translational release factor 1-like [Source:HGNC Symbol;Acc:21051]
+ENSG00000112096,6,SOD2,16,"superoxide dismutase 2, mitochondrial [Source:HGNC Symbol;Acc:11180]"
+ENSG00000112110,6,MRPL18,4,mitochondrial ribosomal protein L18 [Source:HGNC Symbol;Acc:14477]
+ENSG00000112234,6,FBXL4,2,F-box and leucine-rich repeat protein 4 [Source:HGNC Symbol;Acc:13601]
+ENSG00000112294,6,ALDH5A1,6,"aldehyde dehydrogenase 5 family, member A1 [Source:HGNC Symbol;Acc:408]"
+ENSG00000112304,6,ACOT13,3,acyl-CoA thioesterase 13 [Source:HGNC Symbol;Acc:20999]
+ENSG00000112651,6,MRPL2,9,mitochondrial ribosomal protein L2 [Source:HGNC Symbol;Acc:14056]
+ENSG00000112695,6,COX7A2,9,cytochrome c oxidase subunit VIIa polypeptide 2 (liver) [Source:HGNC Symbol;Acc:2288]
+ENSG00000112855,5,HARS2,15,"histidyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:4817]"
+ENSG00000112992,5,NNT,10,nicotinamide nucleotide transhydrogenase [Source:HGNC Symbol;Acc:7863]
+ENSG00000112996,5,MRPS30,4,mitochondrial ribosomal protein S30 [Source:HGNC Symbol;Acc:8769]
+ENSG00000113013,5,HSPA9,13,heat shock 70kDa protein 9 (mortalin) [Source:HGNC Symbol;Acc:5244]
+ENSG00000113048,5,MRPS27,16,mitochondrial ribosomal protein S27 [Source:HGNC Symbol;Acc:14512]
+ENSG00000113272,5,THG1L,3,tRNA-histidine guanylyltransferase 1-like (S. cerevisiae) [Source:HGNC Symbol;Acc:26053]
+ENSG00000113384,5,GOLPH3,3,golgi phosphoprotein 3 (coat-protein) [Source:HGNC Symbol;Acc:15452]
+ENSG00000113407,5,TARS,16,threonyl-tRNA synthetase [Source:HGNC Symbol;Acc:11572]
+ENSG00000113492,5,AGXT2,5,alanine--glyoxylate aminotransferase 2 [Source:HGNC Symbol;Acc:14412]
+ENSG00000113593,5,PPWD1,15,peptidylprolyl isomerase domain and WD repeat containing 1 [Source:HGNC Symbol;Acc:28954]
+ENSG00000113643,5,RARS,10,arginyl-tRNA synthetase [Source:HGNC Symbol;Acc:9870]
+ENSG00000113790,3,EHHADH,6,"enoyl-CoA, hydratase/3-hydroxyacyl CoA dehydrogenase [Source:HGNC Symbol;Acc:3247]"
+ENSG00000113845,3,TIMMDC1,9,translocase of inner mitochondrial membrane domain containing 1 [Source:HGNC Symbol;Acc:1321]
+ENSG00000114021,3,NIT2,7,"nitrilase family, member 2 [Source:HGNC Symbol;Acc:29878]"
+ENSG00000114023,3,FAM162A,3,"family with sequence similarity 162, member A [Source:HGNC Symbol;Acc:17865]"
+ENSG00000114026,3,OGG1,18,8-oxoguanine DNA glycosylase [Source:HGNC Symbol;Acc:8125]
+ENSG00000114054,3,PCCB,19,"propionyl CoA carboxylase, beta polypeptide [Source:HGNC Symbol;Acc:8654]"
+ENSG00000114120,3,SLC25A36,14,"solute carrier family 25 (pyrimidine nucleotide carrier ), member 36 [Source:HGNC Symbol;Acc:25554]"
+ENSG00000114686,3,MRPL3,10,mitochondrial ribosomal protein L3 [Source:HGNC Symbol;Acc:10379]
+ENSG00000114735,3,HEMK1,7,HemK methyltransferase family member 1 [Source:HGNC Symbol;Acc:24923]
+ENSG00000114956,2,DGUOK,8,deoxyguanosine kinase [Source:HGNC Symbol;Acc:2858]
+ENSG00000115042,2,FAHD2A,6,fumarylacetoacetate hydrolase domain containing 2A [Source:HGNC Symbol;Acc:24252]
+ENSG00000115159,2,GPD2,13,glycerol-3-phosphate dehydrogenase 2 (mitochondrial) [Source:HGNC Symbol;Acc:4456]
+ENSG00000115204,2,MPV17,22,MpV17 mitochondrial inner membrane protein [Source:HGNC Symbol;Acc:7224]
+ENSG00000115286,19,NDUFS7,17,"NADH dehydrogenase (ubiquinone) Fe-S protein 7, 20kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7714]"
+ENSG00000115317,2,HTRA2,10,HtrA serine peptidase 2 [Source:HGNC Symbol;Acc:14348]
+ENSG00000115361,2,ACADL,4,"acyl-CoA dehydrogenase, long chain [Source:HGNC Symbol;Acc:88]"
+ENSG00000115364,2,MRPL19,7,mitochondrial ribosomal protein L19 [Source:HGNC Symbol;Acc:14052]
+ENSG00000115419,2,GLS,15,glutaminase [Source:HGNC Symbol;Acc:4331]
+ENSG00000115468,2,EFHD1,6,"EF-hand domain family, member D1 [Source:HGNC Symbol;Acc:29556]"
+ENSG00000115520,2,COQ10B,5,coenzyme Q10 homolog B (S. cerevisiae) [Source:HGNC Symbol;Acc:25819]
+ENSG00000115541,2,HSPE1,7,heat shock 10kDa protein 1 [Source:HGNC Symbol;Acc:5269]
+ENSG00000115657,2,ABCB6,14,"ATP-binding cassette, sub-family B (MDR/TAP), member 6 [Source:HGNC Symbol;Acc:47]"
+ENSG00000115840,2,SLC25A12,11,"solute carrier family 25 (aspartate/glutamate carrier), member 12 [Source:HGNC Symbol;Acc:10982]"
+ENSG00000115944,2,COX7A2L,8,cytochrome c oxidase subunit VIIa polypeptide 2 like [Source:HGNC Symbol;Acc:2289]
+ENSG00000116096,2,SPR,2,"sepiapterin reductase (7,8-dihydrobiopterin:NADP+ oxidoreductase) [Source:HGNC Symbol;Acc:11257]"
+ENSG00000116133,1,DHCR24,4,24-dehydrocholesterol reductase [Source:HGNC Symbol;Acc:2859]
+ENSG00000116171,1,SCP2,16,sterol carrier protein 2 [Source:HGNC Symbol;Acc:10606]
+ENSG00000116221,1,MRPL37,6,mitochondrial ribosomal protein L37 [Source:HGNC Symbol;Acc:14034]
+ENSG00000116288,1,PARK7,10,parkinson protein 7 [Source:HGNC Symbol;Acc:16369]
+ENSG00000116353,1,MECR,18,mitochondrial trans-2-enoyl-CoA reductase [Source:HGNC Symbol;Acc:19691]
+ENSG00000116459,1,ATP5F1,6,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit B1 [Source:HGNC Symbol;Acc:840]"
+ENSG00000116688,1,MFN2,6,mitofusin 2 [Source:HGNC Symbol;Acc:16877]
+ENSG00000116771,1,AGMAT,1,agmatine ureohydrolase (agmatinase) [Source:HGNC Symbol;Acc:18407]
+ENSG00000116791,1,CRYZ,7,"crystallin, zeta (quinone reductase) [Source:HGNC Symbol;Acc:2419]"
+ENSG00000116874,1,WARS2,6,"tryptophanyl tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:12730]"
+ENSG00000116882,1,HAO2,4,hydroxyacid oxidase 2 (long chain) [Source:HGNC Symbol;Acc:4810]
+ENSG00000116898,1,MRPS15,4,mitochondrial ribosomal protein S15 [Source:HGNC Symbol;Acc:14504]
+ENSG00000117009,1,KMO,10,kynurenine 3-monooxygenase (kynurenine 3-hydroxylase) [Source:HGNC Symbol;Acc:6381]
+ENSG00000117054,1,ACADM,19,"acyl-CoA dehydrogenase, C-4 to C-12 straight chain [Source:HGNC Symbol;Acc:89]"
+ENSG00000117118,1,SDHB,8,"succinate dehydrogenase complex, subunit B, iron sulfur (Ip) [Source:HGNC Symbol;Acc:10681]"
+ENSG00000117305,1,HMGCL,10,3-hydroxymethyl-3-methylglutaryl-CoA lyase [Source:HGNC Symbol;Acc:5005]
+ENSG00000117481,1,NSUN4,11,"NOP2/Sun domain family, member 4 [Source:HGNC Symbol;Acc:31802]"
+ENSG00000117528,1,ABCD3,9,"ATP-binding cassette, sub-family D (ALD), member 3 [Source:HGNC Symbol;Acc:67]"
+ENSG00000117592,1,PRDX6,3,peroxiredoxin 6 [Source:HGNC Symbol;Acc:16753]
+ENSG00000117593,1,DARS2,4,"aspartyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:25538]"
+ENSG00000117640,1,MTFR1L,23,mitochondrial fission regulator 1-like [Source:HGNC Symbol;Acc:28836]
+ENSG00000117791,1,MARC2,6,mitochondrial amidoxime reducing component 2 [Source:HGNC Symbol;Acc:26064]
+ENSG00000117862,1,TXNDC12,5,thioredoxin domain containing 12 (endoplasmic reticulum) [Source:HGNC Symbol;Acc:24626]
+ENSG00000117906,15,RCN2,6,"reticulocalbin 2, EF-hand calcium binding domain [Source:HGNC Symbol;Acc:9935]"
+ENSG00000118246,2,FASTKD2,6,FAST kinase domains 2 [Source:HGNC Symbol;Acc:29160]
+ENSG00000118508,6,RAB32,1,"RAB32, member RAS oncogene family [Source:HGNC Symbol;Acc:9772]"
+ENSG00000118596,12,SLC16A7,17,"solute carrier family 16 (monocarboxylate transporter), member 7 [Source:HGNC Symbol;Acc:10928]"
+ENSG00000119013,2,NDUFB3,4,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 3, 12kDa [Source:HGNC Symbol;Acc:7698]"
+ENSG00000119421,9,NDUFA8,2,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 8, 19kDa [Source:HGNC Symbol;Acc:7692]"
+ENSG00000119431,9,HDHD3,3,haloacid dehalogenase-like hydrolase domain containing 3 [Source:HGNC Symbol;Acc:28171]
+ENSG00000119471,9,HSDL2,7,hydroxysteroid dehydrogenase like 2 [Source:HGNC Symbol;Acc:18572]
+ENSG00000119673,14,ACOT2,3,acyl-CoA thioesterase 2 [Source:HGNC Symbol;Acc:18431]
+ENSG00000119689,14,DLST,16,dihydrolipoamide S-succinyltransferase (E2 component of 2-oxo-glutarate complex) [Source:HGNC Symbol;Acc:2911]
+ENSG00000119705,14,SLIRP,11,SRA stem-loop interacting RNA binding protein [Source:HGNC Symbol;Acc:20495]
+ENSG00000119711,14,ALDH6A1,7,"aldehyde dehydrogenase 6 family, member A1 [Source:HGNC Symbol;Acc:7179]"
+ENSG00000119723,14,COQ6,22,coenzyme Q6 monooxygenase [Source:HGNC Symbol;Acc:20233]
+ENSG00000119912,10,IDE,8,insulin-degrading enzyme [Source:HGNC Symbol;Acc:5381]
+ENSG00000119927,10,GPAM,5,"glycerol-3-phosphate acyltransferase, mitochondrial [Source:HGNC Symbol;Acc:24865]"
+ENSG00000120254,6,MTHFD1L,12,methylenetetrahydrofolate dehydrogenase (NADP+ dependent) 1-like [Source:HGNC Symbol;Acc:21055]
+ENSG00000120333,1,MRPS14,3,mitochondrial ribosomal protein S14 [Source:HGNC Symbol;Acc:14049]
+ENSG00000120662,13,MTRF1,10,mitochondrial translational release factor 1 [Source:HGNC Symbol;Acc:7469]
+ENSG00000120675,13,DNAJC15,2,"DnaJ (Hsp40) homolog, subfamily C, member 15 [Source:HGNC Symbol;Acc:20325]"
+ENSG00000120832,12,MTERFD3,7,MTERF domain containing 3 [Source:HGNC Symbol;Acc:30779]
+ENSG00000120915,8,EPHX2,12,"epoxide hydrolase 2, cytoplasmic [Source:HGNC Symbol;Acc:3402]"
+ENSG00000120992,8,LYPLA1,13,lysophospholipase I [Source:HGNC Symbol;Acc:6737]
+ENSG00000121057,17,AKAP1,18,A kinase (PRKA) anchor protein 1 [Source:HGNC Symbol;Acc:367]
+ENSG00000121289,19,CEP89,8,centrosomal protein 89kDa [Source:HGNC Symbol;Acc:25907]
+ENSG00000121310,1,ECHDC2,27,enoyl CoA hydratase domain containing 2 [Source:HGNC Symbol;Acc:23408]
+ENSG00000121691,11,CAT,5,catalase [Source:HGNC Symbol;Acc:1516]
+ENSG00000121897,4,LIAS,7,lipoic acid synthetase [Source:HGNC Symbol;Acc:16429]
+ENSG00000122033,13,MTIF3,13,mitochondrial translational initiation factor 3 [Source:HGNC Symbol;Acc:29788]
+ENSG00000122085,2,MTERFD2,21,MTERF domain containing 2 [Source:HGNC Symbol;Acc:28785]
+ENSG00000122140,9,MRPS2,8,mitochondrial ribosomal protein S2 [Source:HGNC Symbol;Acc:14495]
+ENSG00000122335,6,SERAC1,8,serine active site containing 1 [Source:HGNC Symbol;Acc:21061]
+ENSG00000122378,10,FAM213A,4,"family with sequence similarity 213, member A [Source:HGNC Symbol;Acc:28651]"
+ENSG00000122687,7,FTSJ2,5,FtsJ RNA methyltransferase homolog 2 (E. coli) [Source:HGNC Symbol;Acc:16352]
+ENSG00000122696,9,SLC25A51,4,"solute carrier family 25, member 51 [Source:HGNC Symbol;Acc:23323]"
+ENSG00000122729,9,ACO1,3,"aconitase 1, soluble [Source:HGNC Symbol;Acc:117]"
+ENSG00000122873,10,CISD1,4,CDGSH iron sulfur domain 1 [Source:HGNC Symbol;Acc:30880]
+ENSG00000122912,10,SLC25A16,8,"solute carrier family 25 (mitochondrial carrier; Graves disease autoantigen), member 16 [Source:HGNC Symbol;Acc:10986]"
+ENSG00000122971,12,ACADS,3,"acyl-CoA dehydrogenase, C-2 to C-3 short chain [Source:HGNC Symbol;Acc:90]"
+ENSG00000123130,X,ACOT9,8,acyl-CoA thioesterase 9 [Source:HGNC Symbol;Acc:17152]
+ENSG00000123131,X,PRDX4,5,peroxiredoxin 4 [Source:HGNC Symbol;Acc:17169]
+ENSG00000123213,5,NLN,10,neurolysin (metallopeptidase M3 family) [Source:HGNC Symbol;Acc:16058]
+ENSG00000123297,12,TSFM,11,"Ts translation elongation factor, mitochondrial [Source:HGNC Symbol;Acc:12367]"
+ENSG00000123453,9,SARDH,8,sarcosine dehydrogenase [Source:HGNC Symbol;Acc:10536]
+ENSG00000123472,1,ATPAF1,14,ATP synthase mitochondrial F1 complex assembly factor 1 [Source:HGNC Symbol;Acc:18803]
+ENSG00000123545,6,NDUFAF4,3,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 4 [Source:HGNC Symbol;Acc:21034]"
+ENSG00000123600,2,METTL8,16,methyltransferase like 8 [Source:HGNC Symbol;Acc:25856]
+ENSG00000123815,19,ADCK4,18,aarF domain containing kinase 4 [Source:HGNC Symbol;Acc:19041]
+ENSG00000124098,20,FAM210B,2,"family with sequence similarity 210, member B [Source:HGNC Symbol;Acc:16102]"
+ENSG00000124172,20,ATP5E,3,"ATP synthase, H+ transporting, mitochondrial F1 complex, epsilon subunit [Source:HGNC Symbol;Acc:838]"
+ENSG00000124279,5,FASTKD3,8,FAST kinase domains 3 [Source:HGNC Symbol;Acc:28758]
+ENSG00000124370,2,MCEE,5,methylmalonyl CoA epimerase [Source:HGNC Symbol;Acc:16732]
+ENSG00000124523,6,SIRT5,6,sirtuin 5 [Source:HGNC Symbol;Acc:14933]
+ENSG00000124532,6,MRS2,8,MRS2 magnesium transporter [Source:HGNC Symbol;Acc:13785]
+ENSG00000124593,6,PRICKLE4,10,prickle homolog 4 (Drosophila) [Source:HGNC Symbol;Acc:16805]
+ENSG00000124608,6,AARS2,2,"alanyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:21022]"
+ENSG00000124615,6,MOCS1,11,molybdenum cofactor synthesis 1 [Source:HGNC Symbol;Acc:7190]
+ENSG00000125166,16,GOT2,7,"glutamic-oxaloacetic transaminase 2, mitochondrial [Source:HGNC Symbol;Acc:4433]"
+ENSG00000125246,13,CLYBL,9,citrate lyase beta like [Source:HGNC Symbol;Acc:18355]
+ENSG00000125356,X,NDUFA1,1,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 1, 7.5kDa [Source:HGNC Symbol;Acc:7683]"
+ENSG00000125375,14,ATP5S,11,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit s (factor B) [Source:HGNC Symbol;Acc:18799]"
+ENSG00000125434,17,SLC25A35,8,"solute carrier family 25, member 35 [Source:HGNC Symbol;Acc:31921]"
+ENSG00000125445,17,MRPS7,7,mitochondrial ribosomal protein S7 [Source:HGNC Symbol;Acc:14499]
+ENSG00000125454,17,SLC25A19,15,"solute carrier family 25 (mitochondrial thiamine pyrophosphate carrier), member 19 [Source:HGNC Symbol;Acc:14409]"
+ENSG00000125458,17,NT5C,14,"5', 3'-nucleotidase, cytosolic [Source:HGNC Symbol;Acc:17144]"
+ENSG00000125611,2,CHCHD5,5,coiled-coil-helix-coiled-coil-helix domain containing 5 [Source:HGNC Symbol;Acc:17840]
+ENSG00000125648,19,SLC25A23,14,"solute carrier family 25 (mitochondrial carrier; phosphate carrier), member 23 [Source:HGNC Symbol;Acc:19375]"
+ENSG00000125652,19,ALKBH7,3,"alkB, alkylation repair homolog 7 (E. coli) [Source:HGNC Symbol;Acc:21306]"
+ENSG00000125656,19,CLPP,6,caseinolytic mitochondrial matrix peptidase proteolytic subunit [Source:HGNC Symbol;Acc:2084]
+ENSG00000125741,19,OPA3,3,"optic atrophy 3 (autosomal recessive, with chorea and spastic paraplegia) [Source:HGNC Symbol;Acc:8142]"
+ENSG00000125779,20,PANK2,7,pantothenate kinase 2 [Source:HGNC Symbol;Acc:15894]
+ENSG00000125871,20,MGME1,5,mitochondrial genome maintenance exonuclease 1 [Source:HGNC Symbol;Acc:16205]
+ENSG00000125901,20,MRPS26,1,mitochondrial ribosomal protein S26 [Source:HGNC Symbol;Acc:14045]
+ENSG00000125995,20,ROMO1,5,reactive oxygen species modulator 1 [Source:HGNC Symbol;Acc:16185]
+ENSG00000126267,19,COX6B1,4,cytochrome c oxidase subunit VIb polypeptide 1 (ubiquitous) [Source:HGNC Symbol;Acc:2280]
+ENSG00000126432,11,PRDX5,3,peroxiredoxin 5 [Source:HGNC Symbol;Acc:9355]
+ENSG00000126602,16,TRAP1,17,TNF receptor-associated protein 1 [Source:HGNC Symbol;Acc:16264]
+ENSG00000126768,X,TIMM17B,8,translocase of inner mitochondrial membrane 17 homolog B (yeast) [Source:HGNC Symbol;Acc:17310]
+ENSG00000126858,17,RHOT1,17,ras homolog family member T1 [Source:HGNC Symbol;Acc:21168]
+ENSG00000126953,X,TIMM8A,2,translocase of inner mitochondrial membrane 8 homolog A (yeast) [Source:HGNC Symbol;Acc:11817]
+ENSG00000127184,5,COX7C,7,cytochrome c oxidase subunit VIIc [Source:HGNC Symbol;Acc:2292]
+ENSG00000127540,19,UQCR11,5,"ubiquinol-cytochrome c reductase, complex III subunit XI [Source:HGNC Symbol;Acc:30862]"
+ENSG00000127554,16,GFER,5,"growth factor, augmenter of liver regeneration [Source:HGNC Symbol;Acc:4236]"
+ENSG00000127884,10,ECHS1,1,"enoyl CoA hydratase, short chain, 1, mitochondrial [Source:HGNC Symbol;Acc:3151]"
+ENSG00000127989,7,MTERF,8,mitochondrial transcription termination factor [Source:HGNC Symbol;Acc:21463]
+ENSG00000128050,4,PAICS,8,"phosphoribosylaminoimidazole carboxylase, phosphoribosylaminoimidazole succinocarboxamide synthetase [Source:HGNC Symbol;Acc:8587]"
+ENSG00000128309,22,MPST,8,mercaptopyruvate sulfurtransferase [Source:HGNC Symbol;Acc:7223]
+ENSG00000128311,22,TST,3,thiosulfate sulfurtransferase (rhodanese) [Source:HGNC Symbol;Acc:12388]
+ENSG00000128609,7,NDUFA5,10,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 5 [Source:HGNC Symbol;Acc:7688]"
+ENSG00000128626,19,MRPS12,4,mitochondrial ribosomal protein S12 [Source:HGNC Symbol;Acc:10380]
+ENSG00000128654,2,MTX2,6,metaxin 2 [Source:HGNC Symbol;Acc:7506]
+ENSG00000128694,2,OSGEPL1,8,O-sialoglycoprotein endopeptidase-like 1 [Source:HGNC Symbol;Acc:23075]
+ENSG00000128928,15,IVD,14,isovaleryl-CoA dehydrogenase [Source:HGNC Symbol;Acc:6186]
+ENSG00000128951,15,DUT,11,deoxyuridine triphosphatase [Source:HGNC Symbol;Acc:3078]
+ENSG00000129282,17,MRM1,2,mitochondrial rRNA methyltransferase 1 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:26202]
+ENSG00000129473,14,BCL2L2,6,BCL2-like 2 [Source:HGNC Symbol;Acc:995]
+ENSG00000130159,19,ECSIT,14,ECSIT signalling integrator [Source:HGNC Symbol;Acc:29548]
+ENSG00000130204,19,TOMM40,7,translocase of outer mitochondrial membrane 40 homolog (yeast) [Source:HGNC Symbol;Acc:18001]
+ENSG00000130299,19,GTPBP3,28,GTP binding protein 3 (mitochondrial) [Source:HGNC Symbol;Acc:14880]
+ENSG00000130312,19,MRPL34,6,mitochondrial ribosomal protein L34 [Source:HGNC Symbol;Acc:14488]
+ENSG00000130347,6,RTN4IP1,4,reticulon 4 interacting protein 1 [Source:HGNC Symbol;Acc:18647]
+ENSG00000130348,6,QRSL1,3,glutaminyl-tRNA synthase (glutamine-hydrolyzing)-like 1 [Source:HGNC Symbol;Acc:21020]
+ENSG00000130349,6,C6orf203,4,chromosome 6 open reading frame 203 [Source:HGNC Symbol;Acc:17971]
+ENSG00000130414,2,NDUFA10,13,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 10, 42kDa [Source:HGNC Symbol;Acc:7684]"
+ENSG00000130489,22,SCO2,6,SCO2 cytochrome c oxidase assembly protein [Source:HGNC Symbol;Acc:10604]
+ENSG00000130770,1,ATPIF1,4,ATPase inhibitory factor 1 [Source:HGNC Symbol;Acc:871]
+ENSG00000130921,12,C12orf65,8,chromosome 12 open reading frame 65 [Source:HGNC Symbol;Acc:26784]
+ENSG00000131055,20,COX4I2,2,cytochrome c oxidase subunit IV isoform 2 (lung) [Source:HGNC Symbol;Acc:16232]
+ENSG00000131143,16,COX4I1,18,cytochrome c oxidase subunit IV isoform 1 [Source:HGNC Symbol;Acc:2265]
+ENSG00000131174,X,COX7B,3,cytochrome c oxidase subunit VIIb [Source:HGNC Symbol;Acc:2291]
+ENSG00000131269,X,ABCB7,9,"ATP-binding cassette, sub-family B (MDR/TAP), member 7 [Source:HGNC Symbol;Acc:48]"
+ENSG00000131368,3,MRPS25,7,mitochondrial ribosomal protein S25 [Source:HGNC Symbol;Acc:14511]
+ENSG00000131473,17,ACLY,10,ATP citrate lyase [Source:HGNC Symbol;Acc:115]
+ENSG00000131495,5,NDUFA2,4,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 2, 8kDa [Source:HGNC Symbol;Acc:7685]"
+ENSG00000131730,5,CKMT2,12,"creatine kinase, mitochondrial 2 (sarcomeric) [Source:HGNC Symbol;Acc:1996]"
+ENSG00000131779,1,PEX11B,3,peroxisomal biogenesis factor 11 beta [Source:HGNC Symbol;Acc:8853]
+ENSG00000131828,X,PDHA1,13,pyruvate dehydrogenase (lipoamide) alpha 1 [Source:HGNC Symbol;Acc:8806]
+ENSG00000131844,5,MCCC2,9,methylcrotonoyl-CoA carboxylase 2 (beta) [Source:HGNC Symbol;Acc:6937]
+ENSG00000132142,17,ACACA,26,acetyl-CoA carboxylase alpha [Source:HGNC Symbol;Acc:84]
+ENSG00000132153,3,DHX30,14,DEAH (Asp-Glu-Ala-His) box helicase 30 [Source:HGNC Symbol;Acc:16716]
+ENSG00000132286,11,TIMM10B,5,translocase of inner mitochondrial membrane 10 homolog B (yeast) [Source:HGNC Symbol;Acc:4022]
+ENSG00000132300,2,PTCD3,20,pentatricopeptide repeat domain 3 [Source:HGNC Symbol;Acc:24717]
+ENSG00000132305,2,IMMT,11,"inner membrane protein, mitochondrial [Source:HGNC Symbol;Acc:6047]"
+ENSG00000132313,2,MRPL35,4,mitochondrial ribosomal protein L35 [Source:HGNC Symbol;Acc:14489]
+ENSG00000132394,3,EEFSEC,4,"eukaryotic elongation factor, selenocysteine-tRNA-specific [Source:HGNC Symbol;Acc:24614]"
+ENSG00000132423,6,COQ3,4,coenzyme Q3 methyltransferase [Source:HGNC Symbol;Acc:18175]
+ENSG00000132463,4,GRSF1,9,G-rich RNA sequence binding factor 1 [Source:HGNC Symbol;Acc:4610]
+ENSG00000132541,8,HRSP12,6,heat-responsive protein 12 [Source:HGNC Symbol;Acc:16897]
+ENSG00000132570,5,PCBD2,4,pterin-4 alpha-carbinolamine dehydratase/dimerization cofactor of hepatocyte nuclear factor 1 alpha (TCF1) 2 [Source:HGNC Symbol;Acc:24474]
+ENSG00000132591,17,ERAL1,8,Era-like 12S mitochondrial rRNA chaperone 1 [Source:HGNC Symbol;Acc:3424]
+ENSG00000132676,1,DAP3,26,death associated protein 3 [Source:HGNC Symbol;Acc:2673]
+ENSG00000132763,1,MMACHC,2,"methylmalonic aciduria (cobalamin deficiency) cblC type, with homocystinuria [Source:HGNC Symbol;Acc:24525]"
+ENSG00000132781,1,MUTYH,41,mutY homolog [Source:HGNC Symbol;Acc:7527]
+ENSG00000132837,5,DMGDH,12,dimethylglycine dehydrogenase [Source:HGNC Symbol;Acc:24475]
+ENSG00000133028,17,SCO1,5,SCO1 cytochrome c oxidase assembly protein [Source:HGNC Symbol;Acc:10603]
+ENSG00000133315,11,MACROD1,8,MACRO domain containing 1 [Source:HGNC Symbol;Acc:29598]
+ENSG00000133597,7,ADCK2,5,aarF domain containing kinase 2 [Source:HGNC Symbol;Acc:19039]
+ENSG00000133835,5,HSD17B4,27,hydroxysteroid (17-beta) dehydrogenase 4 [Source:HGNC Symbol;Acc:5213]
+ENSG00000133878,8,DUSP26,3,dual specificity phosphatase 26 (putative) [Source:HGNC Symbol;Acc:28161]
+ENSG00000133943,14,C14orf159,35,chromosome 14 open reading frame 159 [Source:HGNC Symbol;Acc:20498]
+ENSG00000133983,14,COX16,4,COX16 cytochrome c oxidase assembly homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:20213]
+ENSG00000134056,5,MRPS36,5,mitochondrial ribosomal protein S36 [Source:HGNC Symbol;Acc:16631]
+ENSG00000134240,1,HMGCS2,4,3-hydroxy-3-methylglutaryl-CoA synthase 2 (mitochondrial) [Source:HGNC Symbol;Acc:5008]
+ENSG00000134326,2,CMPK2,7,"cytidine monophosphate (UMP-CMP) kinase 2, mitochondrial [Source:HGNC Symbol;Acc:27015]"
+ENSG00000134375,1,TIMM17A,4,translocase of inner mitochondrial membrane 17 homolog A (yeast) [Source:HGNC Symbol;Acc:17315]
+ENSG00000134419,16,RPS15A,13,ribosomal protein S15a [Source:HGNC Symbol;Acc:10389]
+ENSG00000134463,10,ECHDC3,5,enoyl CoA hydratase domain containing 3 [Source:HGNC Symbol;Acc:23489]
+ENSG00000134809,11,TIMM10,3,translocase of inner mitochondrial membrane 10 homolog (yeast) [Source:HGNC Symbol;Acc:11814]
+ENSG00000134905,13,CARS2,32,"cysteinyl-tRNA synthetase 2, mitochondrial (putative) [Source:HGNC Symbol;Acc:25695]"
+ENSG00000135002,9,RFK,6,riboflavin kinase [Source:HGNC Symbol;Acc:30324]
+ENSG00000135070,9,ISCA1,4,iron-sulfur cluster assembly 1 [Source:HGNC Symbol;Acc:28660]
+ENSG00000135241,7,PNPLA8,13,patatin-like phospholipase domain containing 8 [Source:HGNC Symbol;Acc:28900]
+ENSG00000135297,6,MTO1,19,mitochondrial tRNA translation optimization 1 [Source:HGNC Symbol;Acc:19261]
+ENSG00000135390,12,ATP5G2,9,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit C2 (subunit 9) [Source:HGNC Symbol;Acc:842]"
+ENSG00000135423,12,GLS2,15,"glutaminase 2 (liver, mitochondrial) [Source:HGNC Symbol;Acc:29570]"
+ENSG00000135441,12,BLOC1S1,7,"biogenesis of lysosomal organelles complex-1, subunit 1 [Source:HGNC Symbol;Acc:4200]"
+ENSG00000135469,12,COQ10A,10,coenzyme Q10 homolog A (S. cerevisiae) [Source:HGNC Symbol;Acc:26515]
+ENSG00000135537,6,LACE1,7,lactation elevated 1 [Source:HGNC Symbol;Acc:16411]
+ENSG00000135624,2,CCT7,18,"chaperonin containing TCP1, subunit 7 (eta) [Source:HGNC Symbol;Acc:1622]"
+ENSG00000135631,2,RAB11FIP5,6,RAB11 family interacting protein 5 (class I) [Source:HGNC Symbol;Acc:24845]
+ENSG00000135776,1,ABCB10,3,"ATP-binding cassette, sub-family B (MDR/TAP), member 10 [Source:HGNC Symbol;Acc:41]"
+ENSG00000135862,1,LAMC1,6,"laminin, gamma 1 (formerly LAMB2) [Source:HGNC Symbol;Acc:6492]"
+ENSG00000135900,2,MRPL44,1,mitochondrial ribosomal protein L44 [Source:HGNC Symbol;Acc:16650]
+ENSG00000135929,2,CYP27A1,5,"cytochrome P450, family 27, subfamily A, polypeptide 1 [Source:HGNC Symbol;Acc:2605]"
+ENSG00000135940,2,COX5B,4,cytochrome c oxidase subunit Vb [Source:HGNC Symbol;Acc:2269]
+ENSG00000135972,2,MRPS9,3,mitochondrial ribosomal protein S9 [Source:HGNC Symbol;Acc:14501]
+ENSG00000136003,12,ISCU,14,iron-sulfur cluster assembly enzyme [Source:HGNC Symbol;Acc:29882]
+ENSG00000136010,12,ALDH1L2,6,"aldehyde dehydrogenase 1 family, member L2 [Source:HGNC Symbol;Acc:26777]"
+ENSG00000136143,13,SUCLA2,12,"succinate-CoA ligase, ADP-forming, beta subunit [Source:HGNC Symbol;Acc:11448]"
+ENSG00000136270,7,TBRG4,17,transforming growth factor beta regulator 4 [Source:HGNC Symbol;Acc:17443]
+ENSG00000136371,15,MTHFS,4,"5,10-methenyltetrahydrofolate synthetase (5-formyltetrahydrofolate cyclo-ligase) [Source:HGNC Symbol;Acc:7437]"
+ENSG00000136444,17,RSAD1,8,radical S-adenosyl methionine domain containing 1 [Source:HGNC Symbol;Acc:25634]
+ENSG00000136463,17,TACO1,2,translational activator of mitochondrially encoded cytochrome c oxidase I [Source:HGNC Symbol;Acc:24316]
+ENSG00000136521,3,NDUFB5,15,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 5, 16kDa [Source:HGNC Symbol;Acc:7700]"
+ENSG00000136522,3,MRPL47,3,mitochondrial ribosomal protein L47 [Source:HGNC Symbol;Acc:16652]
+ENSG00000136758,10,YME1L1,8,YME1-like 1 ATPase [Source:HGNC Symbol;Acc:12843]
+ENSG00000136783,9,NIPSNAP3A,2,nipsnap homolog 3A (C. elegans) [Source:HGNC Symbol;Acc:23619]
+ENSG00000136874,9,STX17,12,syntaxin 17 [Source:HGNC Symbol;Acc:11432]
+ENSG00000136877,9,FPGS,21,folylpolyglutamate synthase [Source:HGNC Symbol;Acc:3824]
+ENSG00000136897,9,MRPL50,2,mitochondrial ribosomal protein L50 [Source:HGNC Symbol;Acc:16654]
+ENSG00000137106,9,GRHPR,12,glyoxylate reductase/hydroxypyruvate reductase [Source:HGNC Symbol;Acc:4570]
+ENSG00000137124,9,ALDH1B1,1,"aldehyde dehydrogenase 1 family, member B1 [Source:HGNC Symbol;Acc:407]"
+ENSG00000137133,9,HINT2,7,histidine triad nucleotide binding protein 2 [Source:HGNC Symbol;Acc:18344]
+ENSG00000137274,6,BPHL,12,biphenyl hydrolase-like (serine hydrolase) [Source:HGNC Symbol;Acc:1094]
+ENSG00000137288,6,UQCC2,4,ubiquinol-cytochrome c reductase complex assembly factor 2 [Source:HGNC Symbol;Acc:21237]
+ENSG00000137409,6,MTCH1,7,mitochondrial carrier 1 [Source:HGNC Symbol;Acc:17586]
+ENSG00000137411,6,VARS2,13,"valyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:21642]"
+ENSG00000137463,4,MGARP,1,mitochondria-localized glutamic acid-rich protein [Source:HGNC Symbol;Acc:29969]
+ENSG00000137500,11,CCDC90B,19,coiled-coil domain containing 90B [Source:HGNC Symbol;Acc:28108]
+ENSG00000137513,11,NARS2,7,"asparaginyl-tRNA synthetase 2, mitochondrial (putative) [Source:HGNC Symbol;Acc:26274]"
+ENSG00000137547,8,MRPL15,3,mitochondrial ribosomal protein L15 [Source:HGNC Symbol;Acc:14054]
+ENSG00000137700,11,SLC37A4,17,"solute carrier family 37 (glucose-6-phosphate transporter), member 4 [Source:HGNC Symbol;Acc:4061]"
+ENSG00000137714,11,FDX1,1,ferredoxin 1 [Source:HGNC Symbol;Acc:3638]
+ENSG00000137767,15,SQRDL,8,sulfide quinone reductase-like (yeast) [Source:HGNC Symbol;Acc:20390]
+ENSG00000137806,15,NDUFAF1,4,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 1 [Source:HGNC Symbol;Acc:18828]"
+ENSG00000137824,15,RMDN3,11,regulator of microtubule dynamics 3 [Source:HGNC Symbol;Acc:25550]
+ENSG00000137944,1,CCBL2,5,cysteine conjugate-beta lyase 2 [Source:HGNC Symbol;Acc:33238]
+ENSG00000137992,1,DBT,2,dihydrolipoamide branched chain transacylase E2 [Source:HGNC Symbol;Acc:2698]
+ENSG00000138029,2,HADHB,9,"hydroxyacyl-CoA dehydrogenase/3-ketoacyl-CoA thiolase/enoyl-CoA hydratase (trifunctional protein), beta subunit [Source:HGNC Symbol;Acc:4803]"
+ENSG00000138035,2,PNPT1,6,polyribonucleotide nucleotidyltransferase 1 [Source:HGNC Symbol;Acc:23166]
+ENSG00000138078,2,PREPL,16,prolyl endopeptidase-like [Source:HGNC Symbol;Acc:30228]
+ENSG00000138095,2,LRPPRC,9,leucine-rich pentatricopeptide repeat containing [Source:HGNC Symbol;Acc:15714]
+ENSG00000138138,10,ATAD1,5,"ATPase family, AAA domain containing 1 [Source:HGNC Symbol;Acc:25903]"
+ENSG00000138293,10,NCOA4,10,nuclear receptor coactivator 4 [Source:HGNC Symbol;Acc:7671]
+ENSG00000138297,10,TIMM23,8,translocase of inner mitochondrial membrane 23 homolog (yeast) [Source:HGNC Symbol;Acc:17312]
+ENSG00000138346,10,DNA2,8,DNA replication helicase/nuclease 2 [Source:HGNC Symbol;Acc:2939]
+ENSG00000138363,2,ATIC,15,5-aminoimidazole-4-carboxamide ribonucleotide formyltransferase/IMP cyclohydrolase [Source:HGNC Symbol;Acc:794]
+ENSG00000138382,2,METTL5,12,methyltransferase like 5 [Source:HGNC Symbol;Acc:25006]
+ENSG00000138399,2,FASTKD1,10,FAST kinase domains 1 [Source:HGNC Symbol;Acc:26150]
+ENSG00000138413,2,IDH1,9,"isocitrate dehydrogenase 1 (NADP+), soluble [Source:HGNC Symbol;Acc:5382]"
+ENSG00000138495,3,COX17,7,COX17 cytochrome c oxidase copper chaperone [Source:HGNC Symbol;Acc:2264]
+ENSG00000138777,4,PPA2,25,pyrophosphatase (inorganic) 2 [Source:HGNC Symbol;Acc:28883]
+ENSG00000138796,4,HADH,10,hydroxyacyl-CoA dehydrogenase [Source:HGNC Symbol;Acc:4799]
+ENSG00000139131,12,YARS2,3,"tyrosyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:24249]"
+ENSG00000139180,12,NDUFA9,9,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 9, 39kDa [Source:HGNC Symbol;Acc:7693]"
+ENSG00000139410,12,SDSL,6,serine dehydratase-like [Source:HGNC Symbol;Acc:30404]
+ENSG00000139428,12,MMAB,11,methylmalonic aciduria (cobalamin deficiency) cblB type [Source:HGNC Symbol;Acc:19331]
+ENSG00000139437,12,TCHP,10,"trichoplein, keratin filament binding [Source:HGNC Symbol;Acc:28135]"
+ENSG00000139531,12,SUOX,17,sulfite oxidase [Source:HGNC Symbol;Acc:11460]
+ENSG00000139637,12,C12orf10,10,chromosome 12 open reading frame 10 [Source:HGNC Symbol;Acc:17590]
+ENSG00000140107,14,SLC25A47,2,"solute carrier family 25, member 47 [Source:HGNC Symbol;Acc:20115]"
+ENSG00000140374,15,ETFA,20,"electron-transfer-flavoprotein, alpha polypeptide [Source:HGNC Symbol;Acc:3481]"
+ENSG00000140451,15,PIF1,9,PIF1 5'-to-3' DNA helicase [Source:HGNC Symbol;Acc:26220]
+ENSG00000140459,15,CYP11A1,12,"cytochrome P450, family 11, subfamily A, polypeptide 1 [Source:HGNC Symbol;Acc:2590]"
+ENSG00000140521,15,POLG,13,"polymerase (DNA directed), gamma [Source:HGNC Symbol;Acc:9179]"
+ENSG00000140740,16,UQCRC2,11,ubiquinol-cytochrome c reductase core protein II [Source:HGNC Symbol;Acc:12586]
+ENSG00000140905,16,GCSH,6,glycine cleavage system protein H (aminomethyl carrier) [Source:HGNC Symbol;Acc:4208]
+ENSG00000140983,16,RHOT2,27,ras homolog family member T2 [Source:HGNC Symbol;Acc:21169]
+ENSG00000140990,16,NDUFB10,5,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 10, 22kDa [Source:HGNC Symbol;Acc:7696]"
+ENSG00000141378,17,PTRH2,6,peptidyl-tRNA hydrolase 2 [Source:HGNC Symbol;Acc:24265]
+ENSG00000141385,18,AFG3L2,4,AFG3-like AAA ATPase 2 [Source:HGNC Symbol;Acc:315]
+ENSG00000141391,18,SLMO1,9,slowmo homolog 1 (Drosophila) [Source:HGNC Symbol;Acc:24639]
+ENSG00000141447,18,OSBPL1A,16,oxysterol binding protein-like 1A [Source:HGNC Symbol;Acc:16398]
+ENSG00000141682,18,PMAIP1,3,phorbol-12-myristate-13-acetate-induced protein 1 [Source:HGNC Symbol;Acc:9108]
+ENSG00000141756,17,FKBP10,10,"FK506 binding protein 10, 65 kDa [Source:HGNC Symbol;Acc:18169]"
+ENSG00000142082,11,SIRT3,16,sirtuin 3 [Source:HGNC Symbol;Acc:14931]
+ENSG00000142168,21,SOD1,4,"superoxide dismutase 1, soluble [Source:HGNC Symbol;Acc:11179]"
+ENSG00000142444,19,C19orf52,3,chromosome 19 open reading frame 52 [Source:HGNC Symbol;Acc:25152]
+ENSG00000143149,1,ALDH9A1,6,"aldehyde dehydrogenase 9 family, member A1 [Source:HGNC Symbol;Acc:412]"
+ENSG00000143158,1,MPC2,3,mitochondrial pyruvate carrier 2 [Source:HGNC Symbol;Acc:24515]
+ENSG00000143198,1,MGST3,14,microsomal glutathione S-transferase 3 [Source:HGNC Symbol;Acc:7064]
+ENSG00000143224,1,PPOX,20,protoporphyrinogen oxidase [Source:HGNC Symbol;Acc:9280]
+ENSG00000143252,1,SDHC,9,"succinate dehydrogenase complex, subunit C, integral membrane protein, 15kDa [Source:HGNC Symbol;Acc:10682]"
+ENSG00000143314,1,MRPL24,6,mitochondrial ribosomal protein L24 [Source:HGNC Symbol;Acc:14037]
+ENSG00000143353,1,LYPLAL1,12,lysophospholipase-like 1 [Source:HGNC Symbol;Acc:20440]
+ENSG00000143374,1,TARS2,14,"threonyl-tRNA synthetase 2, mitochondrial (putative) [Source:HGNC Symbol;Acc:30740]"
+ENSG00000143436,1,MRPL9,11,mitochondrial ribosomal protein L9 [Source:HGNC Symbol;Acc:14277]
+ENSG00000143627,1,PKLR,3,"pyruvate kinase, liver and RBC [Source:HGNC Symbol;Acc:9020]"
+ENSG00000143653,1,SCCPDH,1,saccharopine dehydrogenase (putative) [Source:HGNC Symbol;Acc:24275]
+ENSG00000143774,1,GUK1,40,guanylate kinase 1 [Source:HGNC Symbol;Acc:4693]
+ENSG00000143811,1,PYCR2,8,"pyrroline-5-carboxylate reductase family, member 2 [Source:HGNC Symbol;Acc:30262]"
+ENSG00000144029,2,MRPS5,8,mitochondrial ribosomal protein S5 [Source:HGNC Symbol;Acc:14498]
+ENSG00000144040,2,SFXN5,22,sideroflexin 5 [Source:HGNC Symbol;Acc:16073]
+ENSG00000144120,2,TMEM177,6,transmembrane protein 177 [Source:HGNC Symbol;Acc:28143]
+ENSG00000144182,2,LIPT1,10,lipoyltransferase 1 [Source:HGNC Symbol;Acc:29569]
+ENSG00000144381,2,HSPD1,15,heat shock 60kDa protein 1 (chaperonin) [Source:HGNC Symbol;Acc:5261]
+ENSG00000144559,3,TAMM41,11,"TAM41, mitochondrial translocator assembly and maintenance protein, homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:25187]"
+ENSG00000144659,3,SLC25A38,2,"solute carrier family 25, member 38 [Source:HGNC Symbol;Acc:26054]"
+ENSG00000144741,3,SLC25A26,7,"solute carrier family 25 (S-adenosylmethionine carrier), member 26 [Source:HGNC Symbol;Acc:20661]"
+ENSG00000144827,3,ABHD10,6,abhydrolase domain containing 10 [Source:HGNC Symbol;Acc:25656]
+ENSG00000144908,3,ALDH1L1,18,"aldehyde dehydrogenase 1 family, member L1 [Source:HGNC Symbol;Acc:3978]"
+ENSG00000144959,3,NCEH1,7,neutral cholesterol ester hydrolase 1 [Source:HGNC Symbol;Acc:29260]
+ENSG00000145020,3,AMT,23,aminomethyltransferase [Source:HGNC Symbol;Acc:473]
+ENSG00000145246,4,ATP10D,7,"ATPase, class V, type 10D [Source:HGNC Symbol;Acc:13549]"
+ENSG00000145247,4,OCIAD2,9,OCIA domain containing 2 [Source:HGNC Symbol;Acc:28685]
+ENSG00000145337,4,PYURF,1,PIGY upstream reading frame [Source:HGNC Symbol;Acc:44317]
+ENSG00000145354,4,CISD2,3,CDGSH iron sulfur domain 2 [Source:HGNC Symbol;Acc:24212]
+ENSG00000145439,4,CBR4,7,carbonyl reductase 4 [Source:HGNC Symbol;Acc:25891]
+ENSG00000145494,5,NDUFS6,3,"NADH dehydrogenase (ubiquinone) Fe-S protein 6, 13kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7713]"
+ENSG00000145832,5,SLC25A48,8,"solute carrier family 25, member 48 [Source:HGNC Symbol;Acc:30451]"
+ENSG00000145982,6,FARS2,4,"phenylalanyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:21062]"
+ENSG00000146066,5,HIGD2A,1,"HIG1 hypoxia inducible domain family, member 2A [Source:HGNC Symbol;Acc:28311]"
+ENSG00000146085,6,MUT,1,methylmalonyl CoA mutase [Source:HGNC Symbol;Acc:7526]
+ENSG00000146250,6,PRSS35,2,"protease, serine, 35 [Source:HGNC Symbol;Acc:21387]"
+ENSG00000146282,6,RARS2,4,"arginyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:21406]"
+ENSG00000146701,7,MDH2,8,"malate dehydrogenase 2, NAD (mitochondrial) [Source:HGNC Symbol;Acc:6971]"
+ENSG00000146729,7,GBAS,11,glioblastoma amplified sequence [Source:HGNC Symbol;Acc:4179]
+ENSG00000147123,X,NDUFB11,2,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 11, 17.3kDa [Source:HGNC Symbol;Acc:20372]"
+ENSG00000147454,8,SLC25A37,12,"solute carrier family 25 (mitochondrial iron transporter), member 37 [Source:HGNC Symbol;Acc:29786]"
+ENSG00000147465,8,STAR,4,steroidogenic acute regulatory protein [Source:HGNC Symbol;Acc:11359]
+ENSG00000147471,8,PROSC,9,proline synthetase co-transcribed homolog (bacterial) [Source:HGNC Symbol;Acc:9457]
+ENSG00000147576,8,ADHFE1,19,"alcohol dehydrogenase, iron containing, 1 [Source:HGNC Symbol;Acc:16354]"
+ENSG00000147586,8,MRPS28,10,mitochondrial ribosomal protein S28 [Source:HGNC Symbol;Acc:14513]
+ENSG00000147592,8,LACTB2,4,"lactamase, beta 2 [Source:HGNC Symbol;Acc:18512]"
+ENSG00000147684,8,NDUFB9,7,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 9, 22kDa [Source:HGNC Symbol;Acc:7704]"
+ENSG00000147853,9,AK3,3,adenylate kinase 3 [Source:HGNC Symbol;Acc:17376]
+ENSG00000148090,9,AUH,6,AU RNA binding protein/enoyl-CoA hydratase [Source:HGNC Symbol;Acc:890]
+ENSG00000148175,9,STOM,3,stomatin [Source:HGNC Symbol;Acc:3383]
+ENSG00000148187,9,MRRF,14,mitochondrial ribosome recycling factor [Source:HGNC Symbol;Acc:7234]
+ENSG00000148290,9,SURF1,4,surfeit 1 [Source:HGNC Symbol;Acc:11474]
+ENSG00000148334,9,PTGES2,13,prostaglandin E synthase 2 [Source:HGNC Symbol;Acc:17822]
+ENSG00000148339,9,SLC25A25,9,"solute carrier family 25 (mitochondrial carrier; phosphate carrier), member 25 [Source:HGNC Symbol;Acc:20663]"
+ENSG00000148450,10,MSRB2,3,methionine sulfoxide reductase B2 [Source:HGNC Symbol;Acc:17061]
+ENSG00000148459,10,PDSS1,5,"prenyl (decaprenyl) diphosphate synthase, subunit 1 [Source:HGNC Symbol;Acc:17759]"
+ENSG00000148672,10,GLUD1,6,glutamate dehydrogenase 1 [Source:HGNC Symbol;Acc:4335]
+ENSG00000148824,10,MTG1,8,mitochondrial ribosome-associated GTPase 1 [Source:HGNC Symbol;Acc:32159]
+ENSG00000148834,10,GSTO1,7,glutathione S-transferase omega 1 [Source:HGNC Symbol;Acc:13312]
+ENSG00000148950,11,IMMP1L,15,IMP1 inner mitochondrial membrane peptidase-like (S. cerevisiae) [Source:HGNC Symbol;Acc:26317]
+ENSG00000149124,11,GLYAT,5,glycine-N-acyltransferase [Source:HGNC Symbol;Acc:13734]
+ENSG00000149474,20,CSRP2BP,7,CSRP2 binding protein [Source:HGNC Symbol;Acc:15904]
+ENSG00000149792,11,MRPL49,9,mitochondrial ribosomal protein L49 [Source:HGNC Symbol;Acc:1176]
+ENSG00000150768,11,DLAT,6,dihydrolipoamide S-acetyltransferase [Source:HGNC Symbol;Acc:2896]
+ENSG00000150779,11,TIMM8B,4,translocase of inner mitochondrial membrane 8 homolog B (yeast) [Source:HGNC Symbol;Acc:11818]
+ENSG00000150787,11,PTS,9,6-pyruvoyltetrahydropterin synthase [Source:HGNC Symbol;Acc:9689]
+ENSG00000150967,12,ABCB9,20,"ATP-binding cassette, sub-family B (MDR/TAP), member 9 [Source:HGNC Symbol;Acc:50]"
+ENSG00000151093,3,OXSM,8,"3-oxoacyl-ACP synthase, mitochondrial [Source:HGNC Symbol;Acc:26063]"
+ENSG00000151366,11,NDUFC2,5,"NADH dehydrogenase (ubiquinone) 1, subcomplex unknown, 2, 14.5kDa [Source:HGNC Symbol;Acc:7706]"
+ENSG00000151376,11,ME3,13,"malic enzyme 3, NADP(+)-dependent, mitochondrial [Source:HGNC Symbol;Acc:6985]"
+ENSG00000151413,14,NUBPL,14,nucleotide binding protein-like [Source:HGNC Symbol;Acc:20278]
+ENSG00000151475,4,SLC25A31,1,"solute carrier family 25 (mitochondrial carrier; adenine nucleotide translocator), member 31 [Source:HGNC Symbol;Acc:25319]"
+ENSG00000151498,11,ACAD8,19,"acyl-CoA dehydrogenase family, member 8 [Source:HGNC Symbol;Acc:87]"
+ENSG00000151552,4,QDPR,9,quinoid dihydropteridine reductase [Source:HGNC Symbol;Acc:9752]
+ENSG00000151726,4,ACSL1,12,acyl-CoA synthetase long-chain family member 1 [Source:HGNC Symbol;Acc:3569]
+ENSG00000151729,4,SLC25A4,2,"solute carrier family 25 (mitochondrial carrier; adenine nucleotide translocator), member 4 [Source:HGNC Symbol;Acc:10990]"
+ENSG00000151806,4,GUF1,4,GUF1 GTPase homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:25799]
+ENSG00000152234,18,ATP5A1,20,"ATP synthase, H+ transporting, mitochondrial F1 complex, alpha subunit 1, cardiac muscle [Source:HGNC Symbol;Acc:823]"
+ENSG00000152256,2,PDK1,11,"pyruvate dehydrogenase kinase, isozyme 1 [Source:HGNC Symbol;Acc:8809]"
+ENSG00000152620,5,NADK2,10,"NAD kinase 2, mitochondrial [Source:HGNC Symbol;Acc:26404]"
+ENSG00000152683,2,SLC30A6,10,"solute carrier family 30 (zinc transporter), member 6 [Source:HGNC Symbol;Acc:19305]"
+ENSG00000153291,6,SLC25A27,9,"solute carrier family 25, member 27 [Source:HGNC Symbol;Acc:21065]"
+ENSG00000153574,2,RPIA,1,ribose 5-phosphate isomerase A [Source:HGNC Symbol;Acc:10297]
+ENSG00000153904,1,DDAH1,11,dimethylarginine dimethylaminohydrolase 1 [Source:HGNC Symbol;Acc:2715]
+ENSG00000154079,6,C6orf57,2,chromosome 6 open reading frame 57 [Source:HGNC Symbol;Acc:20957]
+ENSG00000154174,3,TOMM70A,3,translocase of outer mitochondrial membrane 70 homolog A (S. cerevisiae) [Source:HGNC Symbol;Acc:11985]
+ENSG00000154258,17,ABCA9,9,"ATP-binding cassette, sub-family A (ABC1), member 9 [Source:HGNC Symbol;Acc:39]"
+ENSG00000154358,1,OBSCN,15,"obscurin, cytoskeletal calmodulin and titin-interacting RhoGEF [Source:HGNC Symbol;Acc:15719]"
+ENSG00000154518,2,ATP5G3,5,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit C3 (subunit 9) [Source:HGNC Symbol;Acc:843]"
+ENSG00000154719,21,MRPL39,3,mitochondrial ribosomal protein L39 [Source:HGNC Symbol;Acc:14027]
+ENSG00000154723,21,ATP5J,8,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit F6 [Source:HGNC Symbol;Acc:847]"
+ENSG00000154814,3,OXNAD1,9,oxidoreductase NAD-binding domain containing 1 [Source:HGNC Symbol;Acc:25128]
+ENSG00000154930,20,ACSS1,6,acyl-CoA synthetase short-chain family member 1 [Source:HGNC Symbol;Acc:16091]
+ENSG00000155008,X,APOOL,1,apolipoprotein O-like [Source:HGNC Symbol;Acc:24009]
+ENSG00000155189,8,AGPAT5,7,1-acylglycerol-3-phosphate O-acyltransferase 5 [Source:HGNC Symbol;Acc:20886]
+ENSG00000155287,10,SLC25A28,4,"solute carrier family 25 (mitochondrial iron transporter), member 28 [Source:HGNC Symbol;Acc:23472]"
+ENSG00000155368,2,DBI,10,"diazepam binding inhibitor (GABA receptor modulator, acyl-CoA binding protein) [Source:HGNC Symbol;Acc:2690]"
+ENSG00000155380,1,SLC16A1,8,"solute carrier family 16 (monocarboxylate transporter), member 1 [Source:HGNC Symbol;Acc:10922]"
+ENSG00000155463,14,OXA1L,12,oxidase (cytochrome c) assembly 1-like [Source:HGNC Symbol;Acc:8526]
+ENSG00000155542,5,SETD9,10,SET domain containing 9 [Source:HGNC Symbol;Acc:28508]
+ENSG00000155906,6,RMND1,4,required for meiotic nuclear division 1 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:21176]
+ENSG00000155957,12,TMBIM4,12,transmembrane BAX inhibitor motif containing 4 [Source:HGNC Symbol;Acc:24257]
+ENSG00000156026,10,MCU,11,mitochondrial calcium uniporter [Source:HGNC Symbol;Acc:23526]
+ENSG00000156170,8,NDUFAF6,20,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 6 [Source:HGNC Symbol;Acc:28625]"
+ENSG00000156398,10,SFXN2,13,sideroflexin 2 [Source:HGNC Symbol;Acc:16086]
+ENSG00000156411,14,C14orf2,12,chromosome 14 open reading frame 2 [Source:HGNC Symbol;Acc:1188]
+ENSG00000156467,8,UQCRB,9,ubiquinol-cytochrome c reductase binding protein [Source:HGNC Symbol;Acc:12582]
+ENSG00000156469,8,MTERFD1,5,MTERF domain containing 1 [Source:HGNC Symbol;Acc:24258]
+ENSG00000156502,10,SUPV3L1,7,"suppressor of var1, 3-like 1 (S. cerevisiae) [Source:HGNC Symbol;Acc:11471]"
+ENSG00000156515,10,HK1,18,hexokinase 1 [Source:HGNC Symbol;Acc:4922]
+ENSG00000156521,10,TYSND1,4,trypsin domain containing 1 [Source:HGNC Symbol;Acc:28531]
+ENSG00000156709,X,AIFM1,10,"apoptosis-inducing factor, mitochondrion-associated, 1 [Source:HGNC Symbol;Acc:8768]"
+ENSG00000156885,16,COX6A2,2,cytochrome c oxidase subunit VIa polypeptide 2 [Source:HGNC Symbol;Acc:2279]
+ENSG00000156928,7,MALSU1,5,mitochondrial assembly of ribosomal large subunit 1 [Source:HGNC Symbol;Acc:21721]
+ENSG00000156968,16,MPV17L,3,MPV17 mitochondrial membrane protein-like [Source:HGNC Symbol;Acc:26827]
+ENSG00000156990,3,RPUSD3,17,RNA pseudouridylate synthase domain containing 3 [Source:HGNC Symbol;Acc:28437]
+ENSG00000157036,3,EXOG,17,"endo/exonuclease (5'-3'), endonuclease G-like [Source:HGNC Symbol;Acc:3347]"
+ENSG00000157184,1,CPT2,2,carnitine palmitoyltransferase 2 [Source:HGNC Symbol;Acc:2330]
+ENSG00000157326,14,DHRS4,12,dehydrogenase/reductase (SDR family) member 4 [Source:HGNC Symbol;Acc:16985]
+ENSG00000157379,14,DHRS1,11,dehydrogenase/reductase (SDR family) member 1 [Source:HGNC Symbol;Acc:16445]
+ENSG00000158042,11,MRPL17,4,mitochondrial ribosomal protein L17 [Source:HGNC Symbol;Acc:14053]
+ENSG00000158402,5,CDC25C,11,cell division cycle 25C [Source:HGNC Symbol;Acc:1727]
+ENSG00000158578,X,ALAS2,8,"aminolevulinate, delta-, synthase 2 [Source:HGNC Symbol;Acc:397]"
+ENSG00000158793,1,NIT1,16,nitrilase 1 [Source:HGNC Symbol;Acc:7828]
+ENSG00000158828,1,PINK1,3,PTEN induced putative kinase 1 [Source:HGNC Symbol;Acc:14581]
+ENSG00000158864,1,NDUFS2,16,"NADH dehydrogenase (ubiquinone) Fe-S protein 2, 49kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7708]"
+ENSG00000158882,1,TOMM40L,9,translocase of outer mitochondrial membrane 40 homolog (yeast)-like [Source:HGNC Symbol;Acc:25756]
+ENSG00000159111,17,MRPL10,7,mitochondrial ribosomal protein L10 [Source:HGNC Symbol;Acc:14055]
+ENSG00000159199,17,ATP5G1,10,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit C1 (subunit 9) [Source:HGNC Symbol;Acc:841]"
+ENSG00000159231,21,CBR3,1,carbonyl reductase 3 [Source:HGNC Symbol;Acc:1549]
+ENSG00000159399,2,HK2,3,hexokinase 2 [Source:HGNC Symbol;Acc:4923]
+ENSG00000159423,1,ALDH4A1,6,"aldehyde dehydrogenase 4 family, member A1 [Source:HGNC Symbol;Acc:406]"
+ENSG00000159445,1,THEM4,5,thioesterase superfamily member 4 [Source:HGNC Symbol;Acc:17947]
+ENSG00000159685,3,CHCHD6,8,coiled-coil-helix-coiled-coil-helix domain containing 6 [Source:HGNC Symbol;Acc:28184]
+ENSG00000160072,1,ATAD3B,6,"ATPase family, AAA domain containing 3B [Source:HGNC Symbol;Acc:24007]"
+ENSG00000160124,3,CCDC58,7,coiled-coil domain containing 58 [Source:HGNC Symbol;Acc:31136]
+ENSG00000160194,21,NDUFV3,4,"NADH dehydrogenase (ubiquinone) flavoprotein 3, 10kDa [Source:HGNC Symbol;Acc:7719]"
+ENSG00000160221,21,C21orf33,11,chromosome 21 open reading frame 33 [Source:HGNC Symbol;Acc:1273]
+ENSG00000160439,19,RDH13,22,retinol dehydrogenase 13 (all-trans/9-cis) [Source:HGNC Symbol;Acc:19978]
+ENSG00000160471,19,COX6B2,10,cytochrome c oxidase subunit VIb polypeptide 2 (testis) [Source:HGNC Symbol;Acc:24380]
+ENSG00000160688,1,FLAD1,13,flavin adenine dinucleotide synthetase 1 [Source:HGNC Symbol;Acc:24671]
+ENSG00000160703,11,NLRX1,14,NLR family member X1 [Source:HGNC Symbol;Acc:29890]
+ENSG00000160752,1,FDPS,19,farnesyl diphosphate synthase [Source:HGNC Symbol;Acc:3631]
+ENSG00000160785,1,SLC25A44,5,"solute carrier family 25, member 44 [Source:HGNC Symbol;Acc:29036]"
+ENSG00000160957,8,RECQL4,11,RecQ protein-like 4 [Source:HGNC Symbol;Acc:9949]
+ENSG00000161267,3,BDH1,17,"3-hydroxybutyrate dehydrogenase, type 1 [Source:HGNC Symbol;Acc:1027]"
+ENSG00000161281,19,COX7A1,4,cytochrome c oxidase subunit VIIa polypeptide 1 (muscle) [Source:HGNC Symbol;Acc:2287]
+ENSG00000161513,17,FDXR,20,ferredoxin reductase [Source:HGNC Symbol;Acc:3642]
+ENSG00000161533,17,ACOX1,14,"acyl-CoA oxidase 1, palmitoyl [Source:HGNC Symbol;Acc:119]"
+ENSG00000161558,19,TMEM143,15,transmembrane protein 143 [Source:HGNC Symbol;Acc:25603]
+ENSG00000161653,17,NAGS,3,N-acetylglutamate synthase [Source:HGNC Symbol;Acc:17996]
+ENSG00000162129,11,CLPB,14,ClpB caseinolytic peptidase B homolog (E. coli) [Source:HGNC Symbol;Acc:30664]
+ENSG00000162241,11,SLC25A45,18,"solute carrier family 25, member 45 [Source:HGNC Symbol;Acc:27442]"
+ENSG00000162377,1,COA7,2,cytochrome c oxidase assembly factor 7 [Source:HGNC Symbol;Acc:25716]
+ENSG00000162396,1,PARS2,1,"prolyl-tRNA synthetase 2, mitochondrial (putative) [Source:HGNC Symbol;Acc:30563]"
+ENSG00000162433,1,AK4,8,adenylate kinase 4 [Source:HGNC Symbol;Acc:363]
+ENSG00000162461,1,SLC25A34,3,"solute carrier family 25, member 34 [Source:HGNC Symbol;Acc:27653]"
+ENSG00000162600,1,OMA1,12,OMA1 zinc metallopeptidase [Source:HGNC Symbol;Acc:29661]
+ENSG00000162836,1,ACP6,6,"acid phosphatase 6, lysophosphatidic [Source:HGNC Symbol;Acc:29609]"
+ENSG00000162851,1,TFB2M,2,"transcription factor B2, mitochondrial [Source:HGNC Symbol;Acc:18559]"
+ENSG00000162910,1,MRPL55,36,mitochondrial ribosomal protein L55 [Source:HGNC Symbol;Acc:16686]
+ENSG00000162972,2,C2orf47,4,chromosome 2 open reading frame 47 [Source:HGNC Symbol;Acc:26198]
+ENSG00000163050,1,ADCK3,12,aarF domain containing kinase 3 [Source:HGNC Symbol;Acc:16812]
+ENSG00000163114,4,PDHA2,1,pyruvate dehydrogenase (lipoamide) alpha 2 [Source:HGNC Symbol;Acc:8807]
+ENSG00000163170,2,BOLA3,5,bolA family member 3 [Source:HGNC Symbol;Acc:24415]
+ENSG00000163319,4,MRPS18C,9,mitochondrial ribosomal protein S18C [Source:HGNC Symbol;Acc:16633]
+ENSG00000163382,1,APOA1BP,5,apolipoprotein A-I binding protein [Source:HGNC Symbol;Acc:18453]
+ENSG00000163528,3,CHCHD4,3,coiled-coil-helix-coiled-coil-helix domain containing 4 [Source:HGNC Symbol;Acc:26467]
+ENSG00000163541,2,SUCLG1,9,"succinate-CoA ligase, alpha subunit [Source:HGNC Symbol;Acc:11449]"
+ENSG00000163586,2,FABP1,4,"fatty acid binding protein 1, liver [Source:HGNC Symbol;Acc:3555]"
+ENSG00000163626,4,COX18,5,COX18 cytochrome C oxidase assembly factor [Source:HGNC Symbol;Acc:26801]
+ENSG00000163644,4,PPM1K,11,"protein phosphatase, Mg2+/Mn2+ dependent, 1K [Source:HGNC Symbol;Acc:25415]"
+ENSG00000163738,4,MTHFD2L,16,methylenetetrahydrofolate dehydrogenase (NADP+ dependent) 2-like [Source:HGNC Symbol;Acc:31865]
+ENSG00000163864,3,NMNAT3,16,nicotinamide nucleotide adenylyltransferase 3 [Source:HGNC Symbol;Acc:20989]
+ENSG00000163931,3,TKT,14,transketolase [Source:HGNC Symbol;Acc:11834]
+ENSG00000164051,3,CCDC51,7,coiled-coil domain containing 51 [Source:HGNC Symbol;Acc:25714]
+ENSG00000164182,5,NDUFAF2,4,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 2 [Source:HGNC Symbol;Acc:28086]"
+ENSG00000164209,5,SLC25A46,9,"solute carrier family 25, member 46 [Source:HGNC Symbol;Acc:25198]"
+ENSG00000164241,5,C5orf63,8,chromosome 5 open reading frame 63 [Source:HGNC Symbol;Acc:40051]
+ENSG00000164258,5,NDUFS4,6,"NADH dehydrogenase (ubiquinone) Fe-S protein 4, 18kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7711]"
+ENSG00000164284,5,GRPEL2,4,"GrpE-like 2, mitochondrial (E. coli) [Source:HGNC Symbol;Acc:21060]"
+ENSG00000164347,5,GFM2,10,"G elongation factor, mitochondrial 2 [Source:HGNC Symbol;Acc:29682]"
+ENSG00000164366,5,CCDC127,2,coiled-coil domain containing 127 [Source:HGNC Symbol;Acc:30520]
+ENSG00000164398,5,ACSL6,25,acyl-CoA synthetase long-chain family member 6 [Source:HGNC Symbol;Acc:16496]
+ENSG00000164405,5,UQCRQ,6,"ubiquinol-cytochrome c reductase, complex III subunit VII, 9.5kDa [Source:HGNC Symbol;Acc:29594]"
+ENSG00000164466,5,SFXN1,12,sideroflexin 1 [Source:HGNC Symbol;Acc:16085]
+ENSG00000164494,6,PDSS2,4,"prenyl (decaprenyl) diphosphate synthase, subunit 2 [Source:HGNC Symbol;Acc:23041]"
+ENSG00000164587,5,RPS14,7,ribosomal protein S14 [Source:HGNC Symbol;Acc:10387]
+ENSG00000164830,8,OXR1,17,oxidation resistance 1 [Source:HGNC Symbol;Acc:15822]
+ENSG00000164896,7,FASTK,17,Fas-activated serine/threonine kinase [Source:HGNC Symbol;Acc:24676]
+ENSG00000164898,7,C7orf55,5,chromosome 7 open reading frame 55 [Source:HGNC Symbol;Acc:26946]
+ENSG00000164904,5,ALDH7A1,16,"aldehyde dehydrogenase 7 family, member A1 [Source:HGNC Symbol;Acc:877]"
+ENSG00000164919,8,COX6C,11,cytochrome c oxidase subunit VIc [Source:HGNC Symbol;Acc:2285]
+ENSG00000164933,8,SLC25A32,6,"solute carrier family 25 (mitochondrial folate carrier), member 32 [Source:HGNC Symbol;Acc:29683]"
+ENSG00000164951,8,PDP1,10,pyruvate dehyrogenase phosphatase catalytic subunit 1 [Source:HGNC Symbol;Acc:9279]
+ENSG00000164978,9,NUDT2,3,nudix (nucleoside diphosphate linked moiety X)-type motif 2 [Source:HGNC Symbol;Acc:8049]
+ENSG00000164983,8,TMEM65,1,transmembrane protein 65 [Source:HGNC Symbol;Acc:25203]
+ENSG00000165028,9,NIPSNAP3B,3,nipsnap homolog 3B (C. elegans) [Source:HGNC Symbol;Acc:23641]
+ENSG00000165046,8,LETM2,15,leucine zipper-EF-hand containing transmembrane protein 2 [Source:HGNC Symbol;Acc:14648]
+ENSG00000165060,9,FXN,5,frataxin [Source:HGNC Symbol;Acc:3951]
+ENSG00000165264,9,NDUFB6,2,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 6, 17kDa [Source:HGNC Symbol;Acc:7701]"
+ENSG00000165283,9,STOML2,4,stomatin (EPB72)-like 2 [Source:HGNC Symbol;Acc:14559]
+ENSG00000165487,13,MICU2,8,mitochondrial calcium uptake 2 [Source:HGNC Symbol;Acc:31830]
+ENSG00000165507,10,C10orf10,3,chromosome 10 open reading frame 10 [Source:HGNC Symbol;Acc:23355]
+ENSG00000165526,11,RPUSD4,9,RNA pseudouridylate synthase domain containing 4 [Source:HGNC Symbol;Acc:25898]
+ENSG00000165609,10,NUDT5,9,nudix (nucleoside diphosphate linked moiety X)-type motif 5 [Source:HGNC Symbol;Acc:8052]
+ENSG00000165629,10,ATP5C1,11,"ATP synthase, H+ transporting, mitochondrial F1 complex, gamma polypeptide 1 [Source:HGNC Symbol;Acc:833]"
+ENSG00000165637,10,VDAC2,15,voltage-dependent anion channel 2 [Source:HGNC Symbol;Acc:12672]
+ENSG00000165644,10,COMTD1,7,catechol-O-methyltransferase domain containing 1 [Source:HGNC Symbol;Acc:26309]
+ENSG00000165672,10,PRDX3,4,peroxiredoxin 3 [Source:HGNC Symbol;Acc:9354]
+ENSG00000165678,10,GHITM,1,growth hormone inducible transmembrane protein [Source:HGNC Symbol;Acc:17281]
+ENSG00000165688,9,PMPCA,5,peptidase (mitochondrial processing) alpha [Source:HGNC Symbol;Acc:18667]
+ENSG00000165775,X,FUNDC2,7,FUN14 domain containing 2 [Source:HGNC Symbol;Acc:24925]
+ENSG00000165792,14,METTL17,25,methyltransferase like 17 [Source:HGNC Symbol;Acc:19280]
+ENSG00000165898,14,ISCA2,4,iron-sulfur cluster assembly 2 [Source:HGNC Symbol;Acc:19857]
+ENSG00000165949,14,IFI27,15,"interferon, alpha-inducible protein 27 [Source:HGNC Symbol;Acc:5397]"
+ENSG00000166118,11,SPATA19,2,spermatogenesis associated 19 [Source:HGNC Symbol;Acc:30614]
+ENSG00000166123,16,GPT2,5,glutamic pyruvate transaminase (alanine aminotransferase) 2 [Source:HGNC Symbol;Acc:18062]
+ENSG00000166136,10,NDUFB8,10,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 8, 19kDa [Source:HGNC Symbol;Acc:7703]"
+ENSG00000166199,11,ALKBH3,13,"alkB, alkylation repair homolog 3 (E. coli) [Source:HGNC Symbol;Acc:30141]"
+ENSG00000166260,17,COX11,9,cytochrome c oxidase assembly homolog 11 (yeast) [Source:HGNC Symbol;Acc:2261]
+ENSG00000166321,10,NUDT13,7,nudix (nucleoside diphosphate linked moiety X)-type motif 13 [Source:HGNC Symbol;Acc:18827]
+ENSG00000166347,18,CYB5A,7,cytochrome b5 type A (microsomal) [Source:HGNC Symbol;Acc:2570]
+ENSG00000166394,11,CYB5R2,15,cytochrome b5 reductase 2 [Source:HGNC Symbol;Acc:24376]
+ENSG00000166411,15,IDH3A,24,isocitrate dehydrogenase 3 (NAD+) alpha [Source:HGNC Symbol;Acc:5384]
+ENSG00000166548,16,TK2,20,"thymidine kinase 2, mitochondrial [Source:HGNC Symbol;Acc:11831]"
+ENSG00000166743,16,ACSM1,7,acyl-CoA synthetase medium-chain family member 1 [Source:HGNC Symbol;Acc:18049]
+ENSG00000166816,16,LDHD,4,lactate dehydrogenase D [Source:HGNC Symbol;Acc:19708]
+ENSG00000166855,15,CLPX,6,caseinolytic mitochondrial matrix peptidase chaperone subunit [Source:HGNC Symbol;Acc:2088]
+ENSG00000166896,12,XRCC6BP1,4,XRCC6 binding protein 1 [Source:HGNC Symbol;Acc:29452]
+ENSG00000166902,11,MRPL16,4,mitochondrial ribosomal protein L16 [Source:HGNC Symbol;Acc:14476]
+ENSG00000166920,15,C15orf48,4,chromosome 15 open reading frame 48 [Source:HGNC Symbol;Acc:29898]
+ENSG00000167085,17,PHB,13,prohibitin [Source:HGNC Symbol;Acc:8912]
+ENSG00000167107,17,ACSF2,26,acyl-CoA synthetase family member 2 [Source:HGNC Symbol;Acc:26101]
+ENSG00000167112,9,TRUB2,4,TruB pseudouridine (psi) synthase family member 2 [Source:HGNC Symbol;Acc:17170]
+ENSG00000167113,9,COQ4,5,coenzyme Q4 [Source:HGNC Symbol;Acc:19693]
+ENSG00000167136,9,ENDOG,1,endonuclease G [Source:HGNC Symbol;Acc:3346]
+ENSG00000167186,16,COQ7,11,"coenzyme Q7 homolog, ubiquinone (yeast) [Source:HGNC Symbol;Acc:2244]"
+ENSG00000167264,16,DUS2,16,dihydrouridine synthase 2 [Source:HGNC Symbol;Acc:26014]
+ENSG00000167283,11,ATP5L,8,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit G [Source:HGNC Symbol;Acc:14247]"
+ENSG00000167315,18,ACAA2,7,acetyl-CoA acyltransferase 2 [Source:HGNC Symbol;Acc:83]
+ENSG00000167468,19,GPX4,9,glutathione peroxidase 4 [Source:HGNC Symbol;Acc:4556]
+ENSG00000167699,17,GLOD4,17,glyoxalase domain containing 4 [Source:HGNC Symbol;Acc:14111]
+ENSG00000167716,17,WDR81,15,WD repeat domain 81 [Source:HGNC Symbol;Acc:26600]
+ENSG00000167774,19,NDUFA7,1,NDUFA7 protein  [Source:UniProtKB/TrEMBL;Acc:Q6FG42]
+ENSG00000167792,11,NDUFV1,28,"NADH dehydrogenase (ubiquinone) flavoprotein 1, 51kDa [Source:HGNC Symbol;Acc:7716]"
+ENSG00000167799,11,NUDT8,3,nudix (nucleoside diphosphate linked moiety X)-type motif 8 [Source:HGNC Symbol;Acc:8055]
+ENSG00000167815,19,PRDX2,7,peroxiredoxin 2 [Source:HGNC Symbol;Acc:9353]
+ENSG00000167862,17,ICT1,4,immature colon carcinoma transcript 1 [Source:HGNC Symbol;Acc:5359]
+ENSG00000167863,17,ATP5H,5,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit d [Source:HGNC Symbol;Acc:845]"
+ENSG00000167969,16,ECI1,7,enoyl-CoA delta isomerase 1 [Source:HGNC Symbol;Acc:2703]
+ENSG00000167985,11,SDHAF2,8,succinate dehydrogenase complex assembly factor 2 [Source:HGNC Symbol;Acc:26034]
+ENSG00000167996,11,FTH1,11,"ferritin, heavy polypeptide 1 [Source:HGNC Symbol;Acc:3976]"
+ENSG00000168237,3,GLYCTK,10,glycerate kinase [Source:HGNC Symbol;Acc:24247]
+ENSG00000168268,3,NT5DC2,16,5'-nucleotidase domain containing 2 [Source:HGNC Symbol;Acc:25717]
+ENSG00000168275,1,COA6,3,cytochrome c oxidase assembly factor 6 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:18025]
+ENSG00000168288,2,MMADHC,4,"methylmalonic aciduria (cobalamin deficiency) cblD type, with homocystinuria [Source:HGNC Symbol;Acc:25221]"
+ENSG00000168291,3,PDHB,10,pyruvate dehydrogenase (lipoamide) beta [Source:HGNC Symbol;Acc:8808]
+ENSG00000168393,2,DTYMK,7,deoxythymidylate kinase (thymidylate kinase) [Source:HGNC Symbol;Acc:3061]
+ENSG00000168653,1,NDUFS5,2,"NADH dehydrogenase (ubiquinone) Fe-S protein 5, 15kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7712]"
+ENSG00000168710,1,AHCYL1,6,adenosylhomocysteinase-like 1 [Source:HGNC Symbol;Acc:344]
+ENSG00000168827,3,GFM1,11,"G elongation factor, mitochondrial 1 [Source:HGNC Symbol;Acc:13780]"
+ENSG00000168924,4,LETM1,7,leucine zipper-EF-hand containing transmembrane protein 1 [Source:HGNC Symbol;Acc:6556]
+ENSG00000168958,2,MFF,27,mitochondrial fission factor [Source:HGNC Symbol;Acc:24858]
+ENSG00000169020,4,ATP5I,5,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit E [Source:HGNC Symbol;Acc:846]"
+ENSG00000169021,19,UQCRFS1,1,"ubiquinol-cytochrome c reductase, Rieske iron-sulfur polypeptide 1 [Source:HGNC Symbol;Acc:12587]"
+ENSG00000169084,X,DHRSX,7,dehydrogenase/reductase (SDR family) X-linked [Source:HGNC Symbol;Acc:18399]
+ENSG00000169100,X,SLC25A6,3,"solute carrier family 25 (mitochondrial carrier; adenine nucleotide translocator), member 6 [Source:HGNC Symbol;Acc:10992]"
+ENSG00000169169,19,CPT1C,25,carnitine palmitoyltransferase 1C [Source:HGNC Symbol;Acc:18540]
+ENSG00000169188,X,APEX2,2,APEX nuclease (apurinic/apyrimidinic endonuclease) 2 [Source:HGNC Symbol;Acc:17889]
+ENSG00000169228,5,RAB24,9,"RAB24, member RAS oncogene family [Source:HGNC Symbol;Acc:9765]"
+ENSG00000169230,5,PRELID1,8,PRELI domain containing 1 [Source:HGNC Symbol;Acc:30255]
+ENSG00000169239,X,CA5B,10,"carbonic anhydrase VB, mitochondrial [Source:HGNC Symbol;Acc:1378]"
+ENSG00000169288,4,MRPL1,6,mitochondrial ribosomal protein L1 [Source:HGNC Symbol;Acc:14275]
+ENSG00000169504,1,CLIC4,4,chloride intracellular channel 4 [Source:HGNC Symbol;Acc:13518]
+ENSG00000169519,11,METTL15,9,methyltransferase like 15 [Source:HGNC Symbol;Acc:26606]
+ENSG00000169567,5,HINT1,10,histidine triad nucleotide binding protein 1 [Source:HGNC Symbol;Acc:4912]
+ENSG00000169599,2,NFU1,10,NFU1 iron-sulfur cluster scaffold homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:16287]
+ENSG00000169609,15,C15orf40,13,chromosome 15 open reading frame 40 [Source:HGNC Symbol;Acc:28443]
+ENSG00000169710,17,FASN,6,fatty acid synthase [Source:HGNC Symbol;Acc:3594]
+ENSG00000169738,17,DCXR,21,dicarbonyl/L-xylulose reductase [Source:HGNC Symbol;Acc:18985]
+ENSG00000169972,1,PUSL1,5,pseudouridylate synthase-like 1 [Source:HGNC Symbol;Acc:26914]
+ENSG00000170502,4,NUDT9,8,nudix (nucleoside diphosphate linked moiety X)-type motif 9 [Source:HGNC Symbol;Acc:8056]
+ENSG00000170632,7,ARMC10,11,armadillo repeat containing 10 [Source:HGNC Symbol;Acc:21706]
+ENSG00000170634,2,ACYP2,9,"acylphosphatase 2, muscle type [Source:HGNC Symbol;Acc:180]"
+ENSG00000170791,8,CHCHD7,18,coiled-coil-helix-coiled-coil-helix domain containing 7 [Source:HGNC Symbol;Acc:28314]
+ENSG00000170855,12,TRIAP1,2,TP53 regulated inhibitor of apoptosis 1 [Source:HGNC Symbol;Acc:26937]
+ENSG00000170906,19,NDUFA3,14,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 3, 9kDa [Source:HGNC Symbol;Acc:7686]"
+ENSG00000170917,4,NUDT6,8,nudix (nucleoside diphosphate linked moiety X)-type motif 6 [Source:HGNC Symbol;Acc:8053]
+ENSG00000171103,2,TRMT61B,5,tRNA methyltransferase 61 homolog B (S. cerevisiae) [Source:HGNC Symbol;Acc:26070]
+ENSG00000171109,3,MFN1,10,mitofusin 1 [Source:HGNC Symbol;Acc:18262]
+ENSG00000171202,11,TMEM126A,6,transmembrane protein 126A [Source:HGNC Symbol;Acc:25382]
+ENSG00000171204,11,TMEM126B,11,transmembrane protein 126B [Source:HGNC Symbol;Acc:30883]
+ENSG00000171421,5,MRPL36,5,mitochondrial ribosomal protein L36 [Source:HGNC Symbol;Acc:14490]
+ENSG00000171503,4,ETFDH,8,electron-transferring-flavoprotein dehydrogenase [Source:HGNC Symbol;Acc:3483]
+ENSG00000171552,20,BCL2L1,10,BCL2-like 1 [Source:HGNC Symbol;Acc:992]
+ENSG00000171612,1,SLC25A33,1,"solute carrier family 25 (pyrimidine nucleotide carrier), member 33 [Source:HGNC Symbol;Acc:29681]"
+ENSG00000171766,15,GATM,13,glycine amidinotransferase (L-arginine:glycine amidinotransferase) [Source:HGNC Symbol;Acc:4175]
+ENSG00000171791,18,BCL2,5,B-cell CLL/lymphoma 2 [Source:HGNC Symbol;Acc:990]
+ENSG00000171861,17,RNMTL1,4,RNA methyltransferase like 1 [Source:HGNC Symbol;Acc:18485]
+ENSG00000171865,2,RNASEH1,4,ribonuclease H1 [Source:HGNC Symbol;Acc:18466]
+ENSG00000171953,17,ATPAF2,13,ATP synthase mitochondrial F1 complex assembly factor 2 [Source:HGNC Symbol;Acc:18802]
+ENSG00000171989,15,LDHAL6B,1,lactate dehydrogenase A-like 6B [Source:HGNC Symbol;Acc:21481]
+ENSG00000172113,3,NME6,21,NME/NM23 nucleoside diphosphate kinase 6 [Source:HGNC Symbol;Acc:20567]
+ENSG00000172115,7,CYCS,4,"cytochrome c, somatic [Source:HGNC Symbol;Acc:19986]"
+ENSG00000172171,17,TEFM,5,"transcription elongation factor, mitochondrial [Source:HGNC Symbol;Acc:26223]"
+ENSG00000172172,8,MRPL13,7,mitochondrial ribosomal protein L13 [Source:HGNC Symbol;Acc:14278]
+ENSG00000172340,3,SUCLG2,4,"succinate-CoA ligase, GDP-forming, beta subunit [Source:HGNC Symbol;Acc:11450]"
+ENSG00000172366,16,FAM195A,4,"family with sequence similarity 195, member A [Source:HGNC Symbol;Acc:14142]"
+ENSG00000172482,2,AGXT,4,alanine-glyoxylate aminotransferase [Source:HGNC Symbol;Acc:341]
+ENSG00000172586,10,CHCHD1,2,coiled-coil-helix-coiled-coil-helix domain containing 1 [Source:HGNC Symbol;Acc:23518]
+ENSG00000172590,14,MRPL52,17,mitochondrial ribosomal protein L52 [Source:HGNC Symbol;Acc:16655]
+ENSG00000172840,16,PDP2,8,pyruvate dehyrogenase phosphatase catalytic subunit 2 [Source:HGNC Symbol;Acc:30263]
+ENSG00000172878,2,METAP1D,7,methionyl aminopeptidase type 1D (mitochondrial) [Source:HGNC Symbol;Acc:32583]
+ENSG00000172992,17,DCAKD,7,dephospho-CoA kinase domain containing [Source:HGNC Symbol;Acc:26238]
+ENSG00000173085,4,COQ2,6,coenzyme Q2 4-hydroxybenzoate polyprenyltransferase [Source:HGNC Symbol;Acc:25223]
+ENSG00000173137,8,ADCK5,8,aarF domain containing kinase 5 [Source:HGNC Symbol;Acc:21738]
+ENSG00000173141,13,MRP63,1,mitochondrial ribosomal protein 63 [Source:HGNC Symbol;Acc:14514]
+ENSG00000173171,1,MTX1,7,metaxin 1 [Source:HGNC Symbol;Acc:7504]
+ENSG00000173208,12,ABCD2,1,"ATP-binding cassette, sub-family D (ALD), member 2 [Source:HGNC Symbol;Acc:66]"
+ENSG00000173436,1,MINOS1,9,mitochondrial inner membrane organizing system 1 [Source:HGNC Symbol;Acc:32068]
+ENSG00000173599,11,PC,14,pyruvate carboxylase [Source:HGNC Symbol;Acc:8636]
+ENSG00000173641,1,HSPB7,8,"heat shock 27kDa protein family, member 7 (cardiovascular) [Source:HGNC Symbol;Acc:5249]"
+ENSG00000173660,1,UQCRH,5,ubiquinol-cytochrome c reductase hinge protein [Source:HGNC Symbol;Acc:12590]
+ENSG00000173726,1,TOMM20,3,translocase of outer mitochondrial membrane 20 homolog (yeast) [Source:HGNC Symbol;Acc:20947]
+ENSG00000173915,10,USMG5,5,up-regulated during skeletal muscle growth 5 homolog (mouse) [Source:HGNC Symbol;Acc:30889]
+ENSG00000174021,1,GNG5,3,"guanine nucleotide binding protein (G protein), gamma 5 [Source:HGNC Symbol;Acc:4408]"
+ENSG00000174032,13,SLC25A30,7,"solute carrier family 25, member 30 [Source:HGNC Symbol;Acc:27371]"
+ENSG00000174099,12,MSRB3,11,methionine sulfoxide reductase B3 [Source:HGNC Symbol;Acc:27375]
+ENSG00000174100,17,MRPL45,5,mitochondrial ribosomal protein L45 [Source:HGNC Symbol;Acc:16651]
+ENSG00000174109,16,C16orf91,3,chromosome 16 open reading frame 91 [Source:HGNC Symbol;Acc:27558]
+ENSG00000174173,3,TRMT10C,2,tRNA methyltransferase 10 homolog C (S. cerevisiae) [Source:HGNC Symbol;Acc:26022]
+ENSG00000174326,17,SLC16A11,4,"solute carrier family 16, member 11 [Source:HGNC Symbol;Acc:23093]"
+ENSG00000174374,7,WBSCR16,6,Williams-Beuren syndrome chromosome region 16 [Source:HGNC Symbol;Acc:14948]
+ENSG00000174547,11,MRPL11,6,mitochondrial ribosomal protein L11 [Source:HGNC Symbol;Acc:14042]
+ENSG00000174606,1,ANGEL2,10,angel homolog 2 (Drosophila) [Source:HGNC Symbol;Acc:30534]
+ENSG00000174740,X,PABPC5,2,"poly(A) binding protein, cytoplasmic 5 [Source:HGNC Symbol;Acc:13629]"
+ENSG00000174840,3,PDE12,2,phosphodiesterase 12 [Source:HGNC Symbol;Acc:25386]
+ENSG00000174886,19,NDUFA11,6,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 11, 14.7kDa [Source:HGNC Symbol;Acc:20371]"
+ENSG00000174917,19,C19orf70,6,chromosome 19 open reading frame 70 [Source:HGNC Symbol;Acc:33702]
+ENSG00000174928,3,C3orf33,5,chromosome 3 open reading frame 33 [Source:HGNC Symbol;Acc:26434]
+ENSG00000174990,16,CA5A,3,"carbonic anhydrase VA, mitochondrial [Source:HGNC Symbol;Acc:1377]"
+ENSG00000175110,3,MRPS22,14,mitochondrial ribosomal protein S22 [Source:HGNC Symbol;Acc:14508]
+ENSG00000175193,3,PARL,10,"presenilin associated, rhomboid-like [Source:HGNC Symbol;Acc:18253]"
+ENSG00000175198,13,PCCA,9,"propionyl CoA carboxylase, alpha polypeptide [Source:HGNC Symbol;Acc:8653]"
+ENSG00000175536,11,LIPT2,3,lipoyl(octanoyl) transferase 2 (putative) [Source:HGNC Symbol;Acc:37216]
+ENSG00000175564,11,UCP3,5,"uncoupling protein 3 (mitochondrial, proton carrier) [Source:HGNC Symbol;Acc:12519]"
+ENSG00000175567,11,UCP2,10,"uncoupling protein 2 (mitochondrial, proton carrier) [Source:HGNC Symbol;Acc:12518]"
+ENSG00000175581,11,MRPL48,15,mitochondrial ribosomal protein L48 [Source:HGNC Symbol;Acc:16653]
+ENSG00000175600,7,SUGCT,10,succinylCoA:glutarate-CoA transferase [Source:HGNC Symbol;Acc:16001]
+ENSG00000175606,8,TMEM70,7,transmembrane protein 70 [Source:HGNC Symbol;Acc:26050]
+ENSG00000175756,1,AURKAIP1,6,aurora kinase A interacting protein 1 [Source:HGNC Symbol;Acc:24114]
+ENSG00000175768,9,TOMM5,5,translocase of outer mitochondrial membrane 5 homolog (yeast) [Source:HGNC Symbol;Acc:31369]
+ENSG00000175806,8,MSRA,10,methionine sulfoxide reductase A [Source:HGNC Symbol;Acc:7377]
+ENSG00000176171,10,BNIP3,2,BCL2/adenovirus E1B 19kDa interacting protein 3 [Source:HGNC Symbol;Acc:1084]
+ENSG00000176274,X,SLC25A53,2,"solute carrier family 25, member 53 [Source:HGNC Symbol;Acc:31894]"
+ENSG00000176340,11,COX8A,1,cytochrome c oxidase subunit VIIIA (ubiquitous) [Source:HGNC Symbol;Acc:2294]
+ENSG00000176410,7,DNAJC30,1,"DnaJ (Hsp40) homolog, subfamily C, member 30 [Source:HGNC Symbol;Acc:16410]"
+ENSG00000176422,12,SPRYD4,1,SPRY domain containing 4 [Source:HGNC Symbol;Acc:27468]
+ENSG00000176623,8,RMDN1,19,regulator of microtubule dynamics 1 [Source:HGNC Symbol;Acc:24285]
+ENSG00000176715,16,ACSF3,17,acyl-CoA synthetase family member 3 [Source:HGNC Symbol;Acc:27288]
+ENSG00000176894,12,PXMP2,6,"peroxisomal membrane protein 2, 22kDa [Source:HGNC Symbol;Acc:9716]"
+ENSG00000176974,17,SHMT1,11,serine hydroxymethyltransferase 1 (soluble) [Source:HGNC Symbol;Acc:10850]
+ENSG00000177150,18,FAM210A,7,"family with sequence similarity 210, member A [Source:HGNC Symbol;Acc:28346]"
+ENSG00000177192,12,PUS1,12,pseudouridylate synthase 1 [Source:HGNC Symbol;Acc:15508]
+ENSG00000177302,17,TOP3A,21,topoisomerase (DNA) III alpha [Source:HGNC Symbol;Acc:11992]
+ENSG00000177370,17,TIMM22,1,translocase of inner mitochondrial membrane 22 homolog (yeast) [Source:HGNC Symbol;Acc:17317]
+ENSG00000177542,11,SLC25A22,23,"solute carrier family 25 (mitochondrial carrier: glutamate), member 22 [Source:HGNC Symbol;Acc:19954]"
+ENSG00000177646,3,ACAD9,12,"acyl-CoA dehydrogenase family, member 9 [Source:HGNC Symbol;Acc:21497]"
+ENSG00000177692,21,DNAJC28,3,"DnaJ (Hsp40) homolog, subfamily C, member 28 [Source:HGNC Symbol;Acc:1297]"
+ENSG00000178057,3,NDUFAF3,6,"NADH dehydrogenase (ubiquinone) complex I, assembly factor 3 [Source:HGNC Symbol;Acc:29918]"
+ENSG00000178074,2,C2orf69,2,chromosome 2 open reading frame 69 [Source:HGNC Symbol;Acc:26799]
+ENSG00000178096,1,BOLA1,4,bolA family member 1 [Source:HGNC Symbol;Acc:24263]
+ENSG00000178127,18,NDUFV2,9,"NADH dehydrogenase (ubiquinone) flavoprotein 2, 24kDa [Source:HGNC Symbol;Acc:7717]"
+ENSG00000178307,17,TMEM11,6,transmembrane protein 11 [Source:HGNC Symbol;Acc:16823]
+ENSG00000178445,9,GLDC,5,glycine dehydrogenase (decarboxylating) [Source:HGNC Symbol;Acc:4313]
+ENSG00000178449,12,COX14,4,cytochrome c oxidase assembly homolog 14 (S. cerevisiae) [Source:HGNC Symbol;Acc:28216]
+ENSG00000178537,3,SLC25A20,5,"solute carrier family 25 (carnitine/acylcarnitine translocase), member 20 [Source:HGNC Symbol;Acc:1421]"
+ENSG00000178605,X,GTPBP6,3,GTP binding protein 6 (putative) [Source:HGNC Symbol;Acc:30189]
+ENSG00000178694,3,NSUN3,8,"NOP2/Sun domain family, member 3 [Source:HGNC Symbol;Acc:26208]"
+ENSG00000178741,15,COX5A,6,cytochrome c oxidase subunit Va [Source:HGNC Symbol;Acc:2267]
+ENSG00000178952,16,TUFM,4,"Tu translation elongation factor, mitochondrial [Source:HGNC Symbol;Acc:12420]"
+ENSG00000179091,8,CYC1,4,cytochrome c-1 [Source:HGNC Symbol;Acc:2579]
+ENSG00000179142,8,CYP11B2,1,"cytochrome P450, family 11, subfamily B, polypeptide 2 [Source:HGNC Symbol;Acc:2592]"
+ENSG00000179152,3,TCAIM,12,"T cell activation inhibitor, mitochondrial [Source:HGNC Symbol;Acc:25241]"
+ENSG00000179271,19,GADD45GIP1,1,"growth arrest and DNA-damage-inducible, gamma interacting protein 1 [Source:HGNC Symbol;Acc:29996]"
+ENSG00000179869,7,ABCA13,7,"ATP-binding cassette, sub-family A (ABC1), member 13 [Source:HGNC Symbol;Acc:14638]"
+ENSG00000179988,10,PSTK,9,phosphoseryl-tRNA kinase [Source:HGNC Symbol;Acc:28578]
+ENSG00000180011,18,ZADH2,4,zinc binding alcohol dehydrogenase domain containing 2 [Source:HGNC Symbol;Acc:28697]
+ENSG00000180185,16,FAHD1,3,fumarylacetoacetate hydrolase domain containing 1 [Source:HGNC Symbol;Acc:14169]
+ENSG00000180902,2,D2HGDH,18,D-2-hydroxyglutarate dehydrogenase [Source:HGNC Symbol;Acc:28358]
+ENSG00000180992,6,MRPL14,1,mitochondrial ribosomal protein L14 [Source:HGNC Symbol;Acc:14279]
+ENSG00000181035,19,SLC25A42,6,"solute carrier family 25, member 42 [Source:HGNC Symbol;Acc:28380]"
+ENSG00000181061,3,HIGD1A,6,"HIG1 hypoxia inducible domain family, member 1A [Source:HGNC Symbol;Acc:29527]"
+ENSG00000181192,10,DHTKD1,6,dehydrogenase E1 and transketolase domain containing 1 [Source:HGNC Symbol;Acc:23537]
+ENSG00000181240,19,SLC25A41,3,"solute carrier family 25, member 41 [Source:HGNC Symbol;Acc:28533]"
+ENSG00000181610,17,MRPS23,4,mitochondrial ribosomal protein S23 [Source:HGNC Symbol;Acc:14509]
+ENSG00000181867,5,FTMT,1,ferritin mitochondrial [Source:HGNC Symbol;Acc:17345]
+ENSG00000181873,1,IBA57,3,"IBA57, iron-sulfur cluster assembly homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:27302]"
+ENSG00000181924,11,COA4,6,cytochrome c oxidase assembly factor 4 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:24604]
+ENSG00000181991,15,MRPS11,11,mitochondrial ribosomal protein S11 [Source:HGNC Symbol;Acc:14050]
+ENSG00000182054,15,IDH2,5,"isocitrate dehydrogenase 2 (NADP+), mitochondrial [Source:HGNC Symbol;Acc:5383]"
+ENSG00000182134,1,TDRKH,15,tudor and KH domain containing [Source:HGNC Symbol;Acc:11713]
+ENSG00000182154,9,MRPL41,1,mitochondrial ribosomal protein L41 [Source:HGNC Symbol;Acc:14492]
+ENSG00000182180,10,MRPS16,6,mitochondrial ribosomal protein S16 [Source:HGNC Symbol;Acc:14048]
+ENSG00000182199,12,SHMT2,36,serine hydroxymethyltransferase 2 (mitochondrial) [Source:HGNC Symbol;Acc:10852]
+ENSG00000182362,21,YBEY,8,ybeY metallopeptidase (putative) [Source:HGNC Symbol;Acc:1299]
+ENSG00000182512,14,GLRX5,3,glutaredoxin 5 [Source:HGNC Symbol;Acc:20134]
+ENSG00000182712,X,CMC4,2,C-x(9)-C motif containing 4 [Source:HGNC Symbol;Acc:35428]
+ENSG00000182768,15,NGRN,2,"neugrin, neurite outgrowth associated [Source:HGNC Symbol;Acc:18077]"
+ENSG00000182810,16,DDX28,1,DEAD (Asp-Glu-Ala-Asp) box polypeptide 28 [Source:HGNC Symbol;Acc:17330]
+ENSG00000182899,3,RPL35A,9,ribosomal protein L35a [Source:HGNC Symbol;Acc:10345]
+ENSG00000182902,22,SLC25A18,6,"solute carrier family 25 (glutamate carrier), member 18 [Source:HGNC Symbol;Acc:10988]"
+ENSG00000183010,17,PYCR1,15,pyrroline-5-carboxylate reductase 1 [Source:HGNC Symbol;Acc:9721]
+ENSG00000183032,14,SLC25A21,5,"solute carrier family 25 (mitochondrial oxoadipate carrier), member 21 [Source:HGNC Symbol;Acc:14411]"
+ENSG00000183044,16,ABAT,16,4-aminobutyrate aminotransferase [Source:HGNC Symbol;Acc:23]
+ENSG00000183048,17,SLC25A10,9,"solute carrier family 25 (mitochondrial carrier; dicarboxylate transporter), member 10 [Source:HGNC Symbol;Acc:10980]"
+ENSG00000183172,22,SMDT1,3,single-pass membrane protein with aspartate-rich tail 1 [Source:HGNC Symbol;Acc:25055]
+ENSG00000183513,2,COA5,5,cytochrome c oxidase assembly factor 5 [Source:HGNC Symbol;Acc:33848]
+ENSG00000183549,16,ACSM5,7,acyl-CoA synthetase medium-chain family member 5 [Source:HGNC Symbol;Acc:26060]
+ENSG00000183569,22,SERHL2,10,serine hydrolase-like 2 [Source:HGNC Symbol;Acc:29446]
+ENSG00000183605,10,SFXN4,9,sideroflexin 4 [Source:HGNC Symbol;Acc:16088]
+ENSG00000183617,19,MRPL54,2,mitochondrial ribosomal protein L54 [Source:HGNC Symbol;Acc:16685]
+ENSG00000183648,14,NDUFB1,6,"NADH dehydrogenase (ubiquinone) 1 beta subcomplex, 1, 7kDa [Source:HGNC Symbol;Acc:7695]"
+ENSG00000183747,16,ACSM2A,18,acyl-CoA synthetase medium-chain family member 2A [Source:HGNC Symbol;Acc:32017]
+ENSG00000183773,22,AIFM3,20,"apoptosis-inducing factor, mitochondrion-associated, 3 [Source:HGNC Symbol;Acc:26398]"
+ENSG00000183978,17,COA3,2,cytochrome c oxidase assembly factor 3 [Source:HGNC Symbol;Acc:24990]
+ENSG00000184047,12,DIABLO,15,"diablo, IAP-binding mitochondrial protein [Source:HGNC Symbol;Acc:21528]"
+ENSG00000184076,22,UQCR10,2,"ubiquinol-cytochrome c reductase, complex III subunit X [Source:HGNC Symbol;Acc:30863]"
+ENSG00000184117,22,NIPSNAP1,6,nipsnap homolog 1 (C. elegans) [Source:HGNC Symbol;Acc:7827]
+ENSG00000184428,8,TOP1MT,19,"topoisomerase (DNA) I, mitochondrial [Source:HGNC Symbol;Acc:29787]"
+ENSG00000184470,22,TXNRD2,19,thioredoxin reductase 2 [Source:HGNC Symbol;Acc:18155]
+ENSG00000184752,12,NDUFA12,9,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 12 [Source:HGNC Symbol;Acc:23987]"
+ENSG00000184831,X,APOO,5,apolipoprotein O [Source:HGNC Symbol;Acc:28727]
+ENSG00000184857,16,TMEM186,2,transmembrane protein 186 [Source:HGNC Symbol;Acc:24530]
+ENSG00000184903,7,IMMP2L,11,IMP2 inner mitochondrial membrane peptidase-like (S. cerevisiae) [Source:HGNC Symbol;Acc:14598]
+ENSG00000184983,22,NDUFA6,3,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 6, 14kDa [Source:HGNC Symbol;Acc:7690]"
+ENSG00000185414,2,MRPL30,5,mitochondrial ribosomal protein L30 [Source:HGNC Symbol;Acc:14036]
+ENSG00000185608,22,MRPL40,3,mitochondrial ribosomal protein L40 [Source:HGNC Symbol;Acc:14491]
+ENSG00000185624,17,P4HB,24,"prolyl 4-hydroxylase, beta polypeptide [Source:HGNC Symbol;Acc:8548]"
+ENSG00000185875,10,THNSL1,2,threonine synthase-like 1 (S. cerevisiae) [Source:HGNC Symbol;Acc:26160]
+ENSG00000185973,X,TMLHE,6,"trimethyllysine hydroxylase, epsilon [Source:HGNC Symbol;Acc:18308]"
+ENSG00000186010,19,NDUFA13,9,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 13 [Source:HGNC Symbol;Acc:17194]"
+ENSG00000186081,12,KRT5,11,keratin 5 [Source:HGNC Symbol;Acc:6442]
+ENSG00000186205,1,MARC1,7,mitochondrial amidoxime reducing component 1 [Source:HGNC Symbol;Acc:26189]
+ENSG00000186314,5,PRELID2,10,PRELI domain containing 2 [Source:HGNC Symbol;Acc:28306]
+ENSG00000186687,5,LYRM7,4,LYR motif containing 7 [Source:HGNC Symbol;Acc:28072]
+ENSG00000187024,9,PTRH1,8,peptidyl-tRNA hydrolase 1 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:27039]
+ENSG00000187118,3,CMC1,11,C-x(9)-C motif containing 1 [Source:HGNC Symbol;Acc:28783]
+ENSG00000187145,1,MRPS21,2,mitochondrial ribosomal protein S21 [Source:HGNC Symbol;Acc:14046]
+ENSG00000187581,14,COX8C,1,cytochrome c oxidase subunit VIIIC [Source:HGNC Symbol;Acc:24382]
+ENSG00000187742,9,SECISBP2,9,SECIS binding protein 2 [Source:HGNC Symbol;Acc:30972]
+ENSG00000187796,9,CARD9,8,"caspase recruitment domain family, member 9 [Source:HGNC Symbol;Acc:16391]"
+ENSG00000188554,17,NBR1,9,neighbor of BRCA1 gene 1 [Source:HGNC Symbol;Acc:6746]
+ENSG00000188611,10,ASAH2,6,N-acylsphingosine amidohydrolase (non-lysosomal ceramidase) 2 [Source:HGNC Symbol;Acc:18860]
+ENSG00000188917,X,TRMT2B,8,tRNA methyltransferase 2 homolog B (S. cerevisiae) [Source:HGNC Symbol;Acc:25748]
+ENSG00000189043,7,NDUFA4,6,"NADH dehydrogenase (ubiquinone) 1 alpha subcomplex, 4, 9kDa [Source:HGNC Symbol;Acc:7687]"
+ENSG00000189221,X,MAOA,4,monoamine oxidase A [Source:HGNC Symbol;Acc:6833]
+ENSG00000189227,15,C15orf61,4,chromosome 15 open reading frame 61 [Source:HGNC Symbol;Acc:34453]
+ENSG00000189283,3,FHIT,8,fragile histidine triad [Source:HGNC Symbol;Acc:3701]
+ENSG00000196177,10,ACADSB,5,"acyl-CoA dehydrogenase, short/branched chain [Source:HGNC Symbol;Acc:91]"
+ENSG00000196236,22,XPNPEP3,8,"X-prolyl aminopeptidase (aminopeptidase P) 3, putative [Source:HGNC Symbol;Acc:28052]"
+ENSG00000196290,2,NIF3L1,9,NIF3 NGG1 interacting factor 3-like 1 (S. cerevisiae) [Source:HGNC Symbol;Acc:13390]
+ENSG00000196365,19,LONP1,15,"lon peptidase 1, mitochondrial [Source:HGNC Symbol;Acc:9479]"
+ENSG00000196636,7,ACN9,4,ACN9 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:21752]
+ENSG00000196683,7,TOMM7,6,translocase of outer mitochondrial membrane 7 homolog (yeast) [Source:HGNC Symbol;Acc:21648]
+ENSG00000196850,12,PPTC7,2,PTC7 protein phosphatase homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:30695]
+ENSG00000197119,14,SLC25A29,21,"solute carrier family 25 (mitochondrial carnitine/acylcarnitine carrier), member 29 [Source:HGNC Symbol;Acc:20116]"
+ENSG00000197150,7,ABCB8,23,"ATP-binding cassette, sub-family B (MDR/TAP), member 8 [Source:HGNC Symbol;Acc:49]"
+ENSG00000197157,7,SND1,16,staphylococcal nuclease and tudor domain containing 1 [Source:HGNC Symbol;Acc:30646]
+ENSG00000197208,5,SLC22A4,3,"solute carrier family 22 (organic cation/zwitterion transporter), member 4 [Source:HGNC Symbol;Acc:10968]"
+ENSG00000197345,11,MRPL21,8,mitochondrial ribosomal protein L21 [Source:HGNC Symbol;Acc:14479]
+ENSG00000197444,10,OGDHL,6,oxoglutarate dehydrogenase-like [Source:HGNC Symbol;Acc:25590]
+ENSG00000197448,7,GSTK1,9,glutathione S-transferase kappa 1 [Source:HGNC Symbol;Acc:16906]
+ENSG00000197785,1,ATAD3A,7,"ATPase family, AAA domain containing 3A [Source:HGNC Symbol;Acc:25567]"
+ENSG00000197912,16,SPG7,22,spastic paraplegia 7 (pure and complicated autosomal recessive) [Source:HGNC Symbol;Acc:11237]
+ENSG00000198015,12,MRPL42,11,mitochondrial ribosomal protein L42 [Source:HGNC Symbol;Acc:14493]
+ENSG00000198060,10,MARCH5,4,membrane-associated ring finger (C3HC4) 5 [Source:HGNC Symbol;Acc:26025]
+ENSG00000198074,7,AKR1B10,4,"aldo-keto reductase family 1, member B10 (aldose reductase) [Source:HGNC Symbol;Acc:382]"
+ENSG00000198130,2,HIBCH,14,3-hydroxyisobutyryl-CoA hydrolase [Source:HGNC Symbol;Acc:4908]
+ENSG00000198211,16,TUBB3,1,"tubulin, beta 3 class III [Source:HGNC Symbol;Acc:20772]"
+ENSG00000198431,12,TXNRD1,28,thioredoxin reductase 1 [Source:HGNC Symbol;Acc:12437]
+ENSG00000198695,MT,MT-ND6,1,mitochondrially encoded NADH dehydrogenase 6 [Source:HGNC Symbol;Acc:7462]
+ENSG00000198712,MT,MT-CO2,1,mitochondrially encoded cytochrome c oxidase II [Source:HGNC Symbol;Acc:7421]
+ENSG00000198721,6,ECI2,12,enoyl-CoA delta isomerase 2 [Source:HGNC Symbol;Acc:14601]
+ENSG00000198727,MT,MT-CYB,1,mitochondrially encoded cytochrome b [Source:HGNC Symbol;Acc:7427]
+ENSG00000198755,6,RPL10A,5,ribosomal protein L10a [Source:HGNC Symbol;Acc:10299]
+ENSG00000198763,MT,MT-ND2,1,mitochondrially encoded NADH dehydrogenase 2 [Source:HGNC Symbol;Acc:7456]
+ENSG00000198786,MT,MT-ND5,1,mitochondrially encoded NADH dehydrogenase 5 [Source:HGNC Symbol;Acc:7461]
+ENSG00000198804,MT,MT-CO1,1,mitochondrially encoded cytochrome c oxidase I [Source:HGNC Symbol;Acc:7419]
+ENSG00000198814,X,GK,12,glycerol kinase [Source:HGNC Symbol;Acc:4289]
+ENSG00000198836,3,OPA1,19,optic atrophy 1 (autosomal dominant) [Source:HGNC Symbol;Acc:8140]
+ENSG00000198840,MT,MT-ND3,1,mitochondrially encoded NADH dehydrogenase 3 [Source:HGNC Symbol;Acc:7458]
+ENSG00000198886,MT,MT-ND4,1,mitochondrially encoded NADH dehydrogenase 4 [Source:HGNC Symbol;Acc:7459]
+ENSG00000198888,MT,MT-ND1,1,mitochondrially encoded NADH dehydrogenase 1 [Source:HGNC Symbol;Acc:7455]
+ENSG00000198899,MT,MT-ATP6,1,mitochondrially encoded ATP synthase 6 [Source:HGNC Symbol;Acc:7414]
+ENSG00000198938,MT,MT-CO3,1,mitochondrially encoded cytochrome c oxidase III [Source:HGNC Symbol;Acc:7422]
+ENSG00000203667,1,COX20,5,COX20 cytochrome C oxidase assembly factor [Source:HGNC Symbol;Acc:26970]
+ENSG00000204099,2,NEU4,17,sialidase 4 [Source:HGNC Symbol;Acc:21328]
+ENSG00000204237,17,OXLD1,7,oxidoreductase-like domain containing 1 [Source:HGNC Symbol;Acc:27901]
+ENSG00000204316,17,MRPL38,18,mitochondrial ribosomal protein L38 [Source:HGNC Symbol;Acc:14033]
+ENSG00000204370,11,SDHD,8,"succinate dehydrogenase complex, subunit D, integral membrane protein [Source:HGNC Symbol;Acc:10683]"
+ENSG00000204564,6,C6orf136,14,chromosome 6 open reading frame 136 [Source:HGNC Symbol;Acc:21301]
+ENSG00000204822,2,MRPL53,4,mitochondrial ribosomal protein L53 [Source:HGNC Symbol;Acc:16684]
+ENSG00000204842,12,ATXN2,26,ataxin 2 [Source:HGNC Symbol;Acc:10555]
+ENSG00000205138,19,SDHAF1,1,succinate dehydrogenase complex assembly factor 1 [Source:HGNC Symbol;Acc:33867]
+ENSG00000205309,17,NT5M,6,"5',3'-nucleotidase, mitochondrial [Source:HGNC Symbol;Acc:15769]"
+ENSG00000205560,22,CPT1B,15,carnitine palmitoyltransferase 1B (muscle) [Source:HGNC Symbol;Acc:2329]
+ENSG00000205707,12,LYRM5,11,LYR motif containing 5 [Source:HGNC Symbol;Acc:27052]
+ENSG00000205981,3,DNAJC19,9,"DnaJ (Hsp40) homolog, subfamily C, member 19 [Source:HGNC Symbol;Acc:30528]"
+ENSG00000212907,MT,MT-ND4L,1,mitochondrially encoded NADH dehydrogenase 4L [Source:HGNC Symbol;Acc:7460]
+ENSG00000213339,19,QTRT1,12,queuine tRNA-ribosyltransferase 1 [Source:HGNC Symbol;Acc:23797]
+ENSG00000213463,14,SYNJ2BP,2,synaptojanin 2 binding protein [Source:HGNC Symbol;Acc:18955]
+ENSG00000213465,11,ARL2,6,ADP-ribosylation factor-like 2 [Source:HGNC Symbol;Acc:693]
+ENSG00000213563,8,C8orf82,5,chromosome 8 open reading frame 82 [Source:HGNC Symbol;Acc:33826]
+ENSG00000213619,11,NDUFS3,13,"NADH dehydrogenase (ubiquinone) Fe-S protein 3, 30kDa (NADH-coenzyme Q reductase) [Source:HGNC Symbol;Acc:7710]"
+ENSG00000213965,19,NUDT19,1,nudix (nucleoside diphosphate linked moiety X)-type motif 19 [Source:HGNC Symbol;Acc:32036]
+ENSG00000213995,13,CARKD,5,carbohydrate kinase domain containing [Source:HGNC Symbol;Acc:25576]
+ENSG00000214026,11,MRPL23,10,mitochondrial ribosomal protein L23 [Source:HGNC Symbol;Acc:10322]
+ENSG00000214113,6,LYRM4,9,LYR motif containing 4 [Source:HGNC Symbol;Acc:21365]
+ENSG00000214253,7,FIS1,9,fission 1 (mitochondrial outer membrane) homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:21689]
+ENSG00000214827,X,MTCP1,5,mature T-cell proliferation 1 [Source:HGNC Symbol;Acc:7423]
+ENSG00000215021,12,PHB2,14,prohibitin 2 [Source:HGNC Symbol;Acc:30306]
+ENSG00000215251,20,FASTKD5,1,FAST kinase domains 5 [Source:HGNC Symbol;Acc:25790]
+ENSG00000215845,1,TSTD1,7,thiosulfate sulfurtransferase (rhodanese)-like domain containing 1 [Source:HGNC Symbol;Acc:35410]
+ENSG00000217930,16,PAM16,15,presequence translocase-associated motor 16 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:29679]
+ENSG00000222011,7,FAM185A,8,"family with sequence similarity 185, member A [Source:HGNC Symbol;Acc:22412]"
+ENSG00000223572,15,CKMT1A,7,"creatine kinase, mitochondrial 1A [Source:HGNC Symbol;Acc:31736]"
+ENSG00000224877,17,C17orf89,6,chromosome 17 open reading frame 89 [Source:HGNC Symbol;Acc:33551]
+ENSG00000228253,MT,MT-ATP8,1,mitochondrially encoded ATP synthase 8 [Source:HGNC Symbol;Acc:7415]
+ENSG00000229833,19,PET100,6,PET100 homolog (S. cerevisiae) [Source:HGNC Symbol;Acc:40038]
+ENSG00000230055,17,CISD3,3,CDGSH iron sulfur domain 3 [Source:HGNC Symbol;Acc:27578]
+ENSG00000232859,17,LYRM9,7,LYR motif containing 9 [Source:HGNC Symbol;Acc:27314]
+ENSG00000233276,3,GPX1,3,glutathione peroxidase 1 [Source:HGNC Symbol;Acc:4553]
+ENSG00000239789,7,MRPS17,2,mitochondrial ribosomal protein S17 [Source:HGNC Symbol;Acc:14047]
+ENSG00000240230,7,COX19,4,cytochrome c oxidase assembly homolog 19 (S. cerevisiae) [Source:HGNC Symbol;Acc:28074]
+ENSG00000240303,3,ACAD11,12,"acyl-CoA dehydrogenase family, member 11 [Source:HGNC Symbol;Acc:30211]"
+ENSG00000240857,2,RDH14,2,retinol dehydrogenase 14 (all-trans/9-cis/11-cis) [Source:HGNC Symbol;Acc:19979]
+ENSG00000241468,7,ATP5J2,13,"ATP synthase, H+ transporting, mitochondrial Fo complex, subunit F2 [Source:HGNC Symbol;Acc:848]"
+ENSG00000241837,21,ATP5O,10,"ATP synthase, H+ transporting, mitochondrial F1 complex, O subunit [Source:HGNC Symbol;Acc:850]"
+ENSG00000241878,22,PISD,18,phosphatidylserine decarboxylase [Source:HGNC Symbol;Acc:8999]
+ENSG00000241935,10,HOGA1,4,4-hydroxy-2-oxoglutarate aldolase 1 [Source:HGNC Symbol;Acc:25155]
+ENSG00000241973,22,PI4KA,21,"phosphatidylinositol 4-kinase, catalytic, alpha [Source:HGNC Symbol;Acc:8983]"
+ENSG00000242110,5,AMACR,10,alpha-methylacyl-CoA racemase [Source:HGNC Symbol;Acc:451]
+ENSG00000242114,22,MTFP1,5,mitochondrial fission process 1 [Source:HGNC Symbol;Acc:26945]
+ENSG00000242485,1,MRPL20,6,mitochondrial ribosomal protein L20 [Source:HGNC Symbol;Acc:14478]
+ENSG00000243147,2,MRPL33,6,mitochondrial ribosomal protein L33 [Source:HGNC Symbol;Acc:14487]
+ENSG00000243927,21,MRPS6,5,mitochondrial ribosomal protein S6 [Source:HGNC Symbol;Acc:14051]
+ENSG00000244005,20,NFS1,15,NFS1 cysteine desulfurase [Source:HGNC Symbol;Acc:15910]
+ENSG00000247077,12,PGAM5,5,phosphoglycerate mutase family member 5 [Source:HGNC Symbol;Acc:28763]
+ENSG00000247626,2,MARS2,1,"methionyl-tRNA synthetase 2, mitochondrial [Source:HGNC Symbol;Acc:25133]"
+ENSG00000248098,19,BCKDHA,9,"branched chain keto acid dehydrogenase E1, alpha polypeptide [Source:HGNC Symbol;Acc:986]"
+ENSG00000250479,22,CHCHD10,5,coiled-coil-helix-coiled-coil-helix domain containing 10 [Source:HGNC Symbol;Acc:15559]
+ENSG00000250799,19,PRODH2,6,proline dehydrogenase (oxidase) 2 [Source:HGNC Symbol;Acc:17325]
+ENSG00000254636,10,ARMS2,1,age-related maculopathy susceptibility 2 [Source:HGNC Symbol;Acc:32685]
+ENSG00000254858,19,MPV17L2,4,MPV17 mitochondrial membrane protein-like 2 [Source:HGNC Symbol;Acc:28177]
+ENSG00000256053,14,APOPT1,17,"apoptogenic 1, mitochondrial [Source:HGNC Symbol;Acc:20492]"
+ENSG00000256269,11,HMBS,25,hydroxymethylbilane synthase [Source:HGNC Symbol;Acc:4982]
+ENSG00000256525,17,POLG2,10,"polymerase (DNA directed), gamma 2, accessory subunit [Source:HGNC Symbol;Acc:9180]"
+ENSG00000258429,16,PDF,1,peptide deformylase (mitochondrial) [Source:HGNC Symbol;Acc:30012]
+ENSG00000259494,15,MRPL46,5,mitochondrial ribosomal protein L46 [Source:HGNC Symbol;Acc:1192]
+ENSG00000262814,17,MRPL12,1,mitochondrial ribosomal protein L12 [Source:HGNC Symbol;Acc:10378]
+ENSG00000267673,19,FDX1L,8,ferredoxin 1-like [Source:HGNC Symbol;Acc:30546]
