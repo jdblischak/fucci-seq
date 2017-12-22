@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Gene filtering</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Gene filtering</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2017-12-21</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 62c60ea</p>
+<hr />
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>I performed gene filtering based on the criterion set forth in our previous paper.</p>
+<ol style="list-style-type: decimal">
+<li>Remove mitochrodrial genes: filter out mitochrondrial genes verified and listed in <a href="https://www.broadinstitute.org/scientific-community/science/programs/metabolic-disease-program/publications/mitocarta/mitocarta-in-0">MitoCarta</a>.</li>
+</ol>
+<p><em>Results</em>:Found 1,150 genes previously quantified in <code>MitoCarta</code> inventory.</p>
+<p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/mito-genes-info.csv</code></p>
+<p><span class="math inline">\(~\)</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Remove outlier genes: molecule counts &gt; 4,096 in any sample (x is the theoretical maximum of UMI count for 6-bp UMI)</li>
+</ol>
+<p><em>Results</em> There’s one, and turns out this over-expressed gene is one of the mitochrondrial genes.</p>
+<p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/over-expressed-genes-info.csv</code></p>
+<p><span class="math inline">\(~\)</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Remove lowly expressed genes: Lowly-expressed genes := gene mean &lt; 2 CPM.</li>
+</ol>
+<p><em>Results</em>: * Of 20,421 genes, 7,864 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,830 are endogenoeus genes.</p>
+<p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/lowly-expressed-genes-info.csv</code></p>
+<p><strong>Finally</strong>, filtered eset (<code>eset_filtered</code>) and cpm normalized count (<code>cpm_filtered</code>) are saved in <code>../output/gene-filtering.Rmd/eset-filterd.rdata</code>.</p>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="import-data" class="section level2">
+<h2>Import data</h2>
+<p>Combine <code>eSet</code> objects.</p>
+<pre class="r"><code>library(knitr)
+library(Biobase)
+#library(gdata)
+library(testit)
+library(cowplot)
+library(biomaRt)
+library(knitr)
+library(data.table)
+
+source(&quot;../code/pca.R&quot;)
+eset &lt;- readRDS(&quot;../output_tmp/eset.rds&quot;)</code></pre>
+<p>Filter out low-quality single cell samples.</p>
+<pre class="r"><code>pdata_filter &lt;- pData(eset)[pData(eset)$filter_all == TRUE,]
+count_filter &lt;- exprs(eset[,pData(eset)$filter_all == TRUE])
+dim(count_filter)</code></pre>
+<pre><code>[1] 20421  1025</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="mitochrondrial-genes" class="section level2">
+<h2>Mitochrondrial genes</h2>
+<p>Found 1,150 genes previously quantified in <code>MitoCarta</code> inventory.</p>
+<pre class="r"><code>human_mito &lt;- gdata::read.xls(&quot;../data/Human.MitoCarta2.0.xls&quot;,
+                   sheet = 2, header = TRUE, stringsAsFactors=FALSE)
+human_mito_ensembl &lt;- human_mito$EnsemblGeneID
+
+which_mito &lt;- which(rownames(count_filter) %in% human_mito_ensembl)
+which_mito_genes &lt;- rownames(count_filter)[which_mito]
+
+length(which_mito)</code></pre>
+<pre><code>[1] 1150</code></pre>
+<p>Get mito gene info via <code>biomaRt</code>.</p>
+<pre class="r"><code># do biomart to verfiy these genes
+ensembl &lt;- useMart(host = &quot;grch37.ensembl.org&quot;,
+                   biomart = &quot;ENSEMBL_MART_ENSEMBL&quot;,
+                   dataset = &quot;hsapiens_gene_ensembl&quot;)
+
+mito_genes_info &lt;- getBM(
+  attributes = c(&quot;ensembl_gene_id&quot;, &quot;chromosome_name&quot;,
+                 &quot;external_gene_name&quot;, &quot;transcript_count&quot;,
+                 &quot;description&quot;),
+  filters = &quot;ensembl_gene_id&quot;,
+  values = which_mito_genes[grep(&quot;ENSG&quot;, which_mito_genes)],
+  mart = ensembl)
+
+
+fwrite(mito_genes_info, 
+       file = &quot;../output/gene-filtering.Rmd/mito-genes-info.csv&quot;)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="over-expressed-genes" class="section level2">
+<h2>Over-expressed genes</h2>
+<p>There’s one, and turns out this over-expressed gene is one of the mitochrondrial genes.</p>
+<pre class="r"><code>which_over_expressed &lt;- which(apply(count_filter, 1, function(x) any(x&gt;(4^6)) ))
+over_expressed_genes &lt;- rownames(count_filter)[which_over_expressed]
+over_expressed_genes %in% human_mito_ensembl</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>over_expressed_genes</code></pre>
+<pre><code>[1] &quot;ENSG00000198886&quot;</code></pre>
+<p>Get over-expressed gene info via <code>biomaRt</code>.</p>
+<pre class="r"><code>over_expressed_genes_info &lt;- getBM(
+  attributes = c(&quot;ensembl_gene_id&quot;, &quot;chromosome_name&quot;,
+                 &quot;external_gene_name&quot;, &quot;transcript_count&quot;,
+                 &quot;description&quot;),
+  filters = &quot;ensembl_gene_id&quot;,
+  values = over_expressed_genes,
+  mart = ensembl)
+
+fwrite(over_expressed_genes_info, 
+       file = &quot;../output/gene-filtering.Rmd/over-expressed-genes-info.csv&quot;)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="filter-out-lowly-expressed-genes" class="section level2">
+<h2>Filter out lowly-expressed genes</h2>
+<ul>
+<li>Of 20,421 genes, 7,864 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,830 are endogenoeus genes.</li>
+</ul>
+<p>Compute CPM</p>
+<pre class="r"><code>cpm &lt;- t(t(count_filter)/colSums(count_filter))*(10^6)</code></pre>
+<p>Lowly-expressed genes := gene mean &lt; 2 CPM</p>
+<pre class="r"><code>which_lowly_expressed &lt;- which(rowMeans(cpm) &lt; 2)
+length(which_lowly_expressed)</code></pre>
+<pre><code>[1] 7864</code></pre>
+<pre class="r"><code>which_lowly_expressed_genes &lt;- rownames(cpm)[which_lowly_expressed]
+
+length(grep(&quot;ERCC&quot;, which_lowly_expressed_genes))</code></pre>
+<pre><code>[1] 34</code></pre>
+<pre class="r"><code>length(grep(&quot;ENSG&quot;, which_lowly_expressed_genes))</code></pre>
+<pre><code>[1] 7830</code></pre>
+<p>Get gene info via <code>biomaRt</code>.</p>
+<pre class="r"><code>lowly_expressed_genes_info &lt;- getBM(
+  attributes = c(&quot;ensembl_gene_id&quot;, &quot;chromosome_name&quot;,
+                 &quot;external_gene_name&quot;, &quot;transcript_count&quot;,
+                 &quot;description&quot;),
+  filters = &quot;ensembl_gene_id&quot;,
+  values = which_lowly_expressed_genes[grep(&quot;ENSG&quot;, which_lowly_expressed_genes)],
+  mart = ensembl)
+
+fwrite(lowly_expressed_genes_info, 
+       file = &quot;../output/gene-filtering.Rmd/lowly-expressed-genes-info.csv&quot;)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="combine-filters" class="section level2">
+<h2>Combine filters</h2>
+<p>Including 16,460 genes.</p>
+<pre class="r"><code>gene_filter &lt;- unique(c(which_lowly_expressed, which_mito, which_over_expressed))
+
+genes_to_include &lt;- setdiff(1:nrow(count_filter), gene_filter)
+length(genes_to_include)</code></pre>
+<pre><code>[1] 11489</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="make-filtered-data" class="section level2">
+<h2>Make filtered data</h2>
+<pre class="r"><code>cpm_filtered &lt;- cpm[genes_to_include, ]
+
+eset_filtered &lt;- eset[genes_to_include, pData(eset)$filter_all==TRUE]
+eset_filtered</code></pre>
+<pre><code>ExpressionSet (storageMode: lockedEnvironment)
+assayData: 11489 features, 1025 samples 
+  element names: exprs 
+protocolData: none
+phenoData
+  sampleNames: 20170905-A01 20170905-A02 ... 20170924-H12 (1025
+    total)
+  varLabels: experiment well ... filter_all (43 total)
+  varMetadata: labelDescription
+featureData
+  featureNames: EGFP ENSG00000000003 ... mCherry (11489 total)
+  fvarLabels: chr start ... source (6 total)
+  fvarMetadata: labelDescription
+experimentData: use &#39;experimentData(object)&#39;
+Annotation:  </code></pre>
+<pre class="r"><code>save(cpm_filtered, eset_filtered, 
+     file = &quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="compute-log2-cpm" class="section level2">
+<h2>Compute log2 CPM</h2>
+<p>Import data post sample and gene filtering.</p>
+<pre class="r"><code>load(file=&quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
+<p>Compute log2 CPM based on the library size before filtering.</p>
+<pre class="r"><code>log2cpm &lt;- log2(cpm_filtered+1)</code></pre>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="pca" class="section level2">
+<h2>PCA</h2>
+<pre class="r"><code>pca_log2cpm &lt;- run_pca(log2cpm)
+
+pdata &lt;- pData(eset_filtered)
+pdata$experiment &lt;- as.factor(pdata$experiment)
+
+plot_grid(
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;chip_id&quot;),
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;experiment&quot;),
+  ncol=2)</code></pre>
+<p><img src="figure/gene-filtering.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><span class="math inline">\(~\)</span></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] data.table_1.10.4   biomaRt_2.34.0      cowplot_0.8.0      
+[4] ggplot2_2.2.1       testit_0.7          Biobase_2.38.0     
+[7] BiocGenerics_0.24.0 knitr_1.17         
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.14         compiler_3.4.1       git2r_0.19.0        
+ [4] plyr_1.8.4           prettyunits_1.0.2    progress_1.1.2      
+ [7] bitops_1.0-6         tools_3.4.1          digest_0.6.12       
+[10] bit_1.1-12           evaluate_0.10.1      RSQLite_2.0         
+[13] memoise_1.1.0        tibble_1.3.3         gtable_0.2.0        
+[16] rlang_0.1.4.9000     DBI_0.6-1            yaml_2.1.16         
+[19] stringr_1.2.0        gtools_3.5.0         IRanges_2.12.0      
+[22] S4Vectors_0.16.0     stats4_3.4.1         rprojroot_1.2       
+[25] bit64_0.9-5          grid_3.4.1           R6_2.2.2            
+[28] AnnotationDbi_1.40.0 XML_3.98-1.6         rmarkdown_1.8       
+[31] gdata_2.18.0         blob_1.1.0           magrittr_1.5        
+[34] backports_1.0.5      scales_0.4.1         htmltools_0.3.6     
+[37] assertthat_0.2.0     colorspace_1.3-2     labeling_0.3        
+[40] stringi_1.1.2        RCurl_1.95-4.8       lazyeval_0.2.0      
+[43] munsell_0.4.3       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
