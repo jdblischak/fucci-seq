@@ -57,10 +57,12 @@ dependencies:
   - r-data.table
   - r-dplyr
   - r-dt
+  - r-gdata
   - r-ggplot2
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
+  - r-testit
   - r-wesanderson
   - r-workflowr
   - samtools
