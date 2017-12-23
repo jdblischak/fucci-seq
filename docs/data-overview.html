@@ -24,8 +24,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -35,10 +35,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -287,7 +289,7 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/jdblischak/fucci-seq">
     <span class="fa fa-github"></span>
      
   </a>
@@ -317,22 +319,36 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-12-13</p>
+<p><strong>Last updated:</strong> 2017-12-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 7509725</p>
+<p><strong>Code version:</strong> 0fb561f</p>
 <hr />
-<p>All processed data are stored as <code>expressionSet</code> objects in <code>data/eset</code>. Below shows how to extract information from an <code>expressionSet</code> object.</p>
+<div id="quick-start" class="section level2">
+<h2>Quick start</h2>
+<p>We store feature-level (gene) read count and molecule count in <code>expressionSet</code> (<code>data/eset</code>) objects, which also contain sample metadata (e.g., assigned indivdual ID, cDNA concentraion) and quality filtering criteria (e.g., number of reads mapped to FUCCI transgenes, ERCC conversion rate). Data from different C1 plates are stored in separate <code>eset</code> objects:</p>
 <p><span class="math inline">\(~\)</span></p>
+<p>To combine <code>eset</code> objects from the different C1 plates:</p>
+<p><code>eset &lt;- Reduce(combine, Map(readRDS, Sys.glob(&quot;../data/eset/*.rds&quot;)))</code></p>
+<p><span class="math inline">\(~\)</span></p>
+<p>To access data stored in <code>expressionSet</code>:</p>
+<ul>
+<li><p><code>exprs(eset)</code>: access count data, 20,421 features by 1,536 single cell samples.</p></li>
+<li><p><code>pData(eset)</code>: access sample metadata. Returns data.frame of 1,536 samples by 43 labels. Use <code>varMetadata(phenoData(eset))</code> to view label descriptions.</p></li>
+<li><p><code>fData(eset)</code>: access feature metadata. Returns data.frame of 20,421 features by 6 labels. Use <code>varMetadata(featureData(eset))</code> to view label descriptions.</p></li>
+</ul>
+<hr />
+</div>
+<div id="label-description" class="section level2">
+<h2>Label description</h2>
+<p>Load related packages.</p>
 <pre class="r"><code>library(knitr)
 library(Biobase)</code></pre>
-<p><span class="math inline">\(~\)</span></p>
 <p>To combine all <code>expressionSet</code> objects in the folder,</p>
 <pre class="r"><code>fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
 eset &lt;- Reduce(combine, Map(readRDS, fname))</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<p>To view the sample metadata labels,</p>
-<pre class="r"><code>kable(varMetadata(phenoData(eset)))</code></pre>
+<p>View the sample metadata labels,</p>
+<pre><code>varMetadata(phenoData(eset))</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -473,11 +489,50 @@ eset &lt;- Reduce(combine, Map(readRDS, fname))</code></pre>
 <td>valid_id</td>
 <td align="left">verifyBamID: Is the predicted individual 1 of the 2 added to the C1 chip?</td>
 </tr>
+<tr class="even">
+<td>cut_off_reads</td>
+<td align="left">QC filter: number of mapped reads &gt; 85th percentile among zero-cell samples</td>
+</tr>
+<tr class="odd">
+<td>unmapped_ratios</td>
+<td align="left">QC filter: among reads with a valid UMI, number of unmapped/number of mapped (unmapped/umi)</td>
+</tr>
+<tr class="even">
+<td>cut_off_unmapped</td>
+<td align="left">QC filter: unmapped ratio &lt; 30th percentile among zero-cell samples</td>
+</tr>
+<tr class="odd">
+<td>ercc_percentage</td>
+<td align="left">QC filter: number of reads mapped to ERCC/total sample mapped reads (reads_ercc/mapped)</td>
+</tr>
+<tr class="even">
+<td>cut_off_ercc</td>
+<td align="left">QC filter: ercc percentage &lt; 15th percentile among zero-cell samples</td>
+</tr>
+<tr class="odd">
+<td>cut_off_genes</td>
+<td align="left">QC filter: number of endogenous genes with at least one molecule (detect_hs) &gt; 85th percentile among zero-cell samples</td>
+</tr>
+<tr class="even">
+<td>ercc_conversion</td>
+<td align="left">QC filter: among ERCC, number of molecules/number of mapped reads (mol_ercc/reads_ercc)</td>
+</tr>
+<tr class="odd">
+<td>conversion</td>
+<td align="left">QC filter: among endogenous genes, number of molecules/number of mapped reads (mol_hs/reads_hs)</td>
+</tr>
+<tr class="even">
+<td>conversion_outlier</td>
+<td align="left">QC filter: microscopy detects 1 cell AND ERCC conversion rate &gt; .094</td>
+</tr>
+<tr class="odd">
+<td>filter_all</td>
+<td align="left">QC filter: Does the sample pass all the QC filters? cell_number==1, mol_egfp &gt;0, valid_id==1, cut_off_reads==TRUE, cut_off_ercc==TRUE, cut_off_genes=TRUE</td>
+</tr>
 </tbody>
 </table>
-<p><span class="math inline">\(~\)</span></p>
-<p>To view the feature (gene) metadata labels,</p>
-<pre class="r"><code>kable(varMetadata(featureData(eset)))</code></pre>
+<p>View the feature (gene) metadata labels,</p>
+<pre><code>varMetadata(featureData(eset))</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -512,72 +567,8 @@ eset &lt;- Reduce(combine, Map(readRDS, fname))</code></pre>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(~\)</span></p>
-<p>To extract count data,</p>
-<pre><code>exprs(eset)</code></pre>
-<p>There are 20,421 genes and 1,536 single cell samples in the raw data.</p>
-<pre class="r"><code>dim(exprs(eset))</code></pre>
-<pre><code>[1] 20421  1536</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<p>To extract feature/gene information,</p>
-<pre><code>fData(eset)</code></pre>
-<p>The features include FUCCI transgenes (EGFP and mCherry), ERCC spike-in controls, and endogenoeus genes (ENSG).</p>
-<pre class="r"><code>head(fData(eset))</code></pre>
-<pre><code>                 chr     start       end     name strand     source
-EGFP            EGFP         1       714     EGFP      +       EGFP
-ENSG00000000003  hsX  99883667  99894988   TSPAN6      - H. sapiens
-ENSG00000000005  hsX  99839799  99854882     TNMD      + H. sapiens
-ENSG00000000419 hs20  49551404  49575092     DPM1      - H. sapiens
-ENSG00000000457  hs1 169818772 169863408    SCYL3      - H. sapiens
-ENSG00000000460  hs1 169631245 169823221 C1orf112      + H. sapiens</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<p>To extract sample information,</p>
-<pre><code>pData(eset)</code></pre>
-<p>The rows contain single cell samples. Row names indicate the experiment date (we had one C1 plate per day), and C1 well ID.</p>
-<pre class="r"><code>head(pData(eset))</code></pre>
-<pre><code>             experiment well cell_number concentration         ERCC
-20170905-A01   20170905  A01           1     1.7264044 50x dilution
-20170905-A02   20170905  A02           1     1.4456926 50x dilution
-20170905-A03   20170905  A03           1     1.8896170 50x dilution
-20170905-A04   20170905  A04           1     0.4753723 50x dilution
-20170905-A05   20170905  A05           1     0.5596827 50x dilution
-20170905-A06   20170905  A06           1     2.1353518 50x dilution
-             individual.1 individual.2 image_individual image_label
-20170905-A01      NA18855      NA18870      18870_18855           3
-20170905-A02      NA18855      NA18870      18870_18855           2
-20170905-A03      NA18855      NA18870      18870_18855           1
-20170905-A04      NA18855      NA18870      18870_18855          49
-20170905-A05      NA18855      NA18870      18870_18855          50
-20170905-A06      NA18855      NA18870      18870_18855          51
-                 raw     umi  mapped unmapped reads_ercc reads_hs
-20170905-A01 2734844 1754078 1240443   513635      76433  1163764
-20170905-A02 1910671 1254676  861713   392963     120589   740940
-20170905-A03 2284182 1571727 1093848   477879     124186   968934
-20170905-A04  920518  610742  382426   228316     116552   265873
-20170905-A05 1260569  831378  494618   336760     117843   376703
-20170905-A06 2501607 1733479 1258695   474784      99172  1158976
-             reads_egfp reads_mcherry molecules mol_ercc mol_hs mol_egfp
-20170905-A01        246             0    113178     3122 110041       15
-20170905-A02        182             2     59545     3143  56390       10
-20170905-A03        727             1     74459     3307  71119       32
-20170905-A04          1             0     29385     3110  26274        1
-20170905-A05         71             1     42407     3059  39343        4
-20170905-A06        546             1     94362     3120  91215       26
-             mol_mcherry detect_ercc detect_hs chip_id chipmix freemix
-20170905-A01           0          39      8390 NA18870 0.12414 0.08025
-20170905-A02           2          45      6057 NA18870 0.19067 0.10145
-20170905-A03           1          40      6429 NA18855 0.21403 0.08767
-20170905-A04           0          42      2746 NA18870 0.45097 0.08319
-20170905-A05           1          44      3633 NA18870 0.44775 0.22013
-20170905-A06           1          41      7508 NA18870 0.15767 0.11801
-               snps reads avg_dp min_dp snps_w_min valid_id
-20170905-A01 311848  7959   0.03      1       3503     TRUE
-20170905-A02 311848  3651   0.01      1       1802     TRUE
-20170905-A03 311848  5059   0.02      1       2159     TRUE
-20170905-A04 311848   815   0.00      1        591     TRUE
-20170905-A05 311848  1209   0.00      1        780     TRUE
-20170905-A06 311848  6722   0.02      1       2815     TRUE</code></pre>
 <hr />
+</div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
@@ -601,13 +592,13 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] Biobase_2.38.0      BiocGenerics_0.24.0 knitr_1.16         
+[1] Biobase_2.38.0      BiocGenerics_0.24.0 knitr_1.17         
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.14    digest_0.6.12   rprojroot_1.2   backports_1.0.5
  [5] git2r_0.19.0    magrittr_1.5    evaluate_0.10.1 highr_0.6      
- [9] stringi_1.1.2   rmarkdown_1.6   tools_3.4.1     stringr_1.2.0  
-[13] yaml_2.1.14     compiler_3.4.1  htmltools_0.3.6</code></pre>
+ [9] stringi_1.1.2   rmarkdown_1.8   tools_3.4.1     stringr_1.2.0  
+[13] yaml_2.1.16     compiler_3.4.1  htmltools_0.3.6</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
