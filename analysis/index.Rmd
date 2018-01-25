@@ -13,15 +13,13 @@ Website to share results of fucci-seq project.
 
 ---
 
-## Combined analysis
-
-* [Make combined data](combine-images-intensities.html)
-
----
-
 ## Image analysis
 
 * [Processing images - from images to intensities](images-process.html)
+
+* Image inspection
+    * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
+    * [Inspect images with no nucleus](images-zero-nuclei.html)
 
 * Image intensities
     * [CONFESS results](confess-prelim.html)
@@ -41,17 +39,17 @@ Website to share results of fucci-seq project.
     * [Parametric model across plates and individuals](images-cellcycleR.html)
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     
-
-* Image inspection
-    * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
-    * [Inspect images with no nucleus](images-zero-nuclei.html)
+* transgene count in sequencing data
+    * [Investigate zero-count transgenes](images-transgene.html)
 
 ---
 
 ## QC
 
-* [Sample QC criteria](sampleqc.html)  
-* [Sequencing depth](totals.html)  
-* [Reads versus molecules](reads-v-molecules.html)  
+* Sample QC and filtering
+    * [Sample QC criteria](sampleqc.html)  
+    * [Sequencing depth](totals.html)  
+    * [Reads versus molecules](reads-v-molecules.html)  
 
-* [gene filtering](gene-filtering.html)
+* Gene QC and filtering
+    * [gene filtering](gene-filtering.html)
