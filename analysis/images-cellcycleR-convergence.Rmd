@@ -1,0 +1,175 @@
+---
+title: "parametric cellcycleR for image intensities: convergence assessment"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+
+---
+
+## Introduction/Summary
+
+In this document, we assess the convergence of `cellcycleR` across all samples and all batches on fitting intensity data - three intensity vectors for ~1,200 single cell samples. 
+
+
+**Results**:
+
+20 runs of `sin_cell_ordering_class` on 20 different random seeds. Each 500 iterations. We assess the range of log-likelihood, and model estimates $\hat{\alpha}_g$, $\hat{\phi}_g$, and $\hat{\sigma}_g$.
+
+
+1. Large deviation in the estimates of $\phi_g$: because $\phi_g$ is not identifiable.
+
+2. Not much deviation between the 20 runs in the estimates for $\alpha_g$ amplitude or $\sigma_g$ or log-likelihood. 
+
+3. Re. speed of convergence, across random seeds, it takes about less than 50 iterations to reach convergence. Note that the observation vector of each cell is a three-dimensional vector (green, red, and dapi). The number of iterations will go up as we increase the dimension of the observations (e.g., number of genes).
+
+---
+
+## Data
+
+Combined intensity data (see [combine-intensity-data.R](/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R)).
+
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
+library(ggplot2)
+library(cellcycleR)
+library(data.table)
+library(dplyr)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+library(plotrix)
+
+ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
+ints$rfp.z <- scale(ints$rfp.median.log10sum, center=TRUE, scale=TRUE)
+ints$gfp.z <- scale(ints$gfp.median.log10sum, center=TRUE, scale=TRUE)
+ints$dapi.z <- scale(ints$dapi.median.log10sum, center=TRUE, scale=TRUE)
+
+ints_tmp <- data.frame(rfp.z=ints$rfp.z,
+                       gfp.z=ints$gfp.z,
+                       dapi.z=ints$dapi.z)
+```
+
+---
+
+## Model overview
+
+For $S$ cells, let the vector of true cell time be $t_S$. We use an iterative scheme to estimate cell time parameters $t_S$, and curve parameters $\alpha_g$, $\phi_g$, and $\sigma_g$. First, we consider $T$ time classes which is a set of uniformly spaced time points on $(0, 2\pi)$. In the first iteration, we assign each cell $s$ to a time class $t_s^{(0)}$ and estimate the curve parameters $\alpha_g$, $\phi_g$, and $\sigma_g$. In the second iteratio, we estimate $t_s^{(1)}$ based on the model estimates from the first iteration ($\hat{\alpha}_g$, $\hat{\phi}_g$, and $\hat{\sigma}_g$). We continue this iterative scheme until convergence. For any $n$ iterations, starting from 0, we fit the following model for gene $g$ and and cell $s$.
+
+
+$$
+Y_{sg} = \alpha_g sin(t_s^{(n)} + \phi_g) + \epsilon_{sg}
+$$
+where $\epsilon_{sg} \sim N(0, \sigma^2_g)$, and frequency is 1.
+
+
+---
+
+## Analysis
+
+20 runs of `sin_cell_ordering_class` on 20 different random seeds. Each 500 iterations.
+
+We assess the range of log-likelihood, and model estimates $\hat{\alpha}_g$, $\hat{\phi}_g$, and $\hat{\sigma}_g$.
+
+
+```{r, echo = FALSE, eval = FALSE}
+# cellcycleR analysis
+iter <- seq(1:20)
+seeds <- c(2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71)
+
+for (index in iter) {
+  set.seed(seeds[index])
+  out <- sin_cell_ordering_class(as.matrix(ints_tmp), 
+                                 celltime_levels=300, 
+                                 num_shuffle=1, maxiter=500, tol=1e-6,
+                                 fix.phase = FALSE, phase_in=NULL,
+                                 n_cores=5)
+  saveRDS(out, 
+          file = paste0("/project2/gilad/joycehsiao/fucci-seq/output/images-cellcycleR-convergence.Rmd/out","_", sprintf("%02d", index),".rds") )
+}
+```
+
+
+```{r, echo = FALSE, eval = TRUE}
+fname <- Sys.glob("../output/images-cellcycleR-convergence.Rmd/*.rds")
+objs <- lapply(fname, readRDS)
+loglik <- sapply(objs, "[[", "loglik")
+
+amp <- do.call(rbind, lapply(objs, "[[", "amp"))
+phi <- do.call(rbind, lapply(objs, "[[", "phi"))
+sigma <- do.call(rbind, lapply(objs, "[[", "sigma"))
+
+colnames(amp) <- c("Red", "Green", "DAPI")
+colnames(phi) <- c("Red", "Green", "DAPI")
+colnames(sigma) <- c("Red", "Green", "DAPI")
+```
+
+```{r}
+summary(loglik)
+summary(amp)
+summary(phi)
+summary(sigma)
+```
+
+log-liklihood distribution
+
+```{r}
+plot(loglik)
+```
+
+
+```{r, fig.width=10, fig.height=12}
+par(mfrow=c(5,4), mar=c(1,1,2.5,1), oma=rep(1,4))
+for (i in 1:length(objs)) {
+plot(objs[[i]]$loglik_iter[-1],
+     main = paste("round no.", i))
+}
+title("log-likelihood", outer=TRUE)
+```
+
+speed of convergence
+
+```{r}
+maxiter <- vector("numeric", length(objs))
+for (i in 1:length(maxiter)) {
+  maxiter[i] <- which.max(objs[[i]]$loglik_iter[-1]) 
+}
+
+boxplot(maxiter, outpch = NA, main = "no. iterations reached for convergence") 
+stripchart(maxiter,  
+            vertical = TRUE, method = "jitter", 
+            pch = 21, col = "maroon", bg = "bisque", 
+            add = TRUE) 
+```
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
