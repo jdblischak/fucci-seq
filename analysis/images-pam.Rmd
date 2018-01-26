@@ -1,0 +1,247 @@
+---
+title: "Classify cells based on FUCCI using PAM"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Overview/Results
+
+I tried partition around the medoid (PAM) on the data that have already been filtered for quality single cells using both RNA-sequencing and microscopy data. The eventual goal is to select a subset of cells that are "representative" of each cell cycle phase.
+
+$~$
+
+Results:
+
+1. First, note that the 990 samples in this dataset passed microscopy filters and sequencing data filters. Microscopy filters based on DAPI intensities exlude samples that are detected with low or no DNA content and also samples with more than one nucleus. In other words, microscopy filters exclude cells that are in G0 phase, which typically have low DNA content. In addition, microscopy filters based on GFP and RFP exlude samples that are either in G0 phase or in M phase. 
+
+2. Standard flow cytometry analysis using GFP and RFP can classify cells into G1, G1/S, and G2/M. We fit k=3 and k=4 using PAM on GFP and RFP and also on GFP, RFP, and DAPI. 
+
+3. Results for either k=3 or k=4 didn't change after adding DAPI measurements.
+
+4. Results of partitions between k=3 and k=4: I am mainly interested in k=3 case. I will use k=4 results in the quality checks for k=3 results. In brief, I'll look at cell cycle gene expression profiles of both of these cases. If the additional partition in k=4 is similar to one of the other three partitions, then we can say k=3 fits better. 
+
+5. After we decide on the clustering of cells, we can compute silhouette index for each cell to determine how well each cell fits into its cluster. Then, we can use silhouette index to choose the most "represented cells" from each cluster, for example selecting cells that are the closet to cluster centers.
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(Biobase)
+library(ggplot2)
+library(cowplot)
+library(cluster)
+library(data.table)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ERCC", rownames(df), invert=TRUE), ]
+
+# cpm normalization
+log2cpm <- log2(t(t(counts+1)*(10^6)/colSums(counts)))
+```
+
+select cell cycle genes
+
+```{r}
+cellcycle <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
+which_cc <- which(rownames(log2cpm) %in% cellcycle$ensembl)
+
+log2cpm_cc <- log2cpm[which_cc, ]
+```
+
+
+---
+
+
+## Analysis
+
+Fitting PAM for cells using only green and red intensity measurements.
+
+```{r}
+ints <- with(pdata, data.frame(rfp.median.log10sum,
+                               gfp.median.log10sum,
+                               dapi.median.log10sum))
+ints <- data.frame(ints, 
+                   chip_id = as.factor(pdata$chip_id))
+
+k_list <- c(3:4)
+
+pam_fit_green_red <- lapply(k_list, function(k) {
+  fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id, dapi.median.log10sum))
+    fit_sub <- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+  names(fit) <- unique(ints$chip_id)
+  return(fit)
+})
+names(pam_fit_green_red) <- paste0("k", k_list)
+
+pam_fit_green_red_plot <- vector("list", length(pam_fit_green_red))
+for (k in c(1:length(k_list))) {
+  pp <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(pam_fit_green_red[[k]][[i]]$clustering))
+    return(df_sub)
+  }))
+  pam_fit_green_red_plot[[k]] <- pp
+}
+```
+
+
+Fitting PAM for cells using all three intensity measurements.
+
+```{r}
+pam_fit_green_red_dapi <- lapply(k_list, function(k) {
+  fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -chip_id)
+    fit_sub <- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+  names(fit) <- unique(ints$chip_id)
+  return(fit)
+})
+names(pam_fit_green_red_dapi) <- paste0("k", k_list)
+
+pam_fit_green_red_dapi_plot <- vector("list", length(pam_fit_green_red_dapi))
+for (k in c(1:length(k_list))) {
+  pp <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(pam_fit_green_red_dapi[[k]][[i]]$clustering))
+    return(df_sub)
+  }))
+  pam_fit_green_red_dapi_plot[[k]] <- pp
+}
+```
+  
+---
+
+## Results
+
+
+**k=3**
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(pam_fit_green_red_plot[[1]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=3, PAM on GFP and RFP",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(pam_fit_green_red_dapi_plot[[1]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=3, PAM on GFP, RFP and DAPI",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") )
+```
+
+**k=4**
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(pam_fit_green_red_plot[[2]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=4, PAM on GFP and RFP",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(pam_fit_green_red_dapi_plot[[2]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=4, PAM on GFP, RFP and DAPI",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") )
+```
+
+
+**k=3 versus k=4**
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(pam_fit_green_red_plot[[1]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=3, PAM on GFP and RFP",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(pam_fit_green_red_plot[[2]], 
+         aes(x=gfp.median.log10sum, 
+             y=rfp.median.log10sum, col=cluster)) + 
+      geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+      labs(title = "K=4, PAM on GFP, RFP and DAPI",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") )
+```
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
