@@ -322,7 +322,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-01-30</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 0c49875</p>
+<p><strong>Code version:</strong> e69bd0d</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -331,7 +331,7 @@ shared across the workflowr files. -->
 <p>Results:</p>
 <ol style="list-style-type: decimal">
 <li><p>Compare PAM vs. Mclust results: seems that PAM places cluster centers at the most densely distributed region. and on the other hand, Mclust places cluster centers at the region that is the “center” of the points assigned to the clusters.</p></li>
-<li><p>Select subset of cells: using PAM results, I compute silhouette index for all samples and the choose the top 20 samples in each cluster for each individual. These samples are used in some analysis to evaluate model fit on less noisy data, such as the analysis applying cellcycleR to both imaging data and sequencing data (<a href="https://jdblischak.github.io/fucci-seq/cellcycler-images-seqdata.html">here</a>).</p></li>
+<li><p>Select subset of cells: using PAM results, I compute silhouette index for all samples and the choose the top 25 samples in each cluster for each individual. These samples are used in some analysis to evaluate model fit on less noisy data, such as the analysis applying cellcycleR to both imaging data and sequencing data (<a href="https://jdblischak.github.io/fucci-seq/cellcycler-images-seqdata.html">here</a>).</p></li>
 </ol>
 <p>Let <span class="math inline">\(s(i)\)</span> denotes the silhouette index of sample <span class="math inline">\(i\)</span>. <span class="math inline">\(s(i)\)</span> ranges between -1 to 1. A large value of <span class="math inline">\(s(i)\)</span> indicates that sample <span class="math inline">\(i\)</span> is more similar to samples belonged to its own cluster than any other clusters, and a small value of <span class="math inline">\(s(i)\)</span> indicates that sample <span class="math inline">\(i\)</span> is dissimilar to samples belonged to its own clusters and matches better to samples belonged in some other clusters.</p>
 <p><span class="math inline">\(a(i)\)</span>: Average distance of <span class="math inline">\(i\)</span> with all other samples within the same cluster.</p>
@@ -427,51 +427,47 @@ mclust_fit_plot &lt;- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i)
 </div>
 <div id="compute-silhouette" class="section level2">
 <h2>Compute silhouette</h2>
-<p>Choose the top 20 in each cluster.</p>
+<p>Combine silhouette data with the intensity data.</p>
 <pre class="r"><code>si_pam &lt;- vector(&quot;list&quot;, length(pam_fit))
 for (i in 1:length(si_pam)) {
   si_tmp &lt;- silhouette(pam_fit[[i]])
 
   si_out &lt;- lapply(1:3, function(cl) {
     ord &lt;- order(si_tmp[si_tmp[,1]==cl, 3], decreasing=TRUE)
-    ii &lt;- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])[ord[1:20]]
-    df_sub &lt;- data.frame(ints[ii,], 
-               cluster=cl)
+    ii &lt;- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])
+    ii &lt;- ii[ord]  
+    df_sub &lt;- data.frame(ints[ii,],
+                         unique_id = rownames(pdata)[ii],
+                         cluster=cl,
+                         si=si_tmp[si_tmp[,1]==cl, 3])
   }) 
   si_out &lt;- do.call(rbind, si_out)
   si_pam[[i]] &lt;- si_out
 }
 si_pam_long &lt;- do.call(rbind, si_pam)</code></pre>
+<p>Choose the top 25 in each cluster.</p>
+<pre class="r"><code>cutoff_nsamples &lt;- 20
+
+foo &lt;- lapply(1:uniqueN(si_pam_long$chip_id), function(i) {
+  foo2 &lt;- lapply(1:uniqueN(si_pam_long$cluster), function(j) {
+    df_tmp &lt;- subset(si_pam_long, chip_id == unique(si_pam_long$chip_id)[i] &amp; cluster == unique(si_pam_long$cluster)[j])
+    if (cutoff_nsamples &gt; dim(df_tmp)[1]) {
+        df_tmp_sub &lt;- df_tmp
+    } else {
+        df_tmp_sub &lt;- df_tmp[which(order(df_tmp$si, decreasing = T) %in% c(1:cutoff_nsamples)),]
+    }
+    return(df_tmp_sub)
+  })
+  foo2 &lt;- do.call(rbind, foo2)
+  return(foo2)
+})
+foo &lt;- do.call(rbind, foo)
+si_pam_25 &lt;- foo</code></pre>
 <p>save subset of cells to rds.</p>
-<pre class="r"><code>saveRDS(si_pam_long, file = &quot;../output/images-subset-silhouette.Rmd/si_pam.rds&quot;)</code></pre>
+<pre class="r"><code>save(si_pam_long, si_pam_25, 
+    file = &quot;../output/images-subset-silhouette.Rmd/si_pam.rda&quot;)</code></pre>
 <p>Compare full set versus subset of cells.</p>
-<pre class="r"><code>plot_grid(
-  ggplot(data=pam_fit_plot) + 
-      geom_point(aes(x=gfp.median.log10sum, 
-                     y=rfp.median.log10sum, col=cluster),
-         alpha = .5, cex = .7) + 
-      geom_point(data=pam_centers,
-                  aes(x=gfp.median.log10sum,
-                      y=rfp.median.log10sum), shape=4, size=3) +
-      labs(title = &quot;K=3, PAM&quot;,
-           x=&quot;GFP intensity (log10 pixel sum)&quot;, 
-           y = &quot;RFP intensity (log10 pixel sum)&quot;) + 
-      facet_wrap(~as.factor(chip_id), ncol=3) +
-      theme_gray() + theme(legend.position=&quot;none&quot;),
-  ggplot(data=si_pam_long) + 
-      geom_point(aes(x=gfp.median.log10sum, 
-                     y=rfp.median.log10sum, col=as.factor(cluster)),
-         alpha = .5, cex = .7) + 
-      geom_point(data=pam_centers,
-                  aes(x=gfp.median.log10sum,
-                      y=rfp.median.log10sum), shape=4, size=3) +
-      labs(title = &quot;K=3, PAM&quot;,
-           x=&quot;GFP intensity (log10 pixel sum)&quot;, 
-           y = &quot;RFP intensity (log10 pixel sum)&quot;) + 
-      facet_wrap(~as.factor(chip_id), ncol=3) +
-      theme_gray() + theme(legend.position=&quot;none&quot;)
-  )</code></pre>
-<p><img src="figure/images-subset-silhouette.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-subset-silhouette.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
