@@ -1,0 +1,256 @@
+---
+title: "Classify cells based on FUCCI: compare PAM vs. Mclust"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Overview/Results
+
+I fit PAM and norma-based mixture models on the data that have already been filtered for quality single cells using both RNA-sequencing and microscopy data. The goal here is to identify a subset of cells that are less noisy and use these cells to estimate cell cycle phase.
+
+$~$
+
+Results:
+
+1. Compare PAM vs. Mclust results: seems that PAM places cluster centers at the most densely distributed region. and on the other hand, Mclust places cluster centers at the region that is the "center" of the points assigned to the clusters.
+
+2. Select subset of cells: using PAM results, I compute silhouette index for all samples and the choose the top 20 samples in each cluster for each individual. These samples are used in some analysis to evaluate model fit on less noisy data, such as the analysis applying cellcycleR to both imaging data and sequencing data ([here](https://jdblischak.github.io/fucci-seq/cellcycler-images-seqdata.html)).
+
+Let $s(i)$ denotes the silhouette index of sample $i$. $s(i)$ ranges between -1 to 1. A large value of $s(i)$ indicates that sample $i$ is more similar to samples belonged to its own cluster than any other clusters, and a small value of $s(i)$ indicates that sample $i$ is dissimilar to samples belonged to its own clusters and matches better to samples belonged in some other clusters. 
+
+$a(i)$: Average distance of $i$ with all other samples within the same cluster.
+
+$b(i)$: Lowest average distance of $i$ to all samples in any other cluster, of which $i$ is not a member. In other words, the average distance of sample $i$ to all samples in the neighboring cluster.
+
+
+$$
+s(i) = \frac{b(i)-a(i)}{max\{ a(i), b(i)\}}
+$$
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(Biobase)
+library(ggplot2)
+library(cowplot)
+library(cluster)
+library(mclust)
+library(data.table)
+library(tidyr)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ERCC", rownames(df), invert=TRUE), ]
+```
+
+
+---
+
+
+## Analysis
+
+Fitting PAM for cells using only green and red intensity measurements.
+
+```{r}
+ints <- with(pdata, data.frame(rfp.median.log10sum,
+                               gfp.median.log10sum))
+ints <- data.frame(ints, 
+                   chip_id = as.factor(pdata$chip_id))
+
+k=3
+
+pam_fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id))
+    fit_sub <- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+names(pam_fit) <- unique(ints$chip_id)
+
+mclust_fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id))
+    fit_sub <- Mclust(df_sub, G=k)
+    return(fit_sub)
+})
+names(mclust_fit) <- unique(ints$chip_id)
+
+
+# get centers of each cluster
+pam_centers <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+  fit <- pam_fit[[i]]
+  ints_sub <- ints[ints$chip_id == unique(ints$chip_id)[i],]
+  tmp <- fit$id.med
+  tmp <- data.frame(ints_sub[fit$id.med,],
+                    center=c(1:3))
+  return(tmp) }) )
+
+mclust_centers <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+  fit <- mclust_fit[[i]]
+  tmp <- fit$parameters$mean
+  tmp <- t(tmp)
+  tmp <- data.frame(tmp,center=c(1:3),
+                    chip_id=names(mclust_fit)[i])
+  return(tmp) }) )
+
+# make data read for ggplot
+pam_fit_plot <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(pam_fit[[i]]$clustering))
+    return(df_sub)
+}))
+
+mclust_fit_plot <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(mclust_fit[[i]]$classification))
+    return(df_sub)
+}))
+```
+
+  
+  
+---
+
+## Cluster centers
+
+Compare PAM vs. Mclust results
+
+**k=3**
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(data=pam_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=mclust_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=mclust_centers, 
+                  aes(x=gfp.median.log10sum, 
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "K=3, Mclust",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") 
+)
+```
+
+---
+
+## Compute silhouette
+
+Choose the top 20 in each cluster.
+
+```{r}
+si_pam <- vector("list", length(pam_fit))
+for (i in 1:length(si_pam)) {
+  si_tmp <- silhouette(pam_fit[[i]])
+
+  si_out <- lapply(1:3, function(cl) {
+    ord <- order(si_tmp[si_tmp[,1]==cl, 3], decreasing=TRUE)
+    ii <- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])[ord[1:20]]
+    df_sub <- data.frame(ints[ii,], 
+               cluster=cl)
+  }) 
+  si_out <- do.call(rbind, si_out)
+  si_pam[[i]] <- si_out
+}
+si_pam_long <- do.call(rbind, si_pam)
+```
+
+save subset of cells to rds.
+
+```{r, eval =F}
+saveRDS(si_pam_long, file = "../output/images-subset-silhouette.Rmd/si_pam.rds")
+```
+
+Compare full set versus subset of cells.
+
+```{r}
+plot_grid(
+  ggplot(data=pam_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=si_pam_long) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none")
+  )
+```
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+
