@@ -39,7 +39,7 @@ Results:
 
 1. Compare PAM vs. Mclust results: seems that PAM places cluster centers at the most densely distributed region. and on the other hand, Mclust places cluster centers at the region that is the "center" of the points assigned to the clusters.
 
-2. Select subset of cells: using PAM results, I compute silhouette index for all samples and the choose the top 20 samples in each cluster for each individual. These samples are used in some analysis to evaluate model fit on less noisy data, such as the analysis applying cellcycleR to both imaging data and sequencing data ([here](https://jdblischak.github.io/fucci-seq/cellcycler-images-seqdata.html)).
+2. Select subset of cells: using PAM results, I compute silhouette index for all samples and the choose the top 25 samples in each cluster for each individual. These samples are used in some analysis to evaluate model fit on less noisy data, such as the analysis applying cellcycleR to both imaging data and sequencing data ([here](https://jdblischak.github.io/fucci-seq/cellcycler-images-seqdata.html)).
 
 Let $s(i)$ denotes the silhouette index of sample $i$. $s(i)$ ranges between -1 to 1. A large value of $s(i)$ indicates that sample $i$ is more similar to samples belonged to its own cluster than any other clusters, and a small value of $s(i)$ indicates that sample $i$ is dissimilar to samples belonged to its own clusters and matches better to samples belonged in some other clusters. 
 
@@ -186,7 +186,7 @@ plot_grid(
 
 ## Compute silhouette
 
-Choose the top 20 in each cluster.
+Combine silhouette data with the intensity data.
 
 ```{r}
 si_pam <- vector("list", length(pam_fit))
@@ -195,9 +195,12 @@ for (i in 1:length(si_pam)) {
 
   si_out <- lapply(1:3, function(cl) {
     ord <- order(si_tmp[si_tmp[,1]==cl, 3], decreasing=TRUE)
-    ii <- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])[ord[1:20]]
-    df_sub <- data.frame(ints[ii,], 
-               cluster=cl)
+    ii <- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])
+    ii <- ii[ord]  
+    df_sub <- data.frame(ints[ii,],
+                         unique_id = rownames(pdata)[ii],
+                         cluster=cl,
+                         si=si_tmp[si_tmp[,1]==cl, 3])
   }) 
   si_out <- do.call(rbind, si_out)
   si_pam[[i]] <- si_out
@@ -205,15 +208,38 @@ for (i in 1:length(si_pam)) {
 si_pam_long <- do.call(rbind, si_pam)
 ```
 
+Choose the top 25 in each cluster.
+
+```{r}
+cutoff_nsamples <- 20
+
+foo <- lapply(1:uniqueN(si_pam_long$chip_id), function(i) {
+  foo2 <- lapply(1:uniqueN(si_pam_long$cluster), function(j) {
+    df_tmp <- subset(si_pam_long, chip_id == unique(si_pam_long$chip_id)[i] & cluster == unique(si_pam_long$cluster)[j])
+    if (cutoff_nsamples > dim(df_tmp)[1]) {
+        df_tmp_sub <- df_tmp
+    } else {
+        df_tmp_sub <- df_tmp[which(order(df_tmp$si, decreasing = T) %in% c(1:cutoff_nsamples)),]
+    }
+    return(df_tmp_sub)
+  })
+  foo2 <- do.call(rbind, foo2)
+  return(foo2)
+})
+foo <- do.call(rbind, foo)
+si_pam_25 <- foo
+```
+
 save subset of cells to rds.
 
 ```{r, eval =F}
-saveRDS(si_pam_long, file = "../output/images-subset-silhouette.Rmd/si_pam.rds")
+save(si_pam_long, si_pam_25, 
+    file = "../output/images-subset-silhouette.Rmd/si_pam.rda")
 ```
 
 Compare full set versus subset of cells.
 
-```{r}
+```{r, echo = F, fig.width=10, fig.height=4}  
 plot_grid(
   ggplot(data=pam_fit_plot) + 
       geom_point(aes(x=gfp.median.log10sum, 
@@ -227,14 +253,14 @@ plot_grid(
            y = "RFP intensity (log10 pixel sum)") + 
       facet_wrap(~as.factor(chip_id), ncol=3) +
       theme_gray() + theme(legend.position="none"),
-  ggplot(data=si_pam_long) + 
+  ggplot(data=si_pam_25) + 
       geom_point(aes(x=gfp.median.log10sum, 
                      y=rfp.median.log10sum, col=as.factor(cluster)),
          alpha = .5, cex = .7) + 
       geom_point(data=pam_centers,
                   aes(x=gfp.median.log10sum,
                       y=rfp.median.log10sum), shape=4, size=3) +
-      labs(title = "K=3, PAM",
+      labs(title = "Top 25 samples within clusters",
            x="GFP intensity (log10 pixel sum)", 
            y = "RFP intensity (log10 pixel sum)") + 
       facet_wrap(~as.factor(chip_id), ncol=3) +
