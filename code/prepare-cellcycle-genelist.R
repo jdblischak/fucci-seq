@@ -34,4 +34,10 @@ anno$phase <- as.character(anno$phase)
 
 colnames(anno) <- c("hgnc", "phase", "ensembl")
 
+# change cell cycle phase labeling to be consistent with the labeling in Whitfield et al. 2002
+
+anno$phase[anno$phase=="G1.S"] <- "G1/S"
+anno$phase[anno$phase=="G2.M"] <- "G2"
+anno$phase[anno$phase=="M.G1"] <- "M/G1"
+
 saveRDS(anno, file = "data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
