@@ -13,7 +13,7 @@ Website to share results of fucci-seq project.
 
 ---
 
-## Image analysis
+## Microscopy image analysis
 
 * [Processing images - from images to intensities](images-process.html)
 
@@ -35,16 +35,22 @@ Website to share results of fucci-seq project.
     * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
     * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
     
+* transgene count in sequencing data
+    * [Investigate zero-count transgenes](images-transgene.html)
+
+* Cluster cells based on FUCCI
+    * [Partition around medoids(PAM)](images-pam.html)
+    * [Mixture modeling](images-mclust.html)
+    * [Select a subset using silhouette index](images-subset-silhouette.html)
+
 * Fitting cellcycleR
     * [Parametric model across plates and individuals](images-cellcycleR.html)
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     
-* transgene count in sequencing data
-    * [Investigate zero-count transgenes](images-transgene.html)
 
 ---
 
-## QC
+## Qualty Control
 
 * Sample QC and filtering
     * [Sample QC criteria](sampleqc.html)  
@@ -53,3 +59,5 @@ Website to share results of fucci-seq project.
 
 * Gene QC and filtering
     * [gene filtering](gene-filtering.html)
+    
+    
