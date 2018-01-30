@@ -14,3 +14,6 @@ analysis/*_cache
 output_tmp/
 notes/
 slurm-*
+
+# Joyce's temporary data
+data/batch-paper
