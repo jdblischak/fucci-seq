@@ -60,6 +60,7 @@ dependencies:
   - r-dt
   - r-gdata
   - r-ggplot2
+  - r-mclust
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
