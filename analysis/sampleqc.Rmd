@@ -29,10 +29,11 @@ knitr::read_chunk("chunks.R")
 ```{r packages, message=FALSE}
 library("cowplot")
 library("dplyr")
-library("DT")
+library("edgeR")
 library("ggplot2")
 library("reshape2")
 library("Biobase")
+source("../code/pca.R")
 theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
@@ -213,6 +214,28 @@ plot_gene <- ggplot(anno[anno$cell_number == 0 |
 plot_gene
 ```
 
+```{r gene-number-exp}
+number_exp <- ggplot(anno, aes(x = as.factor(experiment), y = detect_hs, color = as.factor(experiment))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Number of genes detected",
+       title = "Number of genes per sample") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+number_indi <- ggplot(anno, aes(x = chip_id, y = detect_hs, color = as.factor(chip_id))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Number of genes detected",
+       title = "Number of genes per sample") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+plot_grid(number_exp + theme(legend.position = "none"),
+          number_indi + theme(legend.position = "none"),
+          labels = letters[1:2])
+```
+
 ---
 
 ## FUCCI transgene 
@@ -328,6 +351,33 @@ plot_grid(plot_ercc_before,
           plot_ercc_after,
           labels = LETTERS[3:4])
 ```
+
+## PCA
+```{r pca}
+## look at human genes
+eset_hs <- eset[fData(eset)$source == "H. sapiens", ]
+head(featureNames(eset_hs))
+
+## remove genes of all 0s
+eset_hs_clean <- eset_hs[rowSums(exprs(eset_hs)) != 0, ]
+dim(eset_hs_clean)
+
+## convert to log2 cpm
+mol_hs_cpm <- cpm(exprs(eset_hs_clean), log = TRUE)
+mol_hs_cpm_means <- rowMeans(mol_hs_cpm)
+summary(mol_hs_cpm_means)
+
+mol_hs_cpm <- mol_hs_cpm[mol_hs_cpm_means > median(mol_hs_cpm_means), ]
+dim(mol_hs_cpm)
+
+## pca of genes with reasonable expression levels
+pca_hs <- run_pca(mol_hs_cpm)
+
+plot_pca_id <- plot_pca(pca_hs$PCs, pcx = 1, pcy = 2, explained = pca_hs$explained,
+         metadata = pData(eset_hs_clean), color = "chip_id")
+```
+
+
 
 ## Filter
 
