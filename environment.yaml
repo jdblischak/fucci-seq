@@ -65,6 +65,7 @@ dependencies:
   - r-reshape2
   - r-stringr
   - r-testit
+  - r-tidyr
   - r-wesanderson
   - r-workflowr
   - samtools
