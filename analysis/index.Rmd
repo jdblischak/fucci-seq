@@ -59,5 +59,6 @@ Website to share results of fucci-seq project.
 
 * Gene QC and filtering
     * [gene filtering](gene-filtering.html)
+    * [PCA with technical fators](pca-tf.html)
     
     

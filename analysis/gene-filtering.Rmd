@@ -82,7 +82,6 @@ library(knitr)
 library(data.table)
 
 source("../code/pca.R")
-#eset <- readRDS("../output_tmp/eset.rds")
 fname <- Sys.glob("../data/eset/*.rds")
 eset <- Reduce(combine, Map(readRDS, fname))
 ```
@@ -275,30 +274,6 @@ plot_grid(
   plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
          metadata=pdata, color="experiment"),
   ncol=2)
-```
-
-```{r}
-
-get_r2 <- function(x, y) {
-  stopifnot(length(x) == length(y))
-  model <- lm(y ~ x)
-  stats <- summary(model)
-  return(stats$adj.r.squared)
-}
-
-covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, concentration, raw:unmapped,
-                                                     starts_with("detect"), chip_id, molecules)
-pcs <- pca_log2cpm$PCs[, 1:6]
-r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
-             dimnames = list(colnames(covariates), colnames(pcs)))
-for (cov in colnames(covariates)) {
-  for (pc in colnames(pcs)) {
-    r2[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
-  }
-}
-
-heatmap(r2)
-heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), ylab="technical factor")
 ```
 
 
