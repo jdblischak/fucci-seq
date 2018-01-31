@@ -230,12 +230,6 @@ foo <- do.call(rbind, foo)
 si_pam_25 <- foo
 ```
 
-save subset of cells to rds.
-
-```{r, eval =F}
-save(si_pam_long, si_pam_25, 
-    file = "../output/images-subset-silhouette.Rmd/si_pam.rda")
-```
 
 Compare full set versus subset of cells.
 
@@ -268,6 +262,87 @@ plot_grid(
   )
 ```
 
+hard code cluster labels. default in ggplot is 1 orange, 2 green, 3 blue
+
+```{r}
+# NA18511
+# orange 1 to 3, green 2 to 2, blue 3 to 1, 
+
+# NA18855
+# orange 1 to 2, green 2 to 3, blue 3 to 1, 
+
+# NA18870
+# orange 1 to 2, green 2 to 1, blue 3 to 3
+
+# NA19098
+# orange 1 to 1, green 2 to 3, blue 3 to 2
+
+# NA19101
+# orange 1 to 3, green 2 to 2, blue 3 to 1
+
+# NA19160
+# orange 1 to 2, green 2 to 3, blue 3 to 1
+
+tmp <- si_pam_long
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==1,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==2,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==2,]$cluster <- 1
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==3,]$cluster <- 3
+
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==1,]$cluster <- 1
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==3,]$cluster <- 2
+
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==1,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==2,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==3,]$cluster <- 1
+
+
+plot_grid(
+  ggplot(data=si_pam_long) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=si_pam_25) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = "Top 25 samples within clusters",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none")
+  )
+```
+
+save subset of cells to rds.
+
+```{r, eval =F}
+save(si_pam_long, si_pam_25, 
+    file = "../output/images-subset-silhouette.Rmd/si_pam.rda")
+```
 
 
 ---
