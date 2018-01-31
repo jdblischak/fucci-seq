@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-01-30</p>
+<p><strong>Last updated:</strong> 2018-01-31</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> e69bd0d</p>
+<p><strong>Code version:</strong> 8ea93f0</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -463,21 +463,94 @@ foo &lt;- lapply(1:uniqueN(si_pam_long$chip_id), function(i) {
 })
 foo &lt;- do.call(rbind, foo)
 si_pam_25 &lt;- foo</code></pre>
+<p>Compare full set versus subset of cells.</p>
+<p><img src="figure/images-subset-silhouette.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>hard code cluster labels. default in ggplot is 1 orange, 2 green, 3 blue</p>
+<pre class="r"><code># NA18511
+# orange 1 to 3, green 2 to 2, blue 3 to 1, 
+
+# NA18855
+# orange 1 to 2, green 2 to 3, blue 3 to 1, 
+
+# NA18870
+# orange 1 to 2, green 2 to 1, blue 3 to 3
+
+# NA19098
+# orange 1 to 1, green 2 to 3, blue 3 to 2
+
+# NA19101
+# orange 1 to 3, green 2 to 2, blue 3 to 1
+
+# NA19160
+# orange 1 to 2, green 2 to 3, blue 3 to 1
+
+tmp &lt;- si_pam_long
+tmp[si_pam_long$chip_id == &quot;NA18511&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 3
+tmp[si_pam_long$chip_id == &quot;NA18511&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 2
+tmp[si_pam_long$chip_id == &quot;NA18511&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 1
+
+tmp[si_pam_long$chip_id == &quot;NA18855&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 2
+tmp[si_pam_long$chip_id == &quot;NA18855&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 3
+tmp[si_pam_long$chip_id == &quot;NA18855&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 1
+
+tmp[si_pam_long$chip_id == &quot;NA18870&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 2
+tmp[si_pam_long$chip_id == &quot;NA18870&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 1
+tmp[si_pam_long$chip_id == &quot;NA18870&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 3
+
+tmp[si_pam_long$chip_id == &quot;NA19098&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 1
+tmp[si_pam_long$chip_id == &quot;NA19098&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 3
+tmp[si_pam_long$chip_id == &quot;NA19098&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 2
+
+tmp[si_pam_long$chip_id == &quot;NA19101&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 3
+tmp[si_pam_long$chip_id == &quot;NA19101&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 2
+tmp[si_pam_long$chip_id == &quot;NA19101&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 1
+
+tmp[si_pam_long$chip_id == &quot;NA19160&quot; &amp; si_pam_long$cluster==1,]$cluster &lt;- 2
+tmp[si_pam_long$chip_id == &quot;NA19160&quot; &amp; si_pam_long$cluster==2,]$cluster &lt;- 3
+tmp[si_pam_long$chip_id == &quot;NA19160&quot; &amp; si_pam_long$cluster==3,]$cluster &lt;- 1
+
+
+plot_grid(
+  ggplot(data=si_pam_long) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = &quot;K=3, PAM&quot;,
+           x=&quot;GFP intensity (log10 pixel sum)&quot;, 
+           y = &quot;RFP intensity (log10 pixel sum)&quot;) + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position=&quot;none&quot;),
+  ggplot(data=si_pam_25) + 
+      geom_point(aes(x=gfp.median.log10sum, 
+                     y=rfp.median.log10sum, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum,
+                      y=rfp.median.log10sum), shape=4, size=3) +
+      labs(title = &quot;Top 25 samples within clusters&quot;,
+           x=&quot;GFP intensity (log10 pixel sum)&quot;, 
+           y = &quot;RFP intensity (log10 pixel sum)&quot;) + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position=&quot;none&quot;)
+  )</code></pre>
+<p><img src="figure/images-subset-silhouette.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>save subset of cells to rds.</p>
 <pre class="r"><code>save(si_pam_long, si_pam_25, 
     file = &quot;../output/images-subset-silhouette.Rmd/si_pam.rda&quot;)</code></pre>
-<p>Compare full set versus subset of cells.</p>
-<p><img src="figure/images-subset-silhouette.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-redhat-linux-gnu (64-bit)
-Running under: Scientific Linux 7.2 (Nitrogen)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
 
 Matrix products: default
-BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -492,18 +565,18 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] tidyr_0.7.2         data.table_1.10.4-3 mclust_5.4         
-[4] cluster_2.0.6       cowplot_0.9.2       ggplot2_2.2.1      
+[1] tidyr_0.7.1         data.table_1.10.4   mclust_5.3         
+[4] cluster_2.0.6       cowplot_0.9.1       ggplot2_2.2.1      
 [7] Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.14     knitr_1.17       magrittr_1.5     munsell_0.4.3   
- [5] colorspace_1.3-2 rlang_0.1.4      stringr_1.2.0    plyr_1.8.4      
- [9] tools_3.4.1      grid_3.4.1       gtable_0.2.0     git2r_0.20.0    
-[13] htmltools_0.3.6  yaml_2.1.16      lazyeval_0.2.1   rprojroot_1.3-1 
-[17] digest_0.6.13    tibble_1.3.4     purrr_0.2.4      glue_1.2.0      
-[21] evaluate_0.10.1  rmarkdown_1.8    labeling_0.3     stringi_1.1.6   
-[25] compiler_3.4.1   scales_0.5.0     backports_1.1.2 </code></pre>
+ [5] colorspace_1.3-2 rlang_0.1.4.9000 stringr_1.2.0    plyr_1.8.4      
+ [9] tools_3.4.1      grid_3.4.1       gtable_0.2.0     git2r_0.19.0    
+[13] htmltools_0.3.6  yaml_2.1.16      lazyeval_0.2.0   rprojroot_1.2   
+[17] digest_0.6.12    tibble_1.3.3     purrr_0.2.2      glue_1.1.1      
+[21] evaluate_0.10.1  rmarkdown_1.8    labeling_0.3     stringi_1.1.2   
+[25] compiler_3.4.1   scales_0.4.1     backports_1.0.5 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
