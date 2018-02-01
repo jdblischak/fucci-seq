@@ -1,0 +1,156 @@
+---
+title: "PCA vs Technical Variables"
+author: "Po-Yuan Tung"
+date: 2018-01-31
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Setup
+
+```{r packages, message=FALSE}
+library("cowplot")
+library("dplyr")
+library("edgeR")
+library("ggplot2")
+library("heatmap3")
+library("reshape2")
+library("Biobase")
+source("../code/pca.R")
+```
+
+## PCA
+
+### Before fileter
+
+```{r data}
+fname <- Sys.glob("../data/eset/*.rds")
+eset <- Reduce(combine, Map(readRDS, fname))
+
+## look at human genes
+eset_hs <- eset[fData(eset)$source == "H. sapiens", ]
+head(featureNames(eset_hs))
+
+## remove genes of all 0s
+eset_hs_clean <- eset_hs[rowSums(exprs(eset_hs)) != 0, ]
+dim(eset_hs_clean)
+
+## convert to log2 cpm
+mol_hs_cpm <- cpm(exprs(eset_hs_clean), log = TRUE)
+mol_hs_cpm_means <- rowMeans(mol_hs_cpm)
+summary(mol_hs_cpm_means)
+
+## keep genes with reasonable expression levels 
+mol_hs_cpm <- mol_hs_cpm[mol_hs_cpm_means > median(mol_hs_cpm_means), ]
+dim(mol_hs_cpm)
+```
+
+```{r before-filter}
+## pca of genes with reasonable expression levels
+pca_hs <- run_pca(mol_hs_cpm)
+
+## a function of pca vs technical factors
+get_r2 <- function(x, y) {
+  stopifnot(length(x) == length(y))
+  model <- lm(y ~ x)
+  stats <- summary(model)
+  return(stats$adj.r.squared)
+}
+
+## selection of technical factor
+covariates <- pData(eset) %>% dplyr::select(experiment, well, concentration, raw:unmapped,
+                                                     starts_with("detect"), chip_id, molecules)
+## look at the first 6 PCs
+pcs <- pca_hs$PCs[, 1:6]
+
+## generate the data
+r2_before <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2_before[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot
+heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), 
+         ylab="technical factor", main = "Before filter")
+
+```
+
+
+### After filter
+
+Import data post [sample and gene filtering](gene-filtering.Rmd)
+
+```{r filter-data}
+load(file="../output/gene-filtering.Rmd/eset-filtered.rdata")
+```
+
+Compute log2 CPM based on the library size before filtering.
+
+```{r log2}
+log2cpm <- log2(cpm_filtered+1)
+```
+
+```{r after-filter}
+pca_log2cpm <- run_pca(log2cpm)
+
+pdata <- pData(eset_filtered)
+pdata$experiment <- as.factor(pdata$experiment)
+
+plot_grid(
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color="chip_id"),
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color="experiment"),
+  ncol=2)
+```
+
+```{r after-filter-tf}
+covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, chip_id, 
+                                                     concentration, raw:unmapped,
+                                                     starts_with("detect"),  molecules)
+pcs <- pca_log2cpm$PCs[, 1:6]
+r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+heatmap3(r2, cexRow=1, cexCol=1, scale = "none", ylab="technical factor", main = "After filter")
+
+heatmap3(r2, cexRow=1, cexCol=1, ylab="technical factor", main = "After filter")
+```
+
+```{r cor}
+cor_tech <- cor(as.matrix(covariates[,4:11]),use="pairwise.complete.obs")
+heatmap(cor_tech, symm = TRUE)
+```
+

@@ -72,7 +72,9 @@ Combine `eSet` objects.
 ```{r, message=FALSE}
 library(knitr)
 library(Biobase)
+library(dplyr)
 #library(gdata)
+library(heatmap3)
 library(testit)
 library(cowplot)
 library(biomaRt)
@@ -80,7 +82,8 @@ library(knitr)
 library(data.table)
 
 source("../code/pca.R")
-eset <- readRDS("../output_tmp/eset.rds")
+fname <- Sys.glob("../data/eset/*.rds")
+eset <- Reduce(combine, Map(readRDS, fname))
 ```
 
 Filter out low-quality single cell samples.
@@ -272,6 +275,7 @@ plot_grid(
          metadata=pdata, color="experiment"),
   ncol=2)
 ```
+
 
 $~$
 
