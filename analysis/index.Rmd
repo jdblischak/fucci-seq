@@ -47,9 +47,10 @@ Website to share results of fucci-seq project.
     * [Mixture modeling](images-mclust.html)
     * [Select a subset using silhouette index](images-subset-silhouette.html)
     
-* "Gold standard" samples
+* "Gold standard (?)" samples
     * [Expression profiles of "gold-standard" samples](images-goldstandards.html)
     * [Phase-specific scores for Leng et al. 2015](images-goldstandards-followup.html)
+    * [Expression heatmap for fucci-seq and Leng data](images-goldstandards-heatmap.html)
 
 ---
 
@@ -65,3 +66,8 @@ Website to share results of fucci-seq project.
     * [PCA with technical fators](pca-tf.html)
     
     
+---
+
+## One-time investigations
+
+* [Why some gene symbols (genes) correspond to multiple Ensembl IDs?](ensembl.html)
