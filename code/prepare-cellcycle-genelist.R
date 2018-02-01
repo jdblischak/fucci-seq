@@ -4,9 +4,9 @@
 # in several cases, a HGNC symbol is mapped to multiple ensembl gene ID
 macosko <- xlsx::read.xlsx("data/cellcycle-genes-previous-studies/cellcyclegenes-macosko-2015.xlsx",
                            sheetName = 4, header = TRUE)
-tmp <- vector("list", length(macosko))
+tmp <- vector("list", ncol(macosko))
 
-for (i in 1:length(phases)) {
+for (i in 1:ncol(macosko)) {
   macosko[[i]] <- as.character(macosko[[i]])
   macosko[[i]] <- gsub(" ", "", macosko[[i]])
   tmp[[i]] <- macosko[[i]][!is.na(macosko[[i]])]
@@ -28,16 +28,29 @@ biomart <- getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"),
                  values = tmp$hgnc,
                  mart = ensembl)
 
-anno <- merge(macosko_anno, biomart, by.x="hgnc", by.y="hgnc_symbol", all=TRUE)
+anno <- merge(tmp, biomart, by.x="hgnc", by.y="hgnc_symbol", all=TRUE)
 anno$hgnc <- as.character(anno$hgnc)
 anno$phase <- as.character(anno$phase)
 
 colnames(anno) <- c("hgnc", "phase", "ensembl")
 
 # change cell cycle phase labeling to be consistent with the labeling in Whitfield et al. 2002
-
 anno$phase[anno$phase=="G1.S"] <- "G1/S"
 anno$phase[anno$phase=="G2.M"] <- "G2"
 anno$phase[anno$phase=="M.G1"] <- "M/G1"
 
-saveRDS(anno, file = "data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
+# remove duplicated rows due to merging
+dup <- duplicated(anno)
+anno_unique <- anno[!dup,]
+
+# remove ones without ensembl gene ID
+anno_unique <- anno_unique[!is.na(anno_unique$ensembl),]
+
+saveRDS(anno_unique, file = "data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
+
+
+# investigate duplicated rows in annotation data file
+symbols_dup <- duplicated(anno_unique[,-3])
+ll <- anno_unique[anno_unique$hgnc %in% unique(anno_unique$hgnc[symbols_dup]),]
+
+
