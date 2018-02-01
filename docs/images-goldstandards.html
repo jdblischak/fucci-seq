@@ -319,17 +319,17 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-01-31</p>
+<p><strong>Last updated:</strong> 2018-02-01</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> a0dc2ce</p>
+<p><strong>Code version:</strong> 2e1a616</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
 <ol style="list-style-type: decimal">
 <li><p>The goal here is to assess the expression profiles of samples within the assigned clusters based on FUCCI measures (<a href="https://jdblischak.github.io/fucci-seq/images-subset-silhouette.html">see here for details</a>).</p></li>
-<li><p>Results show somewhat variable patterns across the assigned clusters (within each individual).</p></li>
-<li><p>Note that the genes used for the analysis were previously identified as “variable” or “cell cycle regulating” genes in <a href="http://dx.doi.org/10.1016/j.cell.2015.05.002">Macosko et al. 2015</a>. Applying the 544 genes in their results, we found 230 genes identified as “variable” in expression profiles along cell cycle phases.</p></li>
+<li><p>Results from within individaul analysis show that for cluster 3, the scores peak at G2, and for cluster 2, scores peak at G1/S. However, for cluster 1, the peaks are variable across individuals. For example, NA18870, NA19160 and NA19101 peaks at M/G1, while NA18511 peaks at S.</p></li>
+<li><p>Note that the genes used for the analysis were previously identified as “variable” or “cell cycle regulating” genes in <a href="http://dx.doi.org/10.1016/j.cell.2015.05.002">Macosko et al. 2015</a>. Applying the 544 genes in their results, we found 200 to 300 genes identified as “variable” in expression profiles along cell cycle phases. (NA18855 219 cells, NA18870 198 cells, NA19098 165 cells, NA19101 255 cells, NA19160 314 cells, NA18511 239 cells)</p></li>
 <li><p>For validity of the phase scores, we further apply the same method to data in <a href="doi:10.1038/nmeth.3549">Leng et al. 2015</a>, which have been previously scored for cell cycle phases also using FUCCI measurse.</p></li>
 </ol>
 <hr />
@@ -365,8 +365,11 @@ cc_genes &lt;- cellcycle[which(cellcycle$ensembl %in% rownames(log2cpm_cc)),]</c
                                chip_id))</code></pre>
 <p>Load best subset. <code>si_pam.rda</code> contains two objects: <code>si_pam_25</code> (top 25 samples within clusters and individuals) and <code>si_pam_long</code> (all sample information on silhouette index).</p>
 <pre class="r"><code>load(file = &quot;../output/images-subset-silhouette.Rmd/si_pam.rda&quot;)</code></pre>
-<p>Combine sample phoenotye labels with the silhouette sample top 25.</p>
-<pre class="r"><code>si_pam_25$molecules &lt;- pdata$molecules[match(si_pam_25$unique_id, rownames(pdata))]</code></pre>
+<p>subset to the best samples</p>
+<pre class="r"><code>log2cpm_cc_top &lt;- log2cpm_cc[, colnames(log2cpm) %in% unique(si_pam_25$unique_id)]
+pdata_top &lt;- pdata[rownames(pdata) %in% unique(si_pam_25$unique_id),]
+all.equal(colnames(log2cpm_cc_top), rownames(pdata_top))</code></pre>
+<pre><code>[1] TRUE</code></pre>
 <hr />
 </div>
 <div id="analysis" class="section level2">
@@ -379,20 +382,89 @@ cc_genes &lt;- cellcycle[which(cellcycle$ensembl %in% rownames(log2cpm_cc)),]</c
 <li><p>Compute phase-specific score: compute average expression across genes for each single cell samples.</p></li>
 <li><p>Standardize phase-specific scores in two-steps: within each phase, standardize (transforming to z-scores) scores across single cell samples, and then within each single cell sample, standardize scores across phase.</p></li>
 </ol>
-<pre class="r"><code>cc_scores &lt;- lapply(1:uniqueN(cc_genes$phase), function(i) {
+<hr />
+</div>
+<div id="within-individuals-assignment" class="section level2">
+<h2>Within individuals assignment</h2>
+<pre class="r"><code>chip_ids &lt;- unique(pdata_top$chip_id)
+all.equal(rownames(pdata_top), colnames(log2cpm_cc_top))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>cc_scores_within &lt;- lapply(1:uniqueN(pdata_top$chip_id), function(j) {
+  id &lt;- chip_ids[j]
+  samples_to_select &lt;- rownames(pdata_top)[which(pdata_top$chip_id == id)]  
+  
+  cc_scores_list &lt;- lapply(1:uniqueN(cc_genes$phase), function(i) {
+    ph &lt;- unique(cc_genes$phase)[i]
+    df_sub &lt;- log2cpm_cc_top[rownames(log2cpm_cc_top) %in% cc_genes$ensembl[cc_genes$phase == ph], samples_to_select]
+    mn &lt;- colMeans(df_sub)
+    cc &lt;- cor(t(rbind(mn, df_sub)))
+    cc_mean &lt;- cc[-1,1]
+    genes_cc &lt;- names(cc_mean)[which(cc_mean &gt; .3)]
+    scores_raw &lt;- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
+    scores_z &lt;- scale(scores_raw)
+    return(list(scores_z=scores_z, ngenes =length(genes_cc)))
+  })
+  names(cc_scores_list) &lt;- unique(cc_genes$phase)
+  return(cc_scores_list)
+})
+names(cc_scores_within) &lt;- chip_ids
+
+ngenes_within &lt;- lapply(cc_scores_within, function(x) {
+  sapply(x, function(y) y[[2]])
+})
+ngenes &lt;- sapply(ngenes_within, function(x) sum(x))
+print(ngenes)</code></pre>
+<pre><code>NA18855 NA18870 NA19098 NA19101 NA19160 NA18511 
+    219     198     165     255     314     239 </code></pre>
+<pre class="r"><code>cc_scores &lt;- lapply(cc_scores_within, function(x) {
+  tmp &lt;- do.call(cbind, lapply(x, &quot;[[&quot;, 1))
+  colnames(tmp) &lt;- unique(cc_genes$phase)
+  return(tmp)
+})
+
+
+# standardize scores across phases
+cc_scores_z &lt;- lapply(cc_scores, function(x) {
+  tmp &lt;- t(apply(x, 1, scale)) 
+  colnames(tmp) &lt;- unique(cc_genes$phase)
+  tmp &lt;- as.data.frame(tmp)
+  return(tmp)
+})
+
+# convert data format from wide to long
+cc_scores_z_long &lt;- lapply(cc_scores_z, function(x) {
+  long &lt;- gather(x, key=phase, value=scores)
+  long$uniqe_id &lt;- rep(rownames(x), ncol(x))
+  long$chip_id &lt;- pdata_top$chip_id[match(long$uniqe_id, rownames(pdata_top))]
+  long$experiment &lt;- pdata_top$experiment[match(long$uniqe_id, rownames(pdata_top))]
+
+  # select gold standard set
+  long$cluster &lt;- si_pam_25$cluster[match(long$uniqe_id, si_pam_25$unique_id)]
+  
+  long$phase &lt;- factor(long$phase, levels=c(&quot;M/G1&quot;, &quot;G1/S&quot;, &quot;S&quot;, &quot;G2&quot;, &quot;M&quot;))
+  long$cluster &lt;- as.factor(long$cluster)
+  return(long)
+})</code></pre>
+<p><img src="figure/images-goldstandards.Rmd/within-individual-scores-1.png" width="864" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="across-individuals-assignment" class="section level2">
+<h2>Across individuals assignment</h2>
+<pre class="r"><code>cc_scores_list &lt;- lapply(1:uniqueN(cc_genes$phase), function(i) {
   ph &lt;- unique(cc_genes$phase)[i]
-  df_sub &lt;- log2cpm_cc[rownames(log2cpm_cc) %in% cc_genes$ensembl[cc_genes$phase == ph],]
+  df_sub &lt;- log2cpm_cc_top[rownames(log2cpm_cc_top) %in% cc_genes$ensembl[cc_genes$phase == ph],]
   mn &lt;- colMeans(df_sub)
   cc &lt;- cor(t(rbind(mn, df_sub)))
   cc_mean &lt;- cc[-1,1]
   genes_cc &lt;- names(cc_mean)[which(cc_mean &gt; .3)]
   scores_raw &lt;- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
   scores_z &lt;- scale(scores_raw)
-  return(scores_z)
+  return(list(scores_z=scores_z, ngenes =length(genes_cc)))
 })
-names(cc_scores) &lt;- unique(cc_genes$phase)
+names(cc_scores_list) &lt;- unique(cc_genes$phase)
 
-cc_scores &lt;- do.call(cbind, cc_scores)
+ngenes &lt;- sapply(cc_scores_list, &quot;[[&quot;, 2)
+cc_scores &lt;- do.call(cbind, lapply(cc_scores_list, &quot;[[&quot;, 1))
 colnames(cc_scores) &lt;- unique(cc_genes$phase)
 
 # standardize scores across phases
@@ -407,17 +479,14 @@ cc_scores_z_long$uniqe_id &lt;- rep(rownames(cc_scores_z), ncol(cc_scores_z))
 cc_scores_z_long$chip_id &lt;- pdata$chip_id[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
 cc_scores_z_long$experiment &lt;- pdata$experiment[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
 
-
 # select gold standard set
 cc_scores_z_long$cluster &lt;- si_pam_25$cluster[match(cc_scores_z_long$uniqe_id, si_pam_25$unique_id)]
 
-cc_scores_z_long_25 &lt;- cc_scores_z_long[!is.na(cc_scores_z_long$cluster),]
-
-cc_scores_z_long_25$phase &lt;- factor(cc_scores_z_long_25$phase, 
-                                    levels=c(&quot;M/G1&quot;, &quot;G1/S&quot;, &quot;S&quot;, &quot;G2&quot;, &quot;M&quot;))
-cc_scores_z_long_25$cluster &lt;- as.factor(cc_scores_z_long_25$cluster)</code></pre>
-<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-8-1.png" width="864" style="display: block; margin: auto;" /></p>
+cc_scores_z_long$phase &lt;- factor(cc_scores_z_long$phase, 
+                                  levels=c(&quot;M/G1&quot;, &quot;G1/S&quot;, &quot;S&quot;, &quot;G2&quot;, &quot;M&quot;))
+cc_scores_z_long$cluster &lt;- as.factor(cc_scores_z_long$cluster)</code></pre>
 <p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-9-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-10-1.png" width="864" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="others" class="section level2">
@@ -429,14 +498,14 @@ ensg &lt;- cc_genes$ensembl[which(cc_genes$hgnc %in% hgnc)]
 tmp &lt;- log2cpm_cc[which(rownames(log2cpm_cc) %in% ensg),]
 tmp &lt;- data.frame(t(tmp))
 
-cc_scores_z_long_25$ENSG00000073111 &lt;- tmp$ENSG00000073111[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000087586 &lt;- tmp$ENSG00000087586[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000100297 &lt;- tmp$ENSG00000100297[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000157456 &lt;- tmp$ENSG00000157456[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
-cc_scores_z_long_25$ENSG00000178999 &lt;- tmp$ENSG00000178999[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]</code></pre>
-<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-11-1.png" width="864" style="display: block; margin: auto;" /><img src="figure/images-goldstandards.Rmd/unnamed-chunk-11-2.png" width="864" style="display: block; margin: auto;" /></p>
+cc_scores_z_long$ENSG00000073111 &lt;- tmp$ENSG00000073111[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000087586 &lt;- tmp$ENSG00000087586[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000100297 &lt;- tmp$ENSG00000100297[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000157456 &lt;- tmp$ENSG00000157456[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000178999 &lt;- tmp$ENSG00000178999[match(cc_scores_z_long$uniqe_id, rownames(tmp))]</code></pre>
+<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-12-1.png" width="864" style="display: block; margin: auto;" /><img src="figure/images-goldstandards.Rmd/unnamed-chunk-12-2.png" width="864" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
