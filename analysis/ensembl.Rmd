@@ -1,0 +1,69 @@
+---
+title: "Expression profile of the gold-standard samples"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Background
+
+Here's the list for which a given gene symbol corresponds to multiple Ensembl gene ID in the data. 
+
+I learned that there are some regions on the genome that show substantial variability in the population, and subsequently can have multiple representations (sequences). These regions are known as "alternate loci". 
+
+I got some of these info from this paper https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5155401/. According to this paper, the GRCh38 patch assembly has a total of 178 alternate-locus-containing regions associated with a total of 261 alternate loci. 
+
+For example, TAF9 has two alternative loci which correspond to two different Ensembl ID, and you can see the location fo these two here on this page http://useast.ensembl.org/Homo_sapiens/Gene/Alleles?db=core;g=ENSG00000273841;r=5:69364743-69370013. Click on "View alleles of this gene on alternate assemblies".
+
+Another example is TUBB which corresponds to 8 Ensembl IDs. It is located in MHC region which is known to have 8 alternative loci (corresponding to 8 different cell lines; https://www.ncbi.nlm.nih.gov/grc/human/regions/MHC). So there's no surprise that TUBB has 8 Ensembl ID. 
+
+
+---
+
+## Data and packages
+
+
+load cell cycle genes from the dropseq paper
+
+```{r}
+cellcycle <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
+dup <- which(duplicated(cellcycle[,-3]))
+
+cellcycle[cellcycle$hgnc %in% unique(cellcycle$hgnc[dup]),]
+```
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+
