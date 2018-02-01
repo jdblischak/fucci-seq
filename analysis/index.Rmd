@@ -38,15 +38,18 @@ Website to share results of fucci-seq project.
 * transgene count in sequencing data
     * [Investigate zero-count transgenes](images-transgene.html)
 
+* Fitting cellcycleR
+    * [Parametric model across plates and individuals](images-cellcycleR.html)
+    * [Model convergence assessment](images-cellcycleR-convergence.html)
+
 * Cluster cells based on FUCCI
     * [Partition around medoids(PAM)](images-pam.html)
     * [Mixture modeling](images-mclust.html)
     * [Select a subset using silhouette index](images-subset-silhouette.html)
-
-* Fitting cellcycleR
-    * [Parametric model across plates and individuals](images-cellcycleR.html)
-    * [Model convergence assessment](images-cellcycleR-convergence.html)
     
+* "Gold standard" samples
+    * [Expression profiles of "gold-standard" samples](images-goldstandards.html)
+    * [Phase-specific scores for Leng et al. 2015](images-goldstandards-followup.html)
 
 ---
 

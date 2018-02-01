@@ -33,11 +33,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 We collected two types of data for each single cell sample: single-cell RNA-seq using C1 plates and FUCCI image intensity data.
 
+* Raw RNA-seq data: `data/eset-raw.rds`
+
 The filtered data are stored as follows:
 
 * combine intensity and RNA-seq: `data/eset-filtered.rds`  
 * FUCCI intensity data: `data/intensity.rds`  
-* RNA-seq data: `output/gene-filtering.Rmd/eset-filtering.rdata`
+* RNA-seq data: `output/gene-filtering.Rmd/eset-filtered.rdata`
 
 ---
 
@@ -56,9 +58,11 @@ colnames(ints)
 
 ## Sequencing data
 
-* Data from each C1 plate are stored in `data/eset` by experiment (batch) ID
+* Raw data from each C1 plate are stored separatley in `data/eset/` by experiment (batch) ID.
 
-* Combined data are stored in `output/gene-filtering.Rmd/eset-filtering.rdata` (both eSet and CPM data.table). These are filtered for genes and high quality samples using sequencing data results. 
+* Raw data combining C1 plate are stored in `data/eset-raw.rds`.
+
+* Filtered raw data are stored in `output/gene-filtering.Rmd/eset-filtering.rdata` (both eSet and CPM data.table). These are filtered for genes and high quality samples using sequencing data results. 
 
 ```{r}
 load(file="../output/gene-filtering.Rmd/eset-filtered.rdata")

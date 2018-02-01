@@ -53,16 +53,20 @@ dependencies:
   - pysftp
   - r-base==3.4.1
   - r-cellcycler 
+  - r-cluster
   - r-cowplot
   - r-data.table
   - r-dplyr
   - r-dt
   - r-gdata
   - r-ggplot2
+  - r-gplots
+  - r-mclust
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
   - r-testit
+  - r-tidyr
   - r-wesanderson
   - r-workflowr
   - samtools
