@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Expression profile of the gold-standard samples</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Expression profile of the gold-standard samples</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-01-31</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> a0dc2ce</p>
+<hr />
+<div id="overviewresults" class="section level2">
+<h2>Overview/Results</h2>
+<ol style="list-style-type: decimal">
+<li><p>The goal here is to assess the expression profiles of samples within the assigned clusters based on FUCCI measures (<a href="https://jdblischak.github.io/fucci-seq/images-subset-silhouette.html">see here for details</a>).</p></li>
+<li><p>Results show somewhat variable patterns across the assigned clusters (within each individual).</p></li>
+<li><p>Note that the genes used for the analysis were previously identified as “variable” or “cell cycle regulating” genes in <a href="http://dx.doi.org/10.1016/j.cell.2015.05.002">Macosko et al. 2015</a>. Applying the 544 genes in their results, we found 230 genes identified as “variable” in expression profiles along cell cycle phases.</p></li>
+<li><p>For validity of the phase scores, we further apply the same method to data in <a href="doi:10.1038/nmeth.3549">Leng et al. 2015</a>, which have been previously scored for cell cycle phases also using FUCCI measurse.</p></li>
+</ol>
+<hr />
+</div>
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(Biobase)
+library(ggplot2)
+library(cowplot)
+library(data.table)
+library(tidyr)
+library(gplots)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ERCC&quot;, rownames(df), invert=TRUE), ]
+
+# cpm normalization
+log2cpm &lt;- log2(t(t(counts+1)*(10^6)/colSums(counts)))</code></pre>
+<p>select cell cycle genes</p>
+<pre class="r"><code>cellcycle &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2017.rds&quot;)
+which_cc &lt;- which(rownames(log2cpm) %in% cellcycle$ensembl)
+
+log2cpm_cc &lt;- log2cpm[which_cc, ]
+cc_genes &lt;- cellcycle[which(cellcycle$ensembl %in% rownames(log2cpm_cc)),]</code></pre>
+<p>intensity data</p>
+<pre class="r"><code>ints &lt;- with(pdata, data.frame(rfp.median.log10sum,
+                               gfp.median.log10sum,
+                               chip_id))</code></pre>
+<p>Load best subset. <code>si_pam.rda</code> contains two objects: <code>si_pam_25</code> (top 25 samples within clusters and individuals) and <code>si_pam_long</code> (all sample information on silhouette index).</p>
+<pre class="r"><code>load(file = &quot;../output/images-subset-silhouette.Rmd/si_pam.rda&quot;)</code></pre>
+<p>Combine sample phoenotye labels with the silhouette sample top 25.</p>
+<pre class="r"><code>si_pam_25$molecules &lt;- pdata$molecules[match(si_pam_25$unique_id, rownames(pdata))]</code></pre>
+<hr />
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p>Compute phase-specific score for within clusters and individuals. This method was previously used in <a href="http://dx.doi.org/10.1016/j.cell.2015.05.002">Macosko et al. 2015</a> for identifying gene expression patterns that varied along cell cycle phases, and for summarizing cell cycle phase profile for single cell samples.</p>
+<p>We applied the 544 genes identified as varied in <a href="http://dx.doi.org/10.1016/j.cell.2015.05.002">Macosko et al. 2015</a> and identified 230 genes that varied in expression patterns.</p>
+<p>The method was applied to log2CPM normalized data. Briefly,</p>
+<ol style="list-style-type: decimal">
+<li><p>Identify the variable genes wihtin each cell cycle phase: compute for each cell-cycle phase, correlation between per-gene expression level and mean gene expression levels across all single cell samples. Select genes with correlation &gt; .3.</p></li>
+<li><p>Compute phase-specific score: compute average expression across genes for each single cell samples.</p></li>
+<li><p>Standardize phase-specific scores in two-steps: within each phase, standardize (transforming to z-scores) scores across single cell samples, and then within each single cell sample, standardize scores across phase.</p></li>
+</ol>
+<pre class="r"><code>cc_scores &lt;- lapply(1:uniqueN(cc_genes$phase), function(i) {
+  ph &lt;- unique(cc_genes$phase)[i]
+  df_sub &lt;- log2cpm_cc[rownames(log2cpm_cc) %in% cc_genes$ensembl[cc_genes$phase == ph],]
+  mn &lt;- colMeans(df_sub)
+  cc &lt;- cor(t(rbind(mn, df_sub)))
+  cc_mean &lt;- cc[-1,1]
+  genes_cc &lt;- names(cc_mean)[which(cc_mean &gt; .3)]
+  scores_raw &lt;- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
+  scores_z &lt;- scale(scores_raw)
+  return(scores_z)
+})
+names(cc_scores) &lt;- unique(cc_genes$phase)
+
+cc_scores &lt;- do.call(cbind, cc_scores)
+colnames(cc_scores) &lt;- unique(cc_genes$phase)
+
+# standardize scores across phases
+cc_scores_z &lt;- t(apply(cc_scores, 1, scale))
+colnames(cc_scores_z) &lt;- unique(cc_genes$phase)
+cc_scores_z &lt;- as.data.frame(cc_scores_z)
+
+# convert data format from wide to long
+cc_scores_z_long &lt;- gather(cc_scores_z, key=phase, value=cc_scores_z)
+cc_scores_z_long$uniqe_id &lt;- rep(rownames(cc_scores_z), ncol(cc_scores_z))
+
+cc_scores_z_long$chip_id &lt;- pdata$chip_id[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
+cc_scores_z_long$experiment &lt;- pdata$experiment[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
+
+
+# select gold standard set
+cc_scores_z_long$cluster &lt;- si_pam_25$cluster[match(cc_scores_z_long$uniqe_id, si_pam_25$unique_id)]
+
+cc_scores_z_long_25 &lt;- cc_scores_z_long[!is.na(cc_scores_z_long$cluster),]
+
+cc_scores_z_long_25$phase &lt;- factor(cc_scores_z_long_25$phase, 
+                                    levels=c(&quot;M/G1&quot;, &quot;G1/S&quot;, &quot;S&quot;, &quot;G2&quot;, &quot;M&quot;))
+cc_scores_z_long_25$cluster &lt;- as.factor(cc_scores_z_long_25$cluster)</code></pre>
+<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-8-1.png" width="864" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-9-1.png" width="864" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="others" class="section level2">
+<h2>Others</h2>
+<p>Look up “classical cell cycle genes” listed in Macosko et al. 2015 and see their patterns across the assigned clusters.</p>
+<pre class="r"><code>hgnc &lt;- c(&quot;CCNB1&quot;, &quot;CCNB2&quot;, &quot;MCM2&quot;, &quot;MCM3&quot;, &quot;MCM4&quot;, &quot;MCM5&quot;, &quot;MCM6&quot;,
+          &quot;MCM7&quot;, &quot;MCM10&quot;, &quot;AURKA&quot;, &quot;AURKB&quot;)
+ensg &lt;- cc_genes$ensembl[which(cc_genes$hgnc %in% hgnc)]
+tmp &lt;- log2cpm_cc[which(rownames(log2cpm_cc) %in% ensg),]
+tmp &lt;- data.frame(t(tmp))
+
+cc_scores_z_long_25$ENSG00000073111 &lt;- tmp$ENSG00000073111[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000087586 &lt;- tmp$ENSG00000087586[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000076003 &lt;- tmp$ENSG00000076003[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000100297 &lt;- tmp$ENSG00000100297[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000157456 &lt;- tmp$ENSG00000157456[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]
+cc_scores_z_long_25$ENSG00000178999 &lt;- tmp$ENSG00000178999[match(cc_scores_z_long_25$uniqe_id, rownames(tmp))]</code></pre>
+<p><img src="figure/images-goldstandards.Rmd/unnamed-chunk-11-1.png" width="864" style="display: block; margin: auto;" /><img src="figure/images-goldstandards.Rmd/unnamed-chunk-11-2.png" width="864" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] gplots_3.0.1        tidyr_0.7.1         data.table_1.10.4  
+[4] cowplot_0.9.1       ggplot2_2.2.1       Biobase_2.38.0     
+[7] BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.14       knitr_1.17         magrittr_1.5      
+ [4] munsell_0.4.3      colorspace_1.3-2   rlang_0.1.4.9000  
+ [7] stringr_1.2.0      plyr_1.8.4         caTools_1.17.1    
+[10] tools_3.4.1        grid_3.4.1         gtable_0.2.0      
+[13] KernSmooth_2.23-15 git2r_0.19.0       gtools_3.5.0      
+[16] htmltools_0.3.6    yaml_2.1.16        lazyeval_0.2.0    
+[19] rprojroot_1.2      digest_0.6.12      tibble_1.3.3      
+[22] reshape2_1.4.2     purrr_0.2.2        bitops_1.0-6      
+[25] glue_1.1.1         evaluate_0.10.1    rmarkdown_1.8     
+[28] labeling_0.3       gdata_2.17.0       stringi_1.1.2     
+[31] compiler_3.4.1     scales_0.4.1       backports_1.0.5   </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
