@@ -132,8 +132,9 @@ plot_grid(
 ```
 
 ```{r after-filter-tf}
-covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, concentration, raw:unmapped,
-                                                     starts_with("detect"), chip_id, molecules)
+covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, chip_id, 
+                                                     concentration, raw:unmapped,
+                                                     starts_with("detect"),  molecules)
 pcs <- pca_log2cpm$PCs[, 1:6]
 r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
              dimnames = list(colnames(covariates), colnames(pcs)))
@@ -143,6 +144,13 @@ for (cov in colnames(covariates)) {
   }
 }
 
-heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), 
-         ylab="technical factor", main = "After filter")
+heatmap3(r2, cexRow=1, cexCol=1, scale = "none", ylab="technical factor", main = "After filter")
+
+heatmap3(r2, cexRow=1, cexCol=1, ylab="technical factor", main = "After filter")
 ```
+
+```{r cor}
+cor_tech <- cor(as.matrix(covariates[,4:11]),use="pairwise.complete.obs")
+heatmap(cor_tech, symm = TRUE)
+```
+
