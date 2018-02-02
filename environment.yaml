@@ -61,6 +61,7 @@ dependencies:
   - r-gdata
   - r-ggplot2
   - r-gplots
+  - r-heatmap3
   - r-mclust
   - r-rcolorbrewer
   - r-reshape2
