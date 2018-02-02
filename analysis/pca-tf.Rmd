@@ -97,9 +97,11 @@ for (cov in colnames(covariates)) {
 }
 
 ## plot
-heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), 
-         ylab="technical factor", main = "Before filter")
+heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8),
+                              ylab="technical factor", main = "Before filter")
 
+heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
+                       ylab="technical factor", main = "Before filter w/o scale")
 ```
 
 
@@ -132,10 +134,14 @@ plot_grid(
 ```
 
 ```{r after-filter-tf}
+## selection of technical factor
 covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, chip_id, 
                                                      concentration, raw:unmapped,
                                                      starts_with("detect"),  molecules)
+## look at the first 6 PCs
 pcs <- pca_log2cpm$PCs[, 1:6]
+
+## generate the data
 r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
              dimnames = list(colnames(covariates), colnames(pcs)))
 for (cov in colnames(covariates)) {
@@ -144,13 +150,54 @@ for (cov in colnames(covariates)) {
   }
 }
 
-heatmap3(r2, cexRow=1, cexCol=1, scale = "none", ylab="technical factor", main = "After filter")
+## plot heatmap
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), 
+         ylab="technical factor", main = "After filter")
 
-heatmap3(r2, cexRow=1, cexCol=1, ylab="technical factor", main = "After filter")
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = "none", 
+         ylab="technical factor", main = "After filter w/o scale")
+
 ```
+
+PC1 correlated with number of genes detected, which is described in [Hicks et al 2017](https://academic.oup.com/biostatistics/advance-article/doi/10.1093/biostatistics/kxx053/4599254)
+
+Number of genes detected also highly correlated with sequencing metrics, especially total molecule number per sample.
 
 ```{r cor}
 cor_tech <- cor(as.matrix(covariates[,4:11]),use="pairwise.complete.obs")
 heatmap(cor_tech, symm = TRUE)
+```
+
+Look at the top 10% expression genes to see if the correlation of PC1 and number of detected gene would go away. However, the PC1 is still not individual (chip_id).
+
+```{r top}
+## look at top 10% of genes
+log2cpm_mean <- rowMeans(log2cpm)
+summary(log2cpm_mean)
+
+log2cpm_top <- log2cpm[rank(log2cpm_mean) / length(log2cpm_mean) > 1 - 0.1, ]
+dim(log2cpm_top)
+
+pca_top <- run_pca(log2cpm_top)
+
+## look at the first 6 PCs
+pcs <- pca_top$PCs[, 1:6]
+
+## generate the data
+r2_top <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2_top[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2_top, cexRow=1, cexCol=1, margins=c(8,8), 
+         ylab="technical factor", main = "Top 10 % gene")
+
+heatmap3(r2_top, cexRow=1, cexCol=1, margins=c(8,8), scale = "none", 
+         ylab="technical factor", main = "Top 10 % gene w/o scale")
+
 ```
 
