@@ -46,11 +46,29 @@ anno_unique <- anno[!dup,]
 # remove ones without ensembl gene ID
 anno_unique <- anno_unique[!is.na(anno_unique$ensembl),]
 
-saveRDS(anno_unique, file = "data/cellcycle-genes-previous-studies/rds/macosko-2017.rds")
+saveRDS(anno_unique, file = "data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
 
 
 # investigate duplicated rows in annotation data file
-symbols_dup <- duplicated(anno_unique[,-3])
-ll <- anno_unique[anno_unique$hgnc %in% unique(anno_unique$hgnc[symbols_dup]),]
+# symbols_dup <- duplicated(anno_unique[,-3])
+# ll <- anno_unique[anno_unique$hgnc %in% unique(anno_unique$hgnc[symbols_dup]),]
 
 
+
+##########################################################
+
+### Get cell cycle genes from Oscope paper
+oscope <- xlsx::read.xlsx("data/cellcycle-genes-previous-studies/nmeth.3549-S2.xlsx",
+                          sheetName = 1, header = F)
+oscope <- as.character(oscope[[1]])
+
+ensembl <- useMart("ensembl",dataset="hsapiens_gene_ensembl")
+biomart <- getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"),
+                 filters = "hgnc_symbol",
+                 values = oscope,
+                 mart = ensembl)
+
+anno <- biomart
+colnames(anno) <- c("ensembl", "hgnc")
+
+saveRDS(anno, file = "data/cellcycle-genes-previous-studies/rds/leng-2015.rds")
