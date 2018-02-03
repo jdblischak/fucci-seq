@@ -11,9 +11,8 @@ analysis/figure
 analysis/*html
 analysis/*_cache
 
+# Joyce's temporary data
+data/batch-paper
 output_tmp/
 notes/
 slurm-*
-
-# Joyce's temporary data
-data/batch-paper
