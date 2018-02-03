@@ -63,11 +63,13 @@ dependencies:
   - r-gplots
   - r-heatmap3
   - r-mclust
+  - r-scales
   - r-rcolorbrewer
   - r-reshape2
   - r-stringr
   - r-testit
   - r-tidyr
+  - r-venndiagram
   - r-wesanderson
   - r-workflowr
   - samtools
