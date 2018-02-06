@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Po-Yuan Tung" />
+
+<meta name="date" content="2018-01-31" />
+
+<title>PCA vs Technical Variables</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">PCA vs Technical Variables</h1>
+<h4 class="author"><em>Po-Yuan Tung</em></h4>
+<h4 class="date"><em>2018-01-31</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-02-05</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 370d4aa</p>
+<hr />
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<pre class="r"><code>library(&quot;cowplot&quot;)
+library(&quot;dplyr&quot;)
+library(&quot;edgeR&quot;)
+library(&quot;ggplot2&quot;)
+library(&quot;heatmap3&quot;)
+library(&quot;reshape2&quot;)
+library(&quot;Biobase&quot;)
+source(&quot;../code/pca.R&quot;)</code></pre>
+</div>
+<div id="pca" class="section level2">
+<h2>PCA</h2>
+<div id="before-fileter" class="section level3">
+<h3>Before fileter</h3>
+<pre class="r"><code>fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
+eset &lt;- Reduce(combine, Map(readRDS, fname))
+
+## look at human genes
+eset_hs &lt;- eset[fData(eset)$source == &quot;H. sapiens&quot;, ]
+head(featureNames(eset_hs))</code></pre>
+<pre><code>[1] &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; &quot;ENSG00000000457&quot;
+[5] &quot;ENSG00000000460&quot; &quot;ENSG00000000938&quot;</code></pre>
+<pre class="r"><code>## remove genes of all 0s
+eset_hs_clean &lt;- eset_hs[rowSums(exprs(eset_hs)) != 0, ]
+dim(eset_hs_clean)</code></pre>
+<pre><code>Features  Samples 
+   18966     1536 </code></pre>
+<pre class="r"><code>## convert to log2 cpm
+mol_hs_cpm &lt;- cpm(exprs(eset_hs_clean), log = TRUE)
+mol_hs_cpm_means &lt;- rowMeans(mol_hs_cpm)
+summary(mol_hs_cpm_means)</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  2.840   2.891   3.456   4.078   4.783  12.992 </code></pre>
+<pre class="r"><code>## keep genes with reasonable expression levels 
+mol_hs_cpm &lt;- mol_hs_cpm[mol_hs_cpm_means &gt; median(mol_hs_cpm_means), ]
+dim(mol_hs_cpm)</code></pre>
+<pre><code>[1] 9483 1536</code></pre>
+<pre class="r"><code>## pca of genes with reasonable expression levels
+pca_hs &lt;- run_pca(mol_hs_cpm)
+
+## a function of pca vs technical factors
+get_r2 &lt;- function(x, y) {
+  stopifnot(length(x) == length(y))
+  model &lt;- lm(y ~ x)
+  stats &lt;- summary(model)
+  return(stats$adj.r.squared)
+}
+
+## selection of technical factor
+covariates &lt;- pData(eset) %&gt;% dplyr::select(experiment, well, concentration, raw:unmapped,
+                                                     starts_with(&quot;detect&quot;), chip_id, molecules)
+## look at the first 6 PCs
+pcs &lt;- pca_hs$PCs[, 1:6]
+
+## generate the data
+r2_before &lt;- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2_before[cov, pc] &lt;- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot
+heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8),
+                              ylab=&quot;technical factor&quot;, main = &quot;Before filter&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/before-filter-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;,
+                       ylab=&quot;technical factor&quot;, main = &quot;Before filter w/o scale&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/before-filter-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="after-filter" class="section level3">
+<h3>After filter</h3>
+<p>Import data post <a href="gene-filtering.Rmd">sample and gene filtering</a></p>
+<pre class="r"><code>load(file=&quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
+<p>Compute log2 CPM based on the library size before filtering.</p>
+<pre class="r"><code>log2cpm &lt;- log2(cpm_filtered+1)</code></pre>
+<pre class="r"><code>pca_log2cpm &lt;- run_pca(log2cpm)
+
+pdata &lt;- pData(eset_filtered)
+pdata$experiment &lt;- as.factor(pdata$experiment)
+
+plot_grid(
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;chip_id&quot;),
+  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;experiment&quot;),
+  ncol=2)</code></pre>
+<p><img src="figure/pca-tf.Rmd/after-filter-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## selection of technical factor
+covariates &lt;- pData(eset_filtered) %&gt;% dplyr::select(experiment, well, chip_id, 
+                                                     concentration, raw:unmapped,
+                                                     starts_with(&quot;detect&quot;),  molecules)
+## look at the first 6 PCs
+pcs &lt;- pca_log2cpm$PCs[, 1:6]
+
+## generate the data
+r2 &lt;- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2[cov, pc] &lt;- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), 
+         ylab=&quot;technical factor&quot;, main = &quot;After filter&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/after-filter-tf-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;, 
+         ylab=&quot;technical factor&quot;, main = &quot;After filter w/o scale&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/after-filter-tf-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>PC1 correlated with number of genes detected, which is described in <a href="https://academic.oup.com/biostatistics/advance-article/doi/10.1093/biostatistics/kxx053/4599254">Hicks et al 2017</a></p>
+<p>Number of genes detected also highly correlated with sequencing metrics, especially total molecule number per sample.</p>
+<pre class="r"><code>cor_tech &lt;- cor(as.matrix(covariates[,4:11]),use=&quot;pairwise.complete.obs&quot;)
+heatmap(cor_tech, symm = TRUE)</code></pre>
+<p><img src="figure/pca-tf.Rmd/cor-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Look at the top 10% expression genes to see if the correlation of PC1 and number of detected gene would go away. However, the PC1 is still not individual (chip_id).</p>
+<pre class="r"><code>## look at top 10% of genes
+log2cpm_mean &lt;- rowMeans(log2cpm)
+summary(log2cpm_mean)</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3048  1.3316  2.9092  3.3464  4.9083 13.6379 </code></pre>
+<pre class="r"><code>log2cpm_top &lt;- log2cpm[rank(log2cpm_mean) / length(log2cpm_mean) &gt; 1 - 0.1, ]
+dim(log2cpm_top)</code></pre>
+<pre><code>[1] 1149 1025</code></pre>
+<pre class="r"><code>pca_top &lt;- run_pca(log2cpm_top)
+
+## look at the first 6 PCs
+pcs &lt;- pca_top$PCs[, 1:6]
+
+## generate the data
+r2_top &lt;- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2_top[cov, pc] &lt;- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2_top, cexRow=1, cexCol=1, margins=c(8,8), 
+         ylab=&quot;technical factor&quot;, main = &quot;Top 10 % gene&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/top-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>heatmap3(r2_top, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;, 
+         ylab=&quot;technical factor&quot;, main = &quot;Top 10 % gene w/o scale&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/top-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
