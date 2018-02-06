@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-05</p>
+<p><strong>Last updated:</strong> 2018-02-06</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 370d4aa</p>
+<p><strong>Code version:</strong> fd3bf7b</p>
 <hr />
 <div id="setup" class="section level2">
 <h2>Setup</h2>
@@ -351,17 +351,17 @@ head(featureNames(eset_hs))</code></pre>
 eset_hs_clean &lt;- eset_hs[rowSums(exprs(eset_hs)) != 0, ]
 dim(eset_hs_clean)</code></pre>
 <pre><code>Features  Samples 
-   18966     1536 </code></pre>
+   19348     1536 </code></pre>
 <pre class="r"><code>## convert to log2 cpm
 mol_hs_cpm &lt;- cpm(exprs(eset_hs_clean), log = TRUE)
 mol_hs_cpm_means &lt;- rowMeans(mol_hs_cpm)
 summary(mol_hs_cpm_means)</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  2.840   2.891   3.456   4.078   4.783  12.992 </code></pre>
+  2.413   2.482   3.180   3.858   4.761  12.999 </code></pre>
 <pre class="r"><code>## keep genes with reasonable expression levels 
 mol_hs_cpm &lt;- mol_hs_cpm[mol_hs_cpm_means &gt; median(mol_hs_cpm_means), ]
 dim(mol_hs_cpm)</code></pre>
-<pre><code>[1] 9483 1536</code></pre>
+<pre><code>[1] 9674 1536</code></pre>
 <pre class="r"><code>## pca of genes with reasonable expression levels
 pca_hs &lt;- run_pca(mol_hs_cpm)
 

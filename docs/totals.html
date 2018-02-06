@@ -293,7 +293,7 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/jdblischak/fucci-seq">
     <span class="fa fa-github"></span>
      
   </a>
@@ -324,16 +324,14 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-12-13</p>
+<p><strong>Last updated:</strong> 2018-02-06</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 0d37112</p>
+<p><strong>Code version:</strong> fd3bf7b</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
-<pre class="r"><code>library(&quot;dplyr&quot;)</code></pre>
-<pre><code>Warning: Installed Rcpp (0.12.14) different from Rcpp used to build dplyr (0.12.10).
-Please reinstall dplyr to avoid random crashes or undefined behavior.</code></pre>
-<pre class="r"><code>library(&quot;DT&quot;)
+<pre class="r"><code>library(&quot;dplyr&quot;)
+library(&quot;DT&quot;)
 library(&quot;ggplot2&quot;)
 library(&quot;reshape2&quot;)
 library(&quot;Biobase&quot;)
@@ -371,7 +369,7 @@ datatable(total_per_experiment,
                        &quot;Number of mapped&quot;,
                        &quot;Number of molecules&quot;))</code></pre>
 <div id="htmlwidget-b8e0c2e2742a5382bafd" style="width:100%;height:auto;" class="datatables html-widget"></div>
-<script type="application/json" data-for="htmlwidget-b8e0c2e2742a5382bafd">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],["20170905","20170906","20170907","20170908","20170910","20170912","20170913","20170914","20170915","20170916","20170917","20170919","20170920","20170921","20170922","20170924"],[181.680776,163.71047,159.03843,198.933268,218.409798,201.877066,199.55301,184.324283,182.292193,177.823273,154.760077,176.811921,170.75517,195.326862,194.436579,164.030729],[85.017829,71.69816,64.146014,73.459066,84.276806,85.720928,70.672576,75.911338,64.597313,55.577163,65.480526,67.847801,69.986907,81.872748,64.713019,76.97894],[6.827817,7.160486,6.017162,8.577696,8.728836,8.318805,6.408526,7.962425,7.69365,7.435478,6.342408,7.555793,7.007813,9.173321,7.318666,8.373499]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>C1 chip<\/th>\n      <th>Number of raw sequences<\/th>\n      <th>Number of mapped<\/th>\n      <th>Number of molecules<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":16,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,16,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-b8e0c2e2742a5382bafd">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"],["20170905","20170906","20170907","20170908","20170910","20170912","20170913","20170914","20170915","20170916","20170917","20170919","20170920","20170921","20170922","20170924"],[380.687736,362.73125,371.427564,412.542083,436.002711,414.087135,409.345623,387.607724,394.864013,396.638177,365.420416,385.569765,384.111251,410.999651,403.666478,371.133791],[177.84221,163.976187,155.019309,154.324245,167.100997,176.894625,145.720572,160.274388,142.408214,128.065458,161.328501,152.399081,162.471812,175.334635,136.584871,178.332344],[10.036337,10.877239,9.593111,12.324649,12.568274,12.285908,9.416785,11.743803,11.926311,11.656424,9.872018,11.313303,10.755671,13.492618,10.561215,12.572015]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>C1 chip<\/th>\n      <th>Number of raw sequences<\/th>\n      <th>Number of mapped<\/th>\n      <th>Number of molecules<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":16,"columnDefs":[{"className":"dt-right","targets":[2,3,4]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,16,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 <pre class="r"><code>ggplot(melt(total_per_experiment, id.vars = &quot;experiment&quot;,
             variable.name = &quot;type&quot;, value.name = &quot;count&quot;),
        aes(x = experiment, y = count, color = type)) +
@@ -391,8 +389,8 @@ Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
-LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+BLAS: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -403,23 +401,24 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[1] parallel  methods   stats     graphics  grDevices utils     datasets 
 [8] base     
 
 other attached packages:
 [1] bindrcpp_0.2        Biobase_2.38.0      BiocGenerics_0.24.0
 [4] reshape2_1.4.2      ggplot2_2.2.1       DT_0.2             
-[7] dplyr_0.7.0        
+[7] dplyr_0.7.4        
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14     bindr_0.1        knitr_1.16       magrittr_1.5    
- [5] cowplot_0.8.0    munsell_0.4.3    colorspace_1.3-2 R6_2.2.0        
+ [1] Rcpp_0.12.13     knitr_1.16       bindr_0.1        magrittr_1.5    
+ [5] cowplot_0.9.1    munsell_0.4.3    colorspace_1.3-2 R6_2.2.0        
  [9] rlang_0.1.2      plyr_1.8.4       stringr_1.2.0    tools_3.4.1     
 [13] grid_3.4.1       gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6 
 [17] lazyeval_0.2.0   yaml_2.1.14      rprojroot_1.2    digest_0.6.12   
 [21] assertthat_0.1   tibble_1.3.3     htmlwidgets_0.9  glue_1.1.1      
 [25] evaluate_0.10.1  rmarkdown_1.6    labeling_0.3     stringi_1.1.2   
-[29] compiler_3.4.1   scales_0.4.1     backports_1.0.5  jsonlite_1.4    </code></pre>
+[29] compiler_3.4.1   scales_0.5.0     backports_1.0.5  jsonlite_1.4    
+[33] pkgconfig_2.0.1 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
