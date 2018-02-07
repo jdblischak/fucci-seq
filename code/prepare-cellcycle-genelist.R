@@ -23,7 +23,7 @@ tmp <- data.frame(hgnc = c(tmp[[1]], tmp[[2]], tmp[[3]], tmp[[4]], tmp[[5]]),
 library(biomaRt)
 ensembl <- useMart("ensembl",dataset="hsapiens_gene_ensembl")
 
-biomart <- getBM(attributes = c("ensembl_gene_id", "hgnc_symbol"),
+biomart <- getBM(attributes = c(c, "hgnc_symbol"),
                  filters = "hgnc_symbol",
                  values = tmp$hgnc,
                  mart = ensembl)
