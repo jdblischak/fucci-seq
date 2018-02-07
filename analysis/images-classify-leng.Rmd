@@ -1,0 +1,180 @@
+---
+title: "Evaluate phase-specific scores for Leng et al. 2015"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Overview/Results
+
+Goal: What are the expression profiles of the sorted cells in [Leng et al. 2015](doi:10.1038/nmeth.3549)?
+
+Method: Compute phase-specific score [Macoscko et al. 2015](http://dx.doi.org/10.1016/j.cell.2015.05.002) using the genes identified as cell cycle genes and also assigned to different cell cycle phases in Macosko et al. 2015. Hence the genes and the samples evaluated are selected from two independent datasets.
+
+Results: 
+
+    * 120 genes were identified as variable along cell cycle phase. 
+    
+    * G1 cells scored the highest in G1 and also high in M phase. S cells scored the highest in S, while G2 cells scored the highest in G2. Importantly, there appears to be a pattern in average expression levels within each cell state (fucci-assigned). G1 cells peaks at M/G1 and G1/S, S cells peaks at S, while G2 cells peaks at G2. 
+
+    * Compared to our data ([here](https://jdblischak.github.io/fucci-seq/images-classify-fucci.html)): Across individuals, cells classified to S and G2 phases scored the highest in the corresponding phase score. However, cells classifed as G1 phase score high in S phase for some individuals. 
+    
+    What's clear is that phase-specific scores along are not adequate in predicting cell cycle phase. 
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(Biobase)
+library(ggplot2)
+library(cowplot)
+library(data.table)
+library(tidyr)
+library(ccRemover)
+```
+
+Load Leng et al. 2015 data from GEO - already filtered for low-quality samples, and count data was median-normalized. 
+
+```{r}
+HumanLengESC <- readRDS(file = "../data/rnaseq-previous-studies/HumanLengESC.rds")
+
+counts <- exprs(HumanLengESC)
+libsize <- colSums(counts)
+cpm <- t(t(counts)*(10^6)/libsize)
+log2cpm <- log2(cpm+1)
+pdata <- pData(HumanLengESC)
+table(pData(HumanLengESC)$cell_state)
+```
+
+select fucci-expression cells
+
+```{r}
+counts <- counts[,pdata$cell_state != "H1"]
+cpm <- cpm[,pdata$cell_state != "H1"]
+log2cpm <- log2cpm[,pdata$cell_state != "H1"]
+pdata <- pdata[pdata$cell_state != "H1", ]
+pdata$cell_state <- droplevels(pdata$cell_state)
+```
+
+filter genes
+
+```{r}
+genes_to_include <- which(rowMeans(cpm)>1)
+log2cpm <- log2cpm[genes_to_include,]
+```
+
+subset to include genes that are annotated as cell cycle genes (according to ccRemover)
+
+```{r}
+ccremover <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+which_ccremover <- gene_indexer(rownames(log2cpm), species="human", name_type="symbol")
+
+log2cpm_ccremover <- log2cpm[which_ccremover, ]
+cpm_ccremover <- cpm[which_ccremover, ]
+counts_ccremover <- counts[which_ccremover, ]
+```
+
+subset to include genes in Macosko data
+
+```{r}
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+which_macosko <- which(rownames(log2cpm) %in% macosko$hgnc)
+
+log2cpm_macosko <- log2cpm[which_macosko, ]
+cpm_macosko <- cpm[which_macosko, ]
+counts_macosko <- counts[which_macosko, ]
+ccgenes_macosko <- macosko[which(macosko$hgnc %in% rownames(log2cpm_macosko)), ]
+```
+
+compute phase-specific scores
+
+```{r}
+cc_scores <- lapply(1:uniqueN(ccgenes_macosko$phase), function(i) {
+  ph <- unique(ccgenes_macosko$phase)[i]
+  df_sub <- log2cpm_macosko[rownames(log2cpm_macosko) %in% ccgenes_macosko$hgnc[ccgenes_macosko$phase == ph],]
+  mn <- colMeans(df_sub)
+  cc <- cor(t(rbind(mn, df_sub)))
+  cc_mean <- cc[-1,1]
+  genes_cc <- names(cc_mean)[which(cc_mean > .3)]
+  scores_raw <- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
+  scores_z <- scale(scores_raw)
+  return(list(scores_z=scores_z, ngenes = length(genes_cc)))
+})
+names(cc_scores) <- unique(ccgenes_macosko$phase)
+
+ngenes <- sapply(cc_scores, function(x) x[[2]])
+print(ngenes)
+
+scores <- do.call(cbind, lapply(cc_scores, function(x) x[[1]]))
+colnames(scores) <- unique(ccgenes_macosko$phase)
+
+scores_z <- t(apply(scores, 1, scale))
+colnames(scores_z) <- unique(ccgenes_macosko$phase)
+scores_z <- as.data.frame(scores_z)
+
+scores_z_long <- gather(scores_z, key=phase, value=scores)
+scores_z_long$sample_id <- rep(rownames(scores_z), ncol(scores_z))
+
+scores_z_long$cell_state <- pdata$cell_state[match(scores_z_long$sample_id, rownames(pdata))]
+```
+
+
+---
+
+
+## Analysis
+
+```{r, fig.width=8, fig.height=5, echo = F}
+scores_z_long$phase <- factor(scores_z_long$phase, 
+                                 levels=c("M/G1", "G1/S", "S", "G2", "M"))
+scores_z_long$cell_state <- factor(scores_z_long$cell_state, 
+                                 levels=c("G1", "S", "G2"))
+
+ggplot(data=scores_z_long, 
+       aes(x=phase, y=scores, 
+           col=phase)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~cell_state) +
+  ylab("phase-specific score") +
+  ggtitle("Sorted human ESCs in Leng et al. 2015",
+          subtitle="G1 91 cells, S 80 cells, G2 76 cells")
+```
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+
