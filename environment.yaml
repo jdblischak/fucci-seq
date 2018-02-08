@@ -53,6 +53,7 @@ dependencies:
   - pysftp
   - r-base==3.4.1
   - r-cellcycler 
+  - r-circular
   - r-cluster
   - r-ccremover
   - r-cowplot
