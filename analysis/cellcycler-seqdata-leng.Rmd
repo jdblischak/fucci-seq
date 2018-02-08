@@ -43,6 +43,9 @@ Results:
     
     2. Cell order: We exepct that at least the ordering of cells by cell time should match with the fucci-labeled cell cycle phases. This was the case for results using Oscope genes (29) but not for results using all genes or cell cycle annotated genes. 
 
+Additional analysis: I was thinking that perhaps cellcycleR doesn't perform well when the number of cells in the different phases is uneven. And this could explain the poor performance on the fucci data. Or from the method perspective, it could be that the model doesn't accommodate skewed/distored oscillation patterns in the data. I then created a dataset from the Leng data where there's only 10 cells in G1. Results show that (at the end of this page) most G1 cells are estimated to be similar to G2 cells according to the estimated cell ordering...
+
+    
     
 ---
 
@@ -124,7 +127,7 @@ grid.draw(venn.plot)
 
 ---
 
-## Analysis
+## Main analysis
 
 Fitting cellcycleR using the same 3 random seeds for each analysis.
 
@@ -177,7 +180,7 @@ fit_leng_oscope <- fit_leng_oscope_list[[which.max(sapply(fit_leng_oscope_list, 
 
 Distribution of cell times
 
-```{r}
+```{r, fig.height=6, fig.width=8, echo = F}
 par(mfrow=c(2,2), mar=c(3,2,3,1))
 xy <- data.frame(x=fit_leng$cell_times,
                  y=droplevels(pdata_leng$cell_state))
@@ -262,10 +265,36 @@ legend("center", col=c(1:3), pch = 16, legend=c("G1", "S", "G2"))
 title(main="Estimated cell time and FUCCI phase", outer = TRUE, line = -1)
 ```
 
+Results on the same data. Visualize on circular plot.
+
+```{r, fig.height=8, fig.width=8, echo = F}
+par(mfrow=c(3,2), mar=c(3,2,3,1))
+xy <- data.frame(x=fit_leng_oscope$cell_times,
+                 y=pdata_leng$cell_state)
+xy <- xy[order(xy$x),]
+plot.circular(circular(xy$x[xy$y=="G1"], units="radians"), pch=16, cex=.7,
+     main = "All phases", stack=T, bins=120, col=1)
+points.circular(circular(xy$x[xy$y=="S"], units="radians"), pch=16, cex=.7,
+     main = "All phases", stack=T, bins=120, col=2)
+points.circular(circular(xy$x[xy$y=="G2"], units="radians"), pch=16, cex=.7,
+     main = "All phases", stack=T, bins=120, col=3)
+
+plot.circular(circular(xy$x[xy$y=="G1"], units="radians"), pch=16, cex=.7,
+     main = "G1", stack=T, bins=120, col=1)
+plot.circular(circular(xy$x[xy$y=="S"], units="radians"), pch=16, cex=.7,
+     main = "S", stack=T, bins=120, col=2)
+plot.circular(circular(xy$x[xy$y=="G2"], units="radians"), pch=16, cex=.7,
+     main = "G2", stack=T, bins=120, col=3)
+
+plot(x=c(1:5),y=c(1:5), pch="", axes=F, ann=F)
+legend("center", col=c(1:3), pch = 16, legend=c("G1", "S", "G2"))
+
+title(main="Estimated cell time and FUCCI phase on a subsample", outer = TRUE, line = -1)
+```
 
 **gene profiles**
 
-```{r, fig.height=6, fig.width=9, echo = F}
+```{r, fig.height=6, fig.width=7, echo = F}
 gg <- c("NUSAP1", "KPNA2", "CCNB1", "TPX2")
 par(mfrow=c(4,1), mar=c(3,2,2,1))
 for (i in 1:length(gg)) {
@@ -279,6 +308,98 @@ plot(pp$exp, col=c(1:3)[as.factor(pp$cell_state)], pch=1, cex=.7,
 }
 title(main = "Key cell cycle genes identified in Oscope by Oscope gene order", outer = T, line = 0)
 ```
+
+---
+
+## Subsampling
+
+Goal: To test the fit of cellcycleR on dataset with small proportion of G1 cells. 
+
+Method: Here I am using the Oscope genes to see if cellcycleR still performs well with a small dataset.
+
+```{r, eval = F}
+seeds <- c(101,231,456)
+fit_leng_oscope_short_list <- vector("list", length(seeds))
+
+pdata_leng$cell_state <- as.character(pdata_leng$cell_state)
+
+g1_cells <- which(as.character(pdata_leng$cell_state) == "G1")
+which_subsample <- g1_cells[sample(length(g1_cells), 81)]
+log2cpm_leng_oscope_short <- log2cpm_leng_oscope[,-which_subsample]
+pdata_leng_short <- pdata_leng[-which_subsample,]
+
+log2cpm_leng_oscope_short_z <- t(apply(log2cpm_leng_oscope_short, 1, scale))
+colnames(log2cpm_leng_oscope_short_z) <- colnames(log2cpm_leng_oscope_short)
+
+for (i in 1:length(seeds)) {
+  set.seed(seeds[i])
+  fit_leng_oscope_short_list[[i]] <- sin_cell_ordering_class(t(log2cpm_leng_oscope_short_z), 
+                                           celltime_levels=100, 
+                                           num_shuffle=1, maxiter=300, tol=1e-6,
+                                           fix.phase = FALSE, phase_in=NULL,
+                                           n_cores=8)
+}
+
+saveRDS(fit_leng_oscope_short_list, "../output/cellcycler-seqdata-leng.Rmd/fit_leng_oscope_short.rds") 
+saveRDS(pdata_leng_short, "../output/cellcycler-seqdata-leng.Rmd/pdata_leng_short.rds") 
+```
+
+Load previously computed results.
+
+```{r}
+fit_leng_oscope_short_list <- readRDS("../output/cellcycler-seqdata-leng.Rmd/fit_leng_oscope_short.rds") 
+pdata_leng_short <- readRDS("../output/cellcycler-seqdata-leng.Rmd/pdata_leng_short.rds") 
+
+fit_leng_oscope_short <- fit_leng_oscope_short_list[[which.max(sapply(fit_leng_oscope_short_list, "[[", "loglik"))]]
+```
+
+Results
+
+```{r, fig.height=6, fig.width=8, echo = F}
+par(mfrow=c(2,2), mar=c(3,2,3,1))
+xy <- data.frame(x=fit_leng_oscope_short$cell_times,
+                 y=pdata_leng_short$cell_state)
+xy <- xy[order(xy$x),]
+plot.circular(circular(xy$x, units="radians"), pch=16, cex=.7,
+     main = "Estimated cell time", stack=T, bins=120)
+
+plot(xy$x, cex=.6, pch = 16, col = c(1:3)[xy$y], 
+     main = "Using Oscope genes",
+     xlab = "Estimated cell order", ylab = "Estimated cell time (0,2pi)")
+
+plot(y=xy$y, x=xy$x, cex=.7, pch = 1, col = c(1:3)[xy$y], 
+     main = "Using Oscope genes",
+     xlab = "Estimated cell time", ylab = "Sorted phase")
+
+plot(x=c(1:5),y=c(1:5), pch="", axes=F, ann=F)
+legend("center", col=c(1:3), pch = 16, legend=c("G1", "S", "G2"))
+
+title(main="Estimated cell time and FUCCI phase on a subsample", outer = TRUE, line = -1)
+```
+
+Results on the same data. Visualize on circular plot.
+
+```{r, fig.height=6, fig.width=8, echo = F}
+par(mfrow=c(2,2), mar=c(3,2,3,1))
+xy <- data.frame(x=fit_leng_oscope_short$cell_times,
+                 y=pdata_leng_short$cell_state)
+xy <- xy[order(xy$x),]
+# plot.circular(circular(xy$x, units="radians"), pch=16, cex=.7,
+#      main = "All phases", stack=T, bins=120)
+plot.circular(circular(xy$x[xy$y=="G1"], units="radians"), pch=16, cex=.7,
+     main = "G1", stack=T, bins=120, col=1)
+plot.circular(circular(xy$x[xy$y=="S"], units="radians"), pch=16, cex=.7,
+     main = "S", stack=T, bins=120, col=2)
+plot.circular(circular(xy$x[xy$y=="G2"], units="radians"), pch=16, cex=.7,
+     main = "G2", stack=T, bins=120, col=3)
+
+plot(x=c(1:5),y=c(1:5), pch="", axes=F, ann=F)
+legend("center", col=c(1:3), pch = 16, legend=c("G1", "S", "G2"))
+
+title(main="Estimated cell time and FUCCI phase on a subsample", outer = TRUE, line = -1)
+```
+
+
 
 
 ---
