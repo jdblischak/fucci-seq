@@ -38,19 +38,28 @@ Website to share results of fucci-seq project.
 * transgene count in sequencing data
     * [Investigate zero-count transgenes](images-transgene.html)
 
-* Fitting cellcycleR
-    * [Parametric model across plates and individuals](images-cellcycleR.html)
-    * [Model convergence assessment](images-cellcycleR-convergence.html)
-
-* Cluster cells based on FUCCI
-    * [Partition around medoids(PAM)](images-pam.html)
-    * [Mixture modeling](images-mclust.html)
+* Evalute categorical labeling
+    * [Cluster samples by Partition around medoids(PAM)](images-pam.html)
+    * [Cluster samples by Mixture modeling](images-mclust.html)
     * [Select a subset using silhouette index](images-subset-silhouette.html)
+    * [Expression profiles of the "best" samples](images-classify-fucci.html)
+    * [Expression profiles of sorted cells in Leng et al. 2015](images-classify-leng.html)
+
+---
+
+## RNA-seq data
+
+* 
+
+---
+
+## Model fitting
+
+* Evaluating cellcycleR 0.1.6
+    * [Model convergence assessment](images-cellcycleR-convergence.html)
+    * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
+    * [Fitting on sequencing data that have independent cell cycle measurements (both Leng and Fucci)](cellcycler-seqdata.html)
     
-* "Gold standard (?)" samples
-    * [Expression profiles of "gold-standard" samples](images-goldstandards.html)
-    * [Phase-specific scores for Leng et al. 2015](images-goldstandards-followup.html)
-    * [Expression heatmap for fucci-seq and Leng data](images-goldstandards-heatmap.html)
 
 ---
 
@@ -71,3 +80,5 @@ Website to share results of fucci-seq project.
 ## One-time investigations
 
 * [Why some gene symbols (genes) correspond to multiple Ensembl IDs?](ensembl.html)
+
+
