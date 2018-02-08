@@ -13,32 +13,31 @@ Website to share results of fucci-seq project.
 
 ---
 
-..
-
 ## Microscopy image analysis
 
 * [Processing images - from images to intensities](images-process.html)
 
-* Image inspection
+* Visual inspection
     * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
     * [Inspect images with no nucleus](images-zero-nuclei.html)
 
-* Image intensities
+* QC and preprocessing image intensities
     * [CONFESS results](confess-prelim.html)
     * [QC analysis including no. nuclei detected, DAPI, and intensity variation](images-qc.html)
     * [Explore using log10 sum pixel intensity for signal metrics](images-qc-followup.html)
     * [Compare correction approaches using median versus mean background](images-metrics.html)
     
-* Shape metrics
-    * [Nucleus shape metrics versus intensities](images-metrics-cell-shape.html)
-
 * Normalize intensities by batch
     * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
     * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
     * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
-    
+
+* Shape metrics
+    * [Nucleus shape metrics versus intensities](images-metrics-cell-shape.html)
+
 * transgene count in sequencing data
     * [Investigate zero-count transgenes](images-transgene.html)
+
 
 * Evalute categorical labeling
     * [Cluster samples by Partition around medoids(PAM)](images-pam.html)
@@ -60,7 +59,8 @@ Website to share results of fucci-seq project.
 * Evaluating cellcycleR 0.1.6
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
-    * [Fitting on sequencing data that have independent cell cycle measurements (both Leng and Fucci)](cellcycler-seqdata.html)
+    * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
+    * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
     
 
 ---
