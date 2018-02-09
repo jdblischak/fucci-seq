@@ -52,6 +52,7 @@ dependencies:
   - python
   - pysftp
   - r-base==3.4.1
+  - r-ccremover
   - r-cellcycler 
   - r-circular
   - r-cluster
