@@ -2,7 +2,7 @@
 
 # Usage:
 #
-# sbatch cellcycler-convergence.sbatch ${seed} ${iter}
+# sbatch cellcycler-convergence.sbatch ${seed} ${round}
 
 #SBATCH --time=36:00:00
 #SBATCH --mail-type=END,FAIL
@@ -16,8 +16,8 @@
 set -e
 
 seed=$1
-iter=$2
+round=$2
 
-source activate fucci-seq
+source activate r
 
-Rscript cellcycler-convergence.R ${seed} ${iter}
+Rscript cellcycler-convergence.R ${seed} ${round}
