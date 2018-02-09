@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-08</p>
+<p><strong>Last updated:</strong> 2018-02-09</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 52e86d1</p>
+<p><strong>Code version:</strong> 5845152</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -333,7 +333,8 @@ shared across the workflowr files. -->
 <pre><code>1. Cell time estimates: Should span 0 to 2pi give that the samples collected including somewhat similar number of cells from each phase. This was observed for results using Oscope genes (29) but not for results using all genes or cell cycle annotated genes.
 
 2. Cell order: We exepct that at least the ordering of cells by cell time should match with the fucci-labeled cell cycle phases. This was the case for results using Oscope genes (29) but not for results using all genes or cell cycle annotated genes. </code></pre>
-<p>Additional analysis: I was thinking that perhaps cellcycleR doesn’t perform well when the number of cells in the different phases is uneven. And this could explain the poor performance on the fucci data. Or from the method perspective, it could be that the model doesn’t accommodate skewed/distored oscillation patterns in the data. I then created a dataset from the Leng data where there’s only 10 cells in G1. Results show that (at the end of this page) most G1 cells are estimated to be similar to G2 cells according to the estimated cell ordering…</p>
+<p>Additional analysis 1: I was thinking that perhaps cellcycleR doesn’t perform well when the number of cells in the different phases is uneven. And this could explain the poor performance on the fucci data. Or from the method perspective, it could be that the model doesn’t accommodate skewed/distored oscillation patterns in the data. I then created a dataset from the Leng data where there’s only 10 cells in G1. Results show that (at the end of this page) most G1 cells are estimated to be similar to G2 cells according to the estimated cell ordering…</p>
+<p>Additional analysis 2: I examined the cellcycleR fit on the whole set of Leng data gene. I found that the ones with low signal-to-noise ratio range from genes with high variance-mean dependency to low variance-mean dependency.</p>
 <hr />
 </div>
 <div id="data-and-packages" class="section level2">
@@ -349,7 +350,8 @@ library(cellcycleR)
 library(VennDiagram)
 library(ccRemover)
 library(scales)
-library(circular)</code></pre>
+library(circular)
+library(limma)</code></pre>
 <p>Leng et al. data</p>
 <pre class="r"><code>HumanLengESC &lt;- readRDS(file = &quot;../data/rnaseq-previous-studies/HumanLengESC.rds&quot;)
 
@@ -492,15 +494,43 @@ fit_leng_oscope_short &lt;- fit_leng_oscope_short_list[[which.max(sapply(fit_len
 <p><img src="figure/cellcycler-seqdata-leng.Rmd/unnamed-chunk-14-1.png" width="768" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
+<div id="overdispersion" class="section level2">
+<h2>Overdispersion</h2>
+<p>Let’s see if genes with high SNR are also those with high overdispersion. Use voom because we are interested in log based models.</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+leng_voom &lt;- voom(counts_leng, lib.size=libsize_leng, normalize.method = &quot;none&quot;,
+                  save.plot = TRUE)
+genes_voom &lt;- which(rownames(counts_leng) %in% names(leng_voom$voom.xy$x))
+snr &lt;- with(fit_leng, (amp[genes_voom]^2)/(sigma[genes_voom]^2))
+plot(leng_voom$voom.xy$x, leng_voom$voom.xy$y, pch=16, cex=.5, col = &quot;gray60&quot;,
+     xlab = &quot;log2(count sizse + .5&quot;, ylab=&quot;Sqrt(standard deviation)&quot;,
+     main = &quot;All genes&quot;)
+lines(leng_voom$voom.line, col=&quot;red&quot;)
+points(cbind(leng_voom$voom.xy$x,leng_voom$voom.xy$y)[order(snr, decreasing=F)[1:50],],
+       pch=1, col=&quot;blue&quot;)
+
+
+leng_voom &lt;- voom(counts_leng_ccremover, lib.size=libsize_leng, normalize.method = &quot;none&quot;,
+                  save.plot = TRUE)
+genes_voom &lt;- which(rownames(counts_leng_ccremover) %in% names(leng_voom$voom.xy$x))
+snr &lt;- with(fit_leng_ccremover, (amp[genes_voom]^2)/(sigma[genes_voom]^2))
+plot(leng_voom$voom.xy$x, leng_voom$voom.xy$y, pch=16, cex=.5, col = &quot;gray60&quot;,
+     xlab = &quot;log2(count sizse + .5&quot;, ylab=&quot;Sqrt(standard deviation)&quot;,
+     main = &quot;All genes&quot;)
+lines(leng_voom$voom.line, col=&quot;red&quot;)
+points(cbind(leng_voom$voom.xy$x,leng_voom$voom.xy$y)[order(snr, decreasing=F)[1:50],],
+       pch=1, col=&quot;blue&quot;)</code></pre>
+<p><img src="figure/cellcycler-seqdata-leng.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: x86_64-redhat-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
-LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -515,27 +545,27 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] circular_0.4-93     scales_0.5.0        ccRemover_1.0.4    
- [4] VennDiagram_1.6.18  futile.logger_1.4.3 cellcycleR_0.1.6   
- [7] zoo_1.8-0           binhf_1.0-1         adlift_1.3-3       
-[10] EbayesThresh_1.4-12 wavethresh_4.6.8    MASS_7.3-47        
-[13] gplots_3.0.1        tidyr_0.7.1         data.table_1.10.4  
-[16] cowplot_0.9.1       ggplot2_2.2.1       Biobase_2.38.0     
-[19] BiocGenerics_0.24.0
+ [1] limma_3.34.8        circular_0.4-93     scales_0.5.0       
+ [4] ccRemover_1.0.4     VennDiagram_1.6.18  futile.logger_1.4.3
+ [7] cellcycleR_0.1.6    zoo_1.8-1           binhf_1.0-1        
+[10] adlift_1.3-3        EbayesThresh_1.4-12 wavethresh_4.6.8   
+[13] MASS_7.3-47         gplots_3.0.1        tidyr_0.8.0        
+[16] data.table_1.10.4-3 cowplot_0.9.2       ggplot2_2.2.1      
+[19] Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14         compiler_3.4.1       git2r_0.19.0        
- [4] plyr_1.8.4           futile.options_1.0.0 bitops_1.0-6        
- [7] tools_3.4.1          boot_1.3-18          digest_0.6.12       
-[10] lattice_0.20-34      evaluate_0.10.1      tibble_1.3.3        
-[13] gtable_0.2.0         rlang_0.1.4.9000     yaml_2.1.16         
-[16] mvtnorm_1.0-6        stringr_1.2.0        knitr_1.17          
-[19] gtools_3.5.0         caTools_1.17.1       rprojroot_1.2       
-[22] glue_1.1.1           rmarkdown_1.8        gdata_2.17.0        
-[25] lambda.r_1.1.9       purrr_0.2.2          magrittr_1.5        
-[28] backports_1.0.5      htmltools_0.3.6      colorspace_1.3-2    
-[31] KernSmooth_2.23-15   stringi_1.1.2        lazyeval_0.2.0      
-[34] munsell_0.4.3       </code></pre>
+ [1] Rcpp_0.12.15         pillar_1.1.0         compiler_3.4.1      
+ [4] git2r_0.21.0         plyr_1.8.4           futile.options_1.0.0
+ [7] bitops_1.0-6         tools_3.4.1          boot_1.3-19         
+[10] digest_0.6.15        lattice_0.20-35      evaluate_0.10.1     
+[13] tibble_1.4.2         gtable_0.2.0         rlang_0.1.6         
+[16] yaml_2.1.16          mvtnorm_1.0-7        stringr_1.2.0       
+[19] knitr_1.19           gtools_3.5.0         caTools_1.17.1      
+[22] rprojroot_1.3-2      glue_1.2.0           rmarkdown_1.8       
+[25] gdata_2.18.0         lambda.r_1.2         purrr_0.2.4         
+[28] magrittr_1.5         backports_1.1.2      htmltools_0.3.6     
+[31] colorspace_1.3-2     KernSmooth_2.23-15   stringi_1.1.6       
+[34] lazyeval_0.2.1       munsell_0.4.3       </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
