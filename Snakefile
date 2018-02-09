@@ -91,7 +91,8 @@ wildcard_constraints: chip = "[0-9]{8,8}", row = "[A-H]", col = "[0-1][0-9]"
 rule all:
     input: counts = dir_data + "fucci-counts.txt.gz",
            anno = dir_data + "fucci-annotation.txt",
-           description = dir_data + "fucci-annotation-description.txt"
+           description = dir_data + "fucci-annotation-description.txt",
+           eset_combined = dir_data + "eset-raw.rds"
 
 rule intermediate:
     input: #MultiQC
@@ -361,6 +362,12 @@ rule expressionset:
                                                 {input.saf} \
                                                 {input.qc} \
                                                 {output}"
+
+rule expressionset_combined:
+    input: expand(dir_data + "eset/{chip}.rds", chip = chips)
+    output: dir_data + "eset-raw.rds"
+    params: dir_eset = dir_data + "eset/"
+    shell: "Rscript code/output-combined-eset.R {params.dir_eset} {output}"
 
 rule counts_combined:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
