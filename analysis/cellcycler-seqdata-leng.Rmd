@@ -43,8 +43,9 @@ Results:
     
     2. Cell order: We exepct that at least the ordering of cells by cell time should match with the fucci-labeled cell cycle phases. This was the case for results using Oscope genes (29) but not for results using all genes or cell cycle annotated genes. 
 
-Additional analysis: I was thinking that perhaps cellcycleR doesn't perform well when the number of cells in the different phases is uneven. And this could explain the poor performance on the fucci data. Or from the method perspective, it could be that the model doesn't accommodate skewed/distored oscillation patterns in the data. I then created a dataset from the Leng data where there's only 10 cells in G1. Results show that (at the end of this page) most G1 cells are estimated to be similar to G2 cells according to the estimated cell ordering...
+Additional analysis 1: I was thinking that perhaps cellcycleR doesn't perform well when the number of cells in the different phases is uneven. And this could explain the poor performance on the fucci data. Or from the method perspective, it could be that the model doesn't accommodate skewed/distored oscillation patterns in the data. I then created a dataset from the Leng data where there's only 10 cells in G1. Results show that (at the end of this page) most G1 cells are estimated to be similar to G2 cells according to the estimated cell ordering...
 
+Additional analysis 2: I examined the cellcycleR fit on the whole set of Leng data gene. I found that the ones with low signal-to-noise ratio range from genes with high variance-mean dependency to low variance-mean dependency. 
     
     
 ---
@@ -65,6 +66,7 @@ library(VennDiagram)
 library(ccRemover)
 library(scales)
 library(circular)
+library(limma)
 ```
 
 Leng et al. data
@@ -398,6 +400,39 @@ legend("center", col=c(1:3), pch = 16, legend=c("G1", "S", "G2"))
 
 title(main="Estimated cell time and FUCCI phase on a subsample", outer = TRUE, line = -1)
 ```
+
+---
+
+## Overdispersion 
+
+Let's see if genes with high SNR are also those with high overdispersion. Use voom because we are interested in log based models.
+
+```{r, fig.width=7, fig.height=4}
+par(mfrow=c(1,2))
+leng_voom <- voom(counts_leng, lib.size=libsize_leng, normalize.method = "none",
+                  save.plot = TRUE)
+genes_voom <- which(rownames(counts_leng) %in% names(leng_voom$voom.xy$x))
+snr <- with(fit_leng, (amp[genes_voom]^2)/(sigma[genes_voom]^2))
+plot(leng_voom$voom.xy$x, leng_voom$voom.xy$y, pch=16, cex=.5, col = "gray60",
+     xlab = "log2(count sizse + .5", ylab="Sqrt(standard deviation)",
+     main = "All genes")
+lines(leng_voom$voom.line, col="red")
+points(cbind(leng_voom$voom.xy$x,leng_voom$voom.xy$y)[order(snr, decreasing=F)[1:50],],
+       pch=1, col="blue")
+
+
+leng_voom <- voom(counts_leng_ccremover, lib.size=libsize_leng, normalize.method = "none",
+                  save.plot = TRUE)
+genes_voom <- which(rownames(counts_leng_ccremover) %in% names(leng_voom$voom.xy$x))
+snr <- with(fit_leng_ccremover, (amp[genes_voom]^2)/(sigma[genes_voom]^2))
+plot(leng_voom$voom.xy$x, leng_voom$voom.xy$y, pch=16, cex=.5, col = "gray60",
+     xlab = "log2(count sizse + .5", ylab="Sqrt(standard deviation)",
+     main = "All genes")
+lines(leng_voom$voom.line, col="red")
+points(cbind(leng_voom$voom.xy$x,leng_voom$voom.xy$y)[order(snr, decreasing=F)[1:50],],
+       pch=1, col="blue")
+```
+
 
 
 
