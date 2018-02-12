@@ -50,11 +50,11 @@ anno <- pData(eset)
 
 ## Total mapped reads 
 
-Note: Using the 15% cutoff of samples with no cells excludes all the samples
+Note: Using the 20 % cutoff of samples with no cells excludes all the samples
 
 ```{r total-reads}
 ## calculate the cut-off  
-cut_off_reads <- quantile(anno[anno$cell_number == 0,"mapped"], 0.85)
+cut_off_reads <- quantile(anno[anno$cell_number == 0,"mapped"], 0.82)
 
 cut_off_reads
 
@@ -79,14 +79,14 @@ plot_reads
 ---
 
 ## Unmapped ratios
-Note: Using the 30 % cutoff of samples with no cells excludes all the samples
+Note: Using the 40 % cutoff of samples with no cells excludes all the samples
 
 ```{r unmapped-ratios}
 ## calculate unmapped ratios
 anno$unmapped_ratios <- anno$unmapped/anno$umi
 
 ## cut off 
-cut_off_unmapped <- quantile(anno[anno$cell_number == 0,"unmapped_ratios"], 0.3)
+cut_off_unmapped <- quantile(anno[anno$cell_number == 0,"unmapped_ratios"], 0.40)
 
 cut_off_unmapped
 
@@ -107,6 +107,7 @@ plot_unmapped <- ggplot(anno[anno$cell_number == 0 |
 
 plot_unmapped
 ```
+
 Look at the unmapped percentage per sample by C1 experimnet and by individual. 
 
 ```{r unmapped_exp}
@@ -140,7 +141,7 @@ plot_grid(unmapped_exp + theme(legend.position = "none"),
 anno$ercc_percentage <- anno$reads_ercc / anno$mapped
 
 ## cut off 
-cut_off_ercc <- quantile(anno[anno$cell_number == 0,"ercc_percentage"], 0.15)
+cut_off_ercc <- quantile(anno[anno$cell_number == 0,"ercc_percentage"], 0.20)
 
 cut_off_ercc
 
@@ -192,7 +193,7 @@ plot_grid(ercc_exp + theme(legend.position = "none"),
 
 ```{r gene-number}
 ## cut off 
-cut_off_genes <- quantile(anno[anno$cell_number == 0,"detect_hs"], 0.85)
+cut_off_genes <- quantile(anno[anno$cell_number == 0,"detect_hs"], 0.80)
 
 cut_off_genes
 
@@ -388,7 +389,7 @@ anno$filter_all <- anno$cell_number == 1 &
                    anno$mol_egfp > 0 &
                    anno$valid_id &
                    anno$cut_off_reads &
-                   ## anno$cut_off_unmapped &
+                   anno$cut_off_unmapped &
                    anno$cut_off_ercc &
                    anno$cut_off_genes 
 sort(table(anno[anno$filter_all, "chip_id"]))
