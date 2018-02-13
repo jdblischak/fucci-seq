@@ -463,6 +463,11 @@ plot_grid(reads_unmapped_num + theme(legend.position = c(.7,.9)),
           labels = letters[3:4])
 ```
 
+```{r output}
+write.table(data.frame(row.names(anno), anno[,"filter_all"]),
+            file = "../data/quality-single-cells.txt", quote = FALSE,
+            sep = "\t", row.names = FALSE, col.names = FALSE)
+```
 
 ---
 
