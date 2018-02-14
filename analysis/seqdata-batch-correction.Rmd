@@ -110,8 +110,15 @@ boxplot(pdata$molecules~pdata$chip_id,
 counts to log2cpm
 
 ```{r}
-log2cpm <- t(log2(1+(10^6)*(t(counts)/colSums(counts))))
+log2cpm <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
 ```
+
+save log2cpm
+
+```{r, eval=F}
+saveRDS(log2cpm, file = "../output/seqdata-batch-correction.Rmd/log2cpm.rds")
+```
+
 
 convert sample well to two labels: rows and columns
 
