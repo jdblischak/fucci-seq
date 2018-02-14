@@ -322,7 +322,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-02-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 5f10227</p>
+<p><strong>Code version:</strong> 3267559</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/summary</h2>
@@ -373,7 +373,9 @@ counts &lt;- exprs(df)</code></pre>
         xlab = &quot;Plate&quot;, ylab = &quot;log10 library size&quot;)</code></pre>
 <p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>counts to log2cpm</p>
-<pre class="r"><code>log2cpm &lt;- t(log2(1+(10^6)*(t(counts)/colSums(counts))))</code></pre>
+<pre class="r"><code>log2cpm &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))</code></pre>
+<p>save log2cpm</p>
+<pre class="r"><code>saveRDS(log2cpm, file = &quot;../output/seqdata-batch-correction.Rmd/log2cpm.rds&quot;)</code></pre>
 <p>convert sample well to two labels: rows and columns</p>
 <pre class="r"><code>pdata$well_row &lt;- str_sub(pdata$well,1,1)
 pdata$well_col &lt;- str_sub(pdata$well,2,3)</code></pre>
@@ -383,7 +385,7 @@ pdata$well_col &lt;- str_sub(pdata$well,2,3)</code></pre>
 <h2>batch variation</h2>
 <p>total molecules significant differs between individuals and batch</p>
 <pre class="r"><code>ibd_mol &lt;- aov.ibd(log10(molecules)~factor(chip_id)+factor(experiment),data=pdata)</code></pre>
-<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-7-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-8-1.png" width="1056" style="display: block; margin: auto;" /></p>
 <p>per gene log2cpm anova</p>
 <pre class="r"><code>ibd_genes &lt;- lapply(1:nrow(log2cpm), function(i) {
   aov.ibd(log2cpm[i,]~factor(chip_id)+factor(experiment),data=pdata)
@@ -398,7 +400,7 @@ plate_varprop &lt;- sapply(ibd_genes, function(x)  x[[1]]$`Sum Sq`[3]/sum(x[[1]]
 
 plot(log10(ind_varprop), log10(plate_varprop), xlim=c(-4,0), ylim=c(-4,0),
      pch=16, cex=.7)</code></pre>
-<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Estimate plate effect</p>
 <pre class="r"><code># make contrast matrix
 n_plates &lt;- uniqueN(pdata$experiment)
@@ -451,7 +453,7 @@ for (cov in colnames(covariates)) {
 heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;,
          col=brewer.pal(9,&quot;YlGn&quot;), showColDendro = F, Colv = NA,
          ylab=&quot;technical factor&quot;, main = &quot;Batch-corrected data&quot;)</code></pre>
-<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>PCA before adjustment.</p>
 <pre class="r"><code>pca_log2cpm &lt;- prcomp(t(log2cpm), center = TRUE)
 
@@ -481,7 +483,7 @@ for (cov in colnames(covariates)) {
 heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;,
          col=brewer.pal(9,&quot;YlGn&quot;), showColDendro = F, Colv = NA,
          ylab=&quot;technical factor&quot;, main = &quot;Before batch correction&quot;)</code></pre>
-<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-batch-correction.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
