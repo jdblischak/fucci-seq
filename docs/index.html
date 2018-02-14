@@ -226,66 +226,36 @@ div.section {
 <div id="microscopy-image-analysis" class="section level2">
 <h2>Microscopy image analysis</h2>
 <ul>
-<li><p><a href="images-process.html">Processing images - from images to intensities</a></p></li>
-<li>Visual inspection
+<li><a href="images-process.html">Processing images - from images to intensities</a></li>
+</ul>
+<p>We evaluated and pre-processed the results of image analysis as follows:</p>
+<ol style="list-style-type: decimal">
+<li>We visually inspect images deteced to have none or more than one nucleus. For cases that are inconsistent with visual inspection, we correct the number of nuclei detected.
 <ul>
 <li><a href="images-multiple-nuclei.html">Inspect images with multiple nuclei</a></li>
 <li><a href="images-zero-nuclei.html">Inspect images with no nucleus</a></li>
 </ul></li>
-<li>QC and preprocessing image intensities
+<li>We applied background correction to the intensity measurements of GFP, RFP and DAPI based on the following analyses.
 <ul>
 <li><a href="confess-prelim.html">CONFESS results</a></li>
 <li><a href="images-qc.html">QC analysis including no. nuclei detected, DAPI, and intensity variation</a></li>
 <li><a href="images-qc-followup.html">Explore using log10 sum pixel intensity for signal metrics</a></li>
 <li><a href="images-metrics.html">Compare correction approaches using median versus mean background</a></li>
+<li><a href="images-metrics-cell-shape.html">Explore associations between nucleus shape metrics vs intensities</a></li>
 </ul></li>
-<li>Normalize intensities by batch
+<li>We analyzed intensity variation across individuals and batches and determined on an approach that removes batch effect in the data.
 <ul>
 <li><a href="images-qc-labels.html">Visualize signal variation by plate and individual identity</a></li>
 <li><a href="images-qc-variation.html">Visualize the structure of signal variation by individual identity</a></li>
 <li><a href="images-normalize-quantile.html">Quantile normalization for GFP, RFP and DAPI</a></li>
+<li><a href="images-normalize-anova.html">Estimate variance explained in IBD and correct for batch effects in intensities</a></li>
 </ul></li>
-<li>Shape metrics
-<ul>
-<li><a href="images-metrics-cell-shape.html">Nucleus shape metrics versus intensities</a></li>
-</ul></li>
-<li>transgene count in sequencing data
-<ul>
-<li><a href="images-transgene.html">Investigate zero-count transgenes</a></li>
-</ul></li>
-<li>Evalute categorical labeling
-<ul>
-<li><a href="images-pam.html">Cluster samples by Partition around medoids(PAM)</a></li>
-<li><a href="images-mclust.html">Cluster samples by Mixture modeling</a></li>
-<li><a href="images-subset-silhouette.html">Select a subset using silhouette index</a></li>
-<li><a href="images-classify-fucci.html">Expression profiles of the “best” samples</a></li>
-<li><a href="images-classify-leng.html">Expression profiles of sorted cells in Leng et al. 2015</a></li>
-</ul></li>
-</ul>
+</ol>
 <hr />
 </div>
 <div id="rna-seq-data" class="section level2">
 <h2>RNA-seq data</h2>
-<ul>
-<li></li>
-</ul>
-<hr />
-</div>
-<div id="model-fitting" class="section level2">
-<h2>Model fitting</h2>
-<ul>
-<li>Evaluating cellcycleR 0.1.6
-<ul>
-<li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
-<li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
-<li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
-<li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
-</ul></li>
-</ul>
-<hr />
-</div>
-<div id="qualty-control" class="section level2">
-<h2>Qualty Control</h2>
+<p>The first steps in preprocessing RNA-seq data consists of QC and filtering.</p>
 <ul>
 <li>Sample QC and filtering
 <ul>
@@ -301,6 +271,50 @@ div.section {
 <li><a href="pca-tf.html">PCA with technical fators</a></li>
 </ul></li>
 </ul>
+<p>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data</p>
+<ul>
+<li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
+</ul>
+<p>Other information:</p>
+<ul>
+<li>transgene count in sequencing data
+<ul>
+<li><a href="images-transgene.html">Investigate zero-count transgenes</a></li>
+</ul></li>
+</ul>
+<hr />
+</div>
+<div id="intensity-based-sample-classificationordering" class="section level2">
+<h2>Intensity-based sample classification/ordering</h2>
+<p>We explored the possiblities of using intensities to learn cell cycle phases/genes in RNA-seq data.</p>
+<ol style="list-style-type: decimal">
+<li>We considered categorical labeling
+<ul>
+<li><a href="images-pam.html">Cluster samples by Partition around medoids(PAM)</a></li>
+<li><a href="images-mclust.html">Cluster samples by Mixture modeling</a></li>
+<li><a href="images-subset-silhouette.html">Select a subset using silhouette index</a></li>
+<li><a href="images-classify-fucci.html">Expression profiles of the “best” samples</a></li>
+<li><a href="images-classify-leng.html">Expression profiles of sorted cells in Leng et al. 2015</a></li>
+</ul></li>
+<li>We considered continuous ordering
+<ul>
+<li><a href="images-circle-ordering.html">Obtain sample ordering on a unit circle based on GFP and RFP</a></li>
+</ul></li>
+</ol>
+<hr />
+</div>
+<div id="model-fitting" class="section level2">
+<h2>Model fitting</h2>
+<ul>
+<li>Evaluating cellcycleR 0.1.6
+<ul>
+<li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
+<li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
+<li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
+<li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
+</ul></li>
+</ul>
+<hr />
 <hr />
 </div>
 <div id="one-time-investigations" class="section level2">
