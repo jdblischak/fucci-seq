@@ -10,7 +10,7 @@ data/cellcycle-genes-previous-studies/* filter=lfs diff=lfs merge=lfs -text
 data/rnaseq-previous-studies/* filter=lfs diff=lfs merge=lfs -text
 output/cellcycler-seqdata-leng.Rmd/*rda filter=lfs diff=lfs merge=lfs -text
 output/images-subset-silhouette.Rmd/si_pam.rda filter=lfs diff=lfs merge=lfs -text
-output/images-normalize-anova.Rmd/pdata-adj.rds filter=lfs diff=lfs merge=lfs -text
+output/images-normalize-anova.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/seqdata-batch-correction.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
 output/images-circle-ordering.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
 
