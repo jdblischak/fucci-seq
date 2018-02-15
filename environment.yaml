@@ -37,6 +37,7 @@ dependencies:
   - bioconductor-biobase
   - bioconductor-biocinstaller
   - bioconductor-biomart
+  - bioconductor-deseq2 
   - bioconductor-ebimage
   - bioconductor-edger
   - biopython

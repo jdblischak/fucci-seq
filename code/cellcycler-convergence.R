@@ -33,8 +33,13 @@ ints_tmp <- data.frame(rfp.z=ints$rfp.z,
                        dapi.z=ints$dapi.z)
 
 set.seed(args[1])
+sessionInfo()
+
 out <- sin_cell_ordering_class(as.matrix(ints_tmp),
-                               celltime_levels=200, num_iter=10, n_cores=8)
+                               celltime_levels=200,
+                               num_shuffle=1, tol=1e-6,
+                               maxiter=500, n_cores=8)
+
 saveRDS(out,
         file = paste0("/project2/gilad/joycehsiao/fucci-seq/output_tmp/cellcycer-convergence/out-",
                       args[2],".rds"))

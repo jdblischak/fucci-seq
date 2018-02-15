@@ -1,0 +1,468 @@
+---
+title: "Normalize intensities across batches"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+---
+
+## Introduction/summary
+
+The experimental design for our study is commonly known as "incomplete block design". The individuals are grouped into combinations of two, and no two individuals appear in the same combination twice. In our study, combination refers to C1 plates, so the combination of cell lines on each C1 plate is thereofre unique. 
+
+In notations, 
+
+$N$: number of individuals
+$k$: combination size (in our case, each combinatino is a plate)
+$B$: number of plates
+$r_i$: number of replicates for individual $i$ in the entire design
+
+For now assume $r_i=r$ for all individuals. Then, in our design each individual replicate can pair up with $N-1/k-1$ possible number of individuals. And since the pairs consist of unique individuals, so there can be  $N-1/k-1$ possible number of replicates for each individual. We have $N=6, k=2$ which gives 5 replicates per individual cell line.
+
+Our design is in principle balanced, i.e., each pair of individuals occurs together one time in the study. But at the end of the experiment, we collected an additional C1 plate on the first pair of individuals processed. This gives us a total of 16 plates (pairs or blocks).
+
+
+I performed **analysis of variance** for intensity data using the following model
+
+$$
+y_{ij} = \mu + \tau_i + \beta_j + \epsilon_{ij}
+$$
+where $i = 1,2,..., N$ and $j = 1,2,..., B$. The parameters are estimated under sum-to-zero constraints $\sum \tau_i = 0$ and $\sum \beta_j = 0$.
+
+Note that in this model 1) not all $y_{ij}$ exists due to the incompleteness of the design, 2) the effects of individual and block are nonorthogonal, 3) the effects are additive due to the block design.
+
+
+
+We implemented the above model using the `ibd` package and
+
+1. Estimate prop of variance explained by individual and plate.
+
+2. Estimate mean effect from each plate, correct from the intensity data
+
+
+**TO DO: Apply batch correction prior to background correction??**
+
+
+---
+
+## Load data
+
+$~$
+
+```{r, echo = T}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+library(scales)
+
+# note that ibd is not in the fucci-seq conda environment
+library(ibd)
+```
+
+Read in filtered data.
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+```
+
+
+---
+
+## RFP variation 
+
+**RFP**
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+
+**ANOVA**: No signficant variation due to individual cell lines of origin (p<.01), but signification variation due to experiment. Based on the contrast tests for the plate effect, "20170907" and "20170924" are the two plates that differ the most from the others. Based on the contrast tests for the individual effect, "NA18511" differs the most from the average sample intensities.
+
+
+```{r}
+ibd_rfp <- aov.ibd(rfp.median.log10sum~factor(chip_id)+factor(experiment),data=pdata)
+
+# make contrast matrix for plates
+# each plate is compared to the average
+n_plates <- uniqueN(pdata$experiment)
+contrast_plates <- matrix(-1, nrow=n_plates, ncol=n_plates)
+diag(contrast_plates) <- n_plates-1
+
+ibd_rfp_exp <- aov.ibd(rfp.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="experiment", contrast=contrast_plates)
+ibd_rfp_exp_est <- ibd_rfp_exp$LSMEANS
+
+# make contrast matrix for individuals
+# each individual is compared to the average
+n_inds <- uniqueN(pdata$chip_id)
+contrast_inds <- matrix(-1, nrow=n_inds, ncol=n_inds)
+diag(contrast_inds) <- n_inds-1
+
+ibd_rfp_chipid <- aov.ibd(rfp.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="chip_id", contrast=contrast_inds)
+```
+
+
+Substract plate effect from the raw estimates.
+
+```{r}
+pdata$rfp.median.log10sum.adjust <- pdata$rfp.median.log10sum
+ibd_rfp_exp_est$experiment <- as.character(ibd_rfp_exp_est$experiment)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- ibd_rfp_exp_est$lsmean[which(ibd_rfp_exp_est$experiment==exp)]
+  pdata$rfp.median.log10sum.adjust[ii_exp] <- (pdata$rfp.median.log10sum[ii_exp] - est_exp)
+}
+```
+
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot(pdata$rfp.median.log10sum, pdata$rfp.median.log10sum.adjust,
+     xlab = "RFP before batch correction",
+     ylab = "RFP after batch correction")
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=chip_id, y=rfp.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch-corrected"), ncol=2)
+
+plot_grid(
+  ggplot(pdata, 
+          aes(x=experiment, y=rfp.median.log10sum,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=experiment, y=rfp.median.log10sum.adjust,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch-corrected"), ncol=2)
+
+plot_grid(
+ggplot(pdata,
+          aes(x=as.factor(experiment), y=rfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=rfp.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch-corrected"), ncol=2)
+```
+
+ANOVA on adjusted data show no significant batch/block effect.
+
+```{r}
+aov.ibd(rfp.median.log10sum.adjust~factor(chip_id)+factor(experiment),data=pdata)
+```
+
+
+---
+
+## GFP variation
+
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+
+**ANOVA**: No signficant variation due to individual cell lines of origin (p<.01), but signification variation due to experiment. Based on the contrast tests for the plate effect, "20170907" "20170912" "20170922" "20170924" are the two plates that differ the most from the others. Based on the contrast tests for the individual effect, "NA18511" differs the most from the average sample intensities.
+
+
+```{r}
+ibd_gfp <- aov.ibd(gfp.median.log10sum~factor(chip_id)+factor(experiment),data=pdata)
+
+# make contrast matrix
+n_plates <- uniqueN(pdata$experiment)
+contrast_plates <- matrix(-1, nrow=n_plates, ncol=n_plates)
+diag(contrast_plates) <- n_plates-1
+
+ibd_gfp_exp <- aov.ibd(gfp.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="experiment", contrast=contrast_plates)
+ibd_gfp_exp_est <- ibd_gfp_exp$LSMEANS
+
+n_inds <- uniqueN(pdata$chip_id)
+contrast_inds <- matrix(-1, nrow=n_inds, ncol=n_inds)
+diag(contrast_inds) <- n_inds-1
+
+ibd_gfp_chipid <- aov.ibd(gfp.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="chip_id", contrast=contrast_inds)
+```
+
+
+Substract plate effect from the raw estimates.
+
+```{r}
+pdata$gfp.median.log10sum.adjust <- pdata$gfp.median.log10sum
+ibd_gfp_exp_est$experiment <- as.character(ibd_gfp_exp_est$experiment)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- ibd_gfp_exp_est$lsmean[which(ibd_gfp_exp_est$experiment==exp)]
+  pdata$gfp.median.log10sum.adjust[ii_exp] <- (pdata$gfp.median.log10sum[ii_exp] - est_exp)
+}
+
+```
+
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot(pdata$gfp.median.log10sum, pdata$gfp.median.log10sum.adjust,
+     xlab = "GFP raw", ylab="GFP batch corrected")
+  
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=chip_id, y=gfp.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected") , ncol=2)
+
+plot_grid(
+ggplot(pdata,
+          aes(x=as.factor(experiment), y=gfp.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=gfp.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
+
+plot_grid(
+  ggplot(pdata, 
+          aes(x=experiment, y=gfp.median.log10sum,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=experiment, y=gfp.median.log10sum.adjust,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected") , ncol=2)
+```
+
+ANOVA on corrected data showed no significant plate effect.
+
+```{r}
+aov.ibd(gfp.median.log10sum.adjust~factor(chip_id)+factor(experiment),data=pdata)
+```
+
+
+---
+
+## DAPI variation
+
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+
+**ANOVA**: No signficant variation due to individual cell lines of origin (p<.01), but signification variation due to experiment. Based on the contrast tests for the plate effect, the plates are quite different from each other and there are 9 plates that differ from the average ("20170907" "20170908" "20170910" "20170914"  "20170919" "20170920" "20170921" "20170922" "20170924"). Based on the contrast tests for the individual effect, "NA19101" differs the most from the average sample intensities.
+
+
+```{r}
+ibd_dapi <- aov.ibd(dapi.median.log10sum~factor(chip_id)+factor(experiment),data=pdata)
+
+# make contrast matrix
+n_plates <- uniqueN(pdata$experiment)
+contrast_plates <- matrix(-1, nrow=n_plates, ncol=n_plates)
+diag(contrast_plates) <- n_plates-1
+
+ibd_dapi_exp <- aov.ibd(dapi.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="experiment", contrast=contrast_plates)
+ibd_dapi_exp_est <- ibd_dapi_exp$LSMEANS
+
+n_inds <- uniqueN(pdata$chip_id)
+contrast_inds <- matrix(-1, nrow=n_inds, ncol=n_inds)
+diag(contrast_inds) <- n_inds-1
+
+ibd_dapi_chipid <- aov.ibd(dapi.median.log10sum~factor(chip_id)+factor(experiment),
+        data=pdata, spec="chip_id", contrast=contrast_inds)
+```
+
+
+Substract plate effect from the raw estimates.
+
+```{r}
+pdata$dapi.median.log10sum.adjust <- pdata$dapi.median.log10sum
+ibd_dapi_exp_est$experiment <- as.character(ibd_dapi_exp_est$experiment)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- ibd_dapi_exp_est$lsmean[which(ibd_dapi_exp_est$experiment==exp)]
+  pdata$dapi.median.log10sum.adjust[ii_exp] <- (pdata$dapi.median.log10sum[ii_exp] - est_exp)
+}
+```
+
+
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot(pdata$dapi.median.log10sum, pdata$dapi.median.log10sum.adjust,
+     xlab = "Raw", ylab = "Batch corrected")
+  
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=chip_id, y=dapi.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected"), ncol=2)
+
+plot_grid(
+ggplot(pdata,
+          aes(x=as.factor(experiment), y=dapi.median.log10sum,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=dapi.median.log10sum.adjust,
+              col=chip_id)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
+
+plot_grid(
+  ggplot(pdata, 
+          aes(x=experiment, y=dapi.median.log10sum,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=experiment, y=dapi.median.log10sum.adjust,
+              col=experiment)) +
+    geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected"), ncol=2)
+```
+
+
+ANOVA on the batch-corrected DAPI shows no significant plate effect.
+
+```{r}
+aov.ibd(dapi.median.log10sum.adjust~factor(chip_id)+factor(experiment),data=pdata)
+```
+
+---
+
+## bi-axial distribution
+
+There seems to be a decrease in between-sample point distance in the data corrected for batch effect.
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot_grid(
+ggplot(pdata,
+        aes(x=scale(gfp.median.log10sum), y=scale(rfp.median.log10sum))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Raw estimates, z-score"),
+ggplot(pdata,
+        aes(x=scale(gfp.median.log10sum.adjust), y=scale(rfp.median.log10sum.adjust))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Batch-corrected estimates, z-score"), ncol=2)
+
+plot_grid(
+ggplot(pdata,
+        aes(x=scale(gfp.median.log10sum), y=scale(dapi.median.log10sum))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Raw estimates, z-score"),
+ggplot(pdata,
+        aes(x=scale(gfp.median.log10sum.adjust), y=scale(dapi.median.log10sum.adjust))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Batch-corrected estimates, z-score"), ncol=2)
+
+plot_grid(
+ggplot(pdata,
+        aes(x=scale(rfp.median.log10sum), y=scale(dapi.median.log10sum))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Raw estimates, z-score"),
+ggplot(pdata,
+        aes(x=scale(rfp.median.log10sum.adjust), y=scale(dapi.median.log10sum.adjust))) +
+  geom_point() + facet_wrap(~factor(chip_id), ncol=2) +
+  ggtitle("Batch-corrected estimates, z-score"), ncol=2)
+```
+
+
+
+---
+
+## Output
+
+
+Save corrected data to a temporary output folder.
+
+```{r, eval = F, echo = T}
+saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata-adj.rds")
+```
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+

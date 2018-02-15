@@ -17,40 +17,67 @@ Website to share results of fucci-seq project.
 
 * [Processing images - from images to intensities](images-process.html)
 
-* Visual inspection
+
+We evaluated and pre-processed the results of image analysis as follows:
+
+1. We visually inspect images deteced to have none or more than one nucleus. For cases that are inconsistent with visual inspection, we correct the number of nuclei detected.  
     * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
     * [Inspect images with no nucleus](images-zero-nuclei.html)
-
-* QC and preprocessing image intensities
+        
+2. We applied background correction to the intensity measurements of GFP, RFP and DAPI based on the following analyses.  
     * [CONFESS results](confess-prelim.html)
     * [QC analysis including no. nuclei detected, DAPI, and intensity variation](images-qc.html)
     * [Explore using log10 sum pixel intensity for signal metrics](images-qc-followup.html)
     * [Compare correction approaches using median versus mean background](images-metrics.html)
-    
-* Normalize intensities by batch
+    * [Explore associations between nucleus shape metrics vs intensities](images-metrics-cell-shape.html)
+
+3. We analyzed intensity variation across individuals and batches and determined on an approach that removes batch effect in the data.  
     * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
     * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
     * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
+    * [Estimate variance explained in IBD and correct for batch effects in intensities](images-normalize-anova.html)
+    
+---
 
-* Shape metrics
-    * [Nucleus shape metrics versus intensities](images-metrics-cell-shape.html)
+## RNA-seq data
+
+The first steps in preprocessing RNA-seq data consists of QC and filtering. 
+
+* Sample QC and filtering
+    * [Sample QC criteria](sampleqc.html)  
+    * [Sequencing depth](totals.html)  
+    * [Reads versus molecules](reads-v-molecules.html)  
+
+* Gene QC and filtering
+    * [gene filtering](gene-filtering.html)
+    * [PCA with technical fators](pca-tf.html)
+
+We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
+
+* [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
+
+
+Other information:
 
 * transgene count in sequencing data
     * [Investigate zero-count transgenes](images-transgene.html)
 
+---
 
-* Evalute categorical labeling
+## Intensity-based sample classification/ordering
+
+We explored the possiblities of using intensities to learn cell cycle phases/genes in RNA-seq data.
+
+1. We considered categorical labeling   
     * [Cluster samples by Partition around medoids(PAM)](images-pam.html)
     * [Cluster samples by Mixture modeling](images-mclust.html)
     * [Select a subset using silhouette index](images-subset-silhouette.html)
     * [Expression profiles of the "best" samples](images-classify-fucci.html)
     * [Expression profiles of sorted cells in Leng et al. 2015](images-classify-leng.html)
 
----
+2. We considered continuous ordering  
+    * [Obtain sample ordering on a unit circle based on GFP and RFP](images-circle-ordering.html)
 
-## RNA-seq data
-
-* 
 
 ---
 
@@ -65,16 +92,6 @@ Website to share results of fucci-seq project.
 
 ---
 
-## Qualty Control
-
-* Sample QC and filtering
-    * [Sample QC criteria](sampleqc.html)  
-    * [Sequencing depth](totals.html)  
-    * [Reads versus molecules](reads-v-molecules.html)  
-
-* Gene QC and filtering
-    * [gene filtering](gene-filtering.html)
-    * [PCA with technical fators](pca-tf.html)
     
     
 ---

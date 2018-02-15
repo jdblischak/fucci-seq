@@ -1,0 +1,283 @@
+---
+title: "Batch effect in RNA-seq data"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+---
+
+## Introduction/summary
+
+The experimental design for our study is commonly known as "incomplete block design". The individuals are grouped into combinations of two, and no two individuals appear in the same combination twice. In our study, combination refers to C1 plates, so the combination of cell lines on each C1 plate is thereofre unique. 
+
+In notations, 
+
+$N$: number of individuals
+$k$: combination size (in our case, each combinatino is a plate)
+$B$: number of plates
+$r_i$: number of replicates for individual $i$ in the entire design
+
+For now assume $r_i=r$ for all individuals. Then, in our design each individual replicate can pair up with $N-1/k-1$ possible number of individuals. And since the pairs consist of unique individuals, so there can be  $N-1/k-1$ possible number of replicates for each individual. We have $N=6, k=2$ which gives 5 replicates per individual cell line.
+
+Our design is in principle balanced, i.e., each pair of individuals occurs together one time in the study. But at the end of the experiment, we collected an additional C1 plate on the first pair of individuals processed. This gives us a total of 16 plates (pairs or blocks).
+
+
+I performed **analysis of variance** for intensity data using the following model
+
+$$
+y_{ij} = \mu + \tau_i + \beta_j + \epsilon_{ij}
+$$
+where $i = 1,2,..., N$ and $j = 1,2,..., B$. The parameters are estimated under sum-to-zero constraints $\sum \tau_i = 0$ and $\sum \beta_j = 0$.
+
+Note that in this model 1) not all $y_{ij}$ exists due to the incompleteness of the design, 2) the effects of individual and block are nonorthogonal, 3) the effects are additive due to the block design.
+
+
+
+We analyzed data normalized to log2CPM and used the `ibd` package for each gene to 
+
+1. Estimate prop of variance explained by individual and plate.
+
+2. Estimate mean effect from each plate and remove this estimated effect from each gene
+
+
+**TO DO: apply shrinkage to the estimated mean effect??**
+
+---
+
+## Load data
+
+$~$
+
+```{r, echo = T}
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(wesanderson)
+library(RColorBrewer)
+library(Biobase)
+library(scales)
+library(stringr)
+library(heatmap3)
+
+# note that ibd is not in the fucci-seq conda environment
+library(ibd)
+```
+
+Read in filtered data.
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+counts <- exprs(df)
+```
+
+library size variation 
+
+```{r}
+boxplot(pdata$molecules~pdata$experiment,
+        xlab = "Plate", ylab = "log10 library size")
+
+boxplot(pdata$molecules~pdata$chip_id,
+        xlab = "Plate", ylab = "log10 library size")
+```
+
+
+counts to log2cpm
+
+```{r}
+log2cpm <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+```
+
+save log2cpm
+
+```{r, eval=F}
+saveRDS(log2cpm, file = "../output/seqdata-batch-correction.Rmd/log2cpm.rds")
+```
+
+
+convert sample well to two labels: rows and columns
+
+```{r}
+pdata$well_row <- str_sub(pdata$well,1,1)
+pdata$well_col <- str_sub(pdata$well,2,3)
+```
+
+
+---
+
+## batch variation 
+
+total molecules significant differs between individuals and batch
+
+```{r}
+ibd_mol <- aov.ibd(log10(molecules)~factor(chip_id)+factor(experiment),data=pdata)
+```
+
+```{r, fig.width=11, fig.height=6, echo = FALSE}
+plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=molecules,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=molecules,
+              col=chip_id)) +
+    geom_boxplot() + 
+    facet_wrap(~chip_id), ncol=2)
+```
+
+per gene log2cpm anova
+
+```{r, eval = F}
+ibd_genes <- lapply(1:nrow(log2cpm), function(i) {
+  aov.ibd(log2cpm[i,]~factor(chip_id)+factor(experiment),data=pdata)
+})
+
+saveRDS(ibd_genes, file = "../output/seqdata-batch-correction.Rmd/ibd-genes.rds")
+```
+
+This seems to suggest that there's no relationship between proportion of variance explained by indivdiual and by plate. Note that in these per-gene analysis, intercept explains a significant large portion of the variance, suggesting an overall large deviation of sample log2cpm from the mean.
+
+```{r}
+ibd_genes <- readRDS("../output/seqdata-batch-correction.Rmd/ibd-genes.rds")
+ind_varprop <- sapply(ibd_genes, function(x)  x[[1]]$`Sum Sq`[2]/sum(x[[1]]$`Sum Sq`))
+plate_varprop <- sapply(ibd_genes, function(x)  x[[1]]$`Sum Sq`[3]/sum(x[[1]]$`Sum Sq`))
+
+
+plot(log10(ind_varprop), log10(plate_varprop), xlim=c(-4,0), ylim=c(-4,0),
+     pch=16, cex=.7)
+```
+
+Estimate plate effect
+
+```{r, eval = F}
+# make contrast matrix
+n_plates <- uniqueN(pdata$experiment)
+contrast_plates <- matrix(-1, nrow=n_plates, ncol=n_plates)
+diag(contrast_plates) <- n_plates-1
+
+log2cpm.adjust <- log2cpm
+for (i in 1:nrow(log2cpm)) {
+  ibd_exp <- aov.ibd(log2cpm[i,]~factor(chip_id)+factor(experiment),
+          data=pdata, spec="experiment", contrast=contrast_plates)
+  ibd_est <- ibd_exp$LSMEANS
+  
+  exps <- unique(pdata$experiment)
+  for (j in 1:uniqueN(exps)) {
+    exp <- exps[j]
+    ii_exp <- which(pdata$experiment == exp)
+    est_exp <- ibd_est$lsmean[which(ibd_est$experiment==exp)]
+    log2cpm.adjust[i,ii_exp] <- log2cpm[i,ii_exp] - est_exp
+  }
+  }
+
+saveRDS(log2cpm.adjust, file = "../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds")
+```
+
+
+```{r}
+log2cpm.adjust <- readRDS("../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds")
+```
+
+PCA after adjustment. Somehow now well has significant contribution to PC1...
+
+```{r, fig.height=6, fig.width=7}
+pca_log2cpm_adjust <- prcomp(t(log2cpm.adjust), center = TRUE)
+
+covariates <- pdata %>% dplyr::select(experiment, well_row, well_col, chip_id, 
+                                                     concentration, raw:unmapped,
+                                                     starts_with("detect"),  molecules)
+## look at the first 6 PCs
+pcs <- pca_log2cpm_adjust$x[, 1:6]
+
+## generate the data
+get_r2 <- function(x, y) {
+  stopifnot(length(x) == length(y))
+  model <- lm(y ~ x)
+  stats <- summary(model)
+  return(stats$adj.r.squared)
+}
+
+r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
+         col=brewer.pal(9,"YlGn"), showColDendro = F, Colv = NA,
+         ylab="technical factor", main = "Batch-corrected data")
+```
+
+
+PCA before adjustment. 
+
+```{r, fig.height=6, fig.width=7}
+pca_log2cpm <- prcomp(t(log2cpm), center = TRUE)
+
+covariates <- pdata %>% dplyr::select(experiment, well_row, well_col, chip_id, 
+                                                     concentration, raw:unmapped,
+                                                     starts_with("detect"),  molecules)
+## look at the first 6 PCs
+pcs <- pca_log2cpm$x[, 1:6]
+
+## generate the data
+get_r2 <- function(x, y) {
+  stopifnot(length(x) == length(y))
+  model <- lm(y ~ x)
+  stats <- summary(model)
+  return(stats$adj.r.squared)
+}
+
+r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
+         col=brewer.pal(9,"YlGn"), showColDendro = F, Colv = NA,
+         ylab="technical factor", main = "Before batch correction")
+```
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
