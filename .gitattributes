@@ -12,5 +12,5 @@ output/cellcycler-seqdata-leng.Rmd/*rda filter=lfs diff=lfs merge=lfs -text
 output/images-subset-silhouette.Rmd/si_pam.rda filter=lfs diff=lfs merge=lfs -text
 output/images-normalize-anova.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/seqdata-batch-correction.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
-output/images-circle-ordering.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
+output/images-circle-ordering.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
