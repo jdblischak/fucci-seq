@@ -44,7 +44,6 @@ For now assume $r_i=r$ for all individuals. Then, in our design each individual 
 
 Our design is in principle balanced, i.e., each pair of individuals occurs together one time in the study. But at the end of the experiment, we collected an additional C1 plate on the first pair of individuals processed. This gives us a total of 16 plates (pairs or blocks).
 
-
 I performed **analysis of variance** for intensity data using the following model
 
 $$
@@ -53,7 +52,6 @@ $$
 where $i = 1,2,..., N$ and $j = 1,2,..., B$. The parameters are estimated under sum-to-zero constraints $\sum \tau_i = 0$ and $\sum \beta_j = 0$.
 
 Note that in this model 1) not all $y_{ij}$ exists due to the incompleteness of the design, 2) the effects of individual and block are nonorthogonal, 3) the effects are additive due to the block design.
-
 
 
 We implemented the above model using the `ibd` package and
@@ -65,6 +63,7 @@ We implemented the above model using the `ibd` package and
 
 **TO DO: Apply batch correction prior to background correction??**
 
+Additional analysis: After correcting for plate effect, I discovered that there may be a position effect for the image intensites, such that some positions (by image position) produce images that are lower in intensities within plates. So far there's no particular pattern associated with the trend and the tendency for position difference is stronger for red than for green.
 
 ---
 
@@ -186,11 +185,11 @@ plot_grid(
 plot_grid(
 ggplot(pdata,
           aes(x=as.factor(experiment), y=rfp.median.log10sum,
-              col=chip_id)) +
+              col=experiment)) +
     geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
   ggplot(pdata,
           aes(x=as.factor(experiment), y=rfp.median.log10sum.adjust,
-              col=chip_id)) +
+              col=experiment)) +
     geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch-corrected"), ncol=2)
 ```
 
@@ -276,15 +275,6 @@ plot_grid(
               col=chip_id)) +
     geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected") , ncol=2)
 
-plot_grid(
-ggplot(pdata,
-          aes(x=as.factor(experiment), y=gfp.median.log10sum,
-              col=chip_id)) +
-    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
-  ggplot(pdata,
-          aes(x=as.factor(experiment), y=gfp.median.log10sum.adjust,
-              col=chip_id)) +
-    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
 
 plot_grid(
   ggplot(pdata, 
@@ -295,6 +285,17 @@ plot_grid(
           aes(x=experiment, y=gfp.median.log10sum.adjust,
               col=experiment)) +
     geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected") , ncol=2)
+
+plot_grid(
+ggplot(pdata,
+          aes(x=as.factor(experiment), y=gfp.median.log10sum,
+              col=experiment)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=gfp.median.log10sum.adjust,
+              col=experiment)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
+
 ```
 
 ANOVA on corrected data showed no significant plate effect.
@@ -380,16 +381,6 @@ plot_grid(
     geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected"), ncol=2)
 
 plot_grid(
-ggplot(pdata,
-          aes(x=as.factor(experiment), y=dapi.median.log10sum,
-              col=chip_id)) +
-    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
-  ggplot(pdata,
-          aes(x=as.factor(experiment), y=dapi.median.log10sum.adjust,
-              col=chip_id)) +
-    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
-
-plot_grid(
   ggplot(pdata, 
           aes(x=experiment, y=dapi.median.log10sum,
               col=experiment)) +
@@ -398,6 +389,16 @@ plot_grid(
           aes(x=experiment, y=dapi.median.log10sum.adjust,
               col=experiment)) +
     geom_violin() + geom_boxplot(width=.1) + ggtitle("Batch corrected"), ncol=2)
+
+plot_grid(
+ggplot(pdata,
+          aes(x=as.factor(experiment), y=dapi.median.log10sum,
+              col=experiment)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Raw"),
+  ggplot(pdata,
+          aes(x=as.factor(experiment), y=dapi.median.log10sum.adjust,
+              col=experiment)) +
+    geom_boxplot() + facet_wrap(~chip_id) + ggtitle("Batch corrected"), ncol=2)
 ```
 
 
@@ -457,6 +458,203 @@ Save corrected data to a temporary output folder.
 ```{r, eval = F, echo = T}
 saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata-adj.rds")
 ```
+
+
+---
+
+## Variation by image position 
+
+After correcting for plate effect, is there position effect on the plate that are at play?
+
+1. Linear models controling for individual and plate effect show that image labels signficantly add to the variation in both GFP and RFP intensities, but not in DAPI (likelihood ratio test comparing model fit, and F test comparing variance explained)
+
+2. Emprical analysis was done to describe the trend of intensity measurements by image label. Briefly, I assigned ranks to intensity values wiithin plate, and then compute the median ranks at each image position. 
+
+
+
+```{r}
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata-adj.rds")
+
+library(stringr)
+
+#--- RFP
+lm.1 <- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
+lm.2 <- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
+
+summary(lm.1)$adj.r.squared
+summary(lm.2)$adj.r.squared
+anova(lm.2, lm.1)
+
+# compare logliklihood of the two models
+ll.1 <- logLik(lm.1)
+ll.2 <- logLik(lm.2)
+chisq <- -2*(-302.8776)-(-2*(-229.6979))
+df <- 117-22
+pchisq(chisq, df, lower.tail = FALSE)
+  
+
+#--- RFP
+lm.1 <- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
+lm.2 <- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
+
+summary(lm.1)$adj.r.squared
+summary(lm.2)$adj.r.squared
+anova(lm.2, lm.1)
+
+# compare logliklihood of the two models
+ll.1 <- logLik(lm.1)
+ll.2 <- logLik(lm.2)
+chisq <- -2*(-684.1374)-2*(-618.1146)
+df <- 117-22
+pchisq(chisq, df, lower.tail = FALSE)
+
+
+#--- DAPI
+
+lm.1 <- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
+lm.2 <- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
+
+summary(lm.1)$adj.r.squared
+summary(lm.2)$adj.r.squared
+anova(lm.2, lm.1)
+
+# compare logliklihood of the two models
+ll.1 <- logLik(lm.1)
+ll.2 <- logLik(lm.2)
+chisq <- -2*(218.539)-2*(264.9102)
+df <- 117-22
+pchisq(chisq, df, lower.tail = FALSE)
+```
+
+
+```{r, echo = F, fig.width=12, fig.height=10}
+ggplot(pdata.adj, aes(y=gfp.median.log10sum.adjust, x=as.factor(image_label))) +
+  geom_boxplot() + facet_wrap(~as.factor(experiment))
+
+ggplot(pdata.adj, aes(y=rfp.median.log10sum.adjust, x=as.factor(image_label))) +
+  geom_boxplot() + facet_wrap(~as.factor(experiment))
+
+ggplot(pdata.adj, aes(y=rfp.median.log10sum.adjust, x=as.factor(image_label))) +
+  geom_boxplot() + facet_wrap(~as.factor(experiment))
+```
+
+### Ranking
+
+Check intensity by well positions and image labels. 
+
+```{r}
+par(mfrow=c(2,1))
+boxplot(rfp.median.log10sum.adjust ~ factor(well_row), 
+        data=pdata.adj, ylab = "RFP")
+abline(h=0, col="blue")
+boxplot(gfp.median.log10sum.adjust ~ factor(well_row), 
+        data=pdata.adj, ylab = "GFP")
+abline(h=0, col="blue")
+title(main = "Intensities by well row", outer=TRUE, line=-1)
+
+par(mfrow=c(2,1))
+boxplot(rfp.median.log10sum.adjust ~ factor(well_col), 
+        data=pdata.adj, ylab = "RFP")
+abline(h=0, col="blue")
+boxplot(gfp.median.log10sum.adjust ~ factor(well_col), 
+        data=pdata.adj, ylab = "GFP")
+abline(h=0, col="blue")
+title(main = "Intensities by well column", outer=TRUE, line=-1)
+
+
+# by image label
+tt.gfp.median <- pdata.adj %>% group_by(image_label) %>% summarize(., median(gfp.median.log10sum.adjust))
+tt.rfp.median <- pdata.adj %>% group_by(image_label) %>% summarize(., median(rfp.median.log10sum.adjust))
+
+tt <- data.frame(well=pdata.adj$well, image_label=pdata.adj$image_label)
+tt <- tt[!duplicated(tt),]
+colbrew <- brewer.pal(9, "Set1")
+tt$cols <- rep(colbrew[9], 96)
+tt$cols[which(tt$well %in% c("A03", "A02", "A01", "A09", "A08", "A07"))] <- colbrew[1]
+tt$cols[which(tt$well %in% c("H03", "H02", "H01", "H09", "H08", "H07"))] <- colbrew[2]
+tt$cols[which(tt$well %in% c("A06", "A05", "A04", "A12", "A11", "A10"))] <- colbrew[3]
+tt$cols[which(tt$well %in% c("H06", "H05", "H04", "H12", "H11", "H10"))] <- colbrew[4]
+tt <- tt[order(tt$image_label),]
+
+ord.gfp <- as.character(tt.gfp.median$image_label[order(tt.gfp.median$`median(gfp.median.log10sum.adjust)`)])
+ord.rfp <- as.character(tt.rfp.median$image_label[order(tt.rfp.median$`median(rfp.median.log10sum.adjust)`)])
+par(mfrow=c(3,1))
+plot(1:7, 1:7, pch="", axes=F, ann=F)
+legend("center", legend = c("A_a", "H_a", "A_b", "H_b"), col=colbrew[c(1,2,3,4)],
+       pch=16)
+boxplot(rfp.median.log10sum.adjust ~ factor(image_label, levels=ord.rfp), 
+        data=pdata.adj, ylab = "RFP",
+        col=tt$cols[as.numeric(ord.rfp)])
+abline(h=0, lwd=2, col="royalblue")
+boxplot(gfp.median.log10sum.adjust ~ factor(image_label, levels=ord.gfp), 
+        data=pdata.adj, ylab = "GFP",
+        col=tt$cols[as.numeric(ord.rfp)])
+abline(h=0, lwd=2, col="royalblue")
+```
+
+Output results to text file
+
+```{r, eval=F}
+write.table(data.frame(gfp.ord, rfp.ord), 
+            file = "../output/images-normalize-anova.Rmd/intensity_order_by_position.txt",
+            sep ="\t", row.names = F, quote = F)
+```
+
+
+### ANOVA correction
+
+```{r}
+pdata.adj$chip_id <- factor(pdata.adj$chip_id)
+pdata.adj$experiment <- factor(pdata.adj$experiment)
+pdata.adj$image_label <- factor(pdata.adj$image_label)
+
+pdata.adj$rfp.median.log10sum.adjust2 <- pdata.adj$rfp.median.log10sum.adjust
+pdata.adj$gfp.median.log10sum.adjust2 <- pdata.adj$gfp.median.log10sum.adjust
+pdata.adj$dapi.median.log10sum.adjust2 <- pdata.adj$dapi.median.log10sum.adjust
+
+
+## RFP
+
+fit <- lm(rfp.median.log10sum.adjust ~ chip_id +
+            experiment + image_label, 
+          data=pdata.adj)
+fit.mns <- summary(lsmeans(fit, "image_label"))
+fit.mns.tmp <- fit.mns[,c("image_label", "lsmean")]
+
+labs <- unique(pdata.adj$image_label)
+for (i in 1:length(labs)) {
+  lab <- as.character(labs[i])
+  ii_lab <- which(pdata.adj$image_label == lab)
+  est_lab <- fit.mns.tmp$lsmean[which(rownames(fit.mns.tmp)==lab)]
+  pdata.adj$rfp.median.log10sum.adjust2[ii_lab] <- (pdata.adj$rfp.median.log10sum.adjust[ii_lab] - est_lab)
+}
+
+
+## GFP
+
+fit <- lm(gfp.median.log10sum.adjust ~ chip_id +
+            experiment + image_label, 
+          data=pdata.adj)
+fit.mns <- summary(lsmeans(fit, "image_label"))
+fit.mns.tmp <- fit.mns[,c("image_label", "lsmean")]
+
+labs <- unique(pdata.adj$image_label)
+for (i in 1:length(labs)) {
+  lab <- as.character(labs[i])
+  ii_lab <- which(pdata.adj$image_label == lab)
+  est_lab <- fit.mns.tmp$lsmean[which(rownames(fit.mns.tmp)==lab)]
+  pdata.adj$gfp.median.log10sum.adjust2[ii_lab] <- (pdata.adj$gfp.median.log10sum.adjust[ii_lab] - est_lab)
+}
+```
+
+
+```{r, eval = F}
+saveRDS(pdata.adj, file = "../output/images-normalize-anova.Rmd/pdata-adj.rds")
+```
+
+
+
+
 
 ---
 
