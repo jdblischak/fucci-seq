@@ -31,7 +31,8 @@ library("cowplot")
 library("dplyr")
 library("edgeR")
 library("ggplot2")
-library("reshape2")
+library("MASS")
+library("tibble")
 library("Biobase")
 source("../code/pca.R")
 theme_set(cowplot::theme_cowplot())
@@ -267,7 +268,6 @@ plot_grid(egfp_mol + theme(legend.position = c(.5,.9)),
 ### Total molecule vs concentration 
 
 ```{r lda, fig.width=12, fig.height=6}
-library(MASS)
 ## create 3 groups according to cell number
 group_3 <- rep("two",dim(anno)[1])
          group_3[grep("0", anno$cell_number)] <- "no"
@@ -284,6 +284,13 @@ data_lda_p <- predict(data_lda, newdata = data[,c("concentration", "molecules")]
 ## determine how well the model fix
 table(data_lda_p, data[, "group"])
 data$data_lda_p <- data_lda_p
+
+## identify the outlier
+outliers_lda <- data %>% rownames_to_column("sample_id") %>% filter(cell_number == 1, data_lda_p == "two")
+outliers_lda
+
+## create filter
+anno$molecule_outlier <- row.names(anno) %in% outliers_lda$sample_id
 
 ## plot before and after
 plot_before <- ggplot(data, aes(x = concentration, y = molecules / 10^3,
@@ -306,6 +313,8 @@ plot_grid(plot_before + theme(legend.position=c(.8,.85)),
           labels = LETTERS[1:2])
 ```
 
+
+
 ### Reads to molecule conversion
 
 ```{r convertion, fig.width=12, fig.height=6}
@@ -327,11 +336,12 @@ table(data_ercc_lda_p, data[, "group"])
 
 data$data_ercc_lda_p <- data_ercc_lda_p
 
+## identify the outlier
+outliers_conversion <- data %>% rownames_to_column("sample_id") %>% filter(cell_number == 1, data_ercc_lda_p == "two")
+outliers_conversion
 
-## cutoff
-#out_ercc_con <- anno %>% filter(cell_number == "1", ercc_conversion > .094)
-
-anno$conversion_outlier <- anno$cell_number == 1 & anno$ercc_conversion > .094
+## create filter
+anno$conversion_outlier <- row.names(anno) %in% outliers_conversion$sample_id
 
 ## plot before and after
 plot_ercc_before <- ggplot(data, aes(x = ercc_conversion, y = conversion,
@@ -391,7 +401,9 @@ anno$filter_all <- anno$cell_number == 1 &
                    anno$cut_off_reads &
                    anno$cut_off_unmapped &
                    anno$cut_off_ercc &
-                   anno$cut_off_genes 
+                   anno$cut_off_genes &
+                   anno$molecule_outlier == "FALSE" &
+                   anno$conversion_outlier == "FALSE"
 sort(table(anno[anno$filter_all, "chip_id"]))
 
 table(anno[anno$filter_all, c("experiment","chip_id")])
