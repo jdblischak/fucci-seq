@@ -77,13 +77,15 @@ fdata <- fData(df)
 
 # select endogeneous genes
 counts <- exprs(df)[grep("ERCC", rownames(df), invert=TRUE), ]
+
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
 ```
 
 
 ---
 
 
-## Analysis
+## Raw data
 
 Fitting PAM for cells using only green and red intensity measurements.
 
@@ -144,12 +146,8 @@ mclust_fit_plot <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
 ```
 
   
-  
----
 
-## Cluster centers
-
-Compare PAM vs. Mclust results
+### Compare PAM vs. Mclust
 
 **k=3**
 
@@ -182,9 +180,7 @@ plot_grid(
 )
 ```
 
----
-
-## Compute silhouette
+### Compute silhouette
 
 Combine silhouette data with the intensity data.
 
@@ -345,6 +341,264 @@ save(si_pam_long, si_pam_25,
 ```
 
 
+
+---
+
+
+## Adjusted data
+
+Fitting PAM for cells using only green and red intensity measurements.
+
+```{r}
+ints <- with(pdata.adj, data.frame(rfp.median.log10sum.adjust.ash,
+                               gfp.median.log10sum.adjust.ash))
+ints <- data.frame(ints, 
+                   chip_id = as.factor(pdata$chip_id))
+
+k=3
+
+pam_fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id))
+    fit_sub <- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+names(pam_fit) <- unique(ints$chip_id)
+
+mclust_fit <- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id))
+    fit_sub <- Mclust(df_sub, G=k)
+    return(fit_sub)
+})
+names(mclust_fit) <- unique(ints$chip_id)
+
+
+# get centers of each cluster
+pam_centers <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+  fit <- pam_fit[[i]]
+  ints_sub <- ints[ints$chip_id == unique(ints$chip_id)[i],]
+  tmp <- fit$id.med
+  tmp <- data.frame(ints_sub[fit$id.med,],
+                    center=c(1:3))
+  return(tmp) }) )
+
+mclust_centers <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+  fit <- mclust_fit[[i]]
+  tmp <- fit$parameters$mean
+  tmp <- t(tmp)
+  tmp <- data.frame(tmp,center=c(1:3),
+                    chip_id=names(mclust_fit)[i])
+  return(tmp) }) )
+
+# make data read for ggplot
+pam_fit_plot <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(pam_fit[[i]]$clustering))
+    return(df_sub)
+}))
+
+mclust_fit_plot <- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub <- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub <- data.frame(df_sub, cluster=as.factor(mclust_fit[[i]]$classification))
+    return(df_sub)
+}))
+```
+
+  
+
+### Compare PAM vs. Mclust
+
+**k=3**
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(data=pam_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum.adjust.ash,
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=mclust_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=mclust_centers, 
+                  aes(x=gfp.median.log10sum.adjust.ash, 
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "K=3, Mclust",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none") 
+)
+```
+
+### Compute silhouette
+
+Combine silhouette data with the intensity data.
+
+```{r}
+si_pam <- vector("list", length(pam_fit))
+for (i in 1:length(si_pam)) {
+  si_tmp <- silhouette(pam_fit[[i]])
+
+  si_out <- lapply(1:3, function(cl) {
+    ord <- order(si_tmp[si_tmp[,1]==cl, 3], decreasing=TRUE)
+    ii <- as.numeric(rownames(si_tmp)[si_tmp[,1]==cl])
+    ii <- ii[ord]  
+    df_sub <- data.frame(ints[ii,],
+                         unique_id = rownames(pdata)[ii],
+                         cluster=cl,
+                         si=si_tmp[si_tmp[,1]==cl, 3])
+  }) 
+  si_out <- do.call(rbind, si_out)
+  si_pam[[i]] <- si_out
+}
+si_pam_long <- do.call(rbind, si_pam)
+```
+
+Choose the top 25 in each cluster.
+
+```{r}
+cutoff_nsamples <- 20
+
+foo <- lapply(1:uniqueN(si_pam_long$chip_id), function(i) {
+  foo2 <- lapply(1:uniqueN(si_pam_long$cluster), function(j) {
+    df_tmp <- subset(si_pam_long, chip_id == unique(si_pam_long$chip_id)[i] & cluster == unique(si_pam_long$cluster)[j])
+    if (cutoff_nsamples > dim(df_tmp)[1]) {
+        df_tmp_sub <- df_tmp
+    } else {
+        df_tmp_sub <- df_tmp[which(order(df_tmp$si, decreasing = T) %in% c(1:cutoff_nsamples)),]
+    }
+    return(df_tmp_sub)
+  })
+  foo2 <- do.call(rbind, foo2)
+  return(foo2)
+})
+foo <- do.call(rbind, foo)
+si_pam_25 <- foo
+```
+
+
+Compare full set versus subset of cells.
+
+```{r, echo = F, fig.width=10, fig.height=4}  
+plot_grid(
+  ggplot(data=pam_fit_plot) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=cluster),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum.adjust.ash,
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=si_pam_25) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum.adjust.ash,
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "Top 25 samples within clusters",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none")
+  )
+```
+
+hard code cluster labels. default in ggplot is 1 orange, 2 green, 3 blue
+
+```{r}
+# NA18511
+# orange 1 to 3, green 2 to 2, blue 3 to 1, 
+
+# NA18855
+# orange 1 to 2, green 2 to 3, blue 3 to 1, 
+
+# NA18870
+# orange 1 to 2, green 2 to 1, blue 3 to 3
+
+# NA19098
+# orange 1 to 1, green 2 to 3, blue 3 to 2
+
+# NA19101
+# orange 1 to 3, green 2 to 2, blue 3 to 1
+
+# NA19160
+# orange 1 to 2, green 2 to 3, blue 3 to 1
+
+tmp <- si_pam_long
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==1,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==2,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18511" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA18855" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==2,]$cluster <- 1
+tmp[si_pam_long$chip_id == "NA18870" & si_pam_long$cluster==3,]$cluster <- 3
+
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==1,]$cluster <- 1
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19098" & si_pam_long$cluster==3,]$cluster <- 2
+
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==1,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==2,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA19101" & si_pam_long$cluster==3,]$cluster <- 1
+
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==1,]$cluster <- 2
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==2,]$cluster <- 3
+tmp[si_pam_long$chip_id == "NA19160" & si_pam_long$cluster==3,]$cluster <- 1
+
+
+plot_grid(
+  ggplot(data=si_pam_long) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum.adjust.ash,
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "K=3, PAM",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none"),
+  ggplot(data=si_pam_25) + 
+      geom_point(aes(x=gfp.median.log10sum.adjust.ash, 
+                     y=rfp.median.log10sum.adjust.ash, col=as.factor(cluster)),
+         alpha = .5, cex = .7) + 
+      geom_point(data=pam_centers,
+                  aes(x=gfp.median.log10sum.adjust.ash,
+                      y=rfp.median.log10sum.adjust.ash), shape=4, size=3) +
+      labs(title = "Top 25 samples within clusters",
+           x="GFP intensity (log10 pixel sum)", 
+           y = "RFP intensity (log10 pixel sum)") + 
+      facet_wrap(~as.factor(chip_id), ncol=3) +
+      theme_gray() + theme(legend.position="none")
+  )
+```
+
+save subset of cells to rds.
+
+```{r, eval =F}
+save(si_pam_long, si_pam_25, 
+    file = "../output/images-subset-silhouette.Rmd/si_pam.ash.rda")
+```
 ---
 
 ## Session information
