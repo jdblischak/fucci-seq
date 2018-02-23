@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Select cell cycle genes</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Select cell cycle genes</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-02-22</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> eb1a233</p>
+<hr />
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<ol style="list-style-type: decimal">
+<li><p>Select genes annotated to cell cycle in the GO annotation (<a href="GO:0007049" class="uri">GO:0007049</a>).</p></li>
+<li><p>Select genes documented in CycleBase - previously found to relate to cell cycle in microarray studies.</p></li>
+<li><p>Select genes whose expression variability is above certain threshold.</p></li>
+</ol>
+<p>This document generated several RDS for later use:</p>
+<p>*<code>genes.cyclebase.rds</code>: human cell cycle genes based on cycleBase</p>
+<p>*<code>genes.go.rds</code>: human cell cycle genes associated with <a href="GO:0007049" class="uri">GO:0007049</a></p>
+<p>*<code>genes.variable.rds</code>: genes in the current study with detection rate &gt; 50 and dispersion z-score &gt; 1.5 across expression mean bins (this may need to be changed later…).</p>
+<p>*<code>genes.cycle.rds</code>: combined cell cycle annotated genes from CycleBase and GO.</p>
+<p>*<code>genes.cycle.detect.rds</code>: combined cell cycle annotated genes from CycleBase and GO with detection rate &gt; 50% in the current study.</p>
+<p>*<code>genes.variable.cycle.rds</code>: genes identified as variable in the current study that are also in the current cell cycle annotated set.</p>
+<hr />
+</div>
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(biomaRt)
+library(Biobase)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]</code></pre>
+</div>
+<div id="go-cell-cycle" class="section level2">
+<h2>GO cell cycle</h2>
+<pre class="r"><code>ensembl = useMart(&quot;ensembl&quot;,dataset=&quot;hsapiens_gene_ensembl&quot;) 
+#gets gene symbol, transcript_id and go_id for all genes annotated with GO:0007507
+genes.go &lt;- getBM(attributes=c(&#39;hgnc_symbol&#39;, &#39;ensembl_gene_id&#39;, &#39;go_id&#39;),
+                   filters = &#39;go&#39;, values = &#39;GO:0007049&#39;, mart = ensembl)</code></pre>
+</div>
+<div id="cyclebase" class="section level2">
+<h2>Cyclebase</h2>
+<p>Download human periodic genes.</p>
+<pre class="r"><code>genes.cyclebase &lt;- read.table(&quot;../data/cellcycle-genes-previous-studies/human_periodic.tsv&quot;,
+           header = TRUE)</code></pre>
+</div>
+<div id="variable-genes" class="section level2">
+<h2>Variable genes</h2>
+<p>Across individuals, I computed gene mean and coefficient of variation including cells that are detected as expressed for each gene.</p>
+<pre class="r"><code>gene.means &lt;- apply(counts, 1, function(x) {
+  ii_pos &lt;- x &gt;0
+  mean(x[ii_pos])
+})
+
+
+gene.cvs &lt;- apply(counts, 1, function(x) {
+  ii_pos &lt;- x &gt;0
+  mn &lt;- mean(x[ii_pos])
+  sd &lt;- sd(x[ii_pos])
+  sd/mn
+})
+
+gene.drops &lt;- rowMeans(counts&gt;0)</code></pre>
+<p>Relationship between gene mean and CV is the same as we observed before in the batch paper. The genes with low average expression across cells are those that have high dropout rate.</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+plot(x=log10(gene.means), y = gene.cvs,
+     xlab = &quot;log10 gene mean count&quot;, ylab = &quot;CV&quot;)
+abline(v=.25, col = &quot;red&quot;)
+plot(x=gene.drops, y = log10(gene.means),
+     xlab = &quot;Proportion of samples detected (count 0)&quot;,
+     ylab = &quot;log10 gene mean count&quot;)
+abline(v=.5, col = &quot;blue&quot;)
+abline(h=.25, col = &quot;red&quot;)</code></pre>
+<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Two steps here for choosing variable genes:</p>
+<ol style="list-style-type: decimal">
+<li><p>I arbitrary decided on a cutoff for gene mean based on the relationship between CV and log10 gene count. The idea was to filter the genes among which dispersion increases with gene mean (approximately when detection rate 50% or lower).</p></li>
+<li><p>Scan across gene expression bins, identify the ones with high variability in each bin.</p></li>
+</ol>
+<pre class="r"><code>gene.detect &lt;- rownames(counts)[which(gene.drops &gt; .5)]
+
+gene.means.detect &lt;- gene.means[which(gene.drops &gt; .5)]
+gene.cvs.detect &lt;- gene.cvs[which(gene.drops &gt; .5)]
+
+bins &lt;- cut(gene.means.detect, 
+            breaks = quantile(gene.means.detect, prob = seq(0,1, .05)), 
+            include.lowest = TRUE)
+bins &lt;- as.numeric(bins)
+
+genes.variable &lt;- do.call(c, lapply(1:length(bins), function(i) {
+  ii_bin &lt;- bins == i
+  cv.z &lt;- scale(gene.cvs.detect[ii_bin])
+  rownames(cv.z)[which(cv.z&gt;1.5)]
+}) )
+
+plot(x=log10(gene.means.detect), 
+     y=gene.cvs.detect,
+     xlab = &quot;log10 gene mean count&quot;,
+     ylab = &quot;CV&quot;, main = &quot;Genes detected in &gt; 50% cells&quot;,
+     col = 1+as.numeric(names(gene.means.detect) %in% genes.variable))</code></pre>
+<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="output" class="section level2">
+<h2>Output</h2>
+<pre class="r"><code>saveRDS(as.character(genes.cyclebase$gene), 
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cyclebase.rds&quot;)
+saveRDS(as.character(genes.go$ensembl_gene_id),
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds&quot;)
+saveRDS(genes.variable,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.variable.rds&quot;)
+
+genes.cycle &lt;- unique(c(as.character(genes.cyclebase$gene),
+                        as.character(genes.go$ensembl_gene_id)))
+saveRDS(genes.cycle,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.rds&quot;)
+
+genes.cycle.detect &lt;- genes.cycle[which(genes.cycle %in% names(gene.means.detect))]
+saveRDS(genes.cycle.detect,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.detect.rds&quot;)
+
+genes.variable.cycle &lt;- genes.variable[which(genes.variable %in% genes.cycle)]
+saveRDS(genes.variable.cycle,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.variable.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] Biobase_2.38.0      BiocGenerics_0.24.0 biomaRt_2.34.2     
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.15         AnnotationDbi_1.40.0 knitr_1.20          
+ [4] magrittr_1.5         progress_1.1.2       IRanges_2.12.0      
+ [7] bit_1.1-12           R6_2.2.2             rlang_0.2.0         
+[10] httr_1.3.1           stringr_1.3.0        blob_1.1.0          
+[13] tools_3.4.1          DBI_0.7              git2r_0.21.0        
+[16] htmltools_0.3.6      assertthat_0.2.0     yaml_2.1.16         
+[19] bit64_0.9-7          rprojroot_1.3-2      digest_0.6.15       
+[22] tibble_1.4.2         S4Vectors_0.16.0     bitops_1.0-6        
+[25] curl_3.1             RCurl_1.95-4.10      memoise_1.1.0       
+[28] evaluate_0.10.1      RSQLite_2.0          rmarkdown_1.8       
+[31] stringi_1.1.6        pillar_1.1.0         compiler_3.4.1      
+[34] prettyunits_1.0.2    backports_1.1.2      stats4_3.4.1        
+[37] XML_3.98-1.10       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

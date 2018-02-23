@@ -255,7 +255,9 @@ div.section {
 </div>
 <div id="rna-seq-data" class="section level2">
 <h2>RNA-seq data</h2>
-<p>The first steps in preprocessing RNA-seq data consists of QC and filtering.</p>
+<ol style="list-style-type: decimal">
+<li>The first step in preprocessing RNA-seq data consists of QC and filtering.</li>
+</ol>
 <ul>
 <li>Sample QC and filtering
 <ul>
@@ -271,21 +273,21 @@ div.section {
 <li><a href="pca-tf.html">PCA with technical fators</a></li>
 </ul></li>
 </ul>
-<p>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data</p>
+<ol start="2" style="list-style-type: decimal">
+<li>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data</li>
+</ol>
 <ul>
 <li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
 </ul>
 <p>Other information:</p>
 <ul>
-<li>transgene count in sequencing data
-<ul>
-<li><a href="images-transgene.html">Investigate zero-count transgenes</a></li>
-</ul></li>
+<li><a href="seqdata-select-cellcyclegenes.html">Select cell cycle genes for training data</a></li>
+<li><a href="images-transgene.html">Investigate transgene count in sequencing data</a></li>
 </ul>
 <hr />
 </div>
-<div id="intensity-based-sample-classificationordering" class="section level2">
-<h2>Intensity-based sample classification/ordering</h2>
+<div id="intensity-based-cell-cycle-labeling" class="section level2">
+<h2>Intensity-based cell cycle labeling</h2>
 <p>We explored the possiblities of using intensities to learn cell cycle phases/genes in RNA-seq data.</p>
 <ol style="list-style-type: decimal">
 <li>We considered categorical labeling
@@ -298,7 +300,7 @@ div.section {
 </ul></li>
 <li>We considered continuous ordering
 <ul>
-<li><a href="images-circle-ordering.html">Obtain sample ordering on a unit circle based on GFP and RFP</a></li>
+<li><a href="images-circle-ordering.html">Ordering on a unit circle based on GFP and RFP</a></li>
 </ul></li>
 </ol>
 <hr />

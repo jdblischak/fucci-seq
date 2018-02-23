@@ -1,0 +1,205 @@
+---
+title: "Select cell cycle genes"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Overview
+
+1. Select genes annotated to cell cycle in the GO annotation (GO:0007049).
+
+2. Select genes documented in CycleBase - previously found to relate to cell cycle in microarray studies. 
+
+3. Select genes whose expression variability is above certain threshold. 
+
+
+This document generated several RDS for later use:
+
+*`genes.cyclebase.rds`: human cell cycle genes based on cycleBase
+
+*`genes.go.rds`: human cell cycle genes associated with GO:0007049
+
+*`genes.variable.rds`: genes in the current study with detection rate > 50 and dispersion z-score > 1.5 across expression mean bins (this may need to be changed later...).
+
+*`genes.cycle.rds`: combined cell cycle annotated genes from CycleBase and GO.
+
+*`genes.cycle.detect.rds`: combined cell cycle annotated genes from CycleBase and GO with detection rate > 50% in the current study.
+
+*`genes.variable.cycle.rds`: genes identified as variable in the current study that are also in the current cell cycle annotated set.
+
+
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(biomaRt)
+library(Biobase)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+```
+
+
+## GO cell cycle
+
+```{r}
+ensembl = useMart("ensembl",dataset="hsapiens_gene_ensembl") 
+#gets gene symbol, transcript_id and go_id for all genes annotated with GO:0007507
+genes.go <- getBM(attributes=c('hgnc_symbol', 'ensembl_gene_id', 'go_id'),
+                   filters = 'go', values = 'GO:0007049', mart = ensembl)
+```
+
+
+## Cyclebase
+
+Download human periodic genes.
+
+
+```{r}
+genes.cyclebase <- read.table("../data/cellcycle-genes-previous-studies/human_periodic.tsv",
+           header = TRUE)
+```
+
+## Variable genes
+
+Across individuals, I computed gene mean and coefficient of variation including cells that are detected as expressed for each gene. 
+
+
+```{r}
+gene.means <- apply(counts, 1, function(x) {
+  ii_pos <- x >0
+  mean(x[ii_pos])
+})
+
+
+gene.cvs <- apply(counts, 1, function(x) {
+  ii_pos <- x >0
+  mn <- mean(x[ii_pos])
+  sd <- sd(x[ii_pos])
+  sd/mn
+})
+
+gene.drops <- rowMeans(counts>0)
+```
+
+Relationship between gene mean and CV is the same as we observed before in the batch paper. The genes with low average expression across cells are those that have high dropout rate. 
+
+```{r, fig.width=7, fig.height=4}
+par(mfrow=c(1,2))
+plot(x=log10(gene.means), y = gene.cvs,
+     xlab = "log10 gene mean count", ylab = "CV")
+abline(v=.25, col = "red")
+plot(x=gene.drops, y = log10(gene.means),
+     xlab = "Proportion of samples detected (count 0)",
+     ylab = "log10 gene mean count")
+abline(v=.5, col = "blue")
+abline(h=.25, col = "red")
+```
+
+Two steps here for choosing variable genes:
+
+1. I arbitrary decided on a cutoff for gene mean based on the relationship between CV and log10 gene count. The idea was to filter the genes among which dispersion increases with gene mean (approximately when detection rate 50% or lower).
+
+2. Scan across gene expression bins, identify the ones with high variability in each bin. 
+
+```{r}
+gene.detect <- rownames(counts)[which(gene.drops > .5)]
+
+gene.means.detect <- gene.means[which(gene.drops > .5)]
+gene.cvs.detect <- gene.cvs[which(gene.drops > .5)]
+
+bins <- cut(gene.means.detect, 
+            breaks = quantile(gene.means.detect, prob = seq(0,1, .05)), 
+            include.lowest = TRUE)
+bins <- as.numeric(bins)
+
+genes.variable <- do.call(c, lapply(1:length(bins), function(i) {
+  ii_bin <- bins == i
+  cv.z <- scale(gene.cvs.detect[ii_bin])
+  rownames(cv.z)[which(cv.z>1.5)]
+}) )
+
+plot(x=log10(gene.means.detect), 
+     y=gene.cvs.detect,
+     xlab = "log10 gene mean count",
+     ylab = "CV", main = "Genes detected in > 50% cells",
+     col = 1+as.numeric(names(gene.means.detect) %in% genes.variable))
+```
+
+---
+
+## Output
+
+
+```{r, eval = F}
+saveRDS(as.character(genes.cyclebase$gene), 
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cyclebase.rds")
+saveRDS(as.character(genes.go$ensembl_gene_id),
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds")
+saveRDS(genes.variable,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.variable.rds")
+
+genes.cycle <- unique(c(as.character(genes.cyclebase$gene),
+                        as.character(genes.go$ensembl_gene_id)))
+saveRDS(genes.cycle,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.rds")
+
+genes.cycle.detect <- genes.cycle[which(genes.cycle %in% names(gene.means.detect))]
+saveRDS(genes.cycle.detect,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.detect.rds")
+
+genes.variable.cycle <- genes.variable[which(genes.variable %in% genes.cycle)]
+saveRDS(genes.variable.cycle,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.variable.rds")
+```
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+
+
+
