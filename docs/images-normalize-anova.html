@@ -322,7 +322,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-02-22</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 66339f1</p>
+<p><strong>Code version:</strong> 94e13f2</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/summary</h2>
@@ -403,7 +403,7 @@ Residuals           33.942 874
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Indivdual and plate variation</p>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-1.png" width="1056" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-2.png" width="1056" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-3.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-2.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-4-3.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>Position variation</p>
 <pre class="r"><code>well.gfp.median &lt;- pdata %&gt;% group_by(image_label) %&gt;% summarize(., median(gfp.median.log10sum))
 well.rfp.median &lt;- pdata %&gt;% group_by(image_label) %&gt;% summarize(., median(rfp.median.log10sum))
@@ -537,13 +537,13 @@ for (i in 1:uniqueN(pos)) {
   pdata$dapi.median.log10sum.adjust[ii_pos] &lt;- (pdata$dapi.median.log10sum[ii_pos] - est_pos)
 }</code></pre>
 <p>After adjustment</p>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-11-1.png" width="1056" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-11-2.png" width="1056" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-11-3.png" width="1056" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-1.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-2.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-3.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>## These are four corners previously found more likely to have high gene expression values in sequencing data.
 par(mfrow=c(1,1))
 plot(1:7, 1:7, pch=&quot;&quot;, axes=F, ann=F)
 legend(&quot;center&quot;, legend = c(&quot;A_a&quot;, &quot;H_a&quot;, &quot;A_b&quot;, &quot;H_b&quot;), col=colbrew[c(1,2,3,4)],
        pch=16)</code></pre>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>par(mfrow=c(3,1))
 boxplot(rfp.median.log10sum.adjust ~ factor(image_label, levels=ord.rfp), 
         data=pdata, ylab = &quot;RFP&quot;,
@@ -558,101 +558,12 @@ boxplot(dapi.median.log10sum.adjust ~ factor(image_label, levels=ord.dapi),
         col=well.pp$cols[as.numeric(ord.dapi)])
 abline(h=0, lwd=2, col=&quot;royalblue&quot;)
 title(&quot;Position variation&quot;, outer=TRUE, line = -1)</code></pre>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-13-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/plot-position-adjusted-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
-<div id="output" class="section level2">
-<h2>Output</h2>
+<div id="output-results" class="section level2">
+<h2>Output results</h2>
 <p>Save corrected data to a temporary output folder.</p>
-<pre class="r"><code>saveRDS(pdata, file = &quot;../output/images-normalize-anova.Rmd/pdata-adj.rds&quot;)</code></pre>
-<p>After correcting for plate effect, is there position effect on the plate that are at play?</p>
-<ol style="list-style-type: decimal">
-<li><p>Linear models controling for individual and plate effect show that image labels signficantly add to the variation in both GFP and RFP intensities, but not in DAPI (likelihood ratio test comparing model fit, and F test comparing variance explained)</p></li>
-<li><p>Emprical analysis was done to describe the trend of intensity measurements by image label. Briefly, I assigned ranks to intensity values wiithin plate, and then compute the median ranks at each image position.</p></li>
-</ol>
-<pre class="r"><code>pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata-adj.rds&quot;)
-
-library(stringr)
-
-#--- RFP
-lm.1 &lt;- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 &lt;- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared</code></pre>
-<pre><code>[1] 0.047542</code></pre>
-<pre class="r"><code>summary(lm.2)$adj.r.squared</code></pre>
-<pre><code>[1] 0.00404751</code></pre>
-<pre class="r"><code>anova(lm.2, lm.1)</code></pre>
-<pre><code>Analysis of Variance Table
-
-Model 1: gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment)
-Model 2: gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + 
-    as.factor(image_label)
-  Res.Df     RSS Df Sum of Sq      F   Pr(&gt;F)   
-1    969 106.879                                
-2    874  92.191 95    14.688 1.4658 0.003756 **
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># compare logliklihood of the two models
-ll.1 &lt;- logLik(lm.1)
-ll.2 &lt;- logLik(lm.2)
-chisq &lt;- -2*(-302.8776)-(-2*(-229.6979))
-df &lt;- 117-22
-pchisq(chisq, df, lower.tail = FALSE)</code></pre>
-<pre><code>[1] 0.0005647567</code></pre>
-<pre class="r"><code>#--- RFP
-lm.1 &lt;- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 &lt;- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared</code></pre>
-<pre><code>[1] 0.03355844</code></pre>
-<pre class="r"><code>summary(lm.2)$adj.r.squared</code></pre>
-<pre><code>[1] 0.003931648</code></pre>
-<pre class="r"><code>anova(lm.2, lm.1)</code></pre>
-<pre><code>Analysis of Variance Table
-
-Model 1: rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment)
-Model 2: rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + 
-    as.factor(image_label)
-  Res.Df    RSS Df Sum of Sq      F  Pr(&gt;F)  
-1    969 230.89                              
-2    874 202.06 95     28.83 1.3127 0.02962 *
----
-Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code># compare logliklihood of the two models
-ll.1 &lt;- logLik(lm.1)
-ll.2 &lt;- logLik(lm.2)
-chisq &lt;- -2*(-684.1374)-2*(-618.1146)
-df &lt;- 117-22
-pchisq(chisq, df, lower.tail = FALSE)</code></pre>
-<pre><code>[1] 0</code></pre>
-<pre class="r"><code>#--- DAPI
-
-lm.1 &lt;- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 &lt;- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared</code></pre>
-<pre><code>[1] -0.005130973</code></pre>
-<pre class="r"><code>summary(lm.2)$adj.r.squared</code></pre>
-<pre><code>[1] 0.004377971</code></pre>
-<pre class="r"><code>anova(lm.2, lm.1)</code></pre>
-<pre><code>Analysis of Variance Table
-
-Model 1: dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment)
-Model 2: dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + 
-    as.factor(image_label)
-  Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
-1    969 37.275                           
-2    874 33.942 95    3.3333 0.9035 0.7303</code></pre>
-<pre class="r"><code># compare logliklihood of the two models
-ll.1 &lt;- logLik(lm.1)
-ll.2 &lt;- logLik(lm.2)
-chisq &lt;- -2*(218.539)-2*(264.9102)
-df &lt;- 117-22
-pchisq(chisq, df, lower.tail = FALSE)</code></pre>
-<pre><code>[1] 1</code></pre>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-16-1.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-16-2.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-16-3.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>Output results to text file</p>
 <pre class="r"><code>saveRDS(pdata, file = &quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
 <hr />
 </div>
@@ -678,7 +589,7 @@ plot(dapi.pos.ash$result$betahat, dapi.pos.ash$result$PosteriorMean,
 abline(0,1, col = &quot;royalblue&quot;)
      
 par(mfrow=c(2,2))</code></pre>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/ash-position-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>plot(gfp.pos.ash$result$sebetahat, gfp.pos.ash$result$PosteriorSD,
      xlab = &quot;Standard Error&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;GFP&quot;)
 abline(0,1, col = &quot;royalblue&quot;)
@@ -688,7 +599,7 @@ abline(0,1, col = &quot;royalblue&quot;)
 plot(dapi.pos.ash$result$sebetahat, dapi.pos.ash$result$PosteriorSD,
      xlab = &quot;Standard Error&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;DAPI&quot;)
 abline(0,1, col = &quot;royalblue&quot;)</code></pre>
-<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-18-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-normalize-anova.Rmd/ash-position-2.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Plate effect. With only 16 plates, the effects can’t be estimated…</p>
 <pre class="r"><code>library(ashr)
 gfp.plates.ash &lt;- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = &quot;+uniform&quot;,
@@ -743,11 +654,10 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] stringr_1.3.0       bindrcpp_0.2        lsmeans_2.27-61    
- [4] ashr_2.2-4          car_2.1-6           scales_0.5.0       
- [7] Biobase_2.38.0      BiocGenerics_0.24.0 RColorBrewer_1.1-2 
-[10] cowplot_0.9.2       ggplot2_2.2.1       dplyr_0.7.4        
-[13] data.table_1.10.4-3
+ [1] bindrcpp_0.2        lsmeans_2.27-61     ashr_2.2-4         
+ [4] car_2.1-6           scales_0.5.0        Biobase_2.38.0     
+ [7] BiocGenerics_0.24.0 RColorBrewer_1.1-2  cowplot_0.9.2      
+[10] ggplot2_2.2.1       dplyr_0.7.4         data.table_1.10.4-3
 
 loaded via a namespace (and not attached):
  [1] Rcpp_0.12.15       mvtnorm_1.0-7      lattice_0.20-35   
@@ -759,18 +669,18 @@ loaded via a namespace (and not attached):
 [19] lazyeval_0.2.1     pscl_1.5.2         multcomp_1.4-8    
 [22] minqa_1.2.4        SparseM_1.77       nloptr_1.0.4      
 [25] Matrix_1.2-10      rmarkdown_1.8      labeling_0.3      
-[28] splines_3.4.1      lme4_1.1-15        REBayes_1.3       
-[31] munsell_0.4.3      compiler_3.4.1     pkgconfig_2.0.1   
-[34] etrunct_0.1        SQUAREM_2017.10-1  mgcv_1.8-17       
-[37] htmltools_0.3.6    nnet_7.3-12        tibble_1.4.2      
-[40] codetools_0.2-15   MASS_7.3-47        grid_3.4.1        
-[43] nlme_3.1-131       xtable_1.8-2       gtable_0.2.0      
-[46] git2r_0.21.0       magrittr_1.5       estimability_1.3  
-[49] stringi_1.1.6      doParallel_1.0.11  sandwich_2.4-0    
-[52] TH.data_1.0-8      iterators_1.0.9    tools_3.4.1       
-[55] glue_1.2.0         pbkrtest_0.4-7     survival_2.41-3   
-[58] yaml_2.1.16        colorspace_1.3-2   knitr_1.20        
-[61] bindr_0.1          quantreg_5.35     </code></pre>
+[28] splines_3.4.1      lme4_1.1-15        stringr_1.3.0     
+[31] REBayes_1.3        munsell_0.4.3      compiler_3.4.1    
+[34] pkgconfig_2.0.1    etrunct_0.1        SQUAREM_2017.10-1 
+[37] mgcv_1.8-17        htmltools_0.3.6    nnet_7.3-12       
+[40] tibble_1.4.2       codetools_0.2-15   MASS_7.3-47       
+[43] grid_3.4.1         nlme_3.1-131       xtable_1.8-2      
+[46] gtable_0.2.0       git2r_0.21.0       magrittr_1.5      
+[49] estimability_1.3   stringi_1.1.6      doParallel_1.0.11 
+[52] sandwich_2.4-0     TH.data_1.0-8      iterators_1.0.9   
+[55] tools_3.4.1        glue_1.2.0         pbkrtest_0.4-7    
+[58] survival_2.41-3    yaml_2.1.16        colorspace_1.3-2  
+[61] knitr_1.20         bindr_0.1          quantreg_5.35     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
