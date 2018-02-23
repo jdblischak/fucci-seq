@@ -34,7 +34,7 @@ circle.fit <- function(XY, IterMAX=50) {
 
 circle.fit.resid.delete <- function(XY, IterMAX=50) {
   library(matrixStats)
-  library(coincfit)
+  library(conicfit)
 
   resid.delete <- do.call(rbind, lapply(1:nrow(XY), function(i) {
     XY.del <- XY[-i,]
