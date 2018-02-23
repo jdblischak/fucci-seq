@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Circle fit to intensities</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Circle fit to intensities</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-02-22</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> be8a2ca</p>
+<hr />
+<div id="overviewresults" class="section level2">
+<h2>Overview/Results</h2>
+<p>Here we estimate a circle fit on the two-dimensional intensity distriubtion of GFP and RFP.</p>
+<hr />
+</div>
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+library(CorShrink)
+
+source(&quot;../code/circle.intensity.fit.R&quot;)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+# log2cpm &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.rds&quot;)
+# log2cpm.adjust &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds&quot;)
+
+# import corrected intensities
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
+<p>visualize intensity data on a circle. project intensity data onto radians and the visualize the fitting on circles. then use cellcycleR to perform fitting and compare the model fitting with the projection results. it seems that the predicted ordering is especially bad for the gree intensities, which have many outliers. another reason I suspect isthat it attemps to fit similar amplitude/phase parameters to the green and red intensities.</p>
+</div>
+<div id="circle-fitting" class="section level2">
+<h2>Circle fitting</h2>
+<p>Based on all data.</p>
+<pre class="r"><code>source(&quot;../code/circle.intensity.fit.R&quot;)
+sample_names &lt;- rownames(pdata.adj)
+
+pdata.adj &lt;- pdata.adj %&gt;% group_by(chip_id) %&gt;% 
+  mutate(rfp.z=scale(rfp.median.log10sum.adjust),
+            gfp.z=scale(gfp.median.log10sum.adjust),
+            dapi.z=scale(dapi.median.log10sum.adjust))
+rownames(pdata.adj) &lt;- sample_names
+  
+par(mfrow=c(2,3))
+for(i in 1:length(unique(pdata.adj$chip_id))) {
+  id &lt;- unique(as.character(pdata.adj$chip_id))[i]
+  df_sub &lt;- subset(pdata.adj, chip_id == id, select=c(gfp.z, rfp.z))  
+  
+  cpred &lt;- circle.fit(df_sub)
+
+  xlims &lt;- range(df_sub[,1])
+  ylims &lt;- range(df_sub[,2])
+  plot(df_sub, pch=16, col=&quot;gray50&quot;, xlim=xlims, ylim=ylims, cex=.7,
+       main = id, xlab=&quot;GFP&quot;, ylab=&quot;RFP&quot;)
+  points(cpred[,1], cpred[,2], col=&quot;blue&quot;, type = &quot;p&quot;)
+  points(mean(cpred[,1]), mean(cpred[,2]), col=&quot;red&quot;, pch=3, cex=2)
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider deleted residuals.</p>
+<pre class="r"><code>resids.del &lt;- lapply(1:length(unique(pdata.adj$chip_id)), function(i) {
+  id &lt;- unique(as.character(pdata.adj$chip_id))[i]
+  df_sub &lt;- subset(pdata.adj, chip_id == id, select=c(gfp.z, rfp.z))  
+  resids &lt;- circle.fit.resid.delete(df_sub)  
+  scale(resids)
+})
+names(resids.del) &lt;- unique(pdata.adj$chip_id)
+
+par(mfrow=c(2,3))
+for(i in 1:length(unique(pdata.adj$chip_id))) {
+  # id &lt;- unique(as.character(pdata.adj$chip_id))[i]
+  # df_sub &lt;- subset(pdata.adj, chip_id == id, select=c(gfp.z, rfp.z))  
+  hist(resids.del[[i]], main = unique(pdata.adj$chip_id)[i])
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Remove samples with standardized residuals greater than 3.</p>
+<pre class="r"><code>resids.del.remove &lt;- lapply(1:length(unique(pdata.adj$chip_id)), function(i) {
+  which(resids.del[[i]] &gt; 3)
+})
+names(resids.del.remove) &lt;- unique(pdata.adj$chip_id)
+
+pdata.adj.filt &lt;- do.call(rbind, lapply(1:length(unique(pdata.adj$chip_id)), function(i) {
+  id &lt;- unique(as.character(pdata.adj$chip_id))[i]
+  df_sub &lt;- pdata.adj[which(pdata.adj$chip_id == id),]
+  ii.remove &lt;- resids.del.remove[[i]]
+  df_sub_return &lt;- df_sub[-ii.remove,]
+  rownames(df_sub_return) &lt;- (rownames(pdata.adj)[which(pdata.adj$chip_id == id)])[-ii.remove]
+  data.frame(df_sub_return)
+}) )</code></pre>
+<p>Visualize fit after removing outliers.</p>
+<pre class="r"><code>par(mfrow=c(2,3))
+for(i in 1:length(unique(pdata.adj.filt$chip_id))) {
+  id &lt;- unique(as.character(pdata.adj.filt$chip_id))[i]
+  df_sub &lt;- subset(pdata.adj.filt, chip_id == id, select=c(gfp.z, rfp.z))  
+  
+  cpred &lt;- circle.fit(df_sub)
+
+  xlims &lt;- range(df_sub[,1])
+  ylims &lt;- range(df_sub[,2])
+  plot(df_sub, pch=16, col=&quot;gray50&quot;, xlim=xlims, ylim=ylims, cex=.7,
+       main = id, xlab=&quot;GFP&quot;, ylab=&quot;RFP&quot;)
+  points(cpred[,1], cpred[,2], col=&quot;blue&quot;, type = &quot;p&quot;)
+  points(mean(cpred[,1]), mean(cpred[,2]), col=&quot;red&quot;, pch=3, cex=2)
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>saveRDS(pdata.adj.filt, 
+        file = &quot;../output/images-circle-ordering.Rmd/pdata.adj.filt.rds&quot;)</code></pre>
+</div>
+<div id="project-positions" class="section level2">
+<h2>Project positions</h2>
+<pre class="r"><code>pdata.adj.filt &lt;- readRDS(&quot;../output/images-circle-ordering.Rmd/pdata.adj.filt.rds&quot;)
+
+proj.res &lt;- vector(&quot;list&quot;, length=length(unique((pdata.adj$chip_id))))
+
+for(i in 1:length(unique((pdata.adj$chip_id)))) {
+  proj.res[[i]] &lt;- vector(&quot;list&quot;,2)
+  
+  id &lt;- unique(as.character(pdata.adj.filt$chip_id))[i]
+  
+  df_sub &lt;- subset(pdata.adj.filt, 
+                   chip_id == id, select=c(gfp.z, rfp.z))  
+#  sample_ids &lt;-
+    
+  cpred &lt;- circle.fit(df_sub)
+
+  proj.res[[i]][[1]] &lt;- data.frame(cpred, df_sub)
+  colnames(proj.res[[i]][[1]]) &lt;- c(&quot;pos.pred.x&quot;, &quot;pos.pred.y&quot;, &quot;gfp.z&quot;, &quot;rfp.z&quot;)
+  
+  # convert projected coordinates to radians
+  # modulo 2*pi
+  proj.res[[i]][[1]]$rads &lt;- coord2rad(cbind(proj.res[[i]][[1]]$pos.pred.x,
+                                        proj.res[[i]][[1]]$pos.pred.y))
+  rownames(proj.res[[i]][[1]]) &lt;- rownames(df_sub)
+  
+  # compute centers
+  centers &lt;- LMcircleFit(as.matrix(df_sub), ParIni=colMeans(as.matrix(df_sub)), IterMAX=50)
+  
+  proj.res[[i]][[2]] &lt;- data.frame(x.center=centers[1], y.center=centers[2])
+}
+names(proj.res) &lt;- unique(pdata.adj.filt$chip_id)</code></pre>
+<p>Save output</p>
+<pre class="r"><code>saveRDS(proj.res, file = &quot;../output/images-circle-ordering.Rmd/proj.res.rds&quot;)</code></pre>
+<p>Plot circle fit.</p>
+<pre class="r"><code>proj.res &lt;- readRDS(file = &quot;../output/images-circle-ordering.Rmd/proj.res.rds&quot;)
+
+par(mfrow=c(2,3))
+for (i in 1:length(proj.res)) {
+  # xlims &lt;- range(proj.res[[i]]$gfp.z)
+  # ylims &lt;- range(proj.res[[i]]$rfp.z)
+  xlims &lt;- c(-2.5, 2.5)
+  ylims &lt;- c(-2.5, 2.5)
+  plot(subset(proj.res[[i]][[1]], select=c(gfp.z, rfp.z)), 
+       pch=16, col=&quot;gray50&quot;, xlim=xlims, ylim=ylims, cex=.5, 
+       main = names(proj.res)[i],
+       xlab = &quot;GFP&quot;, ylab = &quot;RFP&quot;)
+  points(proj.res[[i]][[1]]$pos.pred.x, proj.res[[i]][[1]]$pos.pred.y,
+         col=&quot;blue&quot;, pch=1)
+  points(proj.res[[i]][[2]]$x.center, proj.res[[i]][[2]]$y.center, 
+         col=&quot;red&quot;, pch=3, cex=2)
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-10-1.png" width="864" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow=c(2,3))
+for (i in 1:length(proj.res)) {
+  plot(proj.res[[i]][[1]]$rads, stack=TRUE, bins=90,
+       main = names(proj.res)[i])
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-10-2.png" width="864" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="property-of-the-circle-fit" class="section level2">
+<h2>Property of the circle fit</h2>
+<div id="intensity-values-by-circle-fit" class="section level3">
+<h3>Intensity values by circle fit</h3>
+<pre class="r"><code>pdata.adj.filtered &lt;- readRDS(&quot;../output/images-circle-ordering.Rmd/pdata.adj.filt.rds&quot;)
+proj.res &lt;- readRDS(&quot;../output/images-circle-ordering.Rmd/proj.res.rds&quot;)
+
+for (i in 1:length(unique(pdata.adj.filt$chip_id))) {
+  par(mfrow=c(2,2), mar = c(3,2,2,1))
+  ids &lt;- unique(as.character(pdata.adj.filt$chip_id))
+  p_sub &lt;- subset(pdata.adj.filt, chip_id == ids[i])
+  #all.equal(rownames(p_sub), rownames(proj.res$NA18870[[1]]))
+  plot(proj.res[[i]][[1]]$rads, stack=T, bins=180, main = &quot;Distribution&quot;)
+  library(RColorBrewer)
+  color &lt;- colorRampPalette(brewer.pal(11,&quot;Spectral&quot;))(11)
+  plot(x=as.numeric(proj.res[[i]][[1]]$rads), 
+       y=p_sub$rfp.z, pch=16, cex=.5, col=color[1], ylim=c(-2.5, 2.5),
+       xlab = &quot;Position on the circle&quot;,
+       ylab = &quot;RFP&quot;, main = &quot;RFP&quot;)
+  abline(h=0, lwd=.5)
+  plot(x=as.numeric(proj.res[[i]][[1]]$rads), 
+       y=p_sub$gfp.z, pch=16, cex=.7, col=color[9], ylim=c(-2.5, 2.5),
+       xlab = &quot;Position on the circle&quot;,
+       ylab = &quot;GFP&quot;, main = &quot;GFP&quot;)
+  abline(h=0, lwd=.5)
+  plot(x=as.numeric(proj.res[[i]][[1]]$rads), 
+       y=p_sub$dapi.z, pch=16, cex=.7, col=color[10], ylim=c(-2.5, 2.5),
+       xlab = &quot;Position on the circle&quot;,
+       ylab = &quot;DAPI&quot;, main = &quot;DAPI&quot;)
+  abline(h=0, lwd=.5)
+  title(names(proj.res)[i], outer=TRUE, line =-1)
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-2.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-3.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-4.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-5.png" width="576" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-11-6.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="expression-variation-by-cell-time" class="section level3">
+<h3>Expression variation by cell time</h3>
+<pre class="r"><code># load cell cycle genes
+genes.cycle &lt;- readRDS(&quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.detect.rds&quot;)
+
+# log2cpm
+log2cpm &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.rds&quot;)
+log2cpm.adjust &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds&quot;)
+
+counts.cycle &lt;- counts[rownames(counts) %in% genes.cycle, ]
+log2cpm.cycle &lt;- log2cpm[rownames(log2cpm) %in% genes.cycle, ]
+log2cpm.adjust.cycle &lt;- log2cpm.adjust[rownames(log2cpm.adjust) %in% genes.cycle, ]</code></pre>
+</div>
+<div id="pearson-correlation" class="section level3">
+<h3>Pearson correlation</h3>
+<pre class="r"><code>corrs &lt;- lapply(1:length(unique(pdata.adj.filt$chip_id)), function(i) {
+  
+  id &lt;- unique(pdata.adj.filt$chip_id)[i]
+  
+  log2cpm_sub &lt;- log2cpm.adjust.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(log2cpm.adjust.cycle))]
+  
+  counts_sub &lt;- counts.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(counts.cycle))]
+  
+  corrs &lt;- do.call(rbind, lapply(1:nrow(counts_sub), function(g) {
+    vec &lt;- cbind(as.numeric(proj.res[[i]][[1]]$rads),
+                 log2cpm_sub[g,])
+    filt &lt;- counts_sub[g,] &gt; 1
+    nsamp &lt;- sum(filt)
+
+    if (nsamp &gt; ncol(counts_sub)/2) {
+      vec &lt;- vec[filt,]
+      corr &lt;- cor(vec[,1], vec[,2])
+      nsam &lt;- nrow(vec)
+      data.frame(corr=corr, nsam=nsam)
+    } else {
+      data.frame(corr=NA, nsam=nrow(vec))
+    }
+    }))
+  rownames(corrs) &lt;- rownames(counts_sub)
+  return(corrs) 
+  })   
+names(corrs) &lt;- unique(pdata.adj.filt$chip_id)</code></pre>
+<pre class="r"><code>par(mfrow=c(2,3))
+for (i in 1:length(corrs)) {
+  hist(corrs[[i]]$corr, main = names(corrs)[i])            
+}
+title(main = &quot;Pearson correlation&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Apply CorShrink</p>
+<pre class="r"><code>par(mfrow=c(2,3))
+for (i in 1:length(corrs)) {
+  corrs_sub &lt;- corrs[[i]]
+  corr.shrink &lt;- CorShrinkVector(corrs_sub$corr, nsamp_vec = corrs_sub$nsam,
+                                   optmethod = &quot;mixEM&quot;, report_model = TRUE)
+  names(corr.shrink$estimate) &lt;- rownames(corrs_sub)
+  plot(corr.shrink$model$result$betahat,
+       corr.shrink$model$result$PosteriorMean,
+       col = 1+as.numeric(corr.shrink$model$result$svalue &lt; .01),
+       xlab = &quot;Correlation&quot;, ylab = &quot;Shrunken estimate&quot;)
+  abline(0,1)
+  title(names(corrs)[i])
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ciruclar-correlation" class="section level3">
+<h3>Ciruclar correlation</h3>
+<pre class="r"><code>source(&quot;../code/corr.cl.R&quot;)
+
+corrs.cl &lt;- lapply(1:length(unique(pdata.adj.filt$chip_id)), function(i) {
+  
+  id &lt;- unique(pdata.adj.filt$chip_id)[i]
+  
+  log2cpm_sub &lt;- log2cpm.adjust.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(log2cpm.adjust.cycle))]
+  
+  counts_sub &lt;- counts.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(counts.cycle))]
+  
+  corrs &lt;- do.call(rbind, lapply(1:nrow(counts_sub), function(g) {
+    vec &lt;- cbind(as.numeric(proj.res[[i]][[1]]$rads),
+                 log2cpm_sub[g,])
+    filt &lt;- counts_sub[g,] &gt; 1
+    nsamp &lt;- sum(filt)
+
+    if (nsamp &gt; ncol(counts_sub)/2) {
+      vec &lt;- vec[filt,]
+      corr &lt;- R2xtCorrCoeff(lvar=vec[,2], cvar=vec[,1])
+      nsam &lt;- nrow(vec)
+      data.frame(corr=corr, nsam=nsam)
+    } else {
+      data.frame(corr=NA, nsam=nrow(vec))
+    }
+    }))
+  rownames(corrs) &lt;- rownames(counts_sub)
+  return(corrs) 
+  })   
+names(corrs.cl) &lt;- unique(pdata.adj.filt$chip_id)</code></pre>
+<pre class="r"><code>par(mfrow=c(2,3))
+for (i in 1:length(corrs)) {
+  hist(corrs.cl[[i]]$corr, main = names(corrs)[i])            
+}
+title(main = &quot;Circular-linear correlation&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Compute significance value</p>
+<pre class="r"><code>corrs.cl.sig &lt;- lapply(1:length(unique(pdata.adj.filt$chip_id)), function(i) {
+  
+  id &lt;- unique(pdata.adj.filt$chip_id)[i]
+  
+  log2cpm_sub &lt;- log2cpm.adjust.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(log2cpm.adjust.cycle))]
+  
+  counts_sub &lt;- counts.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(counts.cycle))]
+  
+  corrs &lt;- do.call(rbind, lapply(1:nrow(counts_sub), function(g) {
+    vec &lt;- cbind(as.numeric(proj.res[[i]][[1]]$rads),
+                 log2cpm_sub[g,])
+    filt &lt;- counts_sub[g,] &gt; 1
+    nsamp &lt;- sum(filt)
+
+    if (nsamp &gt; ncol(counts_sub)/2) {
+      vec &lt;- vec[filt,]
+      corr &lt;- R2xtIndTestRand(lvar=vec[,2], cvar=vec[,1], NR=100)
+      nsam &lt;- nrow(vec)
+      return(corr)
+    } else {
+      return(data.frame(corr=NA, pval=NA))
+    }
+    }))
+  rownames(corrs) &lt;- rownames(counts_sub)
+  return(corrs) 
+  })   
+names(corrs.cl.sig) &lt;- unique(pdata.adj.filt$chip_id)</code></pre>
+<pre class="r"><code>par(mfrow=c(2,3))
+for(i in 1:length(corrs.cl.sig)) {
+  hist(corrs.cl.sig[[i]]$pval, 
+       main = names(corrs.cl.sig)[i])
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Consider significant ones</p>
+<pre class="r"><code>for (i in 1:length(corrs.cl.sig)) {
+  ii.sig &lt;- corrs.cl.sig[[i]]$pval &lt; .01
+  print(sum(ii.sig, na.rm=TRUE))
+}</code></pre>
+<pre><code>[1] 12
+[1] 21
+[1] 23
+[1] 11
+[1] 4
+[1] 10</code></pre>
+<p>Print some genes</p>
+<pre class="r"><code>for (i in 1:length(corrs.cl.sig)) {
+  ii.sig &lt;- corrs.cl.sig[[i]]$pval &lt; .01
+  
+  id &lt;- unique(pdata.adj.filt$chip_id)[i]
+  
+  log2cpm_sub &lt;- log2cpm.adjust.cycle[, match(rownames(proj.res[[i]][[1]]), colnames(log2cpm.adjust.cycle))]
+  
+  genes &lt;- rownames(corrs.cl.sig[[i]])
+  
+  if (i == 5) {numgene &lt;- 3} else {numgene &lt;- 4}
+  par(mfrow=c(2,2))
+  for (g in 1:numgene) {
+    gene &lt;- genes[which(ii.sig)[g]]
+    plot(x=as.numeric(proj.res[[i]][[1]]$rads),
+         y = log2cpm_sub[rownames(log2cpm_sub) == gene,] ,
+         xlab = &quot;Inferred cell time&quot;,
+         ylab = &quot;log2cpm&quot;,
+         main = gene)
+  }
+  title(names(proj.res)[i], outer = TRUE, line = -1)
+}</code></pre>
+<p><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-1.png" width="480" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-2.png" width="480" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-3.png" width="480" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-4.png" width="480" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-5.png" width="480" style="display: block; margin: auto;" /><img src="figure/images-circle-ordering.Rmd/unnamed-chunk-21-6.png" width="480" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] RColorBrewer_1.1-2  bindrcpp_0.2        CorShrink_0.1.1    
+ [4] matrixStats_0.53.1  dplyr_0.7.4         Biobase_2.38.0     
+ [7] BiocGenerics_0.24.0 conicfit_1.0.4      geigen_2.1         
+[10] pracma_2.1.4        circular_0.4-93    
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.15      plyr_1.8.4        compiler_3.4.1   
+ [4] pillar_1.1.0      git2r_0.21.0      bindr_0.1        
+ [7] iterators_1.0.9   tools_3.4.1       boot_1.3-19      
+[10] digest_0.6.15     evaluate_0.10.1   tibble_1.4.2     
+[13] lattice_0.20-35   pkgconfig_2.0.1   rlang_0.2.0      
+[16] foreach_1.4.4     Matrix_1.2-10     yaml_2.1.16      
+[19] mvtnorm_1.0-7     stringr_1.3.0     knitr_1.20       
+[22] rprojroot_1.3-2   grid_3.4.1        glue_1.2.0       
+[25] R6_2.2.2          rmarkdown_1.8     reshape2_1.4.3   
+[28] ashr_2.2-4        magrittr_1.5      MASS_7.3-47      
+[31] codetools_0.2-15  backports_1.1.2   htmltools_0.3.6  
+[34] assertthat_0.2.0  stringi_1.1.6     pscl_1.5.2       
+[37] doParallel_1.0.11 truncnorm_1.0-7   SQUAREM_2017.10-1</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
