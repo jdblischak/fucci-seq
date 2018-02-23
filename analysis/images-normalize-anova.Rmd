@@ -99,7 +99,7 @@ aov.lm.dapi
 
 Indivdual and plate variation
 
-```{r, fig.width=11, fig.height=6, echo = FALSE}
+```{r, fig.width=12, fig.height=8, echo = FALSE}
 gfp.plot <- plot_grid(
   ggplot(pdata, 
           aes(x=chip_id, y=gfp.median.log10sum,
@@ -177,7 +177,7 @@ legend("center", legend = c("A_a", "H_a", "A_b", "H_b"), col=colbrew[c(1,2,3,4)]
        pch=16)
 ```
 
-```{r, fig.width=10, fig.height=7}
+```{r, fig.width=10, fig.height=8}
 par(mfrow=c(3,1))
 boxplot(rfp.median.log10sum ~ factor(image_label, levels=ord.rfp), 
         data=pdata, ylab = "RFP",
@@ -230,7 +230,7 @@ dapi.pos <- summary(lsmeans(lm.dapi, specs="image_label", contrast=contrast_pos)
 
 Substract plate effect from the raw estimates.
 
-```{r}
+```{r compute-adjusted, eval = T}
 ## RFP
 pdata$rfp.median.log10sum.adjust <- pdata$rfp.median.log10sum
 rfp.plates$experiment <- as.character(rfp.plates$experiment)
@@ -304,7 +304,7 @@ for (i in 1:uniqueN(pos)) {
 
 After adjustment
 
-```{r, fig.width=11, fig.height=6, echo = FALSE}
+```{r boxplot-adjusted, fig.width=12, fig.height=8, echo = FALSE}
 gfp.plot <- plot_grid(
   ggplot(pdata, 
           aes(x=chip_id, y=gfp.median.log10sum.adjust,
@@ -380,7 +380,8 @@ legend("center", legend = c("A_a", "H_a", "A_b", "H_b"), col=colbrew[c(1,2,3,4)]
        pch=16)
 ```
 
-```{r, fig.width=10, fig.height=7}
+
+```{r plot-position-adjusted, fig.width=10, fig.height=9}
 par(mfrow=c(3,1))
 boxplot(rfp.median.log10sum.adjust ~ factor(image_label, levels=ord.rfp), 
         data=pdata, ylab = "RFP",
@@ -400,94 +401,12 @@ title("Position variation", outer=TRUE, line = -1)
 
 ---
 
-## Output
+## Output results
 
 
 Save corrected data to a temporary output folder.
 
-```{r, eval = F, echo = T}
-saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata-adj.rds")
-```
-
-
-After correcting for plate effect, is there position effect on the plate that are at play?
-
-1. Linear models controling for individual and plate effect show that image labels signficantly add to the variation in both GFP and RFP intensities, but not in DAPI (likelihood ratio test comparing model fit, and F test comparing variance explained)
-
-2. Emprical analysis was done to describe the trend of intensity measurements by image label. Briefly, I assigned ranks to intensity values wiithin plate, and then compute the median ranks at each image position. 
-
-
-
-```{r}
-pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata-adj.rds")
-
-library(stringr)
-
-#--- RFP
-lm.1 <- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 <- lm(gfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared
-summary(lm.2)$adj.r.squared
-anova(lm.2, lm.1)
-
-# compare logliklihood of the two models
-ll.1 <- logLik(lm.1)
-ll.2 <- logLik(lm.2)
-chisq <- -2*(-302.8776)-(-2*(-229.6979))
-df <- 117-22
-pchisq(chisq, df, lower.tail = FALSE)
-  
-
-#--- RFP
-lm.1 <- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 <- lm(rfp.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared
-summary(lm.2)$adj.r.squared
-anova(lm.2, lm.1)
-
-# compare logliklihood of the two models
-ll.1 <- logLik(lm.1)
-ll.2 <- logLik(lm.2)
-chisq <- -2*(-684.1374)-2*(-618.1146)
-df <- 117-22
-pchisq(chisq, df, lower.tail = FALSE)
-
-
-#--- DAPI
-
-lm.1 <- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment) + as.factor(image_label), data = pdata.adj)
-lm.2 <- lm(dapi.median.log10sum.adjust ~ as.factor(chip_id) + as.factor(experiment), data = pdata.adj)
-
-summary(lm.1)$adj.r.squared
-summary(lm.2)$adj.r.squared
-anova(lm.2, lm.1)
-
-# compare logliklihood of the two models
-ll.1 <- logLik(lm.1)
-ll.2 <- logLik(lm.2)
-chisq <- -2*(218.539)-2*(264.9102)
-df <- 117-22
-pchisq(chisq, df, lower.tail = FALSE)
-```
-
-
-```{r, echo = F, fig.width=12, fig.height=10}
-ggplot(pdata.adj, aes(y=gfp.median.log10sum.adjust, x=as.factor(image_label))) +
-  geom_boxplot() + facet_wrap(~as.factor(experiment))
-
-ggplot(pdata.adj, aes(y=rfp.median.log10sum.adjust, x=as.factor(image_label))) +
-  geom_boxplot() + facet_wrap(~as.factor(experiment))
-
-ggplot(pdata.adj, aes(y=rfp.median.log10sum.adjust, x=as.factor(image_label))) +
-  geom_boxplot() + facet_wrap(~as.factor(experiment))
-```
-
-
-Output results to text file
-
-```{r, eval = F}
+```{r save-rds, eval = F, echo = T}
 saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata.adj.rds")
 ```
 
@@ -499,7 +418,7 @@ saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata.adj.rds")
 
 apply ash to position estimates
 
-```{r, fig.height=6, fig.width=7}
+```{r ash-position, fig.height=6, fig.width=7}
 gfp.pos.ash <- ash(gfp.pos$lsmean, gfp.pos$SE, mixcompdist = "+uniform",
                    lik = lik_t(df=gfp.pos$df[1]))
 rfp.pos.ash <- ash(rfp.pos$lsmean, rfp.pos$SE, mixcompdist = "+uniform",
@@ -532,7 +451,7 @@ abline(0,1, col = "royalblue")
 
 Plate effect. With only 16 plates, the effects can't be estimated...
 
-```{r, fig.height=6, fig.width=7, eval = F}
+```{r ash-plate, fig.height=6, fig.width=7, eval = F}
 library(ashr)
 gfp.plates.ash <- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = "+uniform",
                    lik = lik_t(df=gfp.plates$df[1]))
