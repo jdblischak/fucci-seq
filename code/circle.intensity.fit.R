@@ -7,7 +7,7 @@
 
 circle.fit <- function(XY, IterMAX=50) {
   library(matrixStats)
-  library(coincfit)
+  library(conicfit)
 
   parini <- colMeans(as.matrix(XY))
 
