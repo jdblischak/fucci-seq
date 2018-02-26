@@ -38,28 +38,37 @@ We evaluated and pre-processed the results of image analysis as follows:
     
 ---
 
-## RNA-seq data
+## RNA-seq data preprcessing
 
 1. The first step in preprocessing RNA-seq data consists of QC and filtering. 
-
-* Sample QC and filtering
-    * [Sample QC criteria](sampleqc.html)  
-    * [Sequencing depth](totals.html)  
-    * [Reads versus molecules](reads-v-molecules.html)  
-
-* Gene QC and filtering
-    * [gene filtering](gene-filtering.html)
-    * [PCA with technical fators](pca-tf.html)
+    * Sample QC and filtering
+        * [Sample QC criteria](sampleqc.html)  
+        * [Sequencing depth](totals.html)  
+        * [Reads versus molecules](reads-v-molecules.html)  
+    
+    * Gene QC and filtering
+        * [gene filtering](gene-filtering.html)
+        * [PCA with technical fators](pca-tf.html)
 
 2. We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
+    * [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
 
-* [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
+
+---
+
+## RNA-seq data cell cycle gene signal
+
+We investigated cell cycle signals in the sequencing data.
+
+1. [Investigate transgene count in sequencing data](images-transgene.html)
+
+2. [Select cell cycle genes for training data](seqdata-select-cellcyclegenes.html)
+
+3. [Gene expression levels and intensities](images-seq-correlation.Rmd)
+
+4. PCA and intensities
 
 
-Other information:
-
-* [Select cell cycle genes for training data](seqdata-select-cellcyclegenes.html)
-* [Investigate transgene count in sequencing data](images-transgene.html)
 
 
 
@@ -69,14 +78,14 @@ Other information:
 
 We explored the possiblities of using intensities to learn cell cycle phases/genes in RNA-seq data.
 
-1. We considered categorical labeling   
+1. Consider categorical labeling   
     * [Cluster samples by Partition around medoids(PAM)](images-pam.html)
     * [Cluster samples by Mixture modeling](images-mclust.html)
     * [Select a subset using silhouette index](images-subset-silhouette.html)
-    * [Expression profiles of the "best" samples](images-classify-fucci.html)
+    * Expression profiles of the "best" samples using intensities [before confounding correction](images-classify-fucci.html) and [after confounding correction](images-classify-fucci-adjusted.html)
     * [Expression profiles of sorted cells in Leng et al. 2015](images-classify-leng.html)
 
-2. We considered continuous ordering  
+2. Consider continuous ordering  
     * [Ordering on a unit circle based on GFP and RFP](images-circle-ordering.html)
     
 
