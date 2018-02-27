@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-22</p>
+<p><strong>Last updated:</strong> 2018-02-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> be8a2ca</p>
+<p><strong>Code version:</strong> f434aa3</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -353,19 +353,18 @@ counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
 
 # import corrected intensities
 pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
-<p>visualize intensity data on a circle. project intensity data onto radians and the visualize the fitting on circles. then use cellcycleR to perform fitting and compare the model fitting with the projection results. it seems that the predicted ordering is especially bad for the gree intensities, which have many outliers. another reason I suspect isthat it attemps to fit similar amplitude/phase parameters to the green and red intensities.</p>
 </div>
 <div id="circle-fitting" class="section level2">
 <h2>Circle fitting</h2>
 <p>Based on all data.</p>
 <pre class="r"><code>source(&quot;../code/circle.intensity.fit.R&quot;)
-sample_names &lt;- rownames(pdata.adj)
+#sample_names &lt;- rownames(pdata.adj)
 
 pdata.adj &lt;- pdata.adj %&gt;% group_by(chip_id) %&gt;% 
-  mutate(rfp.z=scale(rfp.median.log10sum.adjust),
-            gfp.z=scale(gfp.median.log10sum.adjust),
-            dapi.z=scale(dapi.median.log10sum.adjust))
-rownames(pdata.adj) &lt;- sample_names
+  mutate(rfp.z=scale(rfp.median.log10sum.adjust.ash),
+            gfp.z=scale(gfp.median.log10sum.adjust.ash),
+            dapi.z=scale(dapi.median.log10sum.adjust.ash))
+pdata.adj &lt;- data.frame(pdata.adj)
   
 par(mfrow=c(2,3))
 for(i in 1:length(unique(pdata.adj$chip_id))) {

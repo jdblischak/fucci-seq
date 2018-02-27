@@ -69,23 +69,19 @@ pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
 ```
 
 
-
-visualize intensity data on a circle. project intensity data onto radians and the visualize the fitting on circles. then use cellcycleR to perform fitting and compare the model fitting with the projection results. it seems that the predicted ordering is especially bad for the gree intensities, which have many outliers. another reason I suspect isthat it attemps to fit similar amplitude/phase parameters to the green and red intensities. 
-
-
 ## Circle fitting
 
 Based on all data.
 
 ```{r, fig.width=7, fig.height=5}
 source("../code/circle.intensity.fit.R")
-sample_names <- rownames(pdata.adj)
+#sample_names <- rownames(pdata.adj)
 
 pdata.adj <- pdata.adj %>% group_by(chip_id) %>% 
-  mutate(rfp.z=scale(rfp.median.log10sum.adjust),
-            gfp.z=scale(gfp.median.log10sum.adjust),
-            dapi.z=scale(dapi.median.log10sum.adjust))
-rownames(pdata.adj) <- sample_names
+  mutate(rfp.z=scale(rfp.median.log10sum.adjust.ash),
+            gfp.z=scale(gfp.median.log10sum.adjust.ash),
+            dapi.z=scale(dapi.median.log10sum.adjust.ash))
+pdata.adj <- data.frame(pdata.adj)
   
 par(mfrow=c(2,3))
 for(i in 1:length(unique(pdata.adj$chip_id))) {

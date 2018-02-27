@@ -304,7 +304,7 @@ for (i in 1:uniqueN(pos)) {
 
 After adjustment
 
-```{r boxplot-adjusted, fig.width=12, fig.height=8, echo = FALSE}
+```{r boxplot-adjusted, fig.width=12, fig.height=7, echo = FALSE}
 gfp.plot <- plot_grid(
   ggplot(pdata, 
           aes(x=chip_id, y=gfp.median.log10sum.adjust,
@@ -416,16 +416,34 @@ saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata.adj.rds")
 
 ## ash
 
-apply ash to position estimates
+apply shrinkage to position estimates
 
 ```{r ash-position, fig.height=6, fig.width=7}
-gfp.pos.ash <- ash(gfp.pos$lsmean, gfp.pos$SE, mixcompdist = "+uniform",
-                   lik = lik_t(df=gfp.pos$df[1]))
-rfp.pos.ash <- ash(rfp.pos$lsmean, rfp.pos$SE, mixcompdist = "+uniform",
-                   lik = lik_t(df=rfp.pos$df[1]))
-dapi.pos.ash <- ash(dapi.pos$lsmean, dapi.pos$SE, mixcompdist = "+uniform",
-                    lik = lik_t(df=dapi.pos$df[1]))
-  
+# # apply limma ebayes to shrink variances
+# library(limma)
+# gfp.pos.var <- squeezeVar(gfp.pos$SE^2, df = gfp.pos$df)$var.post
+# gfp.pos.df <- squeezeVar(gfp.pos$SE^2, df = gfp.pos$df)$df.prior + gfp.pos$df
+gfp.pos.ash <- ash(gfp.pos$lsmean, gfp.pos$SE, mixcompdist = "uniform",
+                   lik = lik_t(df=gfp.pos$df[1]), mode = "estimate" )
+# gfp.pos.ash.varpost <- ash(gfp.pos$lsmean, gfp.pos.var, mixcompdist = "uniform",
+#                    lik = lik_t(df=gfp.pos.df), mode = "estimate" )
+
+
+# rfp.pos.var <- squeezeVar(rfp.pos$SE^2, df = rfp.pos$df)$var.post
+# rfp.pos.df <- squeezeVar(rfp.pos$SE^2, df = rfp.pos$df)$df.prior + gfp.pos$df
+rfp.pos.ash <- ash(rfp.pos$lsmean, rfp.pos$SE, mixcompdist = "uniform",
+                   lik = lik_t(df=rfp.pos$df[1]), mode = "estimate" )
+# rfp.pos.ash.varpost <- ash(rfp.pos$lsmean, rfp.pos.var, mixcompdist = "uniform",
+#                    lik = lik_t(df=rfp.pos.df), mode = "estimate" )
+
+# dapi.pos.var <- squeezeVar(dapi.pos$SE^2, df = dapi.pos$df)$var.post
+# dapi.pos.df <- squeezeVar(dapi.pos$SE^2, df = dapi.pos$df)$df.prior + gfp.pos$df
+dapi.pos.ash <- ash(dapi.pos$lsmean, dapi.pos$SE, mixcompdist = "uniform",
+                   lik = lik_t(df=dapi.pos$df[1]), mode = "estimate" )
+# dapi.pos.ash.varpost <- ash(dapi.pos$lsmean, dapi.pos.var, mixcompdist = "uniform",
+#                    lik = lik_t(df=dapi.pos.df), mode = "estimate" )
+# 
+
 par(mfrow=c(2,2))
 plot(gfp.pos.ash$result$betahat, gfp.pos.ash$result$PosteriorMean,
      xlab = "beta hat", ylab = "Shrunken estimate", main = "GFP")
@@ -449,16 +467,16 @@ plot(dapi.pos.ash$result$sebetahat, dapi.pos.ash$result$PosteriorSD,
 abline(0,1, col = "royalblue")
 ```
 
-Plate effect. With only 16 plates, the effects can't be estimated...
+Plate effect.
 
-```{r ash-plate, fig.height=6, fig.width=7, eval = F}
+```{r ash-plate, fig.height=6, fig.width=7, eval = T}
 library(ashr)
-gfp.plates.ash <- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = "+uniform",
-                   lik = lik_t(df=gfp.plates$df[1]))
-rfp.plates.ash <- ash(rfp.plates$lsmean, rfp.plates$SE, mixcompdist = "+uniform",
-                   lik = lik_t(df=rfp.plates$df[1]))
-dapi.plates.ash <- ash(dapi.plates$lsmean, dapi.plates$SE, mixcompdist = "+uniform",
-                    lik = lik_t(df=dapi.plates$df[1]))
+gfp.plates.ash <- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = "uniform",
+                   lik = lik_t(df=gfp.plates$df[1]), mode = "estimate")
+rfp.plates.ash <- ash(rfp.plates$lsmean, rfp.plates$SE, mixcompdist = "uniform",
+                   lik = lik_t(df=rfp.plates$df[1]), mode = "estimate")
+dapi.plates.ash <- ash(dapi.plates$lsmean, dapi.plates$SE, mixcompdist = "uniform",
+                    lik = lik_t(df=dapi.plates$df[1]), mode = "estimate")
   
 par(mfrow=c(2,2))
 plot(gfp.plates.ash$result$betahat, gfp.plates.ash$result$PosteriorMean,
@@ -485,6 +503,188 @@ abline(0,1, col = "royalblue")
 
 
 
+
+Substract plate effect from the raw estimates.
+
+```{r compute-adjusted-ash, eval = T}
+## RFP
+pdata$rfp.median.log10sum.adjust.ash <- pdata$rfp.median.log10sum
+rfp.plates$experiment <- as.character(rfp.plates$experiment)
+rfp.pos$experiment <- as.character(rfp.pos$image_label)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- rfp.plates.ash$result$PosteriorMean[which(rfp.plates$experiment==exp)]
+  pdata$rfp.median.log10sum.adjust.ash[ii_exp] <- (pdata$rfp.median.log10sum[ii_exp] - est_exp)
+}
+
+pos <- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p <- pos[i]
+  ii_pos <- which(pdata$image_label == p)
+  est_pos <- rfp.pos.ash$result$PosteriorMean[which(rfp.pos$image_label==p)]
+  pdata$rfp.median.log10sum.adjust.ash[ii_pos] <- (pdata$rfp.median.log10sum[ii_pos] - est_pos)
+}
+
+
+## GFP
+pdata$gfp.median.log10sum.adjust.ash <- pdata$gfp.median.log10sum
+gfp.plates$experiment <- as.character(gfp.plates$experiment)
+gfp.pos$experiment <- as.character(gfp.pos$image_label)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- gfp.plates.ash$result$PosteriorMean[which(gfp.plates$experiment==exp)]
+  pdata$gfp.median.log10sum.adjust.ash[ii_exp] <- (pdata$gfp.median.log10sum[ii_exp] - est_exp)
+}
+
+pos <- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p <- pos[i]
+  ii_pos <- which(pdata$image_label == p)
+  est_pos <- gfp.pos.ash$result$PosteriorMean[which(gfp.pos$image_label==p)]
+  pdata$gfp.median.log10sum.adjust.ash[ii_pos] <- (pdata$gfp.median.log10sum[ii_pos] - est_pos)
+}
+
+
+
+## DAPI
+pdata$dapi.median.log10sum.adjust.ash <- pdata$dapi.median.log10sum
+dapi.plates$experiment <- as.character(dapi.plates$experiment)
+dapi.pos$experiment <- as.character(dapi.pos$image_label)
+pdata$experiment <- as.character(pdata$experiment)
+
+exps <- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp <- exps[i]
+  ii_exp <- which(pdata$experiment == exp)
+  est_exp <- dapi.plates.ash$result$PosteriorMean[which(dapi.plates$experiment==exp)]
+  pdata$dapi.median.log10sum.adjust.ash[ii_exp] <- (pdata$dapi.median.log10sum[ii_exp] - est_exp)
+}
+
+pos <- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p <- pos[i]
+  ii_pos <- which(pdata$image_label == p)
+  est_pos <- dapi.pos.ash$result$PosteriorMean[which(dapi.pos$image_label==p)]
+  pdata$dapi.median.log10sum.adjust.ash[ii_pos] <- (pdata$dapi.median.log10sum[ii_pos] - est_pos)
+}
+```
+
+
+After adjustment
+
+```{r boxplot-adjusted-ash, fig.width=12, fig.height=7, echo = FALSE}
+gfp.plot <- plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=gfp.median.log10sum.adjust.ash,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata, 
+        aes(x=factor(experiment), y=gfp.median.log10sum.adjust.ash,
+            col=factor(experiment))) +
+  geom_violin() + geom_boxplot(width=.1), 
+  ncol=2, labels = c("Individual variation", "Plate variation"))
+title <- ggdraw() + draw_label("Adjusted Green fluorescence intensites", fontface='bold')
+plot_grid(title, gfp.plot, 
+          ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+
+## RFP
+rfp.plot <- plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=rfp.median.log10sum.adjust.ash,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata, 
+        aes(x=factor(experiment), y=rfp.median.log10sum.adjust.ash,
+            col=factor(experiment))) +
+  geom_violin() + geom_boxplot(width=.1), 
+  ncol=2, labels = c("Individual variation", "Plate variation"))
+title <- ggdraw() + draw_label("Adjusted Red fluorescence intensites", fontface='bold')
+plot_grid(title, rfp.plot, 
+          ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+
+
+## DAPI
+dapi.plot <- plot_grid(
+  ggplot(pdata, 
+          aes(x=chip_id, y=dapi.median.log10sum.adjust.ash,
+              col=chip_id)) +
+    geom_violin() + geom_boxplot(width=.1),
+  ggplot(pdata, 
+        aes(x=factor(experiment), y=dapi.median.log10sum.adjust.ash,
+            col=factor(experiment))) +
+  geom_violin() + geom_boxplot(width=.1), 
+  ncol=2, labels = c("Individual variation", "Plate variation"))
+title <- ggdraw() + draw_label("Adjusted DAPI intensites", fontface='bold')
+plot_grid(title, dapi.plot, 
+          ncol=1, rel_heights=c(0.1, 1)) # rel_heights values control title margins
+
+
+## Position variation
+well.gfp.median <- pdata %>% group_by(image_label) %>% summarize(., median(gfp.median.log10sum.adjust.ash))
+well.rfp.median <- pdata %>% group_by(image_label) %>% summarize(., median(rfp.median.log10sum.adjust.ash))
+well.dapi.median <- pdata %>% group_by(image_label) %>% summarize(., median(dapi.median.log10sum.adjust.ash))
+
+well.pp <- data.frame(well=pdata$well, image_label=pdata$image_label)
+well.pp <- well.pp[!duplicated(well.pp),]
+colbrew <- brewer.pal(9, "Set1")
+well.pp$cols <- rep(colbrew[9], 96)
+well.pp$cols[which(well.pp$well %in% c("A03", "A02", "A01", "A09", "A08", "A07"))] <- colbrew[1]
+well.pp$cols[which(well.pp$well %in% c("H03", "H02", "H01", "H09", "H08", "H07"))] <- colbrew[2]
+well.pp$cols[which(well.pp$well %in% c("A06", "A05", "A04", "A12", "A11", "A10"))] <- colbrew[3]
+well.pp$cols[which(well.pp$well %in% c("H06", "H05", "H04", "H12", "H11", "H10"))] <- colbrew[4]
+well.pp <- well.pp[order(well.pp$image_label),]
+
+ord.gfp <- as.character(well.gfp.median$image_label[order(well.gfp.median$`median(gfp.median.log10sum.adjust.ash)`)])
+ord.rfp <- as.character(well.rfp.median$image_label[order(well.rfp.median$`median(rfp.median.log10sum.adjust.ash)`)])
+ord.dapi <- as.character(well.dapi.median$image_label[order(well.dapi.median$`median(dapi.median.log10sum.adjust.ash)`)])
+```
+
+
+```{r}
+## These are four corners previously found more likely to have high gene expression values in sequencing data.
+par(mfrow=c(1,1))
+plot(1:7, 1:7, pch="", axes=F, ann=F)
+legend("center", legend = c("A_a", "H_a", "A_b", "H_b"), col=colbrew[c(1,2,3,4)],
+       pch=16)
+```
+
+
+```{r plot-position-adjusted-ash, fig.width=10, fig.height=9}
+par(mfrow=c(3,1))
+boxplot(rfp.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.rfp), 
+        data=pdata, ylab = "RFP",
+        col=well.pp$cols[as.numeric(ord.rfp)])
+abline(h=0, lwd=2, col="royalblue")
+boxplot(gfp.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.gfp), 
+        data=pdata, ylab = "GFP",
+        col=well.pp$cols[as.numeric(ord.gfp)])
+abline(h=0, lwd=2, col="royalblue")
+boxplot(dapi.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.dapi), 
+        data=pdata, ylab = "GFP",
+        col=well.pp$cols[as.numeric(ord.dapi)])
+abline(h=0, lwd=2, col="royalblue")
+title("Position variation", outer=TRUE, line = -1)
+```
+
+
+---
+
+## Output results
+
+
+Save corrected data to a temporary output folder.
+
+```{r save-rds-postash, eval = F, echo = T}
+saveRDS(pdata, file = "../output/images-normalize-anova.Rmd/pdata.adj.rds")
+```
 
 
 

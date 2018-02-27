@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-01-26</p>
+<p><strong>Last updated:</strong> 2018-02-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 6aa2392</p>
+<p><strong>Code version:</strong> 7e30faa</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -346,27 +346,24 @@ library(ggplot2)
 library(cowplot)
 library(cluster)
 library(data.table)</code></pre>
-<p>Load data</p>
+<p>Load data the intensities adjusted for batch effect.</p>
 <pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
 pdata &lt;- pData(df)
 fdata &lt;- fData(df)
 
-# select endogeneous genes
-counts &lt;- exprs(df)[grep(&quot;ERCC&quot;, rownames(df), invert=TRUE), ]
+# # select endogeneous genes
+# counts &lt;- exprs(df)[grep(&quot;ERCC&quot;, rownames(df), invert=TRUE), ]
+# 
+# # cpm normalization
+# log2cpm &lt;- log2(t(t(counts+1)*(10^6)/colSums(counts)))
 
-# cpm normalization
-log2cpm &lt;- log2(t(t(counts+1)*(10^6)/colSums(counts)))</code></pre>
-<p>select cell cycle genes</p>
-<pre class="r"><code>cellcycle &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2017.rds&quot;)
-which_cc &lt;- which(rownames(log2cpm) %in% cellcycle$ensembl)
-
-log2cpm_cc &lt;- log2cpm[which_cc, ]</code></pre>
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
 <hr />
 </div>
-<div id="analysis" class="section level2">
-<h2>Analysis</h2>
+<div id="raw-data" class="section level2">
+<h2>Raw data</h2>
 <p>Fitting PAM for cells using only green and red intensity measurements.</p>
-<pre class="r"><code>ints &lt;- with(pdata, data.frame(rfp.median.log10sum,
+<pre class="r"><code>ints &lt;- with(pdata.adj, data.frame(rfp.median.log10sum,
                                gfp.median.log10sum,
                                dapi.median.log10sum))
 ints &lt;- data.frame(ints, 
@@ -417,16 +414,74 @@ for (k in c(1:length(k_list))) {
   }))
   pam_fit_green_red_dapi_plot[[k]] &lt;- pp
 }</code></pre>
+<p><strong>k=3</strong></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-5-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>k=4</strong></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><strong>k=3 versus k=4</strong></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
-<div id="results" class="section level2">
-<h2>Results</h2>
+<div id="adjusted-data" class="section level2">
+<h2>Adjusted data</h2>
+<p>Fitting PAM for cells using only green and red intensity measurements.</p>
+<pre class="r"><code>ints &lt;- with(pdata.adj, data.frame(rfp.median.log10sum.adjust.ash,
+                               gfp.median.log10sum.adjust.ash,
+                               dapi.median.log10sum.adjust.ash))
+ints &lt;- data.frame(ints, 
+                   chip_id = as.factor(pdata$chip_id))
+
+k_list &lt;- c(3:4)
+
+pam_fit_green_red &lt;- lapply(k_list, function(k) {
+  fit &lt;- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub &lt;- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -c(chip_id, dapi.median.log10sum.adjust.ash))
+    fit_sub &lt;- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+  names(fit) &lt;- unique(ints$chip_id)
+  return(fit)
+})
+names(pam_fit_green_red) &lt;- paste0(&quot;k&quot;, k_list)
+
+pam_fit_green_red_plot &lt;- vector(&quot;list&quot;, length(pam_fit_green_red))
+for (k in c(1:length(k_list))) {
+  pp &lt;- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub &lt;- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub &lt;- data.frame(df_sub, cluster=as.factor(pam_fit_green_red[[k]][[i]]$clustering))
+    return(df_sub)
+  }))
+  pam_fit_green_red_plot[[k]] &lt;- pp
+}</code></pre>
+<p>Fitting PAM for cells using all three intensity measurements.</p>
+<pre class="r"><code>pam_fit_green_red_dapi &lt;- lapply(k_list, function(k) {
+  fit &lt;- lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub &lt;- subset(ints, chip_id==unique(chip_id)[i], 
+                     select = -chip_id)
+    fit_sub &lt;- pam(df_sub, k=k, diss=F)
+    return(fit_sub)
+  })
+  names(fit) &lt;- unique(ints$chip_id)
+  return(fit)
+})
+names(pam_fit_green_red_dapi) &lt;- paste0(&quot;k&quot;, k_list)
+
+pam_fit_green_red_dapi_plot &lt;- vector(&quot;list&quot;, length(pam_fit_green_red_dapi))
+for (k in c(1:length(k_list))) {
+  pp &lt;- do.call(rbind, lapply(1:uniqueN(ints$chip_id), function(i) {
+    df_sub &lt;- subset(ints, chip_id==unique(chip_id)[i])
+    df_sub &lt;- data.frame(df_sub, cluster=as.factor(pam_fit_green_red_dapi[[k]][[i]]$clustering))
+    return(df_sub)
+  }))
+  pam_fit_green_red_dapi_plot[[k]] &lt;- pp
+}</code></pre>
 <p><strong>k=3</strong></p>
-<p><img src="figure/images-pam.Rmd/unnamed-chunk-6-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-10-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p><strong>k=4</strong></p>
-<p><img src="figure/images-pam.Rmd/unnamed-chunk-7-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-11-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p><strong>k=3 versus k=4</strong></p>
-<p><img src="figure/images-pam.Rmd/unnamed-chunk-8-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-pam.Rmd/unnamed-chunk-12-1.png" width="960" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -455,13 +510,13 @@ other attached packages:
 [4] ggplot2_2.2.1       Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14     knitr_1.17       magrittr_1.5     munsell_0.4.3   
- [5] colorspace_1.3-2 rlang_0.1.4      stringr_1.2.0    plyr_1.8.4      
- [9] tools_3.4.1      grid_3.4.1       gtable_0.2.0     git2r_0.20.0    
-[13] htmltools_0.3.6  yaml_2.1.16      lazyeval_0.2.1   rprojroot_1.3-1 
-[17] digest_0.6.13    tibble_1.3.4     evaluate_0.10.1  rmarkdown_1.8   
-[21] labeling_0.3     stringi_1.1.6    compiler_3.4.1   scales_0.5.0    
-[25] backports_1.1.2 </code></pre>
+ [1] Rcpp_0.12.15     knitr_1.20       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 rlang_0.2.0      stringr_1.3.0    plyr_1.8.4      
+ [9] tools_3.4.1      grid_3.4.1       gtable_0.2.0     git2r_0.21.0    
+[13] htmltools_0.3.6  yaml_2.1.16      lazyeval_0.2.1   rprojroot_1.3-2 
+[17] digest_0.6.15    tibble_1.4.2     evaluate_0.10.1  rmarkdown_1.8   
+[21] labeling_0.3     stringi_1.1.6    compiler_3.4.1   pillar_1.1.0    
+[25] scales_0.5.0     backports_1.1.2 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

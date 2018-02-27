@@ -1,0 +1,334 @@
+---
+title: "Expression profile of the gold-standard samples"
+author: "Joyce Hsiao"
+output: html_document
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Overview/Results
+
+Goal: Assess the expression profiles associated with cell cycle phase labels in a subset of samples identified to have high signal in intensity data ([see here for details on how we selected the samples](https://jdblischak.github.io/fucci-seq/images-subset-silhouette.html)).
+
+Method: 
+
+    * Compute phase-specific score for within clusters and individuals. This method was previously used in [Macosko et al. 2015](http://dx.doi.org/10.1016/j.cell.2015.05.002) for identifying gene expression patterns that varied along cell cycle phases, and for summarizing cell cycle phase profile for single cell samples. 
+    
+    * We applied the 544 genes identified as varied in [Macosko et al. 2015](http://dx.doi.org/10.1016/j.cell.2015.05.002) and identified ~230 genes within individuals that varied in expression patterns. 
+    
+    * The method was applied to log2CPM normalized data. Briefly,
+    
+        1. Identify the variable genes wihtin each cell cycle phase: compute for each cell-cycle phase, correlation between per-gene expression level and mean gene expression levels across all single cell samples. Select genes with correlation > .3. 
+        
+        2. Compute phase-specific score: compute average expression across genes for each single cell samples. 
+        
+        3. Standardize phase-specific scores in two-steps: within each phase, standardize (transforming to z-scores) scores across single cell samples, and then within each single cell sample, standardize scores across phase. 
+
+
+Results:
+
+    * Within individaul analysis show that in genearl, cluster 2 and cluster 2 correspond to S and G2 phases as expected. Hoewver, cluster 1 cells do not correspond all to G1 phase as we hoped, and many cells score high on S phase. This is not as surprising as iPSC cell lines are known to have a short G1 phase. In our data, prior to C1 loading, we found only 5% of the samples that are possibly G1 phase (out of tens of thousands of cells).
+    
+    * The genes used for the analysis were previously identified as "variable" or "cell cycle regulating" genes in [Macosko et al. 2015](http://dx.doi.org/10.1016/j.cell.2015.05.002). Applying the 544 genes in their results, we found 200 to 300 genes identified as "variable" in expression profiles along cell cycle phases. (NA18855 219 cells, NA18870 198 cells, NA19098 165 cells, NA19101 255 cells, NA19160 314 cells, NA18511 239 cells)
+
+    * For validity of the phase scores, we further apply the same method to data in [Leng et al. 2015](doi:10.1038/nmeth.3549), which have been previously scored for cell cycle phases also using FUCCI measurse. In that data, using the same set of genes, we found that these sorted cells score high in their corresponding phases. 
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(Biobase)
+library(ggplot2)
+library(cowplot)
+library(data.table)
+library(tidyr)
+library(gplots)
+library(ccRemover)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ERCC", rownames(df), invert=TRUE), ]
+
+# cpm normalization
+log2cpm <- log2(t(t(counts+1)*(10^6)/colSums(counts)))
+```
+
+subset to include genes that are annotated as cell cycle genes (according to ccRemover)
+
+```{r}
+ccremover <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+which_ccremover <- gene_indexer(rownames(log2cpm), species="human", name_type="symbol")
+
+log2cpm_ccremover <- log2cpm[which_ccremover, ]
+```
+
+subset to include genes in Macosko data
+
+```{r}
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+which_macosko <- which(rownames(log2cpm) %in% macosko$ensembl)
+
+log2cpm_macosko <- log2cpm[which_macosko, ]
+ccgenes_macosko <- macosko[which(macosko$ensembl %in% rownames(log2cpm_macosko)),]
+```
+
+Load best subset. `si_pam.rda` contains two objects: `si_pam_25` (top 25 samples within clusters and individuals) and `si_pam_long` (all sample information on silhouette index). 
+
+```{r}
+load(file = "../output/images-subset-silhouette.Rmd/si_pam.ash.rda")
+```
+
+subset to the best samples
+
+```{r}
+log2cpm_macosko_top <- log2cpm_macosko[, rownames(pdata) %in% unique(si_pam_25$unique_id)]
+pdata_top <- pdata[rownames(pdata) %in% unique(si_pam_25$unique_id),]
+all.equal(colnames(log2cpm_macosko_top), rownames(pdata_top))
+```
+
+
+---
+
+## Within individuals assignment
+
+```{r}
+chip_ids <- unique(pdata_top$chip_id)
+all.equal(rownames(pdata_top), colnames(log2cpm_macosko_top))
+
+cc_scores_within <- lapply(1:uniqueN(pdata_top$chip_id), function(j) {
+  id <- chip_ids[j]
+  samples_to_select <- rownames(pdata_top)[which(pdata_top$chip_id == id)]  
+  
+  cc_scores_list <- lapply(1:uniqueN(ccgenes_macosko$phase), function(i) {
+    ph <- unique(ccgenes_macosko$phase)[i]
+    df_sub <- log2cpm_macosko_top[rownames(log2cpm_macosko_top) %in% ccgenes_macosko$ensembl[ccgenes_macosko$phase == ph], samples_to_select]
+    mn <- colMeans(df_sub)
+    cc <- cor(t(rbind(mn, df_sub)))
+    cc_mean <- cc[-1,1]
+    genes_cc <- names(cc_mean)[which(cc_mean > .3)]
+    scores_raw <- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
+    scores_z <- scale(scores_raw)
+    return(list(scores_z=scores_z, ngenes =length(genes_cc)))
+  })
+  names(cc_scores_list) <- unique(ccgenes_macosko$phase)
+  return(cc_scores_list)
+})
+names(cc_scores_within) <- chip_ids
+
+ngenes_within <- lapply(cc_scores_within, function(x) {
+  sapply(x, function(y) y[[2]])
+})
+ngenes <- sapply(ngenes_within, function(x) sum(x))
+print(ngenes)
+
+# compute phase-specific score for each gene set
+cc_scores <- lapply(cc_scores_within, function(x) {
+  tmp <- do.call(cbind, lapply(x, "[[", 1))
+  colnames(tmp) <- unique(ccgenes_macosko$phase)
+  return(tmp)
+})
+
+# standardize scores across phases
+cc_scores_z <- lapply(cc_scores, function(x) {
+  tmp <- t(apply(x, 1, scale)) 
+  colnames(tmp) <- unique(ccgenes_macosko$phase)
+  tmp <- as.data.frame(tmp)
+  return(tmp)
+})
+
+# convert data format from wide to long
+cc_scores_z_long <- lapply(cc_scores_z, function(x) {
+  long <- gather(x, key=phase, value=scores)
+  long$uniqe_id <- rep(rownames(x), ncol(x))
+  long$chip_id <- pdata_top$chip_id[match(long$uniqe_id, rownames(pdata_top))]
+  long$experiment <- pdata_top$experiment[match(long$uniqe_id, rownames(pdata_top))]
+
+  # select gold standard set
+  long$cluster <- si_pam_25$cluster[match(long$uniqe_id, si_pam_25$unique_id)]
+  
+  long$phase <- factor(long$phase, levels=c("M/G1", "G1/S", "S", "G2", "M"))
+  long$cluster <- as.factor(long$cluster)
+  return(long)
+})
+```
+
+
+```{r within-individual-scores, fig.width=9, fig.height=7, echo = F}
+pp <- do.call(rbind, cc_scores_z_long)
+pp$chip_id <- rep(names(cc_scores_z_long), each = length(cc_scores_z_long))
+
+ggplot(data=pp, 
+         aes(x=phase, y=scores, col=phase)) +
+    geom_violin() +
+    geom_boxplot(width=.1) +
+    facet_grid(as.factor(chip_id)~cluster) +
+    ylab("phase-specific scores") +
+    ggtitle("cell cycle phases assignment of gold samples")
+```
+
+---
+
+## Across individuals assignment
+
+```{r}
+cc_scores_list <- lapply(1:uniqueN(ccgenes_macosko$phase), function(i) {
+  ph <- unique(ccgenes_macosko$phase)[i]
+  df_sub <- log2cpm_macosko_top[rownames(log2cpm_macosko_top) %in% ccgenes_macosko$ensembl[ccgenes_macosko$phase == ph],]
+  mn <- colMeans(df_sub)
+  cc <- cor(t(rbind(mn, df_sub)))
+  cc_mean <- cc[-1,1]
+  genes_cc <- names(cc_mean)[which(cc_mean > .3)]
+  scores_raw <- colMeans(df_sub[rownames(df_sub) %in% genes_cc,])
+  scores_z <- scale(scores_raw)
+  return(list(scores_z=scores_z, ngenes =length(genes_cc)))
+})
+names(cc_scores_list) <- unique(ccgenes_macosko$phase)
+
+ngenes <- sapply(cc_scores_list, "[[", 2)
+cc_scores <- do.call(cbind, lapply(cc_scores_list, "[[", 1))
+colnames(cc_scores) <- unique(ccgenes_macosko$phase)
+
+# standardize scores across phases
+cc_scores_z <- t(apply(cc_scores, 1, scale))
+colnames(cc_scores_z) <- unique(ccgenes_macosko$phase)
+cc_scores_z <- as.data.frame(cc_scores_z)
+
+# convert data format from wide to long
+cc_scores_z_long <- gather(cc_scores_z, key=phase, value=cc_scores_z)
+cc_scores_z_long$uniqe_id <- rep(rownames(cc_scores_z), ncol(cc_scores_z))
+
+cc_scores_z_long$chip_id <- pdata$chip_id[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
+cc_scores_z_long$experiment <- pdata$experiment[match(cc_scores_z_long$uniqe_id, rownames(pdata))]
+
+# select gold standard set
+cc_scores_z_long$cluster <- si_pam_25$cluster[match(cc_scores_z_long$uniqe_id, si_pam_25$unique_id)]
+
+cc_scores_z_long$phase <- factor(cc_scores_z_long$phase, 
+                                  levels=c("M/G1", "G1/S", "S", "G2", "M"))
+cc_scores_z_long$cluster <- as.factor(cc_scores_z_long$cluster)
+```
+
+
+```{r between-individual-scores, fig.width=9, fig.height=7, echo = F}
+# pp <- do.call(rbind, cc_scores_z_long)
+# pp$chip_id <- rep(names(cc_scores_z_long), each = length(cc_scores_z_long))
+
+ggplot(data=cc_scores_z_long, 
+         aes(x=phase, y=cc_scores_z, col=phase)) +
+    geom_violin() +
+    geom_boxplot(width=.1) +
+    facet_grid(as.factor(chip_id)~cluster) +
+    ylab("phase-specific scores") +
+    ggtitle("cell cycle phases assignment of gold samples")
+```
+
+---
+
+## Others
+
+Look up "classical cell cycle genes" listed in Macosko et al. 2015 and see their patterns across the assigned clusters.
+
+```{r}
+hgnc <- c("CCNB1", "CCNB2", "MCM2", "MCM3", "MCM4", "MCM5", "MCM6",
+          "MCM7", "MCM10", "AURKA", "AURKB")
+ensg <- ccgenes_macosko$ensembl[which(ccgenes_macosko$hgnc %in% hgnc)]
+tmp <- log2cpm_macosko[which(rownames(log2cpm_macosko) %in% ensg),]
+tmp <- data.frame(t(tmp))
+
+cc_scores_z_long$ENSG00000073111 <- tmp$ENSG00000073111[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000076003 <- tmp$ENSG00000076003[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000087586 <- tmp$ENSG00000087586[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000076003 <- tmp$ENSG00000076003[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000100297 <- tmp$ENSG00000100297[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000157456 <- tmp$ENSG00000157456[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+cc_scores_z_long$ENSG00000178999 <- tmp$ENSG00000178999[match(cc_scores_z_long$uniqe_id, rownames(tmp))]
+```
+
+
+```{r, fig.width=9, fig.height=6, echo = F}
+plot_grid(
+#MCM2, G1/S
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000073111, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ylab("log2CPM") + ggtitle("MCM2, G1/S"),
+#MCM6, G1/S
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000076003, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ylab("log2CPM") +  ggtitle("MCM6, G1/S"),
+#MCM5, G1/S
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000100297, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ylab("log2CPM") + ggtitle("MCM5, G1/S"),
+nrow=3)
+
+plot_grid(
+#AURKA, M
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000087586, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ggtitle("AURKA, M"),
+#CCNB2, M
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000157456, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ggtitle("CCNB2, M"),
+#AURKB, G2
+ggplot(data=cc_scores_z_long, 
+       aes(x=cluster, y=ENSG00000178999, col=cluster)) +
+  geom_violin() +
+  geom_boxplot(width=.1) +
+  facet_wrap(~as.factor(chip_id), nrow=1) + ggtitle("AURKB, G2"),
+  nrow=3)
+```
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+

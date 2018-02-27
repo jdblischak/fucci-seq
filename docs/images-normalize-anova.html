@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-22</p>
+<p><strong>Last updated:</strong> 2018-02-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 94e13f2</p>
+<p><strong>Code version:</strong> b299bc0</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/summary</h2>
@@ -569,14 +569,32 @@ title(&quot;Position variation&quot;, outer=TRUE, line = -1)</code></pre>
 </div>
 <div id="ash" class="section level2">
 <h2>ash</h2>
-<p>apply ash to position estimates</p>
-<pre class="r"><code>gfp.pos.ash &lt;- ash(gfp.pos$lsmean, gfp.pos$SE, mixcompdist = &quot;+uniform&quot;,
-                   lik = lik_t(df=gfp.pos$df[1]))
-rfp.pos.ash &lt;- ash(rfp.pos$lsmean, rfp.pos$SE, mixcompdist = &quot;+uniform&quot;,
-                   lik = lik_t(df=rfp.pos$df[1]))
-dapi.pos.ash &lt;- ash(dapi.pos$lsmean, dapi.pos$SE, mixcompdist = &quot;+uniform&quot;,
-                    lik = lik_t(df=dapi.pos$df[1]))
-  
+<p>apply shrinkage to position estimates</p>
+<pre class="r"><code># # apply limma ebayes to shrink variances
+# library(limma)
+# gfp.pos.var &lt;- squeezeVar(gfp.pos$SE^2, df = gfp.pos$df)$var.post
+# gfp.pos.df &lt;- squeezeVar(gfp.pos$SE^2, df = gfp.pos$df)$df.prior + gfp.pos$df
+gfp.pos.ash &lt;- ash(gfp.pos$lsmean, gfp.pos$SE, mixcompdist = &quot;uniform&quot;,
+                   lik = lik_t(df=gfp.pos$df[1]), mode = &quot;estimate&quot; )
+# gfp.pos.ash.varpost &lt;- ash(gfp.pos$lsmean, gfp.pos.var, mixcompdist = &quot;uniform&quot;,
+#                    lik = lik_t(df=gfp.pos.df), mode = &quot;estimate&quot; )
+
+
+# rfp.pos.var &lt;- squeezeVar(rfp.pos$SE^2, df = rfp.pos$df)$var.post
+# rfp.pos.df &lt;- squeezeVar(rfp.pos$SE^2, df = rfp.pos$df)$df.prior + gfp.pos$df
+rfp.pos.ash &lt;- ash(rfp.pos$lsmean, rfp.pos$SE, mixcompdist = &quot;uniform&quot;,
+                   lik = lik_t(df=rfp.pos$df[1]), mode = &quot;estimate&quot; )
+# rfp.pos.ash.varpost &lt;- ash(rfp.pos$lsmean, rfp.pos.var, mixcompdist = &quot;uniform&quot;,
+#                    lik = lik_t(df=rfp.pos.df), mode = &quot;estimate&quot; )
+
+# dapi.pos.var &lt;- squeezeVar(dapi.pos$SE^2, df = dapi.pos$df)$var.post
+# dapi.pos.df &lt;- squeezeVar(dapi.pos$SE^2, df = dapi.pos$df)$df.prior + gfp.pos$df
+dapi.pos.ash &lt;- ash(dapi.pos$lsmean, dapi.pos$SE, mixcompdist = &quot;uniform&quot;,
+                   lik = lik_t(df=dapi.pos$df[1]), mode = &quot;estimate&quot; )
+# dapi.pos.ash.varpost &lt;- ash(dapi.pos$lsmean, dapi.pos.var, mixcompdist = &quot;uniform&quot;,
+#                    lik = lik_t(df=dapi.pos.df), mode = &quot;estimate&quot; )
+# 
+
 par(mfrow=c(2,2))
 plot(gfp.pos.ash$result$betahat, gfp.pos.ash$result$PosteriorMean,
      xlab = &quot;beta hat&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;GFP&quot;)
@@ -600,14 +618,14 @@ plot(dapi.pos.ash$result$sebetahat, dapi.pos.ash$result$PosteriorSD,
      xlab = &quot;Standard Error&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;DAPI&quot;)
 abline(0,1, col = &quot;royalblue&quot;)</code></pre>
 <p><img src="figure/images-normalize-anova.Rmd/ash-position-2.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Plate effect. With only 16 plates, the effects can’t be estimated…</p>
+<p>Plate effect.</p>
 <pre class="r"><code>library(ashr)
-gfp.plates.ash &lt;- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = &quot;+uniform&quot;,
-                   lik = lik_t(df=gfp.plates$df[1]))
-rfp.plates.ash &lt;- ash(rfp.plates$lsmean, rfp.plates$SE, mixcompdist = &quot;+uniform&quot;,
-                   lik = lik_t(df=rfp.plates$df[1]))
-dapi.plates.ash &lt;- ash(dapi.plates$lsmean, dapi.plates$SE, mixcompdist = &quot;+uniform&quot;,
-                    lik = lik_t(df=dapi.plates$df[1]))
+gfp.plates.ash &lt;- ash(gfp.plates$lsmean, gfp.plates$SE, mixcompdist = &quot;uniform&quot;,
+                   lik = lik_t(df=gfp.plates$df[1]), mode = &quot;estimate&quot;)
+rfp.plates.ash &lt;- ash(rfp.plates$lsmean, rfp.plates$SE, mixcompdist = &quot;uniform&quot;,
+                   lik = lik_t(df=rfp.plates$df[1]), mode = &quot;estimate&quot;)
+dapi.plates.ash &lt;- ash(dapi.plates$lsmean, dapi.plates$SE, mixcompdist = &quot;uniform&quot;,
+                    lik = lik_t(df=dapi.plates$df[1]), mode = &quot;estimate&quot;)
   
 par(mfrow=c(2,2))
 plot(gfp.plates.ash$result$betahat, gfp.plates.ash$result$PosteriorMean,
@@ -620,8 +638,9 @@ plot(dapi.plates.ash$result$betahat, dapi.plates.ash$result$PosteriorMean,
      xlab = &quot;beta hat&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;DAPI&quot;)
 abline(0,1, col = &quot;royalblue&quot;)
      
-par(mfrow=c(2,2))
-plot(gfp.plates.ash$result$sebetahat, gfp.plates.ash$result$PosteriorSD,
+par(mfrow=c(2,2))</code></pre>
+<p><img src="figure/images-normalize-anova.Rmd/ash-plate-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(gfp.plates.ash$result$sebetahat, gfp.plates.ash$result$PosteriorSD,
      xlab = &quot;Standard Error&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;GFP&quot;)
 abline(0,1, col = &quot;royalblue&quot;)
 plot(rfp.plates.ash$result$sebetahat, rfp.plates.ash$result$PosteriorSD,
@@ -630,6 +649,105 @@ abline(0,1, col = &quot;royalblue&quot;)
 plot(dapi.plates.ash$result$sebetahat, dapi.plates.ash$result$PosteriorSD,
      xlab = &quot;Standard Error&quot;, ylab = &quot;Shrunken estimate&quot;, main = &quot;DAPI&quot;)
 abline(0,1, col = &quot;royalblue&quot;)</code></pre>
+<p><img src="figure/images-normalize-anova.Rmd/ash-plate-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Substract plate effect from the raw estimates.</p>
+<pre class="r"><code>## RFP
+pdata$rfp.median.log10sum.adjust.ash &lt;- pdata$rfp.median.log10sum
+rfp.plates$experiment &lt;- as.character(rfp.plates$experiment)
+rfp.pos$experiment &lt;- as.character(rfp.pos$image_label)
+pdata$experiment &lt;- as.character(pdata$experiment)
+
+exps &lt;- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp &lt;- exps[i]
+  ii_exp &lt;- which(pdata$experiment == exp)
+  est_exp &lt;- rfp.plates.ash$result$PosteriorMean[which(rfp.plates$experiment==exp)]
+  pdata$rfp.median.log10sum.adjust.ash[ii_exp] &lt;- (pdata$rfp.median.log10sum[ii_exp] - est_exp)
+}
+
+pos &lt;- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p &lt;- pos[i]
+  ii_pos &lt;- which(pdata$image_label == p)
+  est_pos &lt;- rfp.pos.ash$result$PosteriorMean[which(rfp.pos$image_label==p)]
+  pdata$rfp.median.log10sum.adjust.ash[ii_pos] &lt;- (pdata$rfp.median.log10sum[ii_pos] - est_pos)
+}
+
+
+## GFP
+pdata$gfp.median.log10sum.adjust.ash &lt;- pdata$gfp.median.log10sum
+gfp.plates$experiment &lt;- as.character(gfp.plates$experiment)
+gfp.pos$experiment &lt;- as.character(gfp.pos$image_label)
+pdata$experiment &lt;- as.character(pdata$experiment)
+
+exps &lt;- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp &lt;- exps[i]
+  ii_exp &lt;- which(pdata$experiment == exp)
+  est_exp &lt;- gfp.plates.ash$result$PosteriorMean[which(gfp.plates$experiment==exp)]
+  pdata$gfp.median.log10sum.adjust.ash[ii_exp] &lt;- (pdata$gfp.median.log10sum[ii_exp] - est_exp)
+}
+
+pos &lt;- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p &lt;- pos[i]
+  ii_pos &lt;- which(pdata$image_label == p)
+  est_pos &lt;- gfp.pos.ash$result$PosteriorMean[which(gfp.pos$image_label==p)]
+  pdata$gfp.median.log10sum.adjust.ash[ii_pos] &lt;- (pdata$gfp.median.log10sum[ii_pos] - est_pos)
+}
+
+
+
+## DAPI
+pdata$dapi.median.log10sum.adjust.ash &lt;- pdata$dapi.median.log10sum
+dapi.plates$experiment &lt;- as.character(dapi.plates$experiment)
+dapi.pos$experiment &lt;- as.character(dapi.pos$image_label)
+pdata$experiment &lt;- as.character(pdata$experiment)
+
+exps &lt;- unique(pdata$experiment)
+for (i in 1:uniqueN(exps)) {
+  exp &lt;- exps[i]
+  ii_exp &lt;- which(pdata$experiment == exp)
+  est_exp &lt;- dapi.plates.ash$result$PosteriorMean[which(dapi.plates$experiment==exp)]
+  pdata$dapi.median.log10sum.adjust.ash[ii_exp] &lt;- (pdata$dapi.median.log10sum[ii_exp] - est_exp)
+}
+
+pos &lt;- unique(pdata$image_label)
+for (i in 1:uniqueN(pos)) {
+  p &lt;- pos[i]
+  ii_pos &lt;- which(pdata$image_label == p)
+  est_pos &lt;- dapi.pos.ash$result$PosteriorMean[which(dapi.pos$image_label==p)]
+  pdata$dapi.median.log10sum.adjust.ash[ii_pos] &lt;- (pdata$dapi.median.log10sum[ii_pos] - est_pos)
+}</code></pre>
+<p>After adjustment</p>
+<p><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-ash-1.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-ash-2.png" width="1152" style="display: block; margin: auto;" /><img src="figure/images-normalize-anova.Rmd/boxplot-adjusted-ash-3.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## These are four corners previously found more likely to have high gene expression values in sequencing data.
+par(mfrow=c(1,1))
+plot(1:7, 1:7, pch=&quot;&quot;, axes=F, ann=F)
+legend(&quot;center&quot;, legend = c(&quot;A_a&quot;, &quot;H_a&quot;, &quot;A_b&quot;, &quot;H_b&quot;), col=colbrew[c(1,2,3,4)],
+       pch=16)</code></pre>
+<p><img src="figure/images-normalize-anova.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow=c(3,1))
+boxplot(rfp.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.rfp), 
+        data=pdata, ylab = &quot;RFP&quot;,
+        col=well.pp$cols[as.numeric(ord.rfp)])
+abline(h=0, lwd=2, col=&quot;royalblue&quot;)
+boxplot(gfp.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.gfp), 
+        data=pdata, ylab = &quot;GFP&quot;,
+        col=well.pp$cols[as.numeric(ord.gfp)])
+abline(h=0, lwd=2, col=&quot;royalblue&quot;)
+boxplot(dapi.median.log10sum.adjust.ash ~ factor(image_label, levels=ord.dapi), 
+        data=pdata, ylab = &quot;GFP&quot;,
+        col=well.pp$cols[as.numeric(ord.dapi)])
+abline(h=0, lwd=2, col=&quot;royalblue&quot;)
+title(&quot;Position variation&quot;, outer=TRUE, line = -1)</code></pre>
+<p><img src="figure/images-normalize-anova.Rmd/plot-position-adjusted-ash-1.png" width="960" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="output-results-1" class="section level2">
+<h2>Output results</h2>
+<p>Save corrected data to a temporary output folder.</p>
+<pre class="r"><code>saveRDS(pdata, file = &quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
