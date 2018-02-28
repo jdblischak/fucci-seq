@@ -319,19 +319,18 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2017-12-23</p>
+<p><strong>Last updated:</strong> 2018-02-27</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 0604a0e</p>
+<p><strong>Code version:</strong> 056ff12</p>
 <hr />
 <div id="introductionsummary" class="section level2">
 <h2>Introduction/Summary</h2>
-<p>Here I combine image intensity data with sequencing data on the FUCCI transgenes, focusing on the subset of samples that are identified as single nucleus (1,264 samples).</p>
-<p><strong>Results</strong></p>
 <ol style="list-style-type: decimal">
 <li><p>There are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5’ end: promoter region -&gt; EGFP -&gt; 20 bp linker -&gt; mCherry. We don’t yet have an explanation on the low number of reads mapped to mCherry… We decided to use EGFP to determine if the transgene is silenced at all.</p></li>
 <li><p>Consistent with image intensity data, there are more variation between batches of C1 plates than between individuals. Fortunatley, given our balanced design, technical variation between batches are spread out across individuals. The main concern here would be the inflated within individual variation due to differences between the C1 plates.</p></li>
 <li><p>Considering the relationship between intensity and transgene molecule count: samples with no EGFP molecules also have lower than average (z-score &lt; 0) GFP and RFP intensity.</p></li>
+<li></li>
 </ol>
 <hr />
 </div>
@@ -350,93 +349,112 @@ library(Biobase)</code></pre>
 <div id="data" class="section level2">
 <h2>Data</h2>
 <p>Import sequencing data.</p>
-<pre class="r"><code>fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
-eset &lt;- Reduce(combine, Map(readRDS, fname))
+<pre class="r"><code># fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
+# eset &lt;- Reduce(combine, Map(readRDS, fname))
+# 
+# pdata &lt;- pData(eset)
+# pdata$unique &lt;- paste(pdata$image_individual, sprintf(&quot;%05d&quot;, pdata$image_label), sep=&quot;_&quot;)
 
-pdata &lt;- pData(eset)
-pdata$unique &lt;- paste(pdata$image_individual, sprintf(&quot;%05d&quot;, pdata$image_label), sep=&quot;_&quot;)
+df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
 
-transgenes &lt;- data.frame(t(exprs(eset)[c(&quot;EGFP&quot;, &quot;mCherry&quot;),]))</code></pre>
-<p>Imort intensity data for samples with single nucleus. For source of the intensity data, see [combine-intensity-data.R][/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R].</p>
-<pre class="r"><code>ints &lt;- readRDS(file=&quot;/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds&quot;)
-ints$rfp.z &lt;- scale(ints$rfp.median.log10sum, center=TRUE, scale=TRUE)
-ints$gfp.z &lt;- scale(ints$gfp.median.log10sum, center=TRUE, scale=TRUE)
-ints$dapi.z &lt;- scale(ints$dapi.median.log10sum, center=TRUE, scale=TRUE)
-
-ints_tmp &lt;- data.frame(unique=ints$unique,
-                       rfp.z=ints$rfp.z,
-                       gfp.z=ints$gfp.z,
-                       dapi.z=ints$dapi.z, 
-                       stringsAsFactors = F)</code></pre>
-<p>Combine intensities with sequencing data. This includes 1,264 samples with single nucleus.</p>
-<pre class="r"><code>combo &lt;- ints_tmp
-combo$EGFP &lt;- transgenes$EGFP[match(combo$unique, pdata$unique)]
-combo$mCherry &lt;- transgenes$mCherry[match(combo$unique, pdata$unique)]
-combo$chip_id &lt;- pdata$chip_id[match(combo$unique, pdata$unique)]
-combo$experiment &lt;- pdata$experiment[match(combo$unique, pdata$unique)]</code></pre>
+# import corrected intensities
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
 <div id="transgene-count" class="section level2">
 <h2>Transgene count</h2>
 <p><strong>Results</strong>: there are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5’ end: promoter region -&gt; EGFP -&gt; 20 bp linker -&gt; mCherry. We don’t yet have an explanation on the low number of reads mapped to mCherry… We decided to use EGFP to determine if the transgene is silenced at all.</p>
-<pre class="r"><code>summary(combo$EGFP)</code></pre>
+<pre class="r"><code>summary(pdata.adj$mol_egfp)</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-   0.00    8.00   17.00   17.34   25.00   59.00 </code></pre>
-<pre class="r"><code>summary(combo$mCherry)</code></pre>
+   1.00   15.00   21.00   21.59   27.00   61.00 </code></pre>
+<pre class="r"><code>summary(pdata.adj$mol_mcherry)</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.0000  0.0000  0.4628  1.0000  6.0000 </code></pre>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-<hr />
+ 0.0000  0.0000  1.0000  0.9515  1.0000  6.0000 </code></pre>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="egfp" class="section level2">
 <h2>EGFP</h2>
-<div id="by-individual" class="section level3">
-<h3>By individual</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="by-c1-plate" class="section level3">
-<h3>By C1 plate</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-8-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="by-individual-and-c1-plate" class="section level3">
-<h3>By individual and C1 plate</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-9-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-<hr />
-</div>
+<p>By individual</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>By C1 plate</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-6-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>By individual and C1 plate</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 <div id="mcherry" class="section level2">
 <h2>mCherry</h2>
-<div id="by-individual-1" class="section level3">
-<h3>By individual</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="by-c1-plate-1" class="section level3">
-<h3>By C1 plate</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-11-1.png" width="1056" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
-</div>
-<div id="by-individual-and-c1-plate-1" class="section level3">
-<h3>By individual and C1 plate</h3>
-<p><img src="figure/images-transgene.Rmd/unnamed-chunk-12-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
+<p>By individual</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>By C1 plate</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-9-1.png" width="1056" style="display: block; margin: auto;" /></p>
+<p>By individual and C1 plate</p>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-10-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
+<div id="correlation-between-transgene-count-and-intensities" class="section level2">
+<h2>Correlation between transgene count and intensities</h2>
+<pre class="r"><code>par(mfrow=c(2,2))
+plot(y=pdata.adj$mol_mcherry,
+     x=pdata.adj$mol_egfp,
+     xlab = &quot;EFGP (green)&quot;, ylab = &quot;mCherry (Red)&quot;, 
+     main = &quot;Transgene molecule count&quot;,
+     pch = 16, cex = .7)
+plot(y=pdata.adj$gfp.median.log10sum,
+     x=pdata.adj$mol_egfp,
+     xlab = &quot;EFGP (green)&quot;, ylab = &quot;Green intensity&quot;, 
+     main = &quot;Green intensity vs. molecule count&quot;,
+     pch = 16, cex = .7)
+plot(y=pdata.adj$rfp.median.log10sum,
+     x=pdata.adj$mol_mcherry,
+     xlab = &quot;mCherry (red)&quot;, ylab = &quot;Red intensity&quot;, 
+     main = &quot;Red intensity vs. molecule count&quot;,
+     pch = 16, cex = .7)</code></pre>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Correlation between total transgene count and intensities</p>
+<pre class="r"><code>trans_total &lt;- rowSums(cbind(pdata.adj$mol_mcherry,pdata.adj$mol_egfp))
+par(mfrow=c(1,2))
+plot(x=trans_total,
+     y=pdata.adj$gfp.median.log10sum,
+     xlab = &quot;transgene molecule count&quot;, 
+     ylab = &quot;EGFP protein intensity&quot;, 
+     pch = 16, cex = .7)
+plot(x=trans_total,
+     y=pdata.adj$rfp.median.log10sum,
+     xlab = &quot;transgene molecule count&quot;, 
+     ylab = &quot;mCherry protein intensity&quot;, 
+     pch = 16, cex = .7)
+title(main = &quot;transgene molecule count vs. intensities&quot;,
+      outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow=c(6,2), mar = c(3,2,2,1))
+for (i in 1:length(unique(pdata.adj$chip_id))) {
+  ii_id &lt;- which(pdata.adj$chip_id == unique(pdata.adj$chip_id)[i])
+  plot(x=trans_total[ii_id],
+       y=pdata.adj$gfp.median.log10sum[ii_id],
+       xlab = &quot;transgene molecule count&quot;, 
+       ylab = &quot;EGFP protein intensity&quot;, 
+#       main = &quot;Transgene molecule count&quot;,
+       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
+  plot(x=trans_total[ii_id],
+       y=pdata.adj$rfp.median.log10sum[ii_id],
+       xlab = &quot;transgene molecule count&quot;, 
+       ylab = &quot;mCherry protein intensity&quot;, 
+#       main = &quot;Transgene molecule count&quot;,
+       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
+}</code></pre>
+<p><img src="figure/images-transgene.Rmd/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: x86_64-redhat-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
-LAPACK: /home/joycehsiao/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -452,20 +470,21 @@ attached base packages:
 
 other attached packages:
  [1] Biobase_2.38.0      BiocGenerics_0.24.0 RColorBrewer_1.1-2 
- [4] wesanderson_0.3.2   cowplot_0.8.0       dplyr_0.7.0        
- [7] data.table_1.10.4   cellcycleR_0.1.2    zoo_1.8-0          
+ [4] wesanderson_0.3.4   cowplot_0.9.2       dplyr_0.7.4        
+ [7] data.table_1.10.4-3 cellcycleR_0.1.6    zoo_1.8-1          
 [10] binhf_1.0-1         adlift_1.3-3        EbayesThresh_1.4-12
 [13] wavethresh_4.6.8    MASS_7.3-47         ggplot2_2.2.1      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14     compiler_3.4.1   git2r_0.19.0     plyr_1.8.4      
- [5] tools_3.4.1      digest_0.6.12    evaluate_0.10.1  tibble_1.3.3    
- [9] gtable_0.2.0     lattice_0.20-34  rlang_0.1.4.9000 yaml_2.1.16     
-[13] stringr_1.2.0    knitr_1.17       rprojroot_1.2    grid_3.4.1      
-[17] glue_1.1.1       R6_2.2.2         rmarkdown_1.8    reshape2_1.4.2  
-[21] magrittr_1.5     backports_1.0.5  scales_0.4.1     htmltools_0.3.6 
-[25] assertthat_0.2.0 colorspace_1.3-2 labeling_0.3     stringi_1.1.2   
-[29] lazyeval_0.2.0   munsell_0.4.3   </code></pre>
+ [1] Rcpp_0.12.15     pillar_1.1.0     compiler_3.4.1   git2r_0.21.0    
+ [5] plyr_1.8.4       bindr_0.1        tools_3.4.1      digest_0.6.15   
+ [9] evaluate_0.10.1  tibble_1.4.2     gtable_0.2.0     lattice_0.20-35 
+[13] pkgconfig_2.0.1  rlang_0.2.0      yaml_2.1.16      bindrcpp_0.2    
+[17] stringr_1.3.0    knitr_1.20       rprojroot_1.3-2  grid_3.4.1      
+[21] glue_1.2.0       R6_2.2.2         rmarkdown_1.8    reshape2_1.4.3  
+[25] magrittr_1.5     backports_1.1.2  scales_0.5.0     htmltools_0.3.6 
+[29] assertthat_0.2.0 colorspace_1.3-2 labeling_0.3     stringi_1.1.6   
+[33] lazyeval_0.2.1   munsell_0.4.3   </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
