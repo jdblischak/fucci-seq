@@ -319,15 +319,15 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-23</p>
+<p><strong>Last updated:</strong> 2018-02-28</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 4b23dde</p>
+<p><strong>Code version:</strong> c2d9072</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
 <p>I computed correlation between intensity measurements and gene expression (log2cpm). Then apply CorShrink to account for varying sample size between correlations.</p>
-<p>Results show that there are some indication of cell cycle signal in teh data. Of the genes with s-vaule &lt; .01, 33 correlate with DAPI are annotated as cell cycle gene, 74 correlation with RFP and annotated as cell cycle gene, and 110 correlate with GFP are annotated as cell cycle gene. However, these numbers are not large consider that there are a total of 11429 genes in the data, and among these only 1055 are annotated as cell cycle gene.</p>
+<p>Results show that there are some indication of cell cycle signal in teh data. Of the genes with s-vaule &lt; .01, 33 correlate with DAPI are annotated as cell cycle gene, 74 correlation with RFP and annotated as cell cycle gene, and 110 correlate with GFP are annotated as cell cycle gene.</p>
 <p>In addition, there are sources of variation that may drive sample differences other than cell cycle, and crucially our design induces a strong sample variation between batches, as a trade-off for avoiding confounding of individual and plate effect. Hence analysis of sample variation in our data should consider technical sources of variation along with biological variation.</p>
 <hr />
 </div>
@@ -358,8 +358,8 @@ log2cpm.adjust &lt;- log2cpm.adjust[grep(&quot;ENSG&quot;, rownames(log2cpm)),
 
 all.equal(rownames(pdata.adj), colnames(log2cpm))</code></pre>
 <pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>genes.variable &lt;- readRDS(&quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.variable.rds&quot;)
-genes.cycle &lt;- readRDS(file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.rds&quot;)</code></pre>
+<pre class="r"><code>genes.go.detect &lt;- readRDS(&quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.detect.rds&quot;)
+genes.go &lt;- readRDS(file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds&quot;)</code></pre>
 </div>
 <div id="correlations" class="section level2">
 <h2>Correlations</h2>
@@ -422,9 +422,12 @@ corr.dapi.val &lt;- corr.dapi[!is.na(corr.dapi$corr),]
 
 
 par(mfrow=c(2,2))
-hist(corr.rfp.val$corr, main = &quot;correlation between RFP and expression&quot;)
-hist(corr.gfp.val$corr, main = &quot;correlation between GFP and expression&quot;)
-hist(corr.dapi.val$corr, main = &quot;correlation between DAPI and expression&quot;)</code></pre>
+hist(corr.rfp.val$corr, main = &quot;correlation between RFP and expression&quot;,nclass=50)
+abline(v=0, col = &quot;blue&quot;)
+hist(corr.gfp.val$corr, main = &quot;correlation between GFP and expression&quot;,nclass=50)
+abline(v=0, col = &quot;blue&quot;)
+hist(corr.dapi.val$corr, main = &quot;correlation between DAPI and expression&quot;,nclass=50)
+abline(v=0, col = &quot;blue&quot;)</code></pre>
 <p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-3-1.png" width="576" style="display: block; margin: auto;" /></p>
 <p>Apply CorShrink.</p>
 <pre class="r"><code>corr.rfp.shrink &lt;- CorShrinkVector(corr.rfp.val$corr, nsamp_vec = corr.rfp.val$nsam,
@@ -463,22 +466,88 @@ plot(corr.dapi.val$corr, corr.dapi.shrink$estimate,
 abline(0,1)
 title(&quot;s-value &lt; .01&quot;, outer = TRUE, line = -1)</code></pre>
 <p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Of the ones with s-value &lt; .05, consider the proportion of genes in our annotated set.</p>
-<pre class="r"><code>ii.dapi &lt;- names(corr.dapi.shrink$estimate)[which(corr.dapi.shrink$model$result$svalue &lt; .01)]
-print(sum(ii.dapi %in% genes.cycle))</code></pre>
-<pre><code>[1] 33</code></pre>
-<pre class="r"><code>print(sum(ii.dapi %in% genes.variable))</code></pre>
-<pre><code>[1] 20</code></pre>
-<pre class="r"><code>ii.rfp &lt;- names(corr.rfp.shrink$estimate)[which(corr.rfp.shrink$model$result$svalue &lt; .01)]
-print(sum(ii.rfp %in% genes.cycle))</code></pre>
-<pre><code>[1] 74</code></pre>
-<pre class="r"><code>print(sum(ii.rfp %in% genes.variable))</code></pre>
-<pre><code>[1] 29</code></pre>
-<pre class="r"><code>ii.gfp &lt;- names(corr.gfp.shrink$estimate)[which(corr.gfp.shrink$model$result$svalue &lt; .01)]
-print(sum(ii.gfp %in% genes.cycle))</code></pre>
-<pre><code>[1] 110</code></pre>
-<pre class="r"><code>print(sum(ii.gfp %in% genes.variable))</code></pre>
-<pre><code>[1] 77</code></pre>
+<hr />
+</div>
+<div id="proportions" class="section level2">
+<h2>Proportions</h2>
+<p>Of the ones with s-value &lt; .01, consider the proportion of genes in our annotated set.</p>
+<pre class="r"><code>dapi.sig &lt;- corr.dapi.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.dapi.shrink$estimate) %in% genes.go
+table(dapi.sig, go.genes)</code></pre>
+<pre><code>        go.genes
+dapi.sig FALSE TRUE
+   FALSE  7121  490
+   TRUE    200   33</code></pre>
+<pre class="r"><code>rfp.sig &lt;- corr.rfp.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.rfp.shrink$estimate) %in% genes.go
+table(rfp.sig, go.genes)</code></pre>
+<pre><code>       go.genes
+rfp.sig FALSE TRUE
+  FALSE  7003  449
+  TRUE    318   74</code></pre>
+<pre class="r"><code>gfp.sig &lt;- corr.gfp.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.gfp.shrink$estimate) %in% genes.go
+table(gfp.sig, go.genes)</code></pre>
+<pre><code>       go.genes
+gfp.sig FALSE TRUE
+  FALSE  5857  413
+  TRUE   1464  110</code></pre>
+<p>Given that genes belong to GO cell cycle category, the proportion that has significant correlation with RFP, GFP, and DAPI intensities</p>
+<p>DAPI</p>
+<pre class="r"><code>sum(dapi.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.06309751</code></pre>
+<p>GFP</p>
+<pre class="r"><code>sum(gfp.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.210325</code></pre>
+<p>RFP</p>
+<pre class="r"><code>sum(rfp.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.1414914</code></pre>
+<p>Of the ones with s-value &lt; .01, consider the proportion of genes in our annotated set and also with detection rate &gt; 50%</p>
+<pre class="r"><code>dapi.sig &lt;- corr.dapi.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.dapi.shrink$estimate) %in% genes.go.detect
+table(dapi.sig, go.genes)</code></pre>
+<pre><code>        go.genes
+dapi.sig FALSE TRUE
+   FALSE  7194  417
+   TRUE    200   33</code></pre>
+<pre class="r"><code>rfp.sig &lt;- corr.rfp.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.rfp.shrink$estimate) %in% genes.go.detect
+table(rfp.sig, go.genes)</code></pre>
+<pre><code>       go.genes
+rfp.sig FALSE TRUE
+  FALSE  7075  377
+  TRUE    319   73</code></pre>
+<pre class="r"><code>gfp.sig &lt;- corr.gfp.shrink$model$result$svalue &lt; .01
+go.genes &lt;- names(corr.gfp.shrink$estimate) %in% genes.go.detect
+table(gfp.sig, go.genes)</code></pre>
+<pre><code>       go.genes
+gfp.sig FALSE TRUE
+  FALSE  5927  343
+  TRUE   1467  107</code></pre>
+<p>Given that genes belong to GO cell cycle category and with detection rate &gt; 50%, the proportion that has significant correlation with RFP, GFP, and DAPI intensities</p>
+<p>DAPI</p>
+<pre class="r"><code>sum(dapi.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.07333333</code></pre>
+<p>GFP</p>
+<pre class="r"><code>sum(gfp.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.2377778</code></pre>
+<p>RFP</p>
+<pre class="r"><code>sum(rfp.sig*go.genes)/sum(go.genes)</code></pre>
+<pre><code>[1] 0.1622222</code></pre>
+<hr />
+</div>
+<div id="output" class="section level2">
+<h2>Output</h2>
+<p>save genes that are either correlated with DAPI, RFP or GFP</p>
+<pre class="r"><code>go.genes &lt;- names(corr.dapi.shrink$estimate)[names(corr.dapi.shrink$estimate) %in% genes.go]
+
+dapi.sig &lt;- names(corr.dapi.shrink$estimate)[corr.dapi.shrink$model$result$svalue &lt; .01]
+rfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.rfp.shrink$model$result$svalue &lt; .01]
+gfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.gfp.shrink$model$result$svalue &lt; .01]
+sig.union &lt;- unique(c(dapi.sig, rfp.sig, gfp.sig))
+
+genes.corr &lt;- sig.union[sig.union %in% go.genes]</code></pre>
+<pre class="r"><code>saveRDS(genes.corr, file = &quot;../output/images-seq-correlation.Rmd/genes.corr.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">

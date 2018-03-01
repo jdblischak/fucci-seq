@@ -32,15 +32,15 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 ## Introduction/Summary
 
-Here I combine image intensity data with sequencing data on the FUCCI transgenes, focusing on the subset of samples that are identified as single nucleus (1,264 samples). 
-
-**Results**
 
 1. There are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5' end: promoter region -> EGFP -> 20 bp linker -> mCherry. We don't yet have an explanation on the low number of reads mapped to mCherry... We decided to use EGFP to determine if the transgene is silenced at all. 
 
 2. Consistent with image intensity data, there are more variation between batches of C1 plates than between individuals. Fortunatley, given our balanced design, technical variation between batches are spread out across individuals. The main concern here would be the inflated within individual variation due to differences between the C1 plates.
 
 3. Considering the relationship between intensity and transgene molecule count: samples with no EGFP molecules also have lower than average (z-score < 0) GFP and RFP intensity. 
+
+
+4. 
 
 ---
 
@@ -64,41 +64,20 @@ library(Biobase)
 Import sequencing data.
 
 ```{r}
-fname <- Sys.glob("../data/eset/*.rds")
-eset <- Reduce(combine, Map(readRDS, fname))
+# fname <- Sys.glob("../data/eset/*.rds")
+# eset <- Reduce(combine, Map(readRDS, fname))
+# 
+# pdata <- pData(eset)
+# pdata$unique <- paste(pdata$image_individual, sprintf("%05d", pdata$image_label), sep="_")
 
-pdata <- pData(eset)
-pdata$unique <- paste(pdata$image_individual, sprintf("%05d", pdata$image_label), sep="_")
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
 
-transgenes <- data.frame(t(exprs(eset)[c("EGFP", "mCherry"),]))
+# import corrected intensities
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
 ```
 
-
-Imort intensity data for samples with single nucleus. For source of the intensity data, see [combine-intensity-data.R][/project2/gilad/joycehsiao/fucci-seq/code/combine-intensity-data.R].
-
-
-```{r, echo = TRUE}
-ints <- readRDS(file="/project2/gilad/joycehsiao/fucci-seq/data/intensity.rds")
-ints$rfp.z <- scale(ints$rfp.median.log10sum, center=TRUE, scale=TRUE)
-ints$gfp.z <- scale(ints$gfp.median.log10sum, center=TRUE, scale=TRUE)
-ints$dapi.z <- scale(ints$dapi.median.log10sum, center=TRUE, scale=TRUE)
-
-ints_tmp <- data.frame(unique=ints$unique,
-                       rfp.z=ints$rfp.z,
-                       gfp.z=ints$gfp.z,
-                       dapi.z=ints$dapi.z, 
-                       stringsAsFactors = F)
-```
-
-Combine intensities with sequencing data. This includes 1,264 samples with single nucleus.
-
-```{r}
-combo <- ints_tmp
-combo$EGFP <- transgenes$EGFP[match(combo$unique, pdata$unique)]
-combo$mCherry <- transgenes$mCherry[match(combo$unique, pdata$unique)]
-combo$chip_id <- pdata$chip_id[match(combo$unique, pdata$unique)]
-combo$experiment <- pdata$experiment[match(combo$unique, pdata$unique)]
-```
 
 $~$
 
@@ -109,88 +88,134 @@ $~$
 **Results**: there are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5' end: promoter region -> EGFP -> 20 bp linker -> mCherry. We don't yet have an explanation on the low number of reads mapped to mCherry... We decided to use EGFP to determine if the transgene is silenced at all. 
 
 ```{r}
-summary(combo$EGFP)
-summary(combo$mCherry)
+summary(pdata.adj$mol_egfp)
+summary(pdata.adj$mol_mcherry)
 ```
 
 ```{r, fig.width=7, fig.height=6, echo = FALSE}
 par(mfrow=c(2,2))
-plot(combo$EGFP, combo$gfp.z,
-     xlab = "GFP intensity", ylab = "EGFP molecule count")
-plot(combo$EGFP, combo$rfp.z,
-     xlab = "RFP intensity", ylab = "EGFP molecule count")
-plot(combo$mCherry, combo$gfp.z,
-     xlab = "GFP intensity", ylab = "mCherry molecule count")
-plot(combo$mCherry, combo$rfp.z,
-     xlab = "RFP intensity", ylab = "mCherry molecule count")
+plot(x=pdata.adj$mol_egfp, y=pdata.adj$gfp.median.log10sum,
+     ylab = "GFP intensity", xlab = "EGFP molecule count")
+plot(x=pdata.adj$mol_egfp, y=pdata.adj$rfp.median.log10sum,
+     ylab = "RFP intensity", xlab = "EGFP molecule count")
+plot(x=pdata.adj$mol_mcherry, y=pdata.adj$gfp.median.log10sum,
+     ylab = "GFP intensity", xlab = "mCherry molecule count")
+plot(x=pdata.adj$mol_mcherry, y=pdata.adj$rfp.median.log10sum,
+     ylab = "RFP intensity", xlab = "mCherry molecule count")
 ```
-
-$~$
-
----
 
 ## EGFP
 
-### By individual
+By individual
 
 ```{r, fig.width=7, fig.height=7, echo = FALSE}
-ggplot(combo, aes(x=EGFP)) +
+ggplot(pdata.adj, aes(x=mol_egfp)) +
   geom_histogram() + facet_wrap(~chip_id)
 ```
 
-$~$
-
-### By C1 plate
+By C1 plate
 
 ```{r, fig.width=11, fig.height=11, echo = FALSE}
-ggplot(combo, aes(x=EGFP)) +
+ggplot(pdata.adj, aes(x=mol_egfp)) +
   geom_histogram() + facet_wrap(~experiment, ncol=4) 
 ```
 
-$~$
 
-### By individual and C1 plate
+By individual and C1 plate
 
 ```{r, fig.width=12, fig.height=20, echo = FALSE}
-ggplot(combo, aes(x=EGFP)) +
+ggplot(pdata.adj, aes(x=mol_egfp)) +
   geom_histogram() + facet_grid(experiment ~ chip_id)
 ```
 
-$~$
-
----
 
 ## mCherry
 
-### By individual
+By individual
 
 ```{r, fig.width=7, fig.height=7, echo = FALSE}
-ggplot(combo, aes(x=mCherry)) +
+ggplot(pdata.adj, aes(x=mol_mcherry)) +
   geom_histogram() + facet_wrap(~chip_id)
 ```
 
-$~$
 
-### By C1 plate
+By C1 plate
 
 ```{r, fig.width=11, fig.height=11, echo = FALSE}
-ggplot(combo, aes(x=mCherry)) +
+ggplot(pdata.adj, aes(x=mol_mcherry)) +
   geom_histogram() + facet_wrap(~experiment, ncol=4) 
 ```
 
-$~$
 
-### By individual and C1 plate
+By individual and C1 plate
 
 ```{r, fig.width=12, fig.height=20, echo = FALSE}
-ggplot(combo, aes(x=mCherry)) +
+ggplot(pdata.adj, aes(x=mol_mcherry)) +
   geom_histogram() + facet_grid(experiment ~ chip_id)
 ```
 
-
-$~$
-
 ---
+
+## Correlation between transgene count and intensities
+
+
+```{r, fig.width=7, fig.height=6}
+par(mfrow=c(2,2))
+plot(y=pdata.adj$mol_mcherry,
+     x=pdata.adj$mol_egfp,
+     xlab = "EFGP (green)", ylab = "mCherry (Red)", 
+     main = "Transgene molecule count",
+     pch = 16, cex = .7)
+plot(y=pdata.adj$gfp.median.log10sum,
+     x=pdata.adj$mol_egfp,
+     xlab = "EFGP (green)", ylab = "Green intensity", 
+     main = "Green intensity vs. molecule count",
+     pch = 16, cex = .7)
+plot(y=pdata.adj$rfp.median.log10sum,
+     x=pdata.adj$mol_mcherry,
+     xlab = "mCherry (red)", ylab = "Red intensity", 
+     main = "Red intensity vs. molecule count",
+     pch = 16, cex = .7)
+```
+
+Correlation between total transgene count and intensities
+
+```{r, fig.width=7, fig.height=4}
+trans_total <- rowSums(cbind(pdata.adj$mol_mcherry,pdata.adj$mol_egfp))
+par(mfrow=c(1,2))
+plot(x=trans_total,
+     y=pdata.adj$gfp.median.log10sum,
+     xlab = "transgene molecule count", 
+     ylab = "EGFP protein intensity", 
+     pch = 16, cex = .7)
+plot(x=trans_total,
+     y=pdata.adj$rfp.median.log10sum,
+     xlab = "transgene molecule count", 
+     ylab = "mCherry protein intensity", 
+     pch = 16, cex = .7)
+title(main = "transgene molecule count vs. intensities",
+      outer = TRUE, line = -1)
+```
+
+
+```{r, fig.width=6, fig.height=15}
+par(mfrow=c(6,2), mar = c(3,2,2,1))
+for (i in 1:length(unique(pdata.adj$chip_id))) {
+  ii_id <- which(pdata.adj$chip_id == unique(pdata.adj$chip_id)[i])
+  plot(x=trans_total[ii_id],
+       y=pdata.adj$gfp.median.log10sum[ii_id],
+       xlab = "transgene molecule count", 
+       ylab = "EGFP protein intensity", 
+#       main = "Transgene molecule count",
+       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
+  plot(x=trans_total[ii_id],
+       y=pdata.adj$rfp.median.log10sum[ii_id],
+       xlab = "transgene molecule count", 
+       ylab = "mCherry protein intensity", 
+#       main = "Transgene molecule count",
+       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
+}
+```
 
 ## Session information
 
