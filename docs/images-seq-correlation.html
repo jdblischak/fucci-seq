@@ -322,7 +322,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-02-28</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> b31578a</p>
+<p><strong>Code version:</strong> c2d9072</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -534,6 +534,20 @@ gfp.sig FALSE TRUE
 <p>RFP</p>
 <pre class="r"><code>sum(rfp.sig*go.genes)/sum(go.genes)</code></pre>
 <pre><code>[1] 0.1622222</code></pre>
+<hr />
+</div>
+<div id="output" class="section level2">
+<h2>Output</h2>
+<p>save genes that are either correlated with DAPI, RFP or GFP</p>
+<pre class="r"><code>go.genes &lt;- names(corr.dapi.shrink$estimate)[names(corr.dapi.shrink$estimate) %in% genes.go]
+
+dapi.sig &lt;- names(corr.dapi.shrink$estimate)[corr.dapi.shrink$model$result$svalue &lt; .01]
+rfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.rfp.shrink$model$result$svalue &lt; .01]
+gfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.gfp.shrink$model$result$svalue &lt; .01]
+sig.union &lt;- unique(c(dapi.sig, rfp.sig, gfp.sig))
+
+genes.corr &lt;- sig.union[sig.union %in% go.genes]</code></pre>
+<pre class="r"><code>saveRDS(genes.corr, file = &quot;../output/images-seq-correlation.Rmd/genes.corr.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
