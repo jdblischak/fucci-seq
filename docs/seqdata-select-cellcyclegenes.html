@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-22</p>
+<p><strong>Last updated:</strong> 2018-02-28</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> eb1a233</p>
+<p><strong>Code version:</strong> 4131ce7</p>
 <hr />
 <div id="overview" class="section level2">
 <h2>Overview</h2>
@@ -332,12 +332,11 @@ shared across the workflowr files. -->
 <li><p>Select genes whose expression variability is above certain threshold.</p></li>
 </ol>
 <p>This document generated several RDS for later use:</p>
-<p>*<code>genes.cyclebase.rds</code>: human cell cycle genes based on cycleBase</p>
-<p>*<code>genes.go.rds</code>: human cell cycle genes associated with <a href="GO:0007049" class="uri">GO:0007049</a></p>
-<p>*<code>genes.variable.rds</code>: genes in the current study with detection rate &gt; 50 and dispersion z-score &gt; 1.5 across expression mean bins (this may need to be changed later…).</p>
-<p>*<code>genes.cycle.rds</code>: combined cell cycle annotated genes from CycleBase and GO.</p>
-<p>*<code>genes.cycle.detect.rds</code>: combined cell cycle annotated genes from CycleBase and GO with detection rate &gt; 50% in the current study.</p>
-<p>*<code>genes.variable.cycle.rds</code>: genes identified as variable in the current study that are also in the current cell cycle annotated set.</p>
+<p>*<code>genes.go.rds</code>: 677 human cell cycle genes associated with <a href="GO:0007049" class="uri">GO:0007049</a></p>
+<p>*<code>genes.detect.rds</code>: 6313 genes in the current study with detection rate &gt; 50%</p>
+<p>*<code>genes.go.detect.rds</code>: 450 genes in the current study with detection rate &gt; 50% and associated with <a href="GO:0007049" class="uri">GO:0007049</a></p>
+<p>*<code>genes.variable.rds</code>: 359 genes in the current study with detection rate &gt; 50% and dispersion z-score &gt; 1.5 across expression mean bins</p>
+<p>*<code>genes.go.variable.rds</code>: 24 genes in the current study with detection rate &gt; 50% and dispersion z-score &gt; 1.5 across expression mean bins and associated with <a href="GO:0007049" class="uri">GO:0007049</a></p>
 <hr />
 </div>
 <div id="data-and-packages" class="section level2">
@@ -358,13 +357,8 @@ counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]</code></pre>
 <pre class="r"><code>ensembl = useMart(&quot;ensembl&quot;,dataset=&quot;hsapiens_gene_ensembl&quot;) 
 #gets gene symbol, transcript_id and go_id for all genes annotated with GO:0007507
 genes.go &lt;- getBM(attributes=c(&#39;hgnc_symbol&#39;, &#39;ensembl_gene_id&#39;, &#39;go_id&#39;),
-                   filters = &#39;go&#39;, values = &#39;GO:0007049&#39;, mart = ensembl)</code></pre>
-</div>
-<div id="cyclebase" class="section level2">
-<h2>Cyclebase</h2>
-<p>Download human periodic genes.</p>
-<pre class="r"><code>genes.cyclebase &lt;- read.table(&quot;../data/cellcycle-genes-previous-studies/human_periodic.tsv&quot;,
-           header = TRUE)</code></pre>
+                   filters = &#39;go&#39;, values = &#39;GO:0007049&#39;, mart = ensembl)
+genes.go &lt;- unique(genes.go$ensembl_gene_id)</code></pre>
 </div>
 <div id="variable-genes" class="section level2">
 <h2>Variable genes</h2>
@@ -393,13 +387,13 @@ plot(x=gene.drops, y = log10(gene.means),
      ylab = &quot;log10 gene mean count&quot;)
 abline(v=.5, col = &quot;blue&quot;)
 abline(h=.25, col = &quot;red&quot;)</code></pre>
-<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Two steps here for choosing variable genes:</p>
 <ol style="list-style-type: decimal">
 <li><p>I arbitrary decided on a cutoff for gene mean based on the relationship between CV and log10 gene count. The idea was to filter the genes among which dispersion increases with gene mean (approximately when detection rate 50% or lower).</p></li>
 <li><p>Scan across gene expression bins, identify the ones with high variability in each bin.</p></li>
 </ol>
-<pre class="r"><code>gene.detect &lt;- rownames(counts)[which(gene.drops &gt; .5)]
+<pre class="r"><code>genes.detect &lt;- rownames(counts)[which(gene.drops &gt; .5)]
 
 gene.means.detect &lt;- gene.means[which(gene.drops &gt; .5)]
 gene.cvs.detect &lt;- gene.cvs[which(gene.drops &gt; .5)]
@@ -420,30 +414,26 @@ plot(x=log10(gene.means.detect),
      xlab = &quot;log10 gene mean count&quot;,
      ylab = &quot;CV&quot;, main = &quot;Genes detected in &gt; 50% cells&quot;,
      col = 1+as.numeric(names(gene.means.detect) %in% genes.variable))</code></pre>
-<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/seqdata-select-cellcyclegenes.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="output" class="section level2">
 <h2>Output</h2>
-<pre class="r"><code>saveRDS(as.character(genes.cyclebase$gene), 
-        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cyclebase.rds&quot;)
-saveRDS(as.character(genes.go$ensembl_gene_id),
+<pre class="r"><code>saveRDS(genes.go,
         file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds&quot;)
 saveRDS(genes.variable,
         file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.variable.rds&quot;)
 
-genes.cycle &lt;- unique(c(as.character(genes.cyclebase$gene),
-                        as.character(genes.go$ensembl_gene_id)))
-saveRDS(genes.cycle,
-        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.rds&quot;)
+saveRDS(genes.detect,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.detect.rds&quot;)
 
-genes.cycle.detect &lt;- genes.cycle[which(genes.cycle %in% names(gene.means.detect))]
-saveRDS(genes.cycle.detect,
-        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.detect.rds&quot;)
+genes.go.detect &lt;- genes.detect[which(genes.detect %in% genes.go)]
+saveRDS(genes.go.detect,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.detect.rds&quot;)
 
-genes.variable.cycle &lt;- genes.variable[which(genes.variable %in% genes.cycle)]
-saveRDS(genes.variable.cycle,
-        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.variable.rds&quot;)</code></pre>
+genes.go.variable &lt;- genes.variable[which(genes.variable %in% genes.go)]
+saveRDS(genes.go.variable,
+        file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.variable.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
