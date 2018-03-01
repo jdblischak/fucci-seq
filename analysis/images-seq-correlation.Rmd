@@ -269,6 +269,26 @@ RFP
 sum(rfp.sig*go.genes)/sum(go.genes)
 ```
 
+---
+
+## Output
+
+save genes that are either correlated with DAPI, RFP or GFP
+
+```{r}
+go.genes <- names(corr.dapi.shrink$estimate)[names(corr.dapi.shrink$estimate) %in% genes.go]
+
+dapi.sig <- names(corr.dapi.shrink$estimate)[corr.dapi.shrink$model$result$svalue < .01]
+rfp.sig <- names(corr.dapi.shrink$estimate)[corr.rfp.shrink$model$result$svalue < .01]
+gfp.sig <- names(corr.dapi.shrink$estimate)[corr.gfp.shrink$model$result$svalue < .01]
+sig.union <- unique(c(dapi.sig, rfp.sig, gfp.sig))
+
+genes.corr <- sig.union[sig.union %in% go.genes]
+```
+
+```{r}
+saveRDS(genes.corr, file = "../output/images-seq-correlation.Rmd/genes.corr.rds")
+```
 
 ---
 
