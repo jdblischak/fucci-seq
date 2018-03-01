@@ -40,17 +40,15 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 This document generated several RDS for later use:
 
-*`genes.cyclebase.rds`: human cell cycle genes based on cycleBase
+*`genes.go.rds`: 677 human cell cycle genes associated with GO:0007049
 
-*`genes.go.rds`: human cell cycle genes associated with GO:0007049
+*`genes.detect.rds`: 6313 genes in the current study with detection rate > 50% 
 
-*`genes.variable.rds`: genes in the current study with detection rate > 50 and dispersion z-score > 1.5 across expression mean bins (this may need to be changed later...).
+*`genes.go.detect.rds`: 450 genes in the current study with detection rate > 50%  and associated with GO:0007049
 
-*`genes.cycle.rds`: combined cell cycle annotated genes from CycleBase and GO.
+*`genes.variable.rds`: 359 genes in the current study with detection rate > 50% and dispersion z-score > 1.5 across expression mean bins
 
-*`genes.cycle.detect.rds`: combined cell cycle annotated genes from CycleBase and GO with detection rate > 50% in the current study.
-
-*`genes.variable.cycle.rds`: genes identified as variable in the current study that are also in the current cell cycle annotated set.
+*`genes.go.variable.rds`: 24 genes in the current study with detection rate > 50% and dispersion z-score > 1.5 across expression mean bins and associated with GO:0007049
 
 
 
@@ -84,18 +82,9 @@ ensembl = useMart("ensembl",dataset="hsapiens_gene_ensembl")
 #gets gene symbol, transcript_id and go_id for all genes annotated with GO:0007507
 genes.go <- getBM(attributes=c('hgnc_symbol', 'ensembl_gene_id', 'go_id'),
                    filters = 'go', values = 'GO:0007049', mart = ensembl)
+genes.go <- unique(genes.go$ensembl_gene_id)
 ```
 
-
-## Cyclebase
-
-Download human periodic genes.
-
-
-```{r}
-genes.cyclebase <- read.table("../data/cellcycle-genes-previous-studies/human_periodic.tsv",
-           header = TRUE)
-```
 
 ## Variable genes
 
@@ -140,7 +129,7 @@ Two steps here for choosing variable genes:
 2. Scan across gene expression bins, identify the ones with high variability in each bin. 
 
 ```{r}
-gene.detect <- rownames(counts)[which(gene.drops > .5)]
+genes.detect <- rownames(counts)[which(gene.drops > .5)]
 
 gene.means.detect <- gene.means[which(gene.drops > .5)]
 gene.cvs.detect <- gene.cvs[which(gene.drops > .5)]
@@ -169,25 +158,21 @@ plot(x=log10(gene.means.detect),
 
 
 ```{r, eval = F}
-saveRDS(as.character(genes.cyclebase$gene), 
-        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cyclebase.rds")
-saveRDS(as.character(genes.go$ensembl_gene_id),
+saveRDS(genes.go,
         file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds")
 saveRDS(genes.variable,
         file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.variable.rds")
 
-genes.cycle <- unique(c(as.character(genes.cyclebase$gene),
-                        as.character(genes.go$ensembl_gene_id)))
-saveRDS(genes.cycle,
-        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.rds")
+saveRDS(genes.detect,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.detect.rds")
 
-genes.cycle.detect <- genes.cycle[which(genes.cycle %in% names(gene.means.detect))]
-saveRDS(genes.cycle.detect,
-        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.detect.rds")
+genes.go.detect <- genes.detect[which(genes.detect %in% genes.go)]
+saveRDS(genes.go.detect,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.go.detect.rds")
 
-genes.variable.cycle <- genes.variable[which(genes.variable %in% genes.cycle)]
-saveRDS(genes.variable.cycle,
-        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.cycle.variable.rds")
+genes.go.variable <- genes.variable[which(genes.variable %in% genes.go)]
+saveRDS(genes.go.variable,
+        file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.go.variable.rds")
 ```
 
 
