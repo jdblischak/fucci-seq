@@ -12,7 +12,7 @@
 <meta name="author" content="Joyce Hsiao" />
 
 
-<title>Correlation between intensities and expression</title>
+<title>Select genes indicative of cell cycle state</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -20,9 +20,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -168,101 +165,6 @@ $(document).ready(function () {
 
 
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -309,26 +211,36 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Correlation between intensities and expression</h1>
+<h1 class="title toc-ignore">Select genes indicative of cell cycle state</h1>
 <h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#overviewresults">Overview/Results</a></li>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#correlations">Correlations</a></li>
+<li><a href="#dapi-vs-fucci">DAPI vs FUCCI</a></li>
+<li><a href="#save-output">Save output</a></li>
+<li><a href="#genes-and-projected-cell-times">Genes and projected cell times</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-28</p>
+<p><strong>Last updated:</strong> 2018-03-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> c2d9072</p>
+<p><strong>Code version:</strong> a7c550c</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
-<p>I computed correlation between intensity measurements and gene expression (log2cpm). Then apply CorShrink to account for varying sample size between correlations.</p>
-<p>Results show that there are some indication of cell cycle signal in teh data. Of the genes with s-vaule &lt; .01, 33 correlate with DAPI are annotated as cell cycle gene, 74 correlation with RFP and annotated as cell cycle gene, and 110 correlate with GFP are annotated as cell cycle gene.</p>
-<p>In addition, there are sources of variation that may drive sample differences other than cell cycle, and crucially our design induces a strong sample variation between batches, as a trade-off for avoiding confounding of individual and plate effect. Hence analysis of sample variation in our data should consider technical sources of variation along with biological variation.</p>
+<p>Assume that cell cycle state is a latent variable. Then here we are interested in evaluating whether FUCCI intensities correlates or predicts cell cycle state, asssuming that DAPI can be employed as a proxy for cell cycle state.</p>
+<p>In addition, I performed some analysis on genes that are highly correlated with both DAPI and FUCCI intensities to see 1) if cell cycle ordering based on cellcycleR correlated with these genes, 2) if cell cycle ordering based on least square fit correlated with these genes, 3) if cell cycle ordering based on these genes correlate with the other two ordering at all.</p>
 <hr />
 </div>
 <div id="data-and-packages" class="section level2">
@@ -358,8 +270,10 @@ log2cpm.adjust &lt;- log2cpm.adjust[grep(&quot;ENSG&quot;, rownames(log2cpm)),
 
 all.equal(rownames(pdata.adj), colnames(log2cpm))</code></pre>
 <pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>genes.go.detect &lt;- readRDS(&quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.detect.rds&quot;)
-genes.go &lt;- readRDS(file = &quot;../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds&quot;)</code></pre>
+<pre class="r"><code>macosko &lt;- readRDS(file = &quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+pdata.adj.filt &lt;- readRDS(file = &quot;../output/images-circle-ordering.Rmd/pdata.adj.filt.rds&quot;)
+proj.res &lt;- readRDS(file = &quot;../output/images-circle-ordering.Rmd/proj.res.rds&quot;)</code></pre>
+<hr />
 </div>
 <div id="correlations" class="section level2">
 <h2>Correlations</h2>
@@ -468,86 +382,290 @@ title(&quot;s-value &lt; .01&quot;, outer = TRUE, line = -1)</code></pre>
 <p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
-<div id="proportions" class="section level2">
-<h2>Proportions</h2>
-<p>Of the ones with s-value &lt; .01, consider the proportion of genes in our annotated set.</p>
-<pre class="r"><code>dapi.sig &lt;- corr.dapi.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.dapi.shrink$estimate) %in% genes.go
-table(dapi.sig, go.genes)</code></pre>
-<pre><code>        go.genes
-dapi.sig FALSE TRUE
-   FALSE  7121  490
-   TRUE    200   33</code></pre>
-<pre class="r"><code>rfp.sig &lt;- corr.rfp.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.rfp.shrink$estimate) %in% genes.go
-table(rfp.sig, go.genes)</code></pre>
-<pre><code>       go.genes
-rfp.sig FALSE TRUE
-  FALSE  7003  449
-  TRUE    318   74</code></pre>
-<pre class="r"><code>gfp.sig &lt;- corr.gfp.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.gfp.shrink$estimate) %in% genes.go
-table(gfp.sig, go.genes)</code></pre>
-<pre><code>       go.genes
-gfp.sig FALSE TRUE
-  FALSE  5857  413
-  TRUE   1464  110</code></pre>
-<p>Given that genes belong to GO cell cycle category, the proportion that has significant correlation with RFP, GFP, and DAPI intensities</p>
-<p>DAPI</p>
-<pre class="r"><code>sum(dapi.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.06309751</code></pre>
-<p>GFP</p>
-<pre class="r"><code>sum(gfp.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.210325</code></pre>
-<p>RFP</p>
-<pre class="r"><code>sum(rfp.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.1414914</code></pre>
-<p>Of the ones with s-value &lt; .01, consider the proportion of genes in our annotated set and also with detection rate &gt; 50%</p>
-<pre class="r"><code>dapi.sig &lt;- corr.dapi.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.dapi.shrink$estimate) %in% genes.go.detect
-table(dapi.sig, go.genes)</code></pre>
-<pre><code>        go.genes
-dapi.sig FALSE TRUE
-   FALSE  7194  417
-   TRUE    200   33</code></pre>
-<pre class="r"><code>rfp.sig &lt;- corr.rfp.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.rfp.shrink$estimate) %in% genes.go.detect
-table(rfp.sig, go.genes)</code></pre>
-<pre><code>       go.genes
-rfp.sig FALSE TRUE
-  FALSE  7075  377
-  TRUE    319   73</code></pre>
-<pre class="r"><code>gfp.sig &lt;- corr.gfp.shrink$model$result$svalue &lt; .01
-go.genes &lt;- names(corr.gfp.shrink$estimate) %in% genes.go.detect
-table(gfp.sig, go.genes)</code></pre>
-<pre><code>       go.genes
-gfp.sig FALSE TRUE
-  FALSE  5927  343
-  TRUE   1467  107</code></pre>
-<p>Given that genes belong to GO cell cycle category and with detection rate &gt; 50%, the proportion that has significant correlation with RFP, GFP, and DAPI intensities</p>
-<p>DAPI</p>
-<pre class="r"><code>sum(dapi.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.07333333</code></pre>
-<p>GFP</p>
-<pre class="r"><code>sum(gfp.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.2377778</code></pre>
-<p>RFP</p>
-<pre class="r"><code>sum(rfp.sig*go.genes)/sum(go.genes)</code></pre>
-<pre><code>[1] 0.1622222</code></pre>
+<div id="dapi-vs-fucci" class="section level2">
+<h2>DAPI vs FUCCI</h2>
+<pre class="r"><code>macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+corr.all &lt;- data.frame(genes = rownames(corr.dapi.val),
+                       corr.dapi = corr.dapi.shrink$model$result$PosteriorMean,
+                       corr.gfp = corr.gfp.shrink$model$result$PosteriorMean,
+                       corr.rfp = corr.rfp.shrink$model$result$PosteriorMean,
+                       sval.dapi = corr.dapi.shrink$model$result$svalue,
+                       sval.gfp = corr.gfp.shrink$model$result$svalue,
+                       sval.rfp = corr.rfp.shrink$model$result$svalue)
+rownames(corr.all) &lt;- rownames(corr.dapi.val)
+
+corr.all.macosko &lt;- corr.all[which(rownames(corr.all) %in% macosko$ensembl),]</code></pre>
+<pre class="r"><code>par(mfrow=c(2,2))
+hist(corr.all$corr.dapi[corr.all$sval.dapi &lt; .01], nclass = 50,
+     main = &quot;DAPI vs. expression (sval &lt; .01)&quot;,
+     xlab = &quot;Pearson correlation&quot;)
+
+hist(corr.all$corr.gfp[corr.all$sval.gfp &lt; .01], nclass = 50,
+     main = &quot;GFP vs. expression (sval &lt; .01)&quot;,
+     xlab = &quot;Pearson correlation&quot;)
+
+hist(corr.all$corr.rfp[corr.all$sval.rfp &lt; .01], nclass = 50,
+     main = &quot;RFP vs. expression (sval &lt; .01)&quot;,
+     xlab = &quot;Pearson correlation&quot;)</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>Of the 469 genes previously annotated as cycle gene, we see that there’s about 50% of the genes significantly associated with DAPI that are also associated with FUCCI intenssities (to both GFP and RFP), and vice versa.</p>
+<pre class="r"><code>library(VennDiagram)
+library(grid)
+grid.draw(venn.diagram(
+  list(DAPI = rownames(corr.all.macosko)[corr.all.macosko$sval.dapi &lt; .01],
+       FUCCI = rownames(corr.all.macosko)[corr.all.macosko$sval.gfp &lt; .01 &amp; corr.all.macosko$sval.rfp &lt; .01]),
+             filename = NULL))</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-7-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p>Of genes that are signficantly correlated with both DAPI and Fucci, see how many the expression can be predicted by FUCCI above and beyond DAPI and vice versa.</p>
+<pre class="r"><code>both.genes &lt;- rownames(corr.all.macosko)[corr.all.macosko$sval.dapi &lt; .01 &amp; corr.all.macosko$sval.gfp &lt; .01 &amp; corr.all.macosko$sval.rfp &lt; .01]
+
+fucci.above.dapi &lt;- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm &lt;- both.genes[i]
+  fit.0 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+  fit.1 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res &lt;- anova(fit.0, fit.1)
+  res$`Pr(&gt;F)`[2]
+}) )
+names(fucci.above.dapi) &lt;- both.genes
+
+
+dapi.above.fucci &lt;- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm &lt;- both.genes[i]
+  fit.0 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  fit.1 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res &lt;- anova(fit.0, fit.1)
+  res$`Pr(&gt;F)`[2]
+}) )
+names(dapi.above.fucci) &lt;- both.genes</code></pre>
+<p>Of the 21 genes correlated with both DAPI and FUCCI, 6 of them the expression is predicted by FUCCI above and beyond DAPI, while 10 of them the expression is predicted by DAPI above and beyond FUCCI. In addition, 3 of them FUCCI and DAPI and equally important in predicting expression profile.</p>
+<pre class="r"><code>sum(fucci.above.dapi &lt; .01)</code></pre>
+<pre><code>[1] 8</code></pre>
+<pre class="r"><code>sum(dapi.above.fucci &lt; .01)</code></pre>
+<pre><code>[1] 12</code></pre>
+<p>Of the 7844 genes that we computed correlation between expression and intensities, we see that there’s about 50% of the genes significantly associated with DAPI that are also associated with FUCCI intenssities (to both GFP and RFP), and vice versa.</p>
+<pre class="r"><code>grid.draw(venn.diagram(
+  list(DAPI = rownames(corr.all)[corr.all$sval.dapi &lt; .01],
+       FUCCI = rownames(corr.all)[corr.all$sval.gfp &lt; .01 &amp; corr.all$sval.rfp &lt; .01]),
+             filename = NULL))</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-10-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p>Of genes that are signficantly correlated with both DAPI and Fucci, see how many the expression can be predicted by FUCCI above and beyond DAPI and vice versa.</p>
+<pre class="r"><code>both.genes &lt;- rownames(corr.all)[corr.all$sval.dapi &lt; .01 &amp; corr.all$sval.gfp &lt; .01 &amp; corr.all$sval.rfp &lt; .01]
+
+fucci.above.dapi &lt;- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm &lt;- both.genes[i]
+  fit.0 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+  fit.1 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res &lt;- anova(fit.0, fit.1)
+  res$`Pr(&gt;F)`[2]
+}) )
+names(fucci.above.dapi) &lt;- both.genes
+
+
+dapi.above.fucci &lt;- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm &lt;- both.genes[i]
+  fit.0 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  fit.1 &lt;- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res &lt;- anova(fit.0, fit.1)
+  res$`Pr(&gt;F)`[2]
+}) )
+names(dapi.above.fucci) &lt;- both.genes</code></pre>
+<p>Of the 33 genes correlated with both DAPI and FUCCI, 10 of them the expression is predicted by FUCCI above and beyond DAPI, while 13 of them the expression is predicted by DAPI above and beyond FUCCI. In addition, 3 of them FUCCI and DAPI and equally important in predicting expression profile.</p>
+<pre class="r"><code>sum(fucci.above.dapi &lt; .01)</code></pre>
+<pre><code>[1] 15</code></pre>
+<pre class="r"><code>sum(dapi.above.fucci &lt; .01)</code></pre>
+<pre><code>[1] 13</code></pre>
+<pre class="r"><code>sum(fucci.above.dapi &lt; .01 &amp; dapi.above.fucci &lt; .01)</code></pre>
+<pre><code>[1] 4</code></pre>
 <hr />
 </div>
-<div id="output" class="section level2">
-<h2>Output</h2>
-<p>save genes that are either correlated with DAPI, RFP or GFP</p>
-<pre class="r"><code>go.genes &lt;- names(corr.dapi.shrink$estimate)[names(corr.dapi.shrink$estimate) %in% genes.go]
+<div id="save-output" class="section level2">
+<h2>Save output</h2>
+<pre class="r"><code>save(corr.all, file = &quot;../output/images-seq-correlation.Rmd/corr.all.rds&quot;)
+save(corr.all.macosko, file = &quot;../output/images-seq-correlation.Rmd/corr.all.macosko.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="genes-and-projected-cell-times" class="section level2">
+<h2>Genes and projected cell times</h2>
+<p>There are three clusters in projected cell times (lowest BIC). I then fit spherical regression to find genes that are significant predictors of projected cell times fo each cluster. I only found one signfican genes, which is CDK1.</p>
+<p><strong>Note</strong>: It’s important to consider the assumption that sin(theta) and cos(theta) are uncorrelated. May be unrealistic.</p>
+<pre class="r"><code>log2cpm.sig.macosko &lt;- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all.macosko)[corr.all.macosko$sval.dapi &lt; .01 &amp; corr.all.macosko$sval.rfp &lt; .01 &amp; corr.all.macosko$sval.gfp &lt; .01]), ]
 
-dapi.sig &lt;- names(corr.dapi.shrink$estimate)[corr.dapi.shrink$model$result$svalue &lt; .01]
-rfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.rfp.shrink$model$result$svalue &lt; .01]
-gfp.sig &lt;- names(corr.dapi.shrink$estimate)[corr.gfp.shrink$model$result$svalue &lt; .01]
-sig.union &lt;- unique(c(dapi.sig, rfp.sig, gfp.sig))
+log2cpm.sig.macosko.filt &lt;- log2cpm.sig.macosko[,match(rownames(pdata.adj.filt), colnames(log2cpm.sig.macosko)) ]
 
-genes.corr &lt;- sig.union[sig.union %in% go.genes]</code></pre>
-<pre class="r"><code>saveRDS(genes.corr, file = &quot;../output/images-seq-correlation.Rmd/genes.corr.rds&quot;)</code></pre>
+Theta &lt;- do.call(c, lapply(proj.res, function(x) as.numeric(x[[1]]$rads)))
+names(Theta) &lt;- do.call(c, lapply(proj.res, function(x) rownames(x[[1]])))
+
+hist(Theta, nclass = 50)</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Predict cell times by annotated cell cycle gens that are correlated with both DAPI and FUCCI. Only two genes of these 21 show significant association with the projected cell time.</p>
+<pre class="r"><code>library(Rfast)
+x &lt;- data.frame(chip_id = pdata.adj.filt$chip_id,
+                t(log2cpm.sig.macosko.filt))
+fit &lt;- spml.reg(y=Theta, x=x, seb = TRUE)
+round(2*pnorm(fit$be/fit$seb, lower.tail = FALSE),4)</code></pre>
+<pre><code>                Cosinus of y Sinus of y
+(Intercept)           2.0000     0.4200
+chip_idNA18855        1.5713     0.5676
+chip_idNA18870        0.5448     0.3333
+chip_idNA19098        1.8928     0.5415
+chip_idNA19101        1.2980     0.5986
+chip_idNA19160        0.2619     0.0672
+ENSG00000073111       0.5325     0.5397
+ENSG00000075131       0.5562     0.1162
+ENSG00000087586       0.3181     0.8753
+ENSG00000092853       1.3196     0.0115
+ENSG00000105173       0.6469     0.1668
+ENSG00000108424       0.3158     0.8546
+ENSG00000111665       0.6555     1.4160
+ENSG00000112312       0.0000     0.0001
+ENSG00000113810       1.2961     1.1571
+ENSG00000117724       0.6950     1.4492
+ENSG00000123485       0.7072     1.1348
+ENSG00000123975       1.9968     1.9829
+ENSG00000131747       0.0361     1.4206
+ENSG00000132646       0.1135     0.8299
+ENSG00000137807       0.2208     0.7194
+ENSG00000144354       1.4998     0.0014
+ENSG00000154473       0.7946     1.8048
+ENSG00000170312       0.0000     1.9987
+ENSG00000175063       0.0114     2.0000
+ENSG00000178999       1.8746     1.1140
+ENSG00000182481       0.9368     0.1293</code></pre>
+<p>Could there be multiple modes in the distribution and hence the terrible prediction?</p>
+<pre class="r"><code>library(movMF)
+
+x &lt;- cbind(sin(Theta), cos(Theta))
+fit.2 &lt;- movMF(x, k = 2, nruns = 100)
+fit.3 &lt;- movMF(x, k = 3, nruns = 100)
+fit.4 &lt;- movMF(x, k = 4, nruns = 100)
+
+sapply(list(fit.2, fit.3, fit.4), BIC)</code></pre>
+<pre><code>[1] -45.86082 -67.51785 -48.15189</code></pre>
+<p>For each cluster, fit spml.</p>
+<pre class="r"><code>library(ashr)
+fit.3.predict &lt;- predict(fit.3)
+par(mfrow =c(2,2))
+hist(Theta[fit.3.predict == 1], xlim = c(0,2*pi), main = &quot;Cluster 1&quot;)
+hist(Theta[fit.3.predict == 2], xlim = c(0,2*pi), main = &quot;Cluster 2&quot;)
+hist(Theta[fit.3.predict == 3], xlim = c(0,2*pi), main = &quot;Cluster 3&quot;)
+
+x &lt;- data.frame(chip_id = pdata.adj.filt$chip_id,
+                t(log2cpm.sig.macosko.filt))
+
+fit.clust1 &lt;- spml.reg(y=Theta[which(fit.3.predict == 1)], 
+                       x=x[which(fit.3.predict == 1), ], seb = TRUE)
+fit.clust1.sval &lt;- cbind(ash(fit.clust1$be[,1],fit.clust1$seb[,1])$result$svalue,
+                         ash(fit.clust1$be[,2],fit.clust1$seb[,2])$result$svalue)
+
+fit.clust2 &lt;- spml.reg(y=Theta[which(fit.3.predict == 2)], 
+                       x=x[which(fit.3.predict == 2), ], seb = TRUE)
+fit.clust2.sval &lt;- cbind(ash(fit.clust2$be[,1],fit.clust2$seb[,1])$result$svalue,
+                         ash(fit.clust2$be[,2],fit.clust2$seb[,2])$result$svalue)
+
+fit.clust3 &lt;- spml.reg(y=Theta[which(fit.3.predict == 3)], 
+                       x=x[which(fit.3.predict == 3), ], seb = TRUE)
+fit.clust3.sval &lt;- cbind(ash(fit.clust3$be[,1],fit.clust3$seb[,1])$result$svalue,
+                         ash(fit.clust3$be[,2],fit.clust3$seb[,2])$result$svalue)
+
+cbind(round(fit.clust1.sval,4),
+      round(fit.clust2.sval,4),
+      round(fit.clust3.sval,4))</code></pre>
+<pre><code>        [,1] [,2]   [,3] [,4] [,5] [,6]
+ [1,] 0.4453    1 0.9160    1    1    1
+ [2,] 0.1806    1 0.8087    1    1    1
+ [3,] 0.0922    1 0.9451    1    1    1
+ [4,] 0.5887    1 0.8973    1    1    1
+ [5,] 0.6483    1 0.8677    1    1    1
+ [6,] 0.0036    1 0.9551    1    1    1
+ [7,] 0.8328    1 0.9739    1    1    1
+ [8,] 0.8200    1 0.9724    1    1    1
+ [9,] 0.8052    1 0.9783    1    1    1
+[10,] 0.7277    1 0.9801    1    1    1
+[11,] 0.7421    1 0.9808    1    1    1
+[12,] 0.6722    1 0.9708    1    1    1
+[13,] 0.8267    1 0.9792    1    1    1
+[14,] 0.5504    1 0.6329    1    1    1
+[15,] 0.7553    1 0.9763    1    1    1
+[16,] 0.5043    1 0.9506    1    1    1
+[17,] 0.7969    1 0.9815    1    1    1
+[18,] 0.7117    1 0.9670    1    1    1
+[19,] 0.3668    1 0.9691    1    1    1
+[20,] 0.6203    1 0.9647    1    1    1
+[21,] 0.7780    1 0.9773    1    1    1
+[22,] 0.8129    1 0.9822    1    1    1
+[23,] 0.7671    1 0.9380    1    1    1
+[24,] 0.0057    1 0.9588    1    1    1
+[25,] 0.7879    1 0.9751    1    1    1
+[26,] 0.2623    1 0.9620    1    1    1
+[27,] 0.6933    1 0.9285    1    1    1</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>None is signifcantly associated with sin(theta). But cdk1 for the third cluster (cyclin dependent kinase 1) is significantly associated with all three clusters (sval &lt; .01).</p>
+<pre class="r"><code>rownames(fit.clust3$be)[24]</code></pre>
+<pre><code>[1] &quot;ENSG00000170312&quot;</code></pre>
+<p>Check how different the effect sizes are</p>
+<pre class="r"><code>round(cbind(fit.clust1$be, fit.clust2$be, fit.clust3$be),4)</code></pre>
+<pre><code>                Cosinus of y Sinus of y Cosinus of y Sinus of y
+(Intercept)          -1.5676     4.3411      -4.8615    -4.4178
+chip_idNA18855        0.6413     0.1966       0.4240    -0.2489
+chip_idNA18870        0.6881     0.4371       0.1497    -0.0607
+chip_idNA19098        0.2255    -0.1399       0.3915    -0.0490
+chip_idNA19101        0.1019     0.4251       0.4253     0.0995
+chip_idNA19160        1.1808     0.8396      -0.0916     0.2093
+ENSG00000073111      -0.0077     0.0914       0.0518    -0.0483
+ENSG00000075131       0.0177     0.0208      -0.0573     0.0754
+ENSG00000087586       0.0238     0.0339       0.0354     0.0755
+ENSG00000092853       0.0556    -0.0477       0.0221     0.0372
+ENSG00000105173       0.0533     0.0718       0.0079     0.0304
+ENSG00000108424       0.0953    -0.1604       0.0134    -0.0868
+ENSG00000111665       0.0133    -0.0285      -0.0268    -0.0144
+ENSG00000112312       0.1567    -0.1142       0.5024     0.3102
+ENSG00000113810      -0.0404    -0.0078      -0.0134     0.0564
+ENSG00000117724      -0.1493    -0.0679       0.1533    -0.1182
+ENSG00000123485       0.0285     0.0179       0.0090    -0.0611
+ENSG00000123975      -0.0652    -0.1714      -0.0201    -0.1005
+ENSG00000131747      -0.1456     0.1414      -0.0425     0.1823
+ENSG00000132646       0.1124     0.0830       0.0723     0.1930
+ENSG00000137807       0.0323    -0.1277      -0.0487     0.0095
+ENSG00000144354      -0.0176     0.0693      -0.0004     0.0373
+ENSG00000154473       0.0278    -0.0268      -0.1579    -0.0713
+ENSG00000170312       0.2257    -0.0436       0.1097    -0.0764
+ENSG00000175063       0.0076    -0.0351       0.0110    -0.0225
+ENSG00000178999      -0.1642     0.1270      -0.0925    -0.0722
+ENSG00000182481      -0.0671    -0.0982       0.2185     0.0836
+                Cosinus of y Sinus of y
+(Intercept)          -4.4571    -0.0537
+chip_idNA18855        0.2953    -0.2607
+chip_idNA18870       -0.1854    -0.1613
+chip_idNA19098       -0.1297    -0.1262
+chip_idNA19101        0.1408    -0.2465
+chip_idNA19160       -0.3938    -0.9976
+ENSG00000073111       0.0027    -0.0074
+ENSG00000075131      -0.0759     0.0417
+ENSG00000087586       0.0282     0.0337
+ENSG00000092853      -0.0407     0.1206
+ENSG00000105173      -0.0839    -0.0109
+ENSG00000108424       0.0800    -0.1972
+ENSG00000111665      -0.0805    -0.0779
+ENSG00000112312      -0.2047     0.2599
+ENSG00000113810      -0.1616    -0.0427
+ENSG00000117724       0.4729     0.1592
+ENSG00000123485       0.0248     0.0183
+ENSG00000123975       0.0581    -0.4684
+ENSG00000131747      -0.0802     0.0248
+ENSG00000132646       0.0541    -0.2025
+ENSG00000137807      -0.0405     0.0076
+ENSG00000144354      -0.0567     0.0813
+ENSG00000154473       0.2675     0.1760
+ENSG00000170312       0.3926    -0.1041
+ENSG00000175063       0.0389    -0.1385
+ENSG00000178999      -0.0682    -0.0122
+ENSG00000182481      -0.2941     0.2308</code></pre>
+<p>Correlation between RFP and GFP.</p>
+<pre class="r"><code>plot(x=pdata.adj.filt$gfp.median.log10sum.adjust,
+     y=pdata.adj.filt$rfp.median.log10sum.adjust,
+     xlab = &quot;GFP&quot;, ylab = &quot;RFP&quot;)</code></pre>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -568,60 +686,64 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
-[8] methods   base     
+ [1] grid      stats4    parallel  stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
 
 other attached packages:
- [1] mygene_1.14.0          GenomicFeatures_1.30.3 AnnotationDbi_1.40.0  
- [4] Biobase_2.38.0         GenomicRanges_1.30.2   GenomeInfoDb_1.14.0   
- [7] IRanges_2.12.0         S4Vectors_0.16.0       BiocGenerics_0.24.0   
-[10] CorShrink_0.1.1       
+ [1] ashr_2.2-4             movMF_0.2-2            Rfast_1.8.6           
+ [4] RcppZiggurat_0.1.4     Rcpp_0.12.15           VennDiagram_1.6.19    
+ [7] futile.logger_1.4.3    mygene_1.14.0          GenomicFeatures_1.30.3
+[10] AnnotationDbi_1.40.0   Biobase_2.38.0         GenomicRanges_1.30.2  
+[13] GenomeInfoDb_1.14.0    IRanges_2.12.0         S4Vectors_0.16.0      
+[16] BiocGenerics_0.24.0    CorShrink_0.1.1       
 
 loaded via a namespace (and not attached):
- [1] httr_1.3.1                 RMySQL_0.10.13            
- [3] bit64_0.9-7                jsonlite_1.5              
- [5] splines_3.4.1              foreach_1.4.4             
- [7] gsubfn_0.6-6               Formula_1.2-2             
- [9] assertthat_0.2.0           latticeExtra_0.6-28       
-[11] blob_1.1.0                 GenomeInfoDbData_1.0.0    
-[13] Rsamtools_1.30.0           yaml_2.1.16               
-[15] progress_1.1.2             pillar_1.1.0              
-[17] RSQLite_2.0                backports_1.1.2           
-[19] lattice_0.20-35            chron_2.3-52              
-[21] digest_0.6.15              checkmate_1.8.5           
-[23] RColorBrewer_1.1-2         XVector_0.18.0            
-[25] colorspace_1.3-2           htmltools_0.3.6           
-[27] Matrix_1.2-10              plyr_1.8.4                
-[29] XML_3.98-1.10              biomaRt_2.34.2            
-[31] zlibbioc_1.24.0            scales_0.5.0              
-[33] BiocParallel_1.12.0        htmlTable_1.11.2          
-[35] git2r_0.21.0               tibble_1.4.2              
-[37] sqldf_0.4-11               ggplot2_2.2.1             
-[39] SummarizedExperiment_1.8.1 ashr_2.2-4                
-[41] nnet_7.3-12                lazyeval_0.2.1            
-[43] proto_1.0.0                survival_2.41-3           
-[45] magrittr_1.5               memoise_1.1.0             
-[47] evaluate_0.10.1            doParallel_1.0.11         
-[49] MASS_7.3-47                foreign_0.8-69            
-[51] truncnorm_1.0-7            data.table_1.10.4-3       
-[53] tools_3.4.1                prettyunits_1.0.2         
-[55] matrixStats_0.53.1         stringr_1.3.0             
-[57] munsell_0.4.3              cluster_2.0.6             
-[59] DelayedArray_0.4.1         Biostrings_2.46.0         
-[61] compiler_3.4.1             rlang_0.2.0               
-[63] grid_3.4.1                 RCurl_1.95-4.10           
-[65] rstudioapi_0.7             iterators_1.0.9           
-[67] htmlwidgets_1.0            bitops_1.0-6              
-[69] base64enc_0.1-3            rmarkdown_1.8             
-[71] gtable_0.2.0               codetools_0.2-15          
-[73] DBI_0.7                    reshape2_1.4.3            
-[75] R6_2.2.2                   gridExtra_2.3             
-[77] GenomicAlignments_1.14.1   knitr_1.20                
-[79] rtracklayer_1.38.3         bit_1.1-12                
-[81] Hmisc_4.1-1                rprojroot_1.3-2           
-[83] stringi_1.1.6              pscl_1.5.2                
-[85] SQUAREM_2017.10-1          Rcpp_0.12.15              
-[87] rpart_4.1-11               acepack_1.4.1             </code></pre>
+ [1] bitops_1.0-6               matrixStats_0.53.1        
+ [3] bit64_0.9-7                doParallel_1.0.11         
+ [5] RColorBrewer_1.1-2         progress_1.1.2            
+ [7] httr_1.3.1                 rprojroot_1.3-2           
+ [9] Rmosek_7.1.3               tools_3.4.1               
+[11] backports_1.1.2            R6_2.2.2                  
+[13] rpart_4.1-11               Hmisc_4.1-1               
+[15] DBI_0.7                    lazyeval_0.2.1            
+[17] colorspace_1.3-2           nnet_7.3-12               
+[19] gridExtra_2.3              prettyunits_1.0.2         
+[21] RMySQL_0.10.13             bit_1.1-12                
+[23] compiler_3.4.1             git2r_0.21.0              
+[25] chron_2.3-52               htmlTable_1.11.2          
+[27] DelayedArray_0.4.1         slam_0.1-42               
+[29] rtracklayer_1.38.3         scales_0.5.0              
+[31] checkmate_1.8.5            SQUAREM_2017.10-1         
+[33] stringr_1.3.0              digest_0.6.15             
+[35] Rsamtools_1.30.0           foreign_0.8-69            
+[37] rmarkdown_1.8              XVector_0.18.0            
+[39] pscl_1.5.2                 base64enc_0.1-3           
+[41] htmltools_0.3.6            htmlwidgets_1.0           
+[43] rlang_0.2.0                rstudioapi_0.7            
+[45] RSQLite_2.0                jsonlite_1.5              
+[47] REBayes_1.3                BiocParallel_1.12.0       
+[49] acepack_1.4.1              RCurl_1.95-4.10           
+[51] magrittr_1.5               GenomeInfoDbData_1.0.0    
+[53] Formula_1.2-2              Matrix_1.2-10             
+[55] munsell_0.4.3              proto_1.0.0               
+[57] sqldf_0.4-11               stringi_1.1.6             
+[59] yaml_2.1.16                MASS_7.3-47               
+[61] SummarizedExperiment_1.8.1 zlibbioc_1.24.0           
+[63] plyr_1.8.4                 blob_1.1.0                
+[65] lattice_0.20-35            Biostrings_2.46.0         
+[67] splines_3.4.1              knitr_1.20                
+[69] pillar_1.1.0               reshape2_1.4.3            
+[71] codetools_0.2-15           biomaRt_2.34.2            
+[73] futile.options_1.0.0       XML_3.98-1.10             
+[75] evaluate_0.10.1            latticeExtra_0.6-28       
+[77] lambda.r_1.2               data.table_1.10.4-3       
+[79] foreach_1.4.4              gtable_0.2.0              
+[81] clue_0.3-54                assertthat_0.2.0          
+[83] gsubfn_0.6-6               ggplot2_2.2.1             
+[85] skmeans_0.2-11             survival_2.41-3           
+[87] truncnorm_1.0-7            tibble_1.4.2              
+[89] iterators_1.0.9            GenomicAlignments_1.14.1  
+[91] memoise_1.1.0              cluster_2.0.6             </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -662,8 +784,6 @@ footer is added to webpages before the MathJax javascript. -->
 -->
 
 
-</div>
-</div>
 
 </div>
 
