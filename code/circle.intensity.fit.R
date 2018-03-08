@@ -2,7 +2,8 @@
 #'
 #' @description Compute circle fit. Output projected positions.
 #'
-#' @param XY matrix object of two columns of measurements.
+#' @param XY matrix object of two columns of intensities defining the position of
+#'           sample i on a circle.
 #'
 
 circle.fit <- function(XY, IterMAX=50) {

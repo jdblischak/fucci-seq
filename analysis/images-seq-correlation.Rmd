@@ -1,7 +1,10 @@
 ---
-title: "Correlation between intensities and expression"
+title: "Select genes indicative of cell cycle state"
 author: "Joyce Hsiao"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
 ---
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
@@ -31,12 +34,9 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 ## Overview/Results
 
+Assume that cell cycle state is a latent variable. Then here we are interested in evaluating whether FUCCI intensities correlates or predicts cell cycle state, asssuming that DAPI can be employed as a proxy for cell cycle state. 
 
-I computed correlation between intensity measurements and gene expression (log2cpm). Then apply CorShrink to account for varying sample size between correlations. 
-
-Results show that there are some indication of cell cycle signal in teh data. Of the genes with s-vaule < .01, 33 correlate with DAPI are annotated as cell cycle gene, 74 correlation with RFP and annotated as cell cycle gene, and 110 correlate with GFP are annotated as cell cycle gene. 
-
-In addition, there are sources of variation that may drive sample differences other than cell cycle, and crucially our design induces a strong sample variation between batches, as a trade-off for avoiding confounding of individual and plate effect. Hence analysis of sample variation in our data should consider technical sources of variation along with biological variation.  
+In addition, I performed some analysis on genes that are highly correlated with both DAPI and FUCCI intensities to see 1) if cell cycle ordering based on cellcycleR correlated with these genes, 2) if cell cycle ordering based on least square fit correlated with these genes, 3) if cell cycle ordering based on these genes correlate with the other two ordering at all.
 
 ---
 
@@ -73,11 +73,12 @@ log2cpm.adjust <- log2cpm.adjust[grep("ENSG", rownames(log2cpm)),
 
 all.equal(rownames(pdata.adj), colnames(log2cpm))
 
-genes.go.detect <- readRDS("../output/seqdata-select-cellcyclegenes.Rmd/genes.go.detect.rds")
-genes.go <- readRDS(file = "../output/seqdata-select-cellcyclegenes.Rmd/genes.go.rds")
+macosko <- readRDS(file = "../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+pdata.adj.filt <- readRDS(file = "../output/images-circle-ordering.Rmd/pdata.adj.filt.rds")
+proj.res <- readRDS(file = "../output/images-circle-ordering.Rmd/proj.res.rds")
 ```
 
-
+---
 
 ## Correlations
 
@@ -192,102 +193,232 @@ title("s-value < .01", outer = TRUE, line = -1)
 
 ---
 
-## Proportions
-
-Of the ones with s-value < .01, consider the proportion of genes in our annotated set.
+## DAPI vs FUCCI
 
 ```{r}
-dapi.sig <- corr.dapi.shrink$model$result$svalue < .01
-go.genes <- names(corr.dapi.shrink$estimate) %in% genes.go
-table(dapi.sig, go.genes)
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
 
-rfp.sig <- corr.rfp.shrink$model$result$svalue < .01
-go.genes <- names(corr.rfp.shrink$estimate) %in% genes.go
-table(rfp.sig, go.genes)
+corr.all <- data.frame(genes = rownames(corr.dapi.val),
+                       corr.dapi = corr.dapi.shrink$model$result$PosteriorMean,
+                       corr.gfp = corr.gfp.shrink$model$result$PosteriorMean,
+                       corr.rfp = corr.rfp.shrink$model$result$PosteriorMean,
+                       sval.dapi = corr.dapi.shrink$model$result$svalue,
+                       sval.gfp = corr.gfp.shrink$model$result$svalue,
+                       sval.rfp = corr.rfp.shrink$model$result$svalue)
+rownames(corr.all) <- rownames(corr.dapi.val)
 
-gfp.sig <- corr.gfp.shrink$model$result$svalue < .01
-go.genes <- names(corr.gfp.shrink$estimate) %in% genes.go
-table(gfp.sig, go.genes)
+corr.all.macosko <- corr.all[which(rownames(corr.all) %in% macosko$ensembl),]
+```
+
+```{r fig.width=6, fig.height=6}
+par(mfrow=c(2,2))
+hist(corr.all$corr.dapi[corr.all$sval.dapi < .01], nclass = 50,
+     main = "DAPI vs. expression (sval < .01)",
+     xlab = "Pearson correlation")
+
+hist(corr.all$corr.gfp[corr.all$sval.gfp < .01], nclass = 50,
+     main = "GFP vs. expression (sval < .01)",
+     xlab = "Pearson correlation")
+
+hist(corr.all$corr.rfp[corr.all$sval.rfp < .01], nclass = 50,
+     main = "RFP vs. expression (sval < .01)",
+     xlab = "Pearson correlation")
+```
+
+Of the 469 genes previously annotated as cycle gene, we see that there's about 50% of the genes significantly associated with DAPI that are also associated with FUCCI intenssities (to both GFP and RFP), and vice versa.
+
+```{r fig.width=4, fig.height=4}
+library(VennDiagram)
+library(grid)
+grid.draw(venn.diagram(
+  list(DAPI = rownames(corr.all.macosko)[corr.all.macosko$sval.dapi < .01],
+       FUCCI = rownames(corr.all.macosko)[corr.all.macosko$sval.gfp < .01 & corr.all.macosko$sval.rfp < .01]),
+             filename = NULL))
+```
+
+Of genes that are signficantly correlated with both DAPI and Fucci, see how many the expression can be predicted by FUCCI above and beyond DAPI and vice versa.
+
+```{r}
+both.genes <- rownames(corr.all.macosko)[corr.all.macosko$sval.dapi < .01 & corr.all.macosko$sval.gfp < .01 & corr.all.macosko$sval.rfp < .01]
+
+fucci.above.dapi <- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm <- both.genes[i]
+  fit.0 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+  fit.1 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res <- anova(fit.0, fit.1)
+  res$`Pr(>F)`[2]
+}) )
+names(fucci.above.dapi) <- both.genes
+
+
+dapi.above.fucci <- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm <- both.genes[i]
+  fit.0 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  fit.1 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res <- anova(fit.0, fit.1)
+  res$`Pr(>F)`[2]
+}) )
+names(dapi.above.fucci) <- both.genes
+```
+
+Of the 21 genes correlated with both DAPI and FUCCI, 6 of them the expression is predicted by FUCCI above and beyond DAPI, while 10 of them the expression is predicted by DAPI above and beyond FUCCI. In addition, 3 of them FUCCI and DAPI and equally important in predicting expression profile. 
+
+```{r}
+sum(fucci.above.dapi < .01)
+sum(dapi.above.fucci < .01)
 ```
 
 
-Given that genes belong to GO cell cycle category, the proportion that has significant correlation with RFP, GFP, and DAPI intensities
 
-DAPI
+Of the 7844 genes that we computed correlation between expression and intensities, we see that there's about 50% of the genes significantly associated with DAPI that are also associated with FUCCI intenssities (to both GFP and RFP), and vice versa.
 
-```{r}
-sum(dapi.sig*go.genes)/sum(go.genes)
+```{r fig.width=4, fig.height=4}
+grid.draw(venn.diagram(
+  list(DAPI = rownames(corr.all)[corr.all$sval.dapi < .01],
+       FUCCI = rownames(corr.all)[corr.all$sval.gfp < .01 & corr.all$sval.rfp < .01]),
+             filename = NULL))
 ```
 
-GFP
+Of genes that are signficantly correlated with both DAPI and Fucci, see how many the expression can be predicted by FUCCI above and beyond DAPI and vice versa.
 
 ```{r}
-sum(gfp.sig*go.genes)/sum(go.genes)
+both.genes <- rownames(corr.all)[corr.all$sval.dapi < .01 & corr.all$sval.gfp < .01 & corr.all$sval.rfp < .01]
+
+fucci.above.dapi <- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm <- both.genes[i]
+  fit.0 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+  fit.1 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res <- anova(fit.0, fit.1)
+  res$`Pr(>F)`[2]
+}) )
+names(fucci.above.dapi) <- both.genes
+
+
+dapi.above.fucci <- do.call(c, lapply(1:length(both.genes), function(i) {
+  nm <- both.genes[i]
+  fit.0 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  fit.1 <- lm(log2cpm[which(rownames(log2cpm) %in% nm), ] ~ factor(pdata.adj$chip_id) + pdata.adj$dapi.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$gfp.median.log10sum.adjust.ash - 1)
+  res <- anova(fit.0, fit.1)
+  res$`Pr(>F)`[2]
+}) )
+names(dapi.above.fucci) <- both.genes
 ```
 
-RFP
+Of the 33 genes correlated with both DAPI and FUCCI, 10 of them the expression is predicted by FUCCI above and beyond DAPI, while 13 of them the expression is predicted by DAPI above and beyond FUCCI. In addition, 3 of them FUCCI and DAPI and equally important in predicting expression profile. 
 
 ```{r}
-sum(rfp.sig*go.genes)/sum(go.genes)
+sum(fucci.above.dapi < .01)
+sum(dapi.above.fucci < .01)
 ```
 
-
-Of the ones with s-value < .01, consider the proportion of genes in our annotated set and also with detection rate > 50%
-
 ```{r}
-dapi.sig <- corr.dapi.shrink$model$result$svalue < .01
-go.genes <- names(corr.dapi.shrink$estimate) %in% genes.go.detect
-table(dapi.sig, go.genes)
-
-rfp.sig <- corr.rfp.shrink$model$result$svalue < .01
-go.genes <- names(corr.rfp.shrink$estimate) %in% genes.go.detect
-table(rfp.sig, go.genes)
-
-gfp.sig <- corr.gfp.shrink$model$result$svalue < .01
-go.genes <- names(corr.gfp.shrink$estimate) %in% genes.go.detect
-table(gfp.sig, go.genes)
-```
-
-
-Given that genes belong to GO cell cycle category and with detection rate > 50%, the proportion that has significant correlation with RFP, GFP, and DAPI intensities
-
-DAPI
-
-```{r}
-sum(dapi.sig*go.genes)/sum(go.genes)
-```
-
-GFP
-
-```{r}
-sum(gfp.sig*go.genes)/sum(go.genes)
-```
-
-RFP
-
-```{r}
-sum(rfp.sig*go.genes)/sum(go.genes)
+sum(fucci.above.dapi < .01 & dapi.above.fucci < .01)
 ```
 
 ---
 
-## Output
+## Save output
 
-save genes that are either correlated with DAPI, RFP or GFP
-
-```{r}
-go.genes <- names(corr.dapi.shrink$estimate)[names(corr.dapi.shrink$estimate) %in% genes.go]
-
-dapi.sig <- names(corr.dapi.shrink$estimate)[corr.dapi.shrink$model$result$svalue < .01]
-rfp.sig <- names(corr.dapi.shrink$estimate)[corr.rfp.shrink$model$result$svalue < .01]
-gfp.sig <- names(corr.dapi.shrink$estimate)[corr.gfp.shrink$model$result$svalue < .01]
-sig.union <- unique(c(dapi.sig, rfp.sig, gfp.sig))
-
-genes.corr <- sig.union[sig.union %in% go.genes]
+```{r, eval = F}
+save(corr.all, file = "../output/images-seq-correlation.Rmd/corr.all.rds")
+save(corr.all.macosko, file = "../output/images-seq-correlation.Rmd/corr.all.macosko.rds")
 ```
 
+
+---
+
+##  Genes and projected cell times
+
+There are three clusters in projected cell times (lowest BIC). I then fit spherical regression to find genes that are significant predictors of projected cell times fo each cluster. I only found one signfican genes, which is CDK1. 
+
+**Note**: It's important to consider the assumption that sin(theta) and cos(theta) are uncorrelated. May be unrealistic. 
+
 ```{r}
-saveRDS(genes.corr, file = "../output/images-seq-correlation.Rmd/genes.corr.rds")
+log2cpm.sig.macosko <- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all.macosko)[corr.all.macosko$sval.dapi < .01 & corr.all.macosko$sval.rfp < .01 & corr.all.macosko$sval.gfp < .01]), ]
+
+log2cpm.sig.macosko.filt <- log2cpm.sig.macosko[,match(rownames(pdata.adj.filt), colnames(log2cpm.sig.macosko)) ]
+
+Theta <- do.call(c, lapply(proj.res, function(x) as.numeric(x[[1]]$rads)))
+names(Theta) <- do.call(c, lapply(proj.res, function(x) rownames(x[[1]])))
+
+hist(Theta, nclass = 50)
+```
+
+Predict cell times by annotated cell cycle gens that are correlated with both DAPI and FUCCI. Only two genes of these 21 show significant association with the projected cell time. 
+
+```{r}
+library(Rfast)
+x <- data.frame(chip_id = pdata.adj.filt$chip_id,
+                t(log2cpm.sig.macosko.filt))
+fit <- spml.reg(y=Theta, x=x, seb = TRUE)
+round(2*pnorm(fit$be/fit$seb, lower.tail = FALSE),4)
+```
+
+Could there be multiple modes in the distribution and hence the terrible prediction?
+
+```{r}
+library(movMF)
+
+x <- cbind(sin(Theta), cos(Theta))
+fit.2 <- movMF(x, k = 2, nruns = 100)
+fit.3 <- movMF(x, k = 3, nruns = 100)
+fit.4 <- movMF(x, k = 4, nruns = 100)
+
+sapply(list(fit.2, fit.3, fit.4), BIC)
+```
+
+For each cluster, fit spml. 
+
+```{r}
+library(ashr)
+fit.3.predict <- predict(fit.3)
+par(mfrow =c(2,2))
+hist(Theta[fit.3.predict == 1], xlim = c(0,2*pi), main = "Cluster 1")
+hist(Theta[fit.3.predict == 2], xlim = c(0,2*pi), main = "Cluster 2")
+hist(Theta[fit.3.predict == 3], xlim = c(0,2*pi), main = "Cluster 3")
+
+x <- data.frame(chip_id = pdata.adj.filt$chip_id,
+                t(log2cpm.sig.macosko.filt))
+
+fit.clust1 <- spml.reg(y=Theta[which(fit.3.predict == 1)], 
+                       x=x[which(fit.3.predict == 1), ], seb = TRUE)
+fit.clust1.sval <- cbind(ash(fit.clust1$be[,1],fit.clust1$seb[,1])$result$svalue,
+                         ash(fit.clust1$be[,2],fit.clust1$seb[,2])$result$svalue)
+
+fit.clust2 <- spml.reg(y=Theta[which(fit.3.predict == 2)], 
+                       x=x[which(fit.3.predict == 2), ], seb = TRUE)
+fit.clust2.sval <- cbind(ash(fit.clust2$be[,1],fit.clust2$seb[,1])$result$svalue,
+                         ash(fit.clust2$be[,2],fit.clust2$seb[,2])$result$svalue)
+
+fit.clust3 <- spml.reg(y=Theta[which(fit.3.predict == 3)], 
+                       x=x[which(fit.3.predict == 3), ], seb = TRUE)
+fit.clust3.sval <- cbind(ash(fit.clust3$be[,1],fit.clust3$seb[,1])$result$svalue,
+                         ash(fit.clust3$be[,2],fit.clust3$seb[,2])$result$svalue)
+
+cbind(round(fit.clust1.sval,4),
+      round(fit.clust2.sval,4),
+      round(fit.clust3.sval,4))
+```
+
+None is signifcantly associated with sin(theta). But cdk1 for the third cluster (cyclin dependent kinase 1) is significantly associated with all three clusters (sval < .01).
+
+```{r}
+rownames(fit.clust3$be)[24]
+```
+
+Check how different the effect sizes are
+
+```{r}
+round(cbind(fit.clust1$be, fit.clust2$be, fit.clust3$be),4)
+```
+
+
+Correlation between RFP and GFP.
+
+```{r}
+plot(x=pdata.adj.filt$gfp.median.log10sum.adjust,
+     y=pdata.adj.filt$rfp.median.log10sum.adjust,
+     xlab = "GFP", ylab = "RFP")
 ```
 
 ---

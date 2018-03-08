@@ -32,15 +32,18 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 ## Introduction/Summary
 
+Observations:
 
-1. There are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5' end: promoter region -> EGFP -> 20 bp linker -> mCherry. We don't yet have an explanation on the low number of reads mapped to mCherry... We decided to use EGFP to determine if the transgene is silenced at all. 
+1. There are more reads mapped to EGFP than to mCherry. The transgene sequence from 5' to 3' end: EGFP -> IRES (Internal Ribosomal Entry Site) -> mCherry -> Promoter region. The sequence is transcribed as one long transcript from 5' to 3' mCherry, IRES, EGFP. The IRES allows the translation to continue after mCherry onto EGFP.  The STRT-seq protocol that we use is prone to high coverage bias toward 3'end of the mRNA transcript, which could be a possible explanation for the high coverage of EGFP in our data. 
 
-2. Consistent with image intensity data, there are more variation between batches of C1 plates than between individuals. Fortunatley, given our balanced design, technical variation between batches are spread out across individuals. The main concern here would be the inflated within individual variation due to differences between the C1 plates.
-
-3. Considering the relationship between intensity and transgene molecule count: samples with no EGFP molecules also have lower than average (z-score < 0) GFP and RFP intensity. 
+2. To determine if the transgene is silenced, we consider the number of molecules mapped to EGFP or mCherry. If there's no molecules mapped to either translation region, we consider that there's random silencing going on for the cell.
 
 
-4. 
+Conclusion:
+
+1. Transgene molecule count is not a quality proxy for random silencing of the transgene. 
+
+2. Transgene molecule count is not correlated with intensity measures. 
 
 ---
 
@@ -85,7 +88,7 @@ $~$
 
 ## Transgene count
 
-**Results**: there are more reads mapped to EGFP than to mCherry. The regions in the transgenes statring from 5' end: promoter region -> EGFP -> 20 bp linker -> mCherry. We don't yet have an explanation on the low number of reads mapped to mCherry... We decided to use EGFP to determine if the transgene is silenced at all. 
+**Results**: there are more reads mapped to EGFP than to mCherry. The FUCCI transcript statring from 5' end: mCherry -> IRES -> EGFP. We decided to use EGFP count to determine whether the transgene is silenced in the cell.
 
 ```{r}
 summary(pdata.adj$mol_egfp)
@@ -156,7 +159,7 @@ ggplot(pdata.adj, aes(x=mol_mcherry)) +
 
 ---
 
-## Correlation between transgene count and intensities
+## Correlation with intensities
 
 
 ```{r, fig.width=7, fig.height=6}
@@ -178,44 +181,457 @@ plot(y=pdata.adj$rfp.median.log10sum,
      pch = 16, cex = .7)
 ```
 
-Correlation between total transgene count and intensities
+Correlation between total transgene CPM and intensities
 
 ```{r, fig.width=7, fig.height=4}
-trans_total <- rowSums(cbind(pdata.adj$mol_mcherry,pdata.adj$mol_egfp))
+pdata.adj$trans.total <- with(pdata.adj, mol_egfp + mol_mcherry)
+pdata.adj$trans.cpm <- with(pdata.adj, (10^6)*(mol_egfp + mol_mcherry)/molecules)
+
 par(mfrow=c(1,2))
-plot(x=trans_total,
-     y=pdata.adj$gfp.median.log10sum,
-     xlab = "transgene molecule count", 
-     ylab = "EGFP protein intensity", 
-     pch = 16, cex = .7)
-plot(x=trans_total,
+plot(x=pdata.adj$trans.cpm,
      y=pdata.adj$rfp.median.log10sum,
-     xlab = "transgene molecule count", 
+     xlab = "transgene molecule CPM", 
      ylab = "mCherry protein intensity", 
      pch = 16, cex = .7)
-title(main = "transgene molecule count vs. intensities",
+plot(x=pdata.adj$trans.cpm,
+     y=pdata.adj$gfp.median.log10sum,
+     xlab = "transgene molecule CPM", 
+     ylab = "EGFP protein intensity", 
+     pch = 16, cex = .7)
+title(main = "transgene molecule CPM vs. intensities",
       outer = TRUE, line = -1)
 ```
 
+---
 
-```{r, fig.width=6, fig.height=15}
-par(mfrow=c(6,2), mar = c(3,2,2,1))
+## Correct for intensity using molecule count
+
+```{r, fig.width=11, fig.height=6}
+# for every individual, 
+# fit linear model to estimate the relationships between 
+# intensity and trans cpm
+fit.lm.rfp <- vector("list", 6)
+fit.lm.gfp <- vector("list", 6)
 for (i in 1:length(unique(pdata.adj$chip_id))) {
-  ii_id <- which(pdata.adj$chip_id == unique(pdata.adj$chip_id)[i])
-  plot(x=trans_total[ii_id],
-       y=pdata.adj$gfp.median.log10sum[ii_id],
-       xlab = "transgene molecule count", 
-       ylab = "EGFP protein intensity", 
-#       main = "Transgene molecule count",
-       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
-  plot(x=trans_total[ii_id],
-       y=pdata.adj$rfp.median.log10sum[ii_id],
-       xlab = "transgene molecule count", 
-       ylab = "mCherry protein intensity", 
-#       main = "Transgene molecule count",
-       pch = 16, cex = .7, main = unique(pdata.adj$chip_id)[i])
+  fit.lm.rfp[[i]] <- lm(rfp.median.log10sum.adjust.ash ~ trans.cpm,
+                     data = subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]))
+  fit.lm.gfp[[i]] <- lm(gfp.median.log10sum.adjust.ash ~ trans.cpm,
+                     data = subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]))
+}
+names(fit.lm.rfp) <- unique(pdata.adj$chip_id)
+names(fit.lm.gfp) <- unique(pdata.adj$chip_id)
+
+lapply(fit.lm.rfp, summary)
+lapply(fit.lm.gfp, summary)
+
+pdata.adj$rfp.median.log10sum.adjust.ash.resid <- pdata.adj$rfp.median.log10sum.adjust.ash
+pdata.adj$gfp.median.log10sum.adjust.ash.resid <- pdata.adj$gfp.median.log10sum.adjust.ash
+for (i in 1:6) {
+  which_id <- pdata.adj$chip_id == unique(pdata.adj$chip_id)[i]
+  pdata.adj$rfp.median.log10sum.adjust.ash.resid[which_id] <- fit.lm.rfp[[i]]$residuals
+  pdata.adj$gfp.median.log10sum.adjust.ash.resid[which_id] <- fit.lm.gfp[[i]]$residuals
+}
+
+plot_grid(
+ggplot(pdata.adj, aes(x = gfp.median.log10sum.adjust.ash.resid,
+                      y = rfp.median.log10sum.adjust.ash.resid,
+                      group = factor(chip_id))) +
+  ylim(-1.5, 1.5) + xlim(-1.5, 1.5) +
+  geom_point(cex=.8) + facet_wrap(~chip_id, nrow=2) +
+  xlab("GFP") + ylab("RFP") + ggtitle("Intensities adjusted for batch"),
+ggplot(pdata.adj, aes(x = gfp.median.log10sum.adjust.ash,
+                      y = rfp.median.log10sum.adjust.ash,
+                      group = factor(chip_id))) +
+  ylim(-1.5, 1.5) + xlim(-1.5, 1.5) +
+  geom_point(cex=.8) + facet_wrap(~chip_id, nrow=2) +
+  xlab("GFP") + ylab("RFP") + ggtitle("Residuals of intensity adj for batch")
+)
+```
+
+---
+
+## Cell cycle staging
+
+Fitting circle using intensity before/after transgene molecule correction.
+
+```{r}
+library(Directional)
+
+source("../code/circle.intensity.fit.R")
+
+pdata.adj$rfp.z <- with(pdata.adj, scale(rfp.median.log10sum.adjust.ash))
+pdata.adj$gfp.z <- with(pdata.adj, scale(gfp.median.log10sum.adjust.ash))
+pdata.adj$rfp.resid.z <- with(pdata.adj, scale(rfp.median.log10sum.adjust.ash.resid))
+pdata.adj$gfp.resid.z <- with(pdata.adj, scale(gfp.median.log10sum.adjust.ash.resid))
+
+fit <- lapply(1:6, function(i) {
+  circle.fit(with(subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]),
+                  as.matrix(cbind(gfp.z, rfp.z))), 
+             IterMAX=100)
+})
+names(fit) <- unique(pdata.adj$chip_id)
+
+fit.resid <- lapply(1:6, function(i) {
+  circle.fit(with(subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]),
+                  as.matrix(cbind(gfp.resid.z, rfp.resid.z))), 
+             IterMAX=100)
+})
+names(fit.resid) <- unique(pdata.adj$chip_id)
+
+# compute residuals of the fit
+residuals.fit <- lapply(1:6, function(i) {
+  df_sub <- with(subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]),
+                  as.matrix(cbind(gfp.z, rfp.z)))
+  resids <- scale(df_sub - fit[[i]])
+  resids_ssq <- rowSums(resids^2)
+  return(resids_ssq)
+})
+names(residuals.fit) <- unique(pdata.adj$chip_id)
+
+residuals.fit.resid <- lapply(1:6, function(i) {
+  df_sub <- with(subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i]),
+                  as.matrix(cbind(gfp.resid.z, rfp.resid.z)))
+  resids <- scale(df_sub - fit.resid[[i]])
+  resids_ssq <- rowSums(resids^2)
+  return(resids_ssq)
+})
+names(residuals.fit.resid) <- unique(pdata.adj$chip_id)
+
+
+# print ssq for each individual
+for (i in 1:6) {
+  cat (names(residuals.fit)[i], ":", "\n",
+      "Before correction", sum(residuals.fit[[i]]) ,";", 
+      "After correction", sum(residuals.fit.resid[[i]]), "\n")
 }
 ```
+
+No difference between sum of squares of standardized residuals (within intensities).
+
+```{r, fig.width=6, fig.height=4}
+# compare rankings
+library(circular)
+for (i in 1:6) {
+par(mfrow=c(1,2))
+hist(as.numeric(coord2rad(fit[[i]])), nclass = 40,
+     xlab = "Radians", main = "Before correction")
+hist(as.numeric(coord2rad(fit.resid[[i]])), nclass = 40,
+     xlab = "Radians", main = "After correction")
+title(main  = names(fit)[i], outer = TRUE, line = -1)
+}
+```
+
+
+DAPI and projected positions
+
+```{r, fig.width=9, fig.height=4}
+pdata.adj$dapi.z <- scale(pdata.adj$dapi.median.log10sum.adjust.ash)
+
+for (i in 1:6) {
+df_sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+par(mfrow=c(1,3))
+plot(as.numeric(coord2rad(fit[[i]])), 
+     y=df_sub$dapi.z,
+     xlab = "Radians", ylab = "DAPI", main = "Projected positions")
+hist(as.numeric(coord2rad(fit[[i]])), nclass = 40,
+     xlab = "Radians", main = "Projected positions")
+hist(df_sub$dapi.z, nclass=40,
+     xlab = "DAPI", main = "DAPI intensities")
+title(main  = names(fit)[i], outer = TRUE, line = -1)
+}
+```
+
+
+Spherical regression of projected position ~ various covariates. The analysis is performed for each individual separately.
+
+Individual NA19160
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+
+i=5
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+round(pvals.4,4)
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+# for fun add plate effect
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
+Individual NA18511
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+i=6
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+pvals.4
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+# for fun add plate effect
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
+
+Individual NA19101
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+i=4
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+pvals.4
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+# for fun add plate effect
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
+Individual NA19098
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+i=3
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+pvals.4
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
+
+Individual NA18855
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+i=2
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+pvals.4
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
+
+Individual NA18870
+
+```{r}
+# regression 
+library(Rfast)
+library(Directional)
+i=1
+df.sub <- subset(pdata.adj, chip_id == unique(pdata.adj$chip_id)[i])
+Theta <- coord2rad(fit[[i]])
+
+# test that gfp and rfp should be significant
+# gfp is with cosine and rfp with sin
+X1 <- cbind(df.sub$gfp.z, df.sub$rfp.z)
+reg.1 <- Directional::spml.reg(Theta, X1, rads = TRUE, seb=T, xnew=X1)
+pvals.1 <- 2*pnorm(reg.1$beta/reg.1$seb, lower.tail = F)
+pvals.1
+
+# trans.cpm not associated with X2
+X2 <- df.sub$trans.cpm
+reg.2 <- Directional::spml.reg(Theta, X2, rads = TRUE, seb=T)
+pvals.2 <- 2*pnorm(reg.2$beta/reg.2$seb, lower.tail = F)
+pchisq(-2*reg.2$loglik, df = dim(reg.2$beta)[1]*dim(reg.2$beta)[2], lower.tail = F)
+pvals.2
+
+# dapi predicts cosine of Y
+X3 <- df.sub$dapi.z
+reg.3 <- Directional::spml.reg(Theta, X3, rads = TRUE, seb=T)
+pvals.3 <- 2*pnorm(reg.3$beta/reg.3$seb, lower.tail = F)
+pvals.3
+
+# dapi not significant after adding with green and red
+X4 <- cbind(df.sub$dapi.z, df.sub$gfp.z, df.sub$rfp.z)
+reg.4 <- Directional::spml.reg(Theta, X4, rads = TRUE, seb=T)
+pvals.4 <- 2*pnorm(reg.4$beta/reg.4$seb, lower.tail = F)
+pvals.4
+
+# not significant change in likelihood
+# from model with red and gree to model added dapi
+pchisq(-2*(reg.4$loglik-reg.1$loglik), df = 1, lower.tail = F)
+
+
+X5 <- cbind(df.sub$gfp.z, df.sub$rfp.z, factor(df.sub$experiment))
+reg.5 <- Directional::spml.reg(Theta, X5, rads = TRUE, seb=T)
+pvals.5 <- 2*pnorm(reg.5$beta/reg.5$seb, lower.tail = F)
+pvals.5
+```
+
+
 
 ## Session information
 
