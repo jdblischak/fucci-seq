@@ -223,7 +223,8 @@ div.section {
 <li><a href="#correlations">Correlations</a></li>
 <li><a href="#dapi-vs-fucci">DAPI vs FUCCI</a></li>
 <li><a href="#save-output">Save output</a></li>
-<li><a href="#genes-and-projected-cell-times">Genes and projected cell times</a></li>
+<li><a href="#compare-dapi-and-expression-in-their-ability-to-predict-fucci-intensities">Compare DAPI and expression in their ability to predict FUCCI intensities</a></li>
+<li><a href="#association-between-gene-expression-and-projected-cell-times">Association between gene expression and projected cell times</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -232,10 +233,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-03-07</p>
+<p><strong>Last updated:</strong> 2018-03-08</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> a7c550c</p>
+<p><strong>Code version:</strong> 627abba</p>
 <hr />
 <div id="overviewresults" class="section level2">
 <h2>Overview/Results</h2>
@@ -481,12 +482,97 @@ names(dapi.above.fucci) &lt;- both.genes</code></pre>
 </div>
 <div id="save-output" class="section level2">
 <h2>Save output</h2>
-<pre class="r"><code>save(corr.all, file = &quot;../output/images-seq-correlation.Rmd/corr.all.rds&quot;)
-save(corr.all.macosko, file = &quot;../output/images-seq-correlation.Rmd/corr.all.macosko.rds&quot;)</code></pre>
+<pre class="r"><code>saveRDS(corr.all, file = &quot;../output/images-seq-correlation.Rmd/corr.all.rds&quot;)
+saveRDS(corr.all.macosko, file = &quot;../output/images-seq-correlation.Rmd/corr.all.macosko.rds&quot;)</code></pre>
 <hr />
 </div>
-<div id="genes-and-projected-cell-times" class="section level2">
-<h2>Genes and projected cell times</h2>
+<div id="compare-dapi-and-expression-in-their-ability-to-predict-fucci-intensities" class="section level2">
+<h2>Compare DAPI and expression in their ability to predict FUCCI intensities</h2>
+<p>The approach is outlined as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Find top genes correlated with DAPI (some cutoff)</li>
+<li>Do PCA on these, and take the first PC</li>
+<li>Use this first PC to predict GFP and RFP. Compare with using DAPI to predict GFP and RFP.</li>
+<li>Then you can do the same thing reversing the role of DAPI vs GFP/RFP</li>
+</ol>
+<pre class="r"><code>corr.all &lt;- readRDS(&quot;../output/images-seq-correlation.Rmd/corr.all.rds&quot;)
+
+log2cpm.dapi &lt;- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all)[corr.all$sval.dapi &lt; .01]), ]
+
+pca.log2cpm.dapi &lt;- prcomp(t(log2cpm.dapi), scale. = FALSE)
+(100*(pca.log2cpm.dapi$sdev^2)/sum(pca.log2cpm.dapi$sdev^2))[1:10]</code></pre>
+<pre><code> [1] 6.946316 4.532546 3.443780 2.496960 1.813800 1.642282 1.499672
+ [8] 1.437401 1.380478 1.363254</code></pre>
+<pre class="r"><code># use first PC from genes correlatd with DAPI to predict FUCCI
+fit.rfp.pc1.dapi &lt;- lm(pdata.adj$rfp.median.log10sum.adjust.ash ~ pca.log2cpm.dapi$x[,1] - 1)
+fit.gfp.pc1.dapi &lt;- lm(pdata.adj$gfp.median.log10sum.adjust.ash ~ pca.log2cpm.dapi$x[,1] - 1)
+
+fit.rfp.ints.dapi &lt;- lm(pdata.adj$rfp.median.log10sum.adjust.ash ~ pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+
+fit.gfp.ints.dapi &lt;- lm(pdata.adj$gfp.median.log10sum.adjust.ash ~ pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+
+
+
+get.loglik.fit &lt;- function(fit) {
+  get.loglik &lt;- function(residuals, sigma) {
+    residuals.scaled &lt;- -(residuals^2)
+    residuals.scaled &lt;- residuals.scaled/2/(sigma^2)
+    out &lt;- sum(residuals.scaled - log(sigma) - 0.5*log(2*pi))
+    return(out)
+  }
+  get.loglik(fit$residuals, summary(fit)$sigma)
+}
+
+
+# fit &lt;- fit.dapi.pc.fucci
+# residuals &lt;- fit$residuals
+# sigma &lt;- summary(fit)$sigma
+
+# make an output table
+data.frame(GFP = c(get.loglik.fit(fit.gfp.pc1.dapi), get.loglik.fit(fit.gfp.ints.dapi)),
+           RFP = c(get.loglik.fit(fit.rfp.pc1.dapi), get.loglik.fit(fit.rfp.ints.dapi)),
+           row.names = c(&quot;DAPI PC1 (6%)&quot;, &quot;DAPI intensity&quot;))</code></pre>
+<pre><code>                     GFP       RFP
+DAPI PC1 (6%)  -305.9552 -701.9587
+DAPI intensity -129.9191 -692.7677</code></pre>
+<pre class="r"><code>data.frame(GFP = c(unlist(anova(fit.gfp.pc1.dapi)[5])[1],
+                   unlist(anova(fit.gfp.ints.dapi)[5])[1]),
+           RFP = c(unlist(anova(fit.rfp.pc1.dapi)[5])[1], 
+                   unlist(anova(fit.rfp.ints.dapi)[5])[1]),
+           row.names = c(&quot;DAPI PC1&quot;, &quot;DAPI intensity&quot;))</code></pre>
+<pre><code>                        GFP          RFP
+DAPI PC1       1.937492e-17 6.247227e-01
+DAPI intensity 3.719309e-94 1.617692e-05</code></pre>
+<p>FUCCI predicting DAPI verus expression predicting DAPI.</p>
+<pre class="r"><code>corr.all &lt;- readRDS(&quot;../output/images-seq-correlation.Rmd/corr.all.rds&quot;)
+
+log2cpm.fucci &lt;- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all)[corr.all$sval.gfp &lt; .01 &amp; corr.all$sval.rfp &lt; .01]), ]
+
+pca.log2cpm.fucci &lt;- prcomp(t(log2cpm.fucci), scale. = FALSE)
+(100*(pca.log2cpm.fucci$sdev^2)/sum(pca.log2cpm.fucci$sdev^2))[1:10]</code></pre>
+<pre><code> [1] 11.352165  6.301929  3.005017  2.606710  2.420845  2.381576  2.267142
+ [8]  2.238282  2.128262  2.080983</code></pre>
+<pre class="r"><code># use first PC from genes correlatd with DAPI to predict FUCCI
+fit.dapi.pc.fucci &lt;- lm(pdata.adj$dapi.median.log10sum.adjust.ash ~ pca.log2cpm.fucci$x[,1] -1)
+
+fit.dapi.ints.fucci &lt;- lm(pdata.adj$dapi.median.log10sum.adjust.ash ~ pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$rfp.median.log10sum.adjust.ash -1)
+
+# make an output table
+data.frame(DAPI = c(get.loglik.fit(fit.dapi.pc.fucci), get.loglik.fit(fit.dapi.ints.fucci)),
+           row.names = c(&quot;FUCCI PC1 (11%)&quot;, &quot;FUCCI intensity&quot;))</code></pre>
+<pre><code>                    DAPI
+FUCCI PC1 (11%)  54.8556
+FUCCI intensity 282.1462</code></pre>
+<pre class="r"><code>data.frame(DAPI = c(unlist(anova(fit.dapi.pc.fucci)[5])[1],
+                   unlist(anova(fit.dapi.ints.fucci)[5])[1]),
+           row.names = c(&quot;FUCCI PC1 (11%)&quot;, &quot;FUCCI intensity&quot;))</code></pre>
+<pre><code>                        DAPI
+FUCCI PC1 (11%) 1.397861e-02
+FUCCI intensity 7.720000e-97</code></pre>
+<hr />
+</div>
+<div id="association-between-gene-expression-and-projected-cell-times" class="section level2">
+<h2>Association between gene expression and projected cell times</h2>
 <p>There are three clusters in projected cell times (lowest BIC). I then fit spherical regression to find genes that are significant predictors of projected cell times fo each cluster. I only found one signfican genes, which is CDK1.</p>
 <p><strong>Note</strong>: It’s important to consider the assumption that sin(theta) and cos(theta) are uncorrelated. May be unrealistic.</p>
 <pre class="r"><code>log2cpm.sig.macosko &lt;- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all.macosko)[corr.all.macosko$sval.dapi &lt; .01 &amp; corr.all.macosko$sval.rfp &lt; .01 &amp; corr.all.macosko$sval.gfp &lt; .01]), ]
@@ -497,7 +583,7 @@ Theta &lt;- do.call(c, lapply(proj.res, function(x) as.numeric(x[[1]]$rads)))
 names(Theta) &lt;- do.call(c, lapply(proj.res, function(x) rownames(x[[1]])))
 
 hist(Theta, nclass = 50)</code></pre>
-<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Predict cell times by annotated cell cycle gens that are correlated with both DAPI and FUCCI. Only two genes of these 21 show significant association with the projected cell time.</p>
 <pre class="r"><code>library(Rfast)
 x &lt;- data.frame(chip_id = pdata.adj.filt$chip_id,
@@ -599,7 +685,7 @@ cbind(round(fit.clust1.sval,4),
 [25,] 0.7879    1 0.9751    1    1    1
 [26,] 0.2623    1 0.9620    1    1    1
 [27,] 0.6933    1 0.9285    1    1    1</code></pre>
-<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>None is signifcantly associated with sin(theta). But cdk1 for the third cluster (cyclin dependent kinase 1) is significantly associated with all three clusters (sval &lt; .01).</p>
 <pre class="r"><code>rownames(fit.clust3$be)[24]</code></pre>
 <pre><code>[1] &quot;ENSG00000170312&quot;</code></pre>
@@ -665,7 +751,7 @@ ENSG00000182481      -0.2941     0.2308</code></pre>
 <pre class="r"><code>plot(x=pdata.adj.filt$gfp.median.log10sum.adjust,
      y=pdata.adj.filt$rfp.median.log10sum.adjust,
      xlab = &quot;GFP&quot;, ylab = &quot;RFP&quot;)</code></pre>
-<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/images-seq-correlation.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="session-information" class="section level2">
