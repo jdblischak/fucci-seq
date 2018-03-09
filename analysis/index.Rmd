@@ -64,9 +64,9 @@ We investigated cell cycle signals in the sequencing data.
 
 2. [Select cell cycle genes for training data](seqdata-select-cellcyclegenes.html)
 
-3. [Gene expression levels and intensities](images-seq-correlation.Rmd)
+3. [Correlation/association between expression and intensities](images-seq-correlation.html)
 
-4. PCA and intensities
+4. [PCA and intensities
 
 
 
@@ -94,12 +94,15 @@ We explored the possiblities of using intensities to learn cell cycle phases/gen
 
 ## Model fitting
 
-* Evaluating cellcycleR 0.1.6
+* CellcycleR 0.1.6
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
     * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
     * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
     
+
+* Semi-supervsied method
+    * 
 
 ---
 
