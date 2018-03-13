@@ -15,3 +15,5 @@ output/seqdata-batch-correction.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
 output/images-circle-ordering.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/seqdata-select-cellcyclegenes.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/images-seq-correlation.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/images-circle-ordering-npreg.Rmd/* filter=lfs diff=lfs merge=lfs -text
+
