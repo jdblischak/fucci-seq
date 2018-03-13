@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Simulation study of circular-linear correlation</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Simulation study of circular-linear correlation</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#circular-linear-correlation">Circular-linear correlation</a><ul>
+<li><a href="#notations">Notations</a></li>
+<li><a href="#approach">Approach</a></li>
+<li><a href="#basic-properties">Basic properties</a></li>
+<li><a href="#fishers-z-transformation">Fisher’s z transformation</a></li>
+</ul></li>
+<li><a href="#circular-circular-correlation">Circular-circular correlation</a><ul>
+<li><a href="#approach-1">Approach</a></li>
+<li><a href="#get-a-sense-of-parameters-needed-for-simulations.">Get a sense of parameters needed for simulations.</a></li>
+</ul></li>
+<li><a href="#linear-linear-correlation">Linear-linear correlation</a></li>
+<li><a href="#distribution-properties">Distribution properties</a><ul>
+<li><a href="#sample-size-when-correlation-near-zero">Sample size when correlation near zero</a></li>
+<li><a href="#size-of-correlation-when-the-sample-size-is-small">Size of correlation when the sample size is small</a></li>
+</ul></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-03-13</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> adbc970</p>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<ol style="list-style-type: decimal">
+<li><p>Circular-circular correlation picks up more interesting patterns than circular-linear correlation. In circiular-linear correlation, the linear variable is implied to follow a sinusoidal pattern. This assumption is quite limited, and may explain why many of the genes detected significant in circ-linear case are not signficant in cir-cir case.</p></li>
+<li><p>Although circular-circular correlation detects interesting patterns, the definition of this particular definition of circular-circular correlation (there are other ones) results in a measure that is phase-sensitive. For example, when the phase shift is pi/2, the two variables have a correlation of zero.</p></li>
+<li><p>Following these results, I consider the application of nonparametric regression for circular data.</p></li>
+</ol>
+<hr />
+</div>
+<div id="circular-linear-correlation" class="section level2">
+<h2>Circular-linear correlation</h2>
+<div id="notations" class="section level3">
+<h3>Notations</h3>
+<p>Let <span class="math inline">\(X\)</span> be a linear random variable, and <span class="math inline">\(\Theta\)</span> be a circular random variables. We observe data <span class="math inline">\((x_1, \theta_1), \dots, (x_n, \theta_n)\)</span> on <span class="math inline">\((X, \Theta)\)</span>. In our case, <span class="math inline">\(n\)</span> denotes cells, <span class="math inline">\(x_i\)</span> denotes log2 gene expression (CPM) of a selected gene, and <span class="math inline">\(theta_i\)</span> denotes the angle of cell <span class="math inline">\(i\)</span> on the unit circle formed by GFP and RFP.</p>
+<p><span class="math inline">\(\Theta\)</span> measures directions in 2-dimensions and can be represented as unit vectors <span class="math inline">\(\boldsymbol{u}\)</span> in the plane, i.e., as points on the sphere <span class="math inline">\(S^{p-1} = \{ \boldsymbol{u}: \boldsymbol{u}^T \boldsymbol{u} = 1 \}\)</span>, the (p-1)-dimensional sphere with unit radius and centre at the origin, where <span class="math inline">\(p=2\)</span>. <span class="math inline">\(\boldsymbol{u}\)</span> is thus defined by</p>
+<p><span class="math display">\[
+\boldsymbol{u} = (cos\,\Theta, sin\,\Theta)^T
+\]</span> This definition of <span class="math inline">\(\Theta\)</span> is also known as the <strong>embedding approach</strong>, where the sphere <span class="math inline">\(S^{p-1}\)</span> is regarded as a subset of <span class="math inline">\(\mathbb{R}^p\)</span>.</p>
+</div>
+<div id="approach" class="section level3">
+<h3>Approach</h3>
+<p>We consider a correlation coefficient based on the embedding approach. This approach was independently introduced by Mardia (1979) and Johnson and Wehrly (1977). The measure of dependence between <span class="math inline">\(X\)</span> and <span class="math inline">\(\boldsymbol{u} = (cos \,\theta, sin\,\theta)^T\)</span> is the sample multiple correlation coefficient <span class="math inline">\(R_{x\theta}\)</span> of <span class="math inline">\(X\)</span> and <span class="math inline">\(u\)</span>, i.e., the maximum sample correlation between <span class="math inline">\(X\)</span> and linear functions of <span class="math inline">\(\boldsymbol{u}\)</span>. The sample multiple correlation coefficient is given by:</p>
+<p><span class="math display">\[
+R^2_{x\theta} = \frac{r^2_{xc} + r^2_{xs} - 2r_{xc}r_{xs}r_{cs}}{1-r^2_{cs}}
+\]</span> where <span class="math inline">\(r_{xc} = corr(x, cos\,\theta)\)</span>, <span class="math inline">\(r_{xs} = corr(x, sin\,\theta)\)</span>, <span class="math inline">\(\r_{cs} = corr(cos \,\theta, sin \,\theta)\)</span> are the sample correlation coefficients. If <span class="math inline">\(X\)</span> and <span class="math inline">\(\Theta\)</span> are indepenent and <span class="math inline">\(X\)</span> is normally distributed then under the null hypothesis of zero population multiple correlation coefficient,</p>
+<p><span class="math display">\[
+\frac{(n-3)R^2_{x\theta}}{1-R^2_{x\theta}} \sim F_{2,n-3}
+\]</span></p>
+<p><span class="math inline">\(R^2_{x\theta}\)</span> ranges between zero and one, the greater its value the stronger the association between <span class="math inline">\(X\)</span> and <span class="math inline">\(\Theta\)</span>. <span class="math inline">\(R^2_{x\theta}\)</span> is invariant under a change of scale and origin of <span class="math inline">\(X\)</span> as well as under a change of zero or sense of direction for <span class="math inline">\(\Theta\)</span>.</p>
+<p>Reference:</p>
+<p>Mardia and Jupp (2000). “Correlation and Regression”. Directional Statistics. West Sussex, England: John Wiley &amp; Sons Ltd.</p>
+<p>Mardia, Kent, and Bibby. (1979). Multivariate analysis. Academic Press, London.</p>
+</div>
+<div id="basic-properties" class="section level3">
+<h3>Basic properties</h3>
+<p>The sample multiple correlation for ciruclar-linear association is a function of the sample pearson’s correlation between cos(theta) and sin(theta), correlation between data vector and cos(theta), and correlation between data vector and sin(theta). So when <span class="math inline">\(r_{cs}\)</span> is small, <span class="math inline">\(R^2_{x\tehta}\)</span> is large when either <span class="math inline">\(r^2_{xc}\)</span> or <span class="math inline">\(r^2_{xs}\)</span> is large. When <span class="math inline">\(r_{cs}\)</span> is large, <span class="math inline">\(R^2_{x\theta}\)</span> approaches zero.</p>
+<pre class="r"><code>library(circular)
+library(Rfast)
+set.seed(7)
+theta &lt;- rvonmises(50, pi, 100, rads = TRUE)
+cor(cos(theta), sin(theta))</code></pre>
+<pre><code>[1] -0.3499888</code></pre>
+<pre class="r"><code>x &lt;- 20*rnorm(50, 3*pi/4, 1/10)
+cor(x, cos(theta))^2; cor(x, sin(theta))^2</code></pre>
+<pre><code>[1] 0.0004284577</code></pre>
+<pre><code>[1] 0.006214955</code></pre>
+<pre class="r"><code>sqrt(circlin.cor(theta, x))</code></pre>
+<pre><code>      R-squared  p-value
+[1,] 0.07917757 0.863013</code></pre>
+<p>Get a sense of parameters needed for simulations.</p>
+<pre class="r"><code>set.seed(7)
+theta &lt;- rvonmises(50, 2, 20, rads = TRUE)
+tau &lt;- runif(300, -25, 5)
+set.seed(7)
+x &lt;- t(sapply(1:length(tau), function(i) {
+  tau[i]*cos(theta-15) + rnorm(50) }))
+r.squared &lt;- apply(x, 1, function(x) circlin.cor(theta, x)[1])
+summary(r.squared)</code></pre>
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+0.0002146 0.1658601 0.5318962 0.4722308 0.7447599 0.9067895 </code></pre>
+<pre class="r"><code>which.max(r.squared)</code></pre>
+<pre><code>[1] 115</code></pre>
+<pre class="r"><code>tau[75]</code></pre>
+<pre><code>[1] -24.71072</code></pre>
+<pre class="r"><code>which(r.squared &lt; .4 &amp; r.squared &gt; .3)</code></pre>
+<pre><code> [1]   1  11  21  34  44  57  67  68  84 136 167 194 208 284 285</code></pre>
+<pre class="r"><code>tau[19]</code></pre>
+<pre><code>[1] -8.031457</code></pre>
+<pre class="r"><code>which.min(r.squared)</code></pre>
+<pre><code>[1] 13</code></pre>
+<pre class="r"><code>tau[46]</code></pre>
+<pre><code>[1] -0.1493445</code></pre>
+<pre class="r"><code># strong r.squared
+set.seed(7)
+theta &lt;- rvonmises(50, 2, 20, rads = TRUE)
+set.seed(7)
+x.1 &lt;- (-24.7)*cos(theta-15) + rnorm(50)
+cors.1 &lt;- circlin.cor(theta, x.1)
+cors.1</code></pre>
+<pre><code>     R-squared     p-value
+[1,] 0.8799178 8.42342e-29</code></pre>
+<pre class="r"><code>set.seed(19)
+x.2 &lt;- (-9.8)*cos(theta-15) + rnorm(50)
+cors.2 &lt;- circlin.cor(theta, x.2)
+cors.2</code></pre>
+<pre><code>     R-squared      p-value
+[1,] 0.5189844 1.837546e-12</code></pre>
+<pre class="r"><code>set.seed(17)
+x.3 &lt;- 6*cos(theta-15) + rnorm(50)
+cors.3 &lt;- circlin.cor(theta, x.3)
+cors.3</code></pre>
+<pre><code>     R-squared    p-value
+[1,] 0.1344775 0.00173116</code></pre>
+<pre class="r"><code>library(circular)
+par(mfrow=c(1,2), mar = c(2,2,2,1))
+plot(circular(theta))
+lims &lt;- range(c(x.1,x.2,x.3))
+plot(x=theta, y = x.1, pch = 15, col = &quot;black&quot;, ylim = lims,
+     ylab = &quot;X, linear variable values&quot;,
+     xlab = &quot;Theta, VM(2,20)&quot;)
+points(x=theta, y = x.2, pch = 17, col = &quot;blue&quot;)
+points(x=theta, y = x.3, pch = 16, col = &quot;forestgreen&quot;)</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fishers-z-transformation" class="section level3">
+<h3>Fisher’s z transformation</h3>
+<p>Moderate association</p>
+<pre class="r"><code>x.cl &lt;- sweep(matrix(rnorm(50*200), ncol=50), 2,
+                    STATS = (-8)*cos(theta-15), &quot;+&quot;)
+r.squared.cl &lt;- apply(x.cl, 1, function(x) circlin.cor(theta, x)[1])
+
+par(mfrow=c(2,2))
+hist(sqrt(r.squared.cl), nclass = 50, prob = TRUE,
+     main = &quot;sqrt(multiple correlation)&quot;,
+     xlab = &quot;squared multiple correlation&quot;)
+lines(density(sqrt(r.squared.cl)), col = &quot;red&quot;)
+abline(v=mean(sqrt(r.squared.cl)), col = &quot;blue&quot;, lwd=1.5)
+
+trans.cl &lt;- 0.5* log ((1+ sqrt(r.squared.cl))/(1- sqrt(r.squared.cl)))
+trans.cl.mean &lt;- 0.5* log ((1+ mean(sqrt(r.squared.cl)))/(1- mean(sqrt(r.squared.cl))))
+hist(trans.cl, nclass=50, prob = TRUE,
+     main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z&quot;)
+lines(density(trans.cl), col = &quot;red&quot;)
+abline(v=trans.cl.mean, col=&quot;blue&quot;, lwd=1.5)
+
+qqplot(rnorm(length(trans.cl), trans.cl.mean, 1/sqrt(50-3)), trans.cl,
+       xlab = &quot;Quantiles of N(0, 1/sqrt(47))&quot;,
+       ylab = &quot;Sample quantiles&quot;)
+abline(0,1, col = &quot;blue&quot;)
+title(&quot;Circular-linear correlation, E(R) = .63&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Weak association</p>
+<pre class="r"><code>x.cl.null &lt;- sweep(matrix(rnorm(50*200), ncol=50), 2,
+                    STATS = (-.15)*cos(theta-15), &quot;+&quot;)
+r.squared.cl.null &lt;- apply(x.cl.null, 1, function(x) circlin.cor(theta, x)[1])
+summary(sqrt(r.squared.cl.null))</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.003026 0.111656 0.167794 0.176677 0.242834 0.482664 </code></pre>
+<pre class="r"><code>par(mfrow=c(2,2))
+hist(sqrt(r.squared.cl.null), nclass = 50, prob = TRUE,
+     main = &quot;sqrt(multiple correlation)&quot;,
+     xlab = &quot;squared multiple correlation&quot;)
+lines(density(sqrt(r.squared.cl.null)), col = &quot;red&quot;)
+abline(v=mean(sqrt(r.squared.cl.null)), col = &quot;blue&quot;, lwd=1.5)
+
+trans.cl.null &lt;- 0.5* log ((1+ sqrt(r.squared.cl.null))/(1- sqrt(r.squared.cl.null)))
+trans.cl.null.mean &lt;- 0.5* log ((1+ mean(sqrt(r.squared.cl.null)))/(1- mean(sqrt(r.squared.cl.null))))
+hist(trans.cl.null, nclass=50, prob = TRUE,
+     main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z&quot;)
+lines(density(trans.cl.null), col = &quot;red&quot;)
+abline(v=trans.cl.null.mean, col=&quot;blue&quot;, lwd=1.5)
+
+qqplot(rnorm(length(trans.cl.null), trans.cl.null.mean, 1/sqrt(50-3)), trans.cl.null,
+       xlab = &quot;Quantiles of N(0,.1)&quot;,
+       ylab = &quot;Sample quantiles&quot;)
+abline(0,1, col = &quot;blue&quot;)
+title(&quot;Circular-linear correlation, E(R) = .20&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="circular-circular-correlation" class="section level2">
+<h2>Circular-circular correlation</h2>
+<div id="approach-1" class="section level3">
+<h3>Approach</h3>
+<p>This section is largely taken from Jammalamadaka and SenGupta (2001). Circular Correlation and Regression Section 2. Topics in Circular Statistics. Covent Garden, London: World Scientific Publishing Co. Pe. Ltd.</p>
+<p>Let <span class="math inline">\(\Phi\)</span> and <span class="math inline">\(\Theta\)</span> be a pair of circular random variables with values between 0 to <span class="math inline">\(2\pi\)</span>. We observe data <span class="math inline">\((\phi_1, \theta_1), \dots, (\phi_n, \theta_n)\)</span> on <span class="math inline">\((\Phi, \Theta)\)</span>. I define <span class="math inline">\(\phi_i\)</span> as the normalized log2CPM between 0 to 2pi (value scaled by maximum value across the data and the multipled by 2pi) for cell <span class="math inline">\(i\)</span>. Denote the means of <span class="math inline">\(\Phi\)</span> and <span class="math inline">\(\Theta\)</span> as <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau\)</span>, respectively.</p>
+<p>Recall that the pearson’s moment correlation coeffcient of variables X and Y is defined by</p>
+<p><span class="math display">\[
+\rho(X,Y) = Cov(X,Y)/\sqrt{Var(X)Var(Y)}
+\]</span> This measure has the properties</p>
+<ul>
+<li><span class="math inline">\(-1 \le \rho(X,Y) \le 1\)</span></li>
+<li><span class="math inline">\(\rho(X,Y) = \rho(Y,X)\)</span></li>
+<li><span class="math inline">\(\rho(aX + b, cY+d) = sgn(a)sgn(c)\rho(X,Y)\)</span></li>
+</ul>
+<p>Furthermore, <span class="math inline">\(\rho(X,Y)=0\)</span> if X and Y are independent although the converse is not true in general and if <span class="math inline">\(\rho(X,Y)=+/-1\)</span>, then <span class="math inline">\(X=aY+b\)</span> with probability 1.</p>
+<p>In the case with circular variables <span class="math inline">\(\Phi\)</span> and <span class="math inline">\(\Theta\)</span>, Jammalamadaka and Sarma (1988) define a measure of circular correlation coefficient as</p>
+<p><span class="math display">\[
+\rho_c(\phi, \theta) = \frac{E \big[ sin(\rho-\mu)sin(\theta-\tau)\big]}{\sqrt{Var(sin(\rho-\mu))Var(\theta-\tau)}}
+\]</span></p>
+<p>sin(-) and sin(-) are taken to represent the deviation of <span class="math inline">\(\rho\)</span> and <span class="math inline">\(\theta\)</span> from their respective mean directions.</p>
+<p>To compute <span class="math inline">\(\rho_c(\phi, \theta)\)</span>, notice that</p>
+<ol style="list-style-type: decimal">
+<li><p><span class="math inline">\(E(sin(\rho-\mu))=E(sin(\theta-\tau))=0\)</span>, which is analogous to the fact that the first central moment in linear case is 0.</p></li>
+<li><p><span class="math inline">\(E(cos(\phi-\mu))\)</span> is a measure of concentration of <span class="math inline">\(\phi\)</span> around the mean <span class="math inline">\(\mu\)</span></p></li>
+</ol>
+<p>The circular correlation <span class="math inline">\(\rho_c\)</span> satisfies the following properties:</p>
+<ol style="list-style-type: decimal">
+<li><p><span class="math inline">\(\phi_c(\phi, \theta)\)</span> does not depend on the zero direction used for either variable</p></li>
+<li><p><span class="math inline">\(\phi_c(\phi, \theta) = \rho_c(\theta, \phi)\)</span></p></li>
+<li><p>$ | _c(, ) |&lt;1$</p></li>
+<li><p><span class="math inline">\(\phi_c(\phi, \theta)=0\)</span> if <span class="math inline">\(\rho\)</span> and <span class="math inline">\(\theta\)</span> are independent although the converse need not be true.</p></li>
+<li><p>If <span class="math inline">\(\rho\)</span> and <span class="math inline">\(\theta\)</span> have full support, <span class="math inline">\(\phi_c(\rho, \theta)=1\)</span> iff <span class="math inline">\(\rho=\theta+constant (mod 2\pi)\)</span> and <span class="math inline">\(\phi_c(\phi, \theta) = -1\)</span> iff <span class="math inline">\(\rho+\theta=constant(mod 2\pi\)</span>.</p></li>
+<li><p><span class="math inline">\(\phi_c(\phi, \theta) \approx \rho_c(\theta, \phi)\)</span>, if <span class="math inline">\(\rho\)</span> and <span class="math inline">\(\theta\)</span> are concentrated in a small neighborhood of their respective mean directions and are measured in radians.</p></li>
+</ol>
+<p>The sample correlatoin coefficient of <span class="math inline">\(\Phi\)</span> and <span class="math inline">\(\Theta\)</span> is given by</p>
+<p><span class="math display">\[
+r_{c,n} = \frac{\sum^n_{i=1}sin(\rho_i-\bar{\rho})sin(\theta_i-\bar{\theta})}{\sqrt{\sum^n_{i=1}sin^2(\rho_i-\bar{\rho})sin^2(\theta_i-\bar{\theta})}}
+\]</span> where <span class="math inline">\(\bar{\rho}\)</span> and <span class="math inline">\(\bar{\theta}\)</span> are the sample mean directions.</p>
+</div>
+<div id="get-a-sense-of-parameters-needed-for-simulations." class="section level3">
+<h3>Get a sense of parameters needed for simulations.</h3>
+<pre class="r"><code>set.seed(7)
+theta &lt;- rvonmises(50, pi, 100, rads = TRUE)
+rho &lt;- 2*theta
+cor(sin(theta), sin(rho))</code></pre>
+<pre><code>[1] -0.999963</code></pre>
+<hr />
+</div>
+</div>
+<div id="linear-linear-correlation" class="section level2">
+<h2>Linear-linear correlation</h2>
+<p>These simulations are mainly exercise to help getting an intuition of how Fisher’s z transformation works. In general,</p>
+<ol style="list-style-type: decimal">
+<li><p>The standard devaition of the transformed score is defined as <span class="math inline">\(1/\sqrt{N-3}\)</span>. This is derived following variance stablizing transformation of Fisher’s z score.</p></li>
+<li><p>Fisher’s z trnasformation maps from [-1, 1] to (-infinity, + infinity). For small n, the correlations tend to center away from zero and have a skewed distribution. The Fisher’s z transformation results in ligher tails in the distribution and preservs values around zero, thereby creating a bell shape distribution. On the other hand, for large n, the correlation tends to center around zero and follow a symmetric and bell-shaped distribution, hence the distribution is similar before/after the Fisher’s z transformation.</p></li>
+</ol>
+</div>
+<div id="distribution-properties" class="section level2">
+<h2>Distribution properties</h2>
+<p>Position correlation and sample size 50.</p>
+<pre class="r"><code>x.linear &lt;- sweep(matrix(rnorm(200*50), ncol=50), 2,
+                  STAT=5*cos(theta-pi), &quot;+&quot;)
+cor.linear &lt;- apply(x.linear, 1, function(x) cor(theta, x)[1])
+summary(cor.linear)</code></pre>
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+-0.397293 -0.090176  0.010182  0.004271  0.110744  0.379811 </code></pre>
+<pre class="r"><code>par(mfrow=c(2,2))
+hist(cor.linear, nclass = 50, prob = TRUE,
+     main = &quot;Pearon&#39;s correlation&quot;, xlab = &quot;Correlation coef.&quot;)
+lines(density(cor.linear), col = &quot;red&quot;)
+abline(v=mean(cor.linear), col = &quot;blue&quot;, lwd=1.5)
+
+trans.linear &lt;- 0.5* log ((1+ cor.linear)/(1- cor.linear))
+trans.linear.mean &lt;- 0.5* log ((1+ mean(cor.linear))/(1- mean(cor.linear)))
+hist(trans.linear, nclass=50, prob = TRUE,
+     main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z score&quot;)
+lines(density(trans.linear), col = &quot;red&quot;)
+abline(v=trans.linear.mean, col=&quot;blue&quot;, lwd=1.5)
+
+qqplot(rnorm(length(trans.linear), trans.linear.mean, .1), 
+       trans.linear,
+       xlab = &quot;Quantiles of N(0,.1)&quot;,
+       ylab = &quot;Sample quantiles&quot;)
+abline(0,1, col = &quot;blue&quot;)
+title(&quot;E(R)=.9&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Null correlation and sample size 50.</p>
+<pre class="r"><code>x.linear.null &lt;- matrix(rnorm(200*50),ncol=50)
+cor.linear.null &lt;- apply(x.linear.null, 1, function(x) cor(theta, x)[1])
+summary(cor.linear.null)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+-0.47044 -0.09885 -0.00709 -0.00368  0.10062  0.32247 </code></pre>
+<pre class="r"><code>par(mfrow=c(2,2))
+hist(cor.linear.null, nclass = 50, prob = TRUE,
+     main = &quot;Pearon&#39;s correlation&quot;, xlab = &quot;Correlation coef.&quot;)
+lines(density(cor.linear.null), col = &quot;red&quot;)
+abline(v=mean(cor.linear.null), col = &quot;blue&quot;, lwd=1.5)
+
+trans.linear.null &lt;- 0.5* log ((1+ cor.linear.null)/(1- cor.linear.null))
+trans.linear.null.mean &lt;- 0.5* log ((1+ mean(cor.linear.null))/(1- mean(cor.linear.null)))
+hist(trans.linear.null, nclass=50, prob = TRUE,
+     main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z score&quot;)
+lines(density(trans.linear.null), col = &quot;red&quot;)
+abline(v=trans.linear.null.mean, col=&quot;blue&quot;, lwd=1.5)
+
+qqplot(rnorm(length(trans.linear.null), trans.linear.null.mean, .1), 
+       trans.linear.null,
+       xlab = &quot;Quantiles of N(0,.1)&quot;,
+       ylab = &quot;Sample quantiles&quot;)
+abline(0,1, col = &quot;blue&quot;)
+title(&quot;E(R)=-.02&quot;, outer = TRUE, line = -1)</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div id="sample-size-when-correlation-near-zero" class="section level3">
+<h3>Sample size when correlation near zero</h3>
+<pre class="r"><code>nsamp &lt;- c(5,20,40)
+theta.n &lt;- lapply(1:length(nsamp), function(i) {
+  set.seed(17)
+  n &lt;- nsamp[i]
+  t &lt;- theta[sample(length(theta), n, replace = F)]  
+  return(t)
+})
+
+cor.linear.null.n &lt;- lapply(1:length(nsamp), function(i) {
+  n &lt;- nsamp[i]
+  mat &lt;- matrix(rnorm(200*n), ncol=n)
+  cor &lt;- apply(mat, 1, function(x) cor(theta.n[[i]], x))
+  return(cor)
+})
+
+par(mfrow=c(3,2))
+for (i in 1:length(nsamp)) {
+  vec &lt;- cor.linear.null.n[[i]]
+  hist(vec, nclass = 50, prob = TRUE,
+       main = paste(&quot;N=&quot;, nsamp[i],&quot;, Pearon&#39;s correlation&quot;), 
+       xlab = &quot;Correlation coef.&quot;)
+  lines(density(vec), col = &quot;red&quot;)
+  abline(v=mean(vec), col = &quot;blue&quot;, lwd=1.5)
+  
+  trans &lt;- 0.5* log ((1+ vec)/(1- vec))
+  trans.mean &lt;- 0.5* log ((1+ mean(vec))/(1- mean(vec)))
+  hist(trans, nclass=50, prob = TRUE,
+       main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z score&quot;)
+  lines(density(trans), col = &quot;red&quot;)
+  abline(v=trans.mean, col=&quot;blue&quot;, lwd=1.5)
+}</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="size-of-correlation-when-the-sample-size-is-small" class="section level3">
+<h3>Size of correlation when the sample size is small</h3>
+<pre class="r"><code>theta.5 &lt;- theta.n[[1]]
+
+x.linear.rho &lt;- list(
+  sweep(matrix(rnorm(200*5), ncol=5), 2,
+      STAT=5*cos(theta.5-pi), &quot;+&quot;),
+  sweep(matrix(rnorm(200*5), ncol=5), 2,
+        STAT=20*cos(theta.5-pi), &quot;+&quot;) )
+
+cor.linear.rho &lt;- lapply(1:length(x.linear.rho), function(i) {
+  cor &lt;- apply(x.linear.rho[[i]], 1, function(x) cor(theta.5, x))
+  return(cor)
+})
+
+par(mfrow=c(2,2))
+for (i in 1:length(x.linear.rho)) {
+  vec &lt;- cor.linear.rho[[i]]
+  hist(vec, nclass = 50, prob = TRUE,
+       main = paste(&quot;N=5, E(R) =&quot;, round(mean(vec),2)), 
+       xlab = &quot;Correlation coef.&quot;)
+  lines(density(vec), col = &quot;red&quot;)
+  abline(v=mean(vec), col = &quot;blue&quot;, lwd=1.5)
+  
+  trans &lt;- 0.5* log ((1+ vec)/(1- vec))
+  trans.mean &lt;- 0.5* log ((1+ mean(vec))/(1- mean(vec)))
+  hist(trans, nclass=50, prob = TRUE,
+       main = &quot;Fisher&#39;s z&quot;, xlab = &quot;Fisher&#39;s z score&quot;)
+  lines(density(trans), col = &quot;red&quot;)
+  abline(v=trans.mean, col=&quot;blue&quot;, lwd=1.5)
+}</code></pre>
+<p><img src="figure/circ-simulation-correlation.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
