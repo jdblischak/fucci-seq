@@ -1,0 +1,465 @@
+---
+title: "Circle fit to intensities: follow-up"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Goals
+
+1. Estimate positions based on PCA
+
+2. Correlation positions with genes and DAPI
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+library(CorShrink)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm <- readRDS("../output/seqdata-batch-correction.Rmd/log2cpm.rds")
+# log2cpm.adjust <- readRDS("../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds")
+
+# import corrected intensities
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+```
+
+
+---
+
+## Projected normal on PCs of Red/Green
+
+
+```{r, fig.width=7, fig.height=5}
+pc.fucci <- prcomp(subset(pdata.adj, 
+                          select=c("rfp.median.log10sum.adjust",
+                                   "gfp.median.log10sum.adjust")),
+                   center = T, scale. = T)
+```
+
+The first two PC are about the sample in explaining variation.
+
+```{r}
+pc.fucci$sdev[1:2]
+```
+
+Green and red are similarly correlated with PC1 and PC2 across individuals. 
+
+```{r}
+pcs.rfp <- sapply(1:2, function(i) {
+  res <- summary(lm(pc.fucci$x[,i]~pdata.adj$rfp.median.log10sum.adjust))
+  res$adj.r.squared
+})
+pcs.rfp
+
+pcs.gfp <- sapply(1:2, function(i) {
+  res <- summary(lm(pc.fucci$x[,i]~pdata.adj$gfp.median.log10sum.adjust))
+  res$adj.r.squared
+})
+pcs.gfp
+```
+
+```{r, fig.width=7, fig.height=7}
+library(circular)
+Theta.fucci <- coord2rad(pc.fucci$x)
+
+par(mfrow=c(2,2), mar=c(4,4,3,1))
+plot(circular(Theta.fucci), stack = TRUE)
+plot(as.numeric(Theta.fucci), pdata.adj$rfp.median.log10sum.adjust,
+     col = "firebrick", pch = 16, cex = .7,
+     xlab = "Theta (projected cell time)", 
+     ylab = "RFP (log10 intensity)")
+plot(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust,
+     col = "forestgreen", pch = 16, cex = .7,
+     xlab = "Theta (projected cell time)", 
+     ylab = "GFP (log10 intensity)")
+plot(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust,
+     col = "mediumblue", pch = 16, cex = .7,
+     xlab = "Theta (projected cell time)", 
+     ylab = "DAPI (log10 intensity)")
+```
+
+Correlation with DAPI, RFP and GFP.
+
+```{r}
+library(Rfast)
+library(circular)
+
+# normalize intensities to between 0 to 2*pi
+pdata.adj$dapi.circ <- with(pdata.adj, {
+  normed <- (dapi.median.log10sum.adjust-min(dapi.median.log10sum.adjust))/(max(dapi.median.log10sum.adjust)- min(dapi.median.log10sum.adjust))
+  normed*2*pi
+} )
+pdata.adj$gfp.circ <- with(pdata.adj, {
+  normed <- (gfp.median.log10sum-min(gfp.median.log10sum.adjust))/(max(gfp.median.log10sum.adjust)- min(gfp.median.log10sum.adjust))
+  normed*2*pi
+} )
+pdata.adj$rfp.circ <- with(pdata.adj, {
+  normed <- (rfp.median.log10sum.adjust-min(rfp.median.log10sum.adjust))/(max(rfp.median.log10sum.adjust)- min(rfp.median.log10sum.adjust))
+  normed*2*pi
+} )
+
+
+cor.dapi.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$dapi.median.log10sum.adjust)[1])
+cor.gfp.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust)[1])
+cor.rfp.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$rfp.median.log10sum.adjust)[1])
+
+cor.dapi.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$dapi.median.log10sum.adjust)
+cor.gfp.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust)
+cor.rfp.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$rfp.median.log10sum.adjust)
+
+out <- data.frame(cbind(rbind(cor.dapi.cl, cor.gfp.cl, cor.rfp.cl),
+                 rbind(cor.dapi.cc, cor.gfp.cc, cor.rfp.cc)),
+           row.names = c("DAPI", "GFP", "RFP"))
+colnames(out) <- c("cor.circ.linear", "cor.circ.circ")
+print(out)
+```
+
+
+The high correlation of GFP and RFP in the first column follows the use of PCs of GFP and RFP to construct cell time. Results in the second column seem interesting. The values capture the relationship between these measures in the plot. GFP and DAPI are negatively associated with cell time and RFP is positive associated with cell time.
+
+
+
+Correlation with DAPI, RFP and GFP.
+
+```{r}
+library(Rfast)
+library(circular)
+
+# normalize intensities to between 0 to 2*pi
+pdata.adj$dapi.circ <- with(pdata.adj, {
+  normed <- (dapi.median.log10sum.adjust-min(dapi.median.log10sum.adjust))/(max(dapi.median.log10sum.adjust)- min(dapi.median.log10sum.adjust))
+  normed*2*pi
+} )
+pdata.adj$gfp.circ <- with(pdata.adj, {
+  normed <- (gfp.median.log10sum-min(gfp.median.log10sum.adjust))/(max(gfp.median.log10sum.adjust)- min(gfp.median.log10sum.adjust))
+  normed*2*pi
+} )
+pdata.adj$rfp.circ <- with(pdata.adj, {
+  normed <- (rfp.median.log10sum.adjust-min(rfp.median.log10sum.adjust))/(max(rfp.median.log10sum.adjust)- min(rfp.median.log10sum.adjust))
+  normed*2*pi
+} )
+
+
+cor.dapi.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$dapi.median.log10sum.adjust)[1])
+cor.gfp.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust)[1])
+cor.rfp.cl <- sqrt(circlin.cor(as.numeric(Theta.fucci), pdata.adj$rfp.median.log10sum.adjust)[1])
+
+cor.dapi.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$dapi.median.log10sum.adjust)
+cor.gfp.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$gfp.median.log10sum.adjust)
+cor.rfp.cc <- cor.circular(as.numeric(Theta.fucci), pdata.adj$rfp.median.log10sum.adjust)
+
+out <- data.frame(cbind(rbind(cor.dapi.cl, cor.gfp.cl, cor.rfp.cl),
+                 rbind(cor.dapi.cc, cor.gfp.cc, cor.rfp.cc)),
+           row.names = c("DAPI", "GFP", "RFP"))
+colnames(out) <- c("cor.circ.linear", "cor.circ.circ")
+print(out)
+```
+
+---
+
+## Circular-circular correlation between projected time and gene expression
+
+
+```{r, fig.width=7, fig.height=4}
+library(Rfast)
+library(circular)
+
+counts.log2cpm <- log10((10^6)*t(t(counts)/colSums(counts))+1)
+counts.log2cpm.normed <- 2*pi*(counts.log2cpm)/max(counts.log2cpm)
+
+cor.cc.log2cpm <- sapply(1:nrow(counts.log2cpm), function(g) {
+  cor.circular(counts.log2cpm.normed[g,],Theta.fucci)
+})
+nsam.nonzero <- rowSums(counts.log2cpm > 0)
+
+library(CorShrink)
+corshrink.nonzero.cc.log2cpm <- CorShrinkVector(cor.cc.log2cpm,
+                    nsamp_vec = nsam.nonzero, report_model=TRUE)
+
+sval.cc <- corshrink.nonzero.cc.log2cpm$model$result$svalue
+
+par(mfrow=c(1,2))
+hist(cor.cc.log2cpm, nclass=50,
+     main = "Correlation with Theta")
+with(corshrink.nonzero.cc.log2cpm$model$result, { 
+     plot(betahat,PosteriorMean, pch = 16, col = "gray40", cex=.7,
+          xlab = "Observed effect size", ylab = "Shrunked effect size");
+     abline(0,1, col = "mediumblue");
+     points(betahat,PosteriorMean, col = as.numeric(sval.cc<.01)+1, lwd=.8)
+     title(paste("sig. at svalue < .01", sum(sval.cc<.01), "genes"))
+     })
+```
+
+Check cell cycle enrichment with s-value < .01.
+
+```{r}
+genes.sig.cc <- (rownames(counts.log2cpm.normed)[sval.cc < .01])[order(cor.cc.log2cpm[which(sval.cc < .01)], decreasing = F)]
+sig.cycle.cc <- mean(genes.sig.cc %in% macosko$ensembl)
+nonsig.cycle.cc <- mean(setdiff(rownames(counts.log2cpm.normed), genes.sig.cc) %in% macosko$ensembl)
+sig.cycle.cc/nonsig.cycle.cc     
+
+rho.sig.cc <- (cor.cc.log2cpm[sval.cc < .01])[order(cor.cc.log2cpm[which(sval.cc < .01)], decreasing = F)]
+
+genes.sig.cycle.cc <- genes.sig.cc[genes.sig.cc %in% macosko$ensembl]
+rho.sig.cycle.cc <- rho.sig.cc[genes.sig.cc %in% macosko$ensembl]
+gene.names.sig.cycle.cc <- sapply(1:length(genes.sig.cycle.cc), function(g) {
+  nm <- with(macosko, hgnc[ensembl == genes.sig.cycle.cc[g]]) 
+  return(nm[1])})
+```
+
+Check cell cycle enrichment in top 200 genes.
+
+```{r}
+genes.sig.cc <- (rownames(counts.log2cpm.normed)[order(sval.cc) < 201])[order(cor.cc.log2cpm[which(order(sval.cc) < 201)], decreasing = F)]
+sig.cycle.cc <- mean(genes.sig.cc %in% macosko$ensembl)
+nonsig.cycle.cc <- mean(setdiff(rownames(counts.log2cpm.normed), genes.sig.cc) %in% macosko$ensembl)
+sig.cycle.cc/nonsig.cycle.cc     
+
+rho.sig.cc <- (cor.cc.log2cpm[order(sval.cc) < 201])[order(cor.cc.log2cpm[which(order(sval.cc) < 201)], decreasing = F)]
+
+genes.sig.cycle.cc <- genes.sig.cc[genes.sig.cc %in% macosko$ensembl]
+rho.sig.cycle.cc <- rho.sig.cc[genes.sig.cc %in% macosko$ensembl]
+gene.names.sig.cycle.cc <- sapply(1:length(genes.sig.cycle.cc), function(g) {
+  nm <- with(macosko, hgnc[ensembl == genes.sig.cycle.cc[g]]) 
+  return(nm[1])})
+```
+
+Visualize expression of significant genes.
+
+```{r,fig.width=6, fig.height=11}
+par(mfrow=c(4,2))
+for(i in 1:8) {
+  plot(counts.log2cpm.normed[which(rownames(counts.log2cpm) == genes.sig.cycle.cc[i]),
+                             order(as.numeric(Theta.fucci))],
+     ylab = "Angle (0,2pi)", xlab = "Cells ordered by Theta",
+     pch = 16, cex = .7, ylim = c(0,2*pi))
+  title(paste(gene.names.sig.cycle.cc[i], "; corr = ", round(rho.sig.cycle.cc[i],digits=2)))
+  points(as.numeric(Theta.fucci)[order(Theta.fucci)], col = "gray40", cex=.5, pch=16)
+}
+title("Expression pattern by Theta", outer=T, line=-1)
+
+# sin versus sin
+par(mfrow=c(4,2))
+for(i in 1:8) {
+  xx <- as.numeric(Theta.fucci)[order(Theta.fucci)]
+  yy <- counts.log2cpm.normed[which(rownames(counts.log2cpm) == genes.sig.cycle.cc[i]),order(as.numeric(Theta.fucci))]
+  xx <- sin(xx-mean(xx))
+  yy <- sin(yy-mean(yy))
+  plot(x=xx, y=yy,
+     pch = 16, cex = .7, ylim=c(-1,1),
+     xlab = "sin(Theta)", ylab="sin(gene angle)") 
+  title(paste(gene.names.sig.cycle.cc[i], "; corr = ", round(rho.sig.cycle.cc[i],digits=2)))
+}
+title("sin(Theta) vs. sin(normalized gene expression)", outer=T, line=-1)
+
+# write.table(cbind(genes.sig.cycle, rho.sig.cycle), file = "output_tmp/genes.sig.cycle.txt", quote=F, sep = "\t", col.names=F, row.names=F)
+# 
+# write.table(cbind(genes.sig, rho.sig), file = "output_tmp/genes.sig.txt", quote=F, sep = "\t", col.names=F, row.names=F)
+```
+
+
+
+## Circular-linear correlation between projected time and gene expression
+
+
+```{r, fig.width=7, fig.height=4}
+library(Rfast)
+library(circular)
+
+counts.log2cpm <- log10((10^6)*t(t(counts)/colSums(counts))+1)
+
+cor.cl.log2cpm <- sapply(1:nrow(counts.log2cpm), function(g) {
+    sqrt(circlin.cor(counts.log2cpm[g,],Theta.fucci)[1])
+})
+nsam.nonzero <- rowSums(counts.log2cpm > 0)
+
+library(CorShrink)
+corshrink.nonzero.cl.log2cpm <- CorShrinkVector(cor.cl.log2cpm, nsamp_vec = nsam.nonzero, report_model=TRUE)
+
+sval.cl <- corshrink.nonzero.cl.log2cpm$model$result$svalue
+
+par(mfrow=c(1,2))
+hist(cor.cl.log2cpm, nclass=50,
+     main = "Correlation with Theta")
+with(corshrink.nonzero.cl.log2cpm$model$result, { 
+     plot(betahat,PosteriorMean, pch = 16, col = "gray40", cex=.7,
+          xlab = "Observed effect size", ylab = "Shrunked effect size");
+     abline(0,1, col = "mediumblue");
+     points(betahat,PosteriorMean, col = as.numeric(sval.cl<.01)+1, lwd=.8)
+     title(paste("sig. at svalue < .01", sum(svalue<.01), "genes"))
+     })
+```
+
+Check cell cycle enrichment in genes with s-value < .01.
+
+```{r}
+genes.sig.cl <- (rownames(counts.log2cpm)[sval.cl < .01])[order(cor.cl.log2cpm[which(sval.cl < .01)], decreasing = F)]
+sig.cycle.cl <- mean(genes.sig.cl %in% macosko$ensembl)
+nonsig.cycle.cl <- mean(setdiff(rownames(counts.log2cpm), genes.sig.cl) %in% macosko$ensembl)
+sig.cycle.cl/nonsig.cycle.cl
+
+rho.sig.cl <- (cor.cl.log2cpm[sval.cl < .01])[order(cor.cl.log2cpm[which(sval.cl < .01)], decreasing = F)]
+
+genes.sig.cycle.cl <- genes.sig.cl[genes.sig.cl %in% macosko$ensembl]
+rho.sig.cycle.cl <- rho.sig.cl[genes.sig.cl %in% macosko$ensembl]
+gene.names.sig.cycle.cl <- sapply(1:length(genes.sig.cycle.cl), function(g) {
+  nm <- with(macosko, hgnc[ensembl == genes.sig.cycle.cl[g]]) 
+  return(nm[1])})
+
+
+## these 8 are also significant in circular-circular correlation
+sval.cc[rownames(counts.log2cpm.normed) %in% genes.sig.cycle.cl[1:8]]
+```
+
+Check cell cycle enrichment in genes with s-value in top 200.
+
+
+```{r}
+genes.sig.cl <- (rownames(counts.log2cpm)[order(sval.cl) < 201])[order(cor.cl.log2cpm[which(order(sval.cl) < 201)], decreasing = F)]
+sig.cycle.cl <- mean(genes.sig.cl %in% macosko$ensembl)
+nonsig.cycle.cl <- mean(setdiff(rownames(counts.log2cpm), genes.sig.cl) %in% macosko$ensembl)
+sig.cycle.cl/nonsig.cycle.cl
+
+rho.sig.cl <- (cor.cl.log2cpm[order(sval.cl) < 201])[order(cor.cl.log2cpm[which(order(sval.cl) < 201)], decreasing = F)]
+
+genes.sig.cycle.cl <- genes.sig.cl[genes.sig.cl %in% macosko$ensembl]
+rho.sig.cycle.cl <- rho.sig.cl[genes.sig.cl %in% macosko$ensembl]
+gene.names.sig.cycle.cl <- sapply(1:length(genes.sig.cycle.cl), function(g) {
+  nm <- with(macosko, hgnc[ensembl == genes.sig.cycle.cl[g]]) 
+  return(nm[1])})
+
+
+## these 8 are also significant in circular-circular correlation
+sval.cc[rownames(counts.log2cpm.normed) %in% genes.sig.cycle.cl[1:8]]
+```
+
+Visualize expression of the significant genes.
+
+```{r cir-liear-plots, fig.width=6, fig.height=11}
+par(mfrow=c(4,2))
+for(i in 1:min(length(genes.sig.cycle.cl),8)) {
+  plot(x=as.numeric(Theta.fucci),
+       y=counts.log2cpm.normed[which(rownames(counts.log2cpm) == genes.sig.cycle.cl[i]),
+                             order(as.numeric(Theta.fucci))],
+     ylab = "Angle (0,2pi)", xlab = "Sin(Theta)",
+     pch = 16, cex = .7, ylim = c(1,5))
+  title(paste(gene.names.sig.cycle.cl[i], "; corr = ", round(rho.sig.cycle.cl[i],digits=2)))
+}
+title("sinusoidal pattern by Theta?", outer=T, line=-1)
+
+# sin versus data
+par(mfrow=c(4,2))
+for(i in 1:min(length(genes.sig.cycle.cl),8)) {
+  xx <- as.numeric(Theta.fucci)[order(Theta.fucci)]
+  yy <- counts.log2cpm.normed[which(rownames(counts.log2cpm) == genes.sig.cycle.cl[i]),order(as.numeric(Theta.fucci))]
+  xx <- sin(xx-mean(xx))
+  yy <- yy-mean(yy)
+  plot(x=xx, y=yy,
+     pch = 16, cex = .7, ylim=c(-1,1),
+     xlab = "sin(Theta)", ylab="sin(gene angle)") 
+  title(paste(gene.names.sig.cycle.cl[i], "; corr = ", round(rho.sig.cycle.cl[i],digits=2)))
+}
+title("Sin(Theta) vs. data", outer=TRUE, line=-1)
+
+# cosine versus data
+par(mfrow=c(4,2))
+for(i in 1:min(length(genes.sig.cycle.cl),8)) {
+  xx <- as.numeric(Theta.fucci)[order(Theta.fucci)]
+  yy <- counts.log2cpm.normed[which(rownames(counts.log2cpm) == genes.sig.cycle.cl[i]),order(as.numeric(Theta.fucci))]
+  xx <- cos(xx-mean(xx))
+  yy <- yy-mean(yy)
+  plot(x=xx, y=yy,
+     pch = 16, cex = .7, ylim=c(-1,1),
+     xlab = "cos(Theta)", ylab="sin(gene angle)") 
+  title(paste(gene.names.sig.cycle.cl[i], "; corr = ", round(rho.sig.cycle.cl[i],digits=2)))
+}
+title("Cos(Theta) vs. data", outer=TRUE, line=-1)
+```
+
+
+
+
+
+---
+
+## Comparae results between circ-linear and cir-circ correlation
+
+
+1. There are almost no overlap in the top 200 genes between the two methods. Going up to top 500 genes, we see 19 of the 481 genes overlap between the two methods. In other words, a variable that is significantly corrleated with sin(theta) doesn't necessary have a high correlation in sin(variable value) with sin(theta). This also implies that all previous examples that I plotted for each correlation case is only significant for that particular category.
+
+2. Results above on gene enrichment showed that when considering top 200 genes, cir-cir results are enriched two-fold with cell cycle genes (in Macosko data), while cir-linear are enriched with .5 with cell cycle genes, i.e., the top 200 have fewer cell cycle genes than the other genes. When consider s-values, cir-cir has about 11 fold of enrichment and cir-linear has about 2 fold enrichment...
+
+
+```{r}
+# so many more when considering circular-linear correlation
+# probably because it's picking up sinuisoidal patterns, hence osciallating genes
+# find some examples...
+table(order(sval.cc)<201, order(sval.cl)<201)
+
+table(order(sval.cc)<501, order(sval.cl)<501)
+
+plot(rank(sval.cc), rank(sval.cl))
+```
+
+
+
+
+---
+
+## Session information
+
+```{r, echo = FALSE}
+sessionInfo()
+```
+
+
+
