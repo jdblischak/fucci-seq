@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Lists of signficant genes using different types of correlation</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lists of signficant genes using different types of correlation</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#projected-normal-on-pcs-of-redgreen">Projected normal on PCs of Red/Green</a></li>
+<li><a href="#pearsons-correlation-on-unordered-data">Pearsons correlation on unordered data</a></li>
+<li><a href="#circular-linear-correlation">Circular-linear correlation</a></li>
+<li><a href="#cyclical-genes-by-smash">Cyclical genes by smash</a></li>
+<li><a href="#circular-linear-correlation-1">Circular-linear correlation</a></li>
+<li><a href="#compare-lists">Compare lists</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-03-14</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 302b4d3</p>
+<hr />
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>In terms of the enrichment for cell cycle genes found in Whitfield paper, the top 200 genes in linear correlation case has 5 fold enrichment, while the top 200 genes in circular-linear correlation case has 6.9 fold enrichment. When considering the top 100 genes, the linear correlation has 6.5 fold enrichment, and the circular-linear correlation has 9.4 fold enrichment.</p>
+<ul>
+<li>Something strange with smash results. No overlap with correlation results at all. There’s still some unresolved issues about how to apply smash to single cell RNA-seq data. For one, how to deal with dropouts?</li>
+</ul>
+<hr />
+</div>
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(smashr)
+library(NPCirc)
+library(CorShrink)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.rds&quot;)
+# log2cpm.adjust &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds&quot;)
+log2cpm &lt;- log2cpm.all[grep(&quot;ENSG&quot;, rownames(log2cpm.all)), ]
+
+# import corrected intensities
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+source(&quot;../code/images-circle-ordering-npreg.R&quot;)</code></pre>
+<hr />
+</div>
+<div id="projected-normal-on-pcs-of-redgreen" class="section level2">
+<h2>Projected normal on PCs of Red/Green</h2>
+<pre class="r"><code>pc.fucci &lt;- prcomp(subset(pdata.adj, 
+                          select=c(&quot;rfp.median.log10sum.adjust&quot;,
+                                   &quot;gfp.median.log10sum.adjust&quot;)),
+                   center = T, scale. = T)
+library(circular)
+Theta.fucci &lt;- coord2rad(pc.fucci$x)
+log2cpm.ordered &lt;- log2cpm[,order(as.numeric(Theta.fucci))]
+Theta.fucci.ordered &lt;- Theta.fucci[order(as.numeric(Theta.fucci))]</code></pre>
+<p>–</p>
+</div>
+<div id="pearsons-correlation-on-unordered-data" class="section level2">
+<h2>Pearsons correlation on unordered data</h2>
+<pre class="r"><code>cors &lt;- sapply(1:nrow(log2cpm), function(g) {
+  cor(Theta.fucci, log2cpm[g,])
+})
+nsamp.nonzero &lt;- rowSums(log2cpm&gt;0)
+
+cors.shrink &lt;- CorShrinkVector(cors, nsamp.nonzero, report_model = TRUE)
+
+out.cors &lt;- with(cors.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors) &lt;- rownames(log2cpm)
+
+
+out.cors.nosig &lt;- out.cors[out.cors$svalue &gt; .01,]
+out.cors.sig &lt;- out.cors[out.cors$svalue &lt; .01,]
+out.cors.sig.sorted &lt;- out.cors.sig[order(out.cors.sig$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.sig) %in% macosko$ensembl)/mean(rownames(out.cors.nosig) %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 5.528023</code></pre>
+<pre class="r"><code>mean((rownames(out.cors)[order(out.cors$svalue)])[1:200] %in% macosko$ensembl)/mean((rownames(out.cors)[order(out.cors$svalue)])[200:nrow(out.cors)] %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 4.925439</code></pre>
+<pre class="r"><code>mean((rownames(out.cors)[order(out.cors$svalue)])[1:100] %in% macosko$ensembl)/mean((rownames(out.cors)[order(out.cors$svalue)])[100:nrow(out.cors)] %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 6.508723</code></pre>
+<p>Save output.</p>
+<pre class="r"><code>write.table((rownames(out.cors)[order(out.cors$svalue)])[1:200], 
+            row.names = F, col.names = F, quote = F,
+            file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.lin.top200.txt&quot;)</code></pre>
+<hr />
+</div>
+<div id="circular-linear-correlation" class="section level2">
+<h2>Circular-linear correlation</h2>
+<pre class="r"><code>library(Directional)
+
+cors.circlin &lt;- sapply(1:nrow(log2cpm), function(g) {
+  sqrt(circlin.cor(Theta.fucci, log2cpm[g,])[1])
+})
+nsamp.nonzero &lt;- rowSums(log2cpm&gt;0)
+
+cors.circlin.shrink &lt;- CorShrinkVector(cors.circlin, nsamp.nonzero, report_model = TRUE)
+
+out.cors.circlin &lt;- with(cors.circlin.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors.circlin) &lt;- rownames(log2cpm)
+
+
+out.cors.circlin.nosig &lt;- out.cors.circlin[out.cors.circlin$svalue &gt; .01,]
+out.cors.circlin.sig &lt;- out.cors.circlin[out.cors.circlin$svalue &lt; .01,]
+out.cors.circlin.sig.sorted &lt;- out.cors.circlin[order(out.cors.circlin$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.circlin.sig) %in% macosko$ensembl)/mean(rownames(out.cors.circlin.nosig) %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 3.266438</code></pre>
+<pre class="r"><code>mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200] %in% macosko$ensembl)/mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[200:nrow(out.cors.circlin)] %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 3.486831</code></pre>
+<pre class="r"><code>mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:100] %in% macosko$ensembl)/mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[100:nrow(out.cors.circlin)] %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 4.760504</code></pre>
+<p>Save output.</p>
+<pre class="r"><code>write.table((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200], 
+            row.names = F, col.names = F, quote = F,
+            file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.cir.lin.top200.txt&quot;)</code></pre>
+<hr />
+</div>
+<div id="cyclical-genes-by-smash" class="section level2">
+<h2>Cyclical genes by smash</h2>
+<pre class="r"><code>partitions &lt;- partitionSamples.n(c(1:length(Theta.fucci)), 1, c(512,400))$partitions
+
+indices.train &lt;- partitions[[1]][[1]]
+Y.train &lt;- Theta.fucci.ordered[indices.train]
+X.train &lt;- log2cpm.ordered[,indices.train]
+
+out.smash &lt;- mclapply(1:nrow(log2cpm), function(g) {
+    xx.train &lt;- X.train[g,]
+    is.zeros &lt;- which(xx.train == 0)
+    not.zeros &lt;- which(xx.train != 0)
+    xx.train.impute &lt;- xx.train
+    if (length(is.zeros) &gt; 1) {
+      for (j in 1:length(is.zeros)) {
+        pos &lt;- is.zeros[j]
+        if (pos == 1) {impute.val &lt;- xx.train[pos+1]}
+        if (pos == length(xx.train.impute)) {impute.val &lt;- xx.train[pos-1]}
+        if (pos &gt; 1 &amp; pos &lt; length(xx.train.impute)) {
+          impute.val &lt;- min(xx.train[not.zeros], na.rm=T) }
+          xx.train.impute[pos] &lt;- impute.val 
+      }
+    } else { xx.train.impute &lt;- xx.train}
+    fit.smash.xx &lt;- smash(x = xx.train.impute)
+    pve &lt;- 1- var(xx.train.impute-fit.smash.xx)/var(xx.train.impute)    
+    return(list(xx.smash=fit.smash.xx, 
+                xx.train.impute = xx.train.impute,
+                pve=pve))
+  }, mc.cores=10)  </code></pre>
+<pre class="r"><code>out.smash.fit &lt;- do.call(rbind, lapply(out.smash, &quot;[[&quot;, 1))
+rownames(out.smash.fit) &lt;- rownames(log2cpm)
+
+out.smash.traindata &lt;- do.call(rbind, lapply(out.smash, &quot;[[&quot;, 2))
+rownames(out.smash.traindata) &lt;- rownames(log2cpm)
+
+out.smash.pve &lt;- sapply(out.smash, &quot;[[&quot;, 3)
+names(out.smash.pve) &lt;- rownames(log2cpm)</code></pre>
+<p>Save output.</p>
+<pre class="r"><code>saveRDS(out.smash.pve, file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.pve.rds&quot;)
+saveRDS(out.smash.traindata,
+        file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.traindata.rds&quot;)
+saveRDS(out.smash.fit, file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.fit.rds&quot;)
+
+
+write.table(names(out.smash.pve)[out.smash.pve &gt; .5], 
+            row.names = F, col.names = F, quote = F,
+            file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/expression.smash.txt&quot;)</code></pre>
+<pre class="r"><code>out.smash.pve &lt;- readRDS(&quot;../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.pve.rds&quot;)
+out.smash.cyclical &lt;- which(out.smash.pve &gt; .1)
+out.smash.notcyclical &lt;- which(out.smash.pve &lt; .1)
+
+mean(names(out.smash.pve)[out.smash.pve &gt; .5] %in% macosko$ensembl)/mean(names(out.smash.pve)[out.smash.pve &lt; .5] %in% macosko$ensembl)  </code></pre>
+<pre><code>[1] 0.08888094</code></pre>
+<hr />
+</div>
+<div id="circular-linear-correlation-1" class="section level2">
+<h2>Circular-linear correlation</h2>
+<pre class="r"><code>library(Directional)
+
+cors.circlin &lt;- sapply(1:nrow(log2cpm), function(g) {
+  sqrt(circlin.cor(Theta.fucci, log2cpm[g,])[1])
+})
+nsamp.nonzero &lt;- rowSums(log2cpm&gt;0)
+
+cors.circlin.shrink &lt;- CorShrinkVector(cors.circlin, nsamp.nonzero, report_model = TRUE)
+
+out.cors.circlin &lt;- with(cors.circlin.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors.circlin) &lt;- rownames(log2cpm)
+
+
+out.cors.circlin.nosig &lt;- out.cors.circlin[out.cors.circlin$svalue &gt; .001,]
+out.cors.circlin.sig &lt;- out.cors.circlin[out.cors.circlin$svalue &lt; .001,]
+out.cors.circlin.sig.sorted &lt;- out.cors.circlin[order(out.cors.circlin$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.circlin.sig) %in% macosko$ensembl)/mean(rownames(out.cors.circlin.nosig) %in% macosko$ensembl)</code></pre>
+<pre><code>[1] 3.095129</code></pre>
+<p>Save output.</p>
+<pre class="r"><code>write.table(out.cors.circlin.sig.sorted, row.names = F, col.names = F, quote = F,
+            file = &quot;../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.cir.lin.siggenes.txt&quot;)</code></pre>
+<hr />
+</div>
+<div id="compare-lists" class="section level2">
+<h2>Compare lists</h2>
+<pre class="r"><code>library(VennDiagram)
+
+grid.draw(venn.diagram(list(linear=(rownames(out.cors)[order(out.cors$svalue)])[1:200],
+                  circ.linear=(rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200],
+                  smash=(names(out.smash.pve)[order(out.smash.pve, decreasing = T)])[1:200]),
+             filename = NULL))
+
+
+grid.draw(venn.diagram(list(linear=(rownames(out.cors)[order(out.cors$svalue)])[1:500],
+                  circ.linear=(rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:500],
+                  smash=(names(out.smash.pve)[order(out.smash.pve, decreasing = T)])[1:500]),
+             filename = NULL))</code></pre>
+<p><img src="figure/images-circle-ordering-sigcorgenes.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] grid      parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] VennDiagram_1.6.19  futile.logger_1.4.3 Directional_3.0    
+ [4] CorShrink_0.1.1     NPCirc_2.0.1        smashr_1.0.5       
+ [7] caTools_1.17.1      data.table_1.10.4-3 Matrix_1.2-10      
+[10] wavethresh_4.6.8    MASS_7.3-47         ashr_2.2-7         
+[13] Rcpp_0.12.16        matrixStats_0.53.1  dplyr_0.7.4        
+[16] Biobase_2.38.0      BiocGenerics_0.24.0 conicfit_1.0.4     
+[19] geigen_2.1          pracma_2.1.4        circular_0.4-93    
+
+loaded via a namespace (and not attached):
+ [1] mvtnorm_1.0-7        lattice_0.20-35      assertthat_0.2.0    
+ [4] rprojroot_1.3-2      digest_0.6.15        foreach_1.4.4       
+ [7] mime_0.5             truncnorm_1.0-8      slam_0.1-42         
+[10] R6_2.2.2             plyr_1.8.4           futile.options_1.0.0
+[13] backports_1.1.2      RcppZiggurat_0.1.4   evaluate_0.10.1     
+[16] pillar_1.2.1         rlang_0.2.0          pscl_1.5.2          
+[19] misc3d_0.8-4         rmarkdown_1.9        stringr_1.3.0       
+[22] htmlwidgets_1.0      shiny_1.0.5          compiler_3.4.1      
+[25] httpuv_1.3.6.2       pkgconfig_2.0.1      SQUAREM_2017.10-1   
+[28] shape_1.4.4          htmltools_0.3.6      tibble_1.4.2        
+[31] codetools_0.2-15     bitops_1.0-6         jsonlite_1.5        
+[34] xtable_1.8-2         git2r_0.21.0         magrittr_1.5        
+[37] Rfast_1.8.8          stringi_1.1.7        reshape2_1.4.3      
+[40] doParallel_1.0.11    bindrcpp_0.2         boot_1.3-19         
+[43] lambda.r_1.2         iterators_1.0.9      tools_3.4.1         
+[46] glue_1.2.0           movMF_0.2-2          crosstalk_1.0.0     
+[49] plotrix_3.7          yaml_2.1.18          knitr_1.20          
+[52] bindr_0.1.1         </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
