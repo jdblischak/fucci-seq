@@ -269,7 +269,6 @@ sum(dapi.above.fucci < .01)
 ```
 
 
-
 Of the 7844 genes that we computed correlation between expression and intensities, we see that there's about 50% of the genes significantly associated with DAPI that are also associated with FUCCI intenssities (to both GFP and RFP), and vice versa.
 
 ```{r fig.width=4, fig.height=4}
@@ -320,14 +319,96 @@ sum(fucci.above.dapi < .01 & dapi.above.fucci < .01)
 ## Save output
 
 ```{r, eval = F}
-save(corr.all, file = "../output/images-seq-correlation.Rmd/corr.all.rds")
-save(corr.all.macosko, file = "../output/images-seq-correlation.Rmd/corr.all.macosko.rds")
+saveRDS(corr.all, file = "../output/images-seq-correlation.Rmd/corr.all.rds")
+saveRDS(corr.all.macosko, file = "../output/images-seq-correlation.Rmd/corr.all.macosko.rds")
 ```
 
 
 ---
 
-##  Genes and projected cell times
+## Compare DAPI and expression in their ability to predict FUCCI intensities
+
+The approach is outlined as follows:
+
+1. Find top genes correlated with DAPI (some cutoff)
+2. Do PCA on these, and take the first PC
+3. Use this first PC to predict GFP and RFP. Compare with using DAPI to predict GFP and RFP.
+4. Then you can do the same thing reversing the role of DAPI vs GFP/RFP
+
+
+```{r}
+corr.all <- readRDS("../output/images-seq-correlation.Rmd/corr.all.rds")
+
+log2cpm.dapi <- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all)[corr.all$sval.dapi < .01]), ]
+
+pca.log2cpm.dapi <- prcomp(t(log2cpm.dapi), scale. = FALSE)
+(100*(pca.log2cpm.dapi$sdev^2)/sum(pca.log2cpm.dapi$sdev^2))[1:10]
+
+# use first PC from genes correlatd with DAPI to predict FUCCI
+fit.rfp.pc1.dapi <- lm(pdata.adj$rfp.median.log10sum.adjust.ash ~ pca.log2cpm.dapi$x[,1] - 1)
+fit.gfp.pc1.dapi <- lm(pdata.adj$gfp.median.log10sum.adjust.ash ~ pca.log2cpm.dapi$x[,1] - 1)
+
+fit.rfp.ints.dapi <- lm(pdata.adj$rfp.median.log10sum.adjust.ash ~ pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+
+fit.gfp.ints.dapi <- lm(pdata.adj$gfp.median.log10sum.adjust.ash ~ pdata.adj$dapi.median.log10sum.adjust.ash - 1)
+
+
+
+get.loglik.fit <- function(fit) {
+  get.loglik <- function(residuals, sigma) {
+    residuals.scaled <- -(residuals^2)
+    residuals.scaled <- residuals.scaled/2/(sigma^2)
+    out <- sum(residuals.scaled - log(sigma) - 0.5*log(2*pi))
+    return(out)
+  }
+  get.loglik(fit$residuals, summary(fit)$sigma)
+}
+
+
+# fit <- fit.dapi.pc.fucci
+# residuals <- fit$residuals
+# sigma <- summary(fit)$sigma
+
+# make an output table
+data.frame(GFP = c(get.loglik.fit(fit.gfp.pc1.dapi), get.loglik.fit(fit.gfp.ints.dapi)),
+           RFP = c(get.loglik.fit(fit.rfp.pc1.dapi), get.loglik.fit(fit.rfp.ints.dapi)),
+           row.names = c("DAPI PC1 (6%)", "DAPI intensity"))
+
+data.frame(GFP = c(unlist(anova(fit.gfp.pc1.dapi)[5])[1],
+                   unlist(anova(fit.gfp.ints.dapi)[5])[1]),
+           RFP = c(unlist(anova(fit.rfp.pc1.dapi)[5])[1], 
+                   unlist(anova(fit.rfp.ints.dapi)[5])[1]),
+           row.names = c("DAPI PC1", "DAPI intensity"))
+```
+
+
+FUCCI predicting DAPI verus expression predicting DAPI.
+
+```{r}
+corr.all <- readRDS("../output/images-seq-correlation.Rmd/corr.all.rds")
+
+log2cpm.fucci <- log2cpm[which(rownames(log2cpm) %in% rownames(corr.all)[corr.all$sval.gfp < .01 & corr.all$sval.rfp < .01]), ]
+
+pca.log2cpm.fucci <- prcomp(t(log2cpm.fucci), scale. = FALSE)
+(100*(pca.log2cpm.fucci$sdev^2)/sum(pca.log2cpm.fucci$sdev^2))[1:10]
+
+# use first PC from genes correlatd with DAPI to predict FUCCI
+fit.dapi.pc.fucci <- lm(pdata.adj$dapi.median.log10sum.adjust.ash ~ pca.log2cpm.fucci$x[,1] -1)
+
+fit.dapi.ints.fucci <- lm(pdata.adj$dapi.median.log10sum.adjust.ash ~ pdata.adj$gfp.median.log10sum.adjust.ash + pdata.adj$rfp.median.log10sum.adjust.ash -1)
+
+# make an output table
+data.frame(DAPI = c(get.loglik.fit(fit.dapi.pc.fucci), get.loglik.fit(fit.dapi.ints.fucci)),
+           row.names = c("FUCCI PC1 (11%)", "FUCCI intensity"))
+
+data.frame(DAPI = c(unlist(anova(fit.dapi.pc.fucci)[5])[1],
+                   unlist(anova(fit.dapi.ints.fucci)[5])[1]),
+           row.names = c("FUCCI PC1 (11%)", "FUCCI intensity"))
+```
+
+---
+
+## Association between gene expression and projected cell times
 
 There are three clusters in projected cell times (lowest BIC). I then fit spherical regression to find genes that are significant predictors of projected cell times fo each cluster. I only found one signfican genes, which is CDK1. 
 

@@ -214,8 +214,18 @@ div.section {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#microscopy-image-analysis">Microscopy image analysis</a></li>
+<li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
+<li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
+<li><a href="#model-fitting">Model fitting</a></li>
+<li><a href="#one-time-investigations">One-time investigations</a></li>
+</ul>
+</div>
 
-<p>Website to share results of fucci-seq project.</p>
+<hr />
 <div id="overview" class="section level2">
 <h2>Overview</h2>
 <ul>
@@ -279,54 +289,58 @@ div.section {
 </ol>
 <hr />
 </div>
-<div id="rna-seq-data-cell-cycle-gene-signal" class="section level2">
-<h2>RNA-seq data cell cycle gene signal</h2>
-<p>We investigated cell cycle signals in the sequencing data.</p>
+<div id="cell-cycle-signal-in-gene-expression-data" class="section level2">
+<h2>Cell cycle signal in gene expression data</h2>
 <ol style="list-style-type: decimal">
-<li><p><a href="images-transgene.html">Investigate transgene count in sequencing data</a></p></li>
-<li><p><a href="seqdata-select-cellcyclegenes.html">Select cell cycle genes for training data</a></p></li>
-<li><p><a href="images-seq-correlation.Rmd">Gene expression levels and intensities</a></p></li>
-<li><p>PCA and intensities</p></li>
+<li>We investigated cell cycle signals in the sequencing data alone.</li>
 </ol>
-<hr />
-</div>
-<div id="intensity-based-cell-cycle-labeling" class="section level2">
-<h2>Intensity-based cell cycle labeling</h2>
-<p>We explored the possiblities of using intensities to learn cell cycle phases/genes in RNA-seq data.</p>
-<ol style="list-style-type: decimal">
-<li>Consider categorical labeling
 <ul>
-<li><a href="images-pam.html">Cluster samples by Partition around medoids(PAM)</a></li>
-<li><a href="images-mclust.html">Cluster samples by Mixture modeling</a></li>
-<li><a href="images-subset-silhouette.html">Select a subset using silhouette index</a></li>
-<li>Expression profiles of the “best” samples using intensities <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
-<li><a href="images-classify-leng.html">Expression profiles of sorted cells in Leng et al. 2015</a></li>
-</ul></li>
-<li>Consider continuous ordering
-<ul>
-<li><a href="images-circle-ordering.html">Ordering on a unit circle based on GFP and RFP</a></li>
-</ul></li>
+<li>Consider <a href="images-transgene.html">transgene count in sequencing data</a></li>
+<li>Compute linear correlation between gene expression levels <a href="images-seq-correlation.html">with DAPI and FUCCI intensities</a></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.</li>
 </ol>
+<ul>
+<li>Cluster samples by <a href="images-pam.html">Partition around medoids(PAM)</a></li>
+<li>Cluster samples by <a href="images-mclust.html">Guassian mixture modeling</a></li>
+<li>Select a subset of samples that are closet to the cluster centers (cluster representives) <a href="images-subset-silhouette.html">using silhouette index</a></li>
+<li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
+<li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>We ordered cells on a circle using FUCCI intensities alone.</li>
+</ol>
+<ul>
+<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle which approximate the relative ordering of cells on cell cycle</a></li>
+<li>I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
+<li>Here I put together lists of genes identified as signfiicantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
+</ul>
 <hr />
 </div>
 <div id="model-fitting" class="section level2">
 <h2>Model fitting</h2>
 <ul>
-<li>Evaluating cellcycleR 0.1.6
+<li>CellcycleR 0.1.6
 <ul>
 <li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
 <li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
 <li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
 <li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
 </ul></li>
+<li><p>Correlation for circular response variable: some simulations to check <a href="circ-correlation-simulation.html">its property and also relations with Fisher’s z transformation</a></p></li>
+<li>Nonparametric circular regression
+<ul>
+<li>First, evaluate smash for smoothing gene expression data and compare <a href="images-circle-ordering-npreg.html">results of smash with NPCirc</a></li>
+</ul></li>
 </ul>
-<hr />
 <hr />
 </div>
 <div id="one-time-investigations" class="section level2">
 <h2>One-time investigations</h2>
 <ul>
-<li><a href="ensembl.html">Why some gene symbols (genes) correspond to multiple Ensembl IDs?</a></li>
+<li><p>Why some gene symbols (genes) correspond to <a href="ensembl.html">multiple Ensembl IDs?</a></p></li>
+<li><p>I selected a set of cell cycle <a href="seqdata-select-cellcyclegenes.html">genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.</a></p></li>
 </ul>
 </div>
 

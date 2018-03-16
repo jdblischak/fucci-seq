@@ -1,0 +1,306 @@
+---
+title: "Lists of signficant genes using different types of correlation"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Summary
+
+In terms of the enrichment for cell cycle genes found in Whitfield paper, the top 200 genes in linear correlation case has 5 fold enrichment, while the top 200 genes in circular-linear correlation case has 6.9 fold enrichment. When considering the top 100 genes, the linear correlation has 6.5 fold enrichment, and the circular-linear correlation has 9.4 fold enrichment.
+
+* Something strange with smash results. No overlap with correlation results at all. There's still some unresolved issues about how to apply smash to single cell RNA-seq data. For one, how to deal with dropouts?
+
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(smashr)
+library(NPCirc)
+library(CorShrink)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-filtered.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- readRDS("../output/seqdata-batch-correction.Rmd/log2cpm.rds")
+# log2cpm.adjust <- readRDS("../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds")
+log2cpm <- log2cpm.all[grep("ENSG", rownames(log2cpm.all)), ]
+
+# import corrected intensities
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+source("../code/images-circle-ordering-npreg.R")
+```
+
+
+---
+
+## Projected normal on PCs of Red/Green
+
+
+```{r, fig.width=7, fig.height=5}
+pc.fucci <- prcomp(subset(pdata.adj, 
+                          select=c("rfp.median.log10sum.adjust",
+                                   "gfp.median.log10sum.adjust")),
+                   center = T, scale. = T)
+library(circular)
+Theta.fucci <- coord2rad(pc.fucci$x)
+log2cpm.ordered <- log2cpm[,order(as.numeric(Theta.fucci))]
+Theta.fucci.ordered <- Theta.fucci[order(as.numeric(Theta.fucci))]
+```
+
+--
+
+
+## Pearsons correlation on unordered data
+
+```{r}
+cors <- sapply(1:nrow(log2cpm), function(g) {
+  cor(Theta.fucci, log2cpm[g,])
+})
+nsamp.nonzero <- rowSums(log2cpm>0)
+
+cors.shrink <- CorShrinkVector(cors, nsamp.nonzero, report_model = TRUE)
+
+out.cors <- with(cors.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors) <- rownames(log2cpm)
+
+
+out.cors.nosig <- out.cors[out.cors$svalue > .01,]
+out.cors.sig <- out.cors[out.cors$svalue < .01,]
+out.cors.sig.sorted <- out.cors.sig[order(out.cors.sig$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.sig) %in% macosko$ensembl)/mean(rownames(out.cors.nosig) %in% macosko$ensembl)
+
+mean((rownames(out.cors)[order(out.cors$svalue)])[1:200] %in% macosko$ensembl)/mean((rownames(out.cors)[order(out.cors$svalue)])[200:nrow(out.cors)] %in% macosko$ensembl)
+
+mean((rownames(out.cors)[order(out.cors$svalue)])[1:100] %in% macosko$ensembl)/mean((rownames(out.cors)[order(out.cors$svalue)])[100:nrow(out.cors)] %in% macosko$ensembl)
+```
+Save output.
+
+```{r, eval = F}
+write.table((rownames(out.cors)[order(out.cors$svalue)])[1:200], 
+            row.names = F, col.names = F, quote = F,
+            file = "../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.lin.top200.txt")
+```
+
+
+---
+
+## Circular-linear correlation
+
+```{r}
+library(Directional)
+
+cors.circlin <- sapply(1:nrow(log2cpm), function(g) {
+  sqrt(circlin.cor(Theta.fucci, log2cpm[g,])[1])
+})
+nsamp.nonzero <- rowSums(log2cpm>0)
+
+cors.circlin.shrink <- CorShrinkVector(cors.circlin, nsamp.nonzero, report_model = TRUE)
+
+out.cors.circlin <- with(cors.circlin.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors.circlin) <- rownames(log2cpm)
+
+
+out.cors.circlin.nosig <- out.cors.circlin[out.cors.circlin$svalue > .01,]
+out.cors.circlin.sig <- out.cors.circlin[out.cors.circlin$svalue < .01,]
+out.cors.circlin.sig.sorted <- out.cors.circlin[order(out.cors.circlin$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.circlin.sig) %in% macosko$ensembl)/mean(rownames(out.cors.circlin.nosig) %in% macosko$ensembl)
+
+
+mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200] %in% macosko$ensembl)/mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[200:nrow(out.cors.circlin)] %in% macosko$ensembl)
+
+mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:100] %in% macosko$ensembl)/mean((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[100:nrow(out.cors.circlin)] %in% macosko$ensembl)
+```
+Save output.
+
+```{r, eval = F}
+write.table((rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200], 
+            row.names = F, col.names = F, quote = F,
+            file = "../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.cir.lin.top200.txt")
+```
+
+---
+
+## Cyclical genes by smash
+
+```{r, eval = F}
+partitions <- partitionSamples.n(c(1:length(Theta.fucci)), 1, c(512,400))$partitions
+
+indices.train <- partitions[[1]][[1]]
+Y.train <- Theta.fucci.ordered[indices.train]
+X.train <- log2cpm.ordered[,indices.train]
+
+out.smash <- mclapply(1:nrow(log2cpm), function(g) {
+    xx.train <- X.train[g,]
+    is.zeros <- which(xx.train == 0)
+    not.zeros <- which(xx.train != 0)
+    xx.train.impute <- xx.train
+    if (length(is.zeros) > 1) {
+      for (j in 1:length(is.zeros)) {
+        pos <- is.zeros[j]
+        if (pos == 1) {impute.val <- xx.train[pos+1]}
+        if (pos == length(xx.train.impute)) {impute.val <- xx.train[pos-1]}
+        if (pos > 1 & pos < length(xx.train.impute)) {
+          impute.val <- min(xx.train[not.zeros], na.rm=T) }
+          xx.train.impute[pos] <- impute.val 
+      }
+    } else { xx.train.impute <- xx.train}
+    fit.smash.xx <- smash(x = xx.train.impute)
+    pve <- 1- var(xx.train.impute-fit.smash.xx)/var(xx.train.impute)    
+    return(list(xx.smash=fit.smash.xx, 
+                xx.train.impute = xx.train.impute,
+                pve=pve))
+  }, mc.cores=10)  
+```
+
+
+```{r, eval = F}
+out.smash.fit <- do.call(rbind, lapply(out.smash, "[[", 1))
+rownames(out.smash.fit) <- rownames(log2cpm)
+
+out.smash.traindata <- do.call(rbind, lapply(out.smash, "[[", 2))
+rownames(out.smash.traindata) <- rownames(log2cpm)
+
+out.smash.pve <- sapply(out.smash, "[[", 3)
+names(out.smash.pve) <- rownames(log2cpm)
+```
+
+Save output.
+
+```{r, eval = F}
+saveRDS(out.smash.pve, file = "../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.pve.rds")
+saveRDS(out.smash.traindata,
+        file = "../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.traindata.rds")
+saveRDS(out.smash.fit, file = "../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.fit.rds")
+
+
+write.table(names(out.smash.pve)[out.smash.pve > .5], 
+            row.names = F, col.names = F, quote = F,
+            file = "../output/images-circle-ordering-sigcorgenes.Rmd/expression.smash.txt")
+```
+
+
+```{r}
+out.smash.pve <- readRDS("../output/images-circle-ordering-sigcorgenes.Rmd/out.smash.pve.rds")
+out.smash.cyclical <- which(out.smash.pve > .1)
+out.smash.notcyclical <- which(out.smash.pve < .1)
+
+mean(names(out.smash.pve)[out.smash.pve > .5] %in% macosko$ensembl)/mean(names(out.smash.pve)[out.smash.pve < .5] %in% macosko$ensembl)  
+```
+
+
+
+---
+
+## Circular-linear correlation 
+
+```{r}
+library(Directional)
+
+cors.circlin <- sapply(1:nrow(log2cpm), function(g) {
+  sqrt(circlin.cor(Theta.fucci, log2cpm[g,])[1])
+})
+nsamp.nonzero <- rowSums(log2cpm>0)
+
+cors.circlin.shrink <- CorShrinkVector(cors.circlin, nsamp.nonzero, report_model = TRUE)
+
+out.cors.circlin <- with(cors.circlin.shrink$model$result, data.frame(PosteriorMean, svalue))
+rownames(out.cors.circlin) <- rownames(log2cpm)
+
+
+out.cors.circlin.nosig <- out.cors.circlin[out.cors.circlin$svalue > .001,]
+out.cors.circlin.sig <- out.cors.circlin[out.cors.circlin$svalue < .001,]
+out.cors.circlin.sig.sorted <- out.cors.circlin[order(out.cors.circlin$svalue),]
+
+# check macosko genes enrichment
+mean(rownames(out.cors.circlin.sig) %in% macosko$ensembl)/mean(rownames(out.cors.circlin.nosig) %in% macosko$ensembl)
+```
+
+Save output.
+
+```{r, eval = F}
+write.table(out.cors.circlin.sig.sorted, row.names = F, col.names = F, quote = F,
+            file = "../output/images-circle-ordering-sigcorgenes.Rmd/position.expression.cir.lin.siggenes.txt")
+```
+
+---
+
+## Compare lists
+
+```{r}
+library(VennDiagram)
+
+grid.draw(venn.diagram(list(linear=(rownames(out.cors)[order(out.cors$svalue)])[1:200],
+                  circ.linear=(rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:200],
+                  smash=(names(out.smash.pve)[order(out.smash.pve, decreasing = T)])[1:200]),
+             filename = NULL))
+
+
+grid.draw(venn.diagram(list(linear=(rownames(out.cors)[order(out.cors$svalue)])[1:500],
+                  circ.linear=(rownames(out.cors.circlin)[order(out.cors.circlin$svalue)])[1:500],
+                  smash=(names(out.smash.pve)[order(out.smash.pve, decreasing = T)])[1:500]),
+             filename = NULL))
+```
+
+
+---
+
+## Session information
+
+```{r, eval = T}
+sessionInfo()
+```
+
