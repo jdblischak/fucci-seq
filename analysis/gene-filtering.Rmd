@@ -51,7 +51,7 @@ $~$
 
 3. Remove lowly expressed genes: Lowly-expressed genes := gene mean < 2 CPM.
 
-*Results*: * Of 20,421 genes, 7,864 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,830 are endogenoeus genes. 
+*Results*: * Of 20,421 genes, 7,628 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,594 are endogenoeus genes. 
 
 *Output*: gene annotation saved in `../output/gene-filtering.Rmd/lowly-expressed-genes-info.csv`
 
@@ -82,8 +82,7 @@ library(knitr)
 library(data.table)
 
 source("../code/pca.R")
-fname <- Sys.glob("../data/eset/*.rds")
-eset <- Reduce(combine, Map(readRDS, fname))
+eset <- readRDS("../data/eset-raw.rds")
 ```
 
 Filter out low-quality single cell samples.
