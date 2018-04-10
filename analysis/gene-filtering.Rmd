@@ -1,7 +1,10 @@
 ---
-title: "Gene filtering"
+title: "Gene filtering and sample filtering"
 author: "Joyce Hsiao"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
 ---
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
@@ -33,15 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 I performed gene filtering based on the criterion set forth in our previous paper. 
 
-1. Remove mitochrodrial genes: filter out mitochrondrial genes verified and listed in [MitoCarta][mitocarta].
-
-*Results*:Found 1,150 genes previously quantified in `MitoCarta` inventory.
-
-*Output*: gene annotation saved in `../output/gene-filtering.Rmd/mito-genes-info.csv`
-
-$~$
-
-2. Remove outlier genes: molecule counts > 4,096 in any sample (x is the theoretical maximum of UMI count for 6-bp UMI)
+1. Remove outlier genes: molecule counts > 4,096 in any sample (x is the theoretical maximum of UMI count for 6-bp UMI)
 
 *Results* There's one, and turns out this over-expressed gene is one of the mitochrondrial genes.
 
@@ -49,16 +44,15 @@ $~$
 
 $~$
 
-3. Remove lowly expressed genes: Lowly-expressed genes := gene mean < 2 CPM.
+2. Remove lowly expressed genes: Lowly-expressed genes := gene mean < 2 CPM.
 
 *Results*: * Of 20,421 genes, 7,628 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,594 are endogenoeus genes. 
 
 *Output*: gene annotation saved in `../output/gene-filtering.Rmd/lowly-expressed-genes-info.csv`
 
+3. Include 1025 samples classifed as high quality samples (of all the 1536 samples). 
 
-**Finally**, filtered eset (`eset_filtered`) and cpm normalized count (`cpm_filtered`) are saved in `../output/gene-filtering.Rmd/eset-filterd.rdata`.
-
-[mitocarta]: https://www.broadinstitute.org/scientific-community/science/programs/metabolic-disease-program/publications/mitocarta/mitocarta-in-0
+4. Finally, create a filtered dataset (`eset_filtered`) that includes 1025 samples and 12792 genes and save in  `../output/gene-filtering.Rmd/eset-gene-filtering.rds`.
 
 
 $~$
@@ -81,7 +75,7 @@ library(biomaRt)
 library(knitr)
 library(data.table)
 
-source("../code/pca.R")
+source("../code/utility.R")
 eset <- readRDS("../data/eset-raw.rds")
 ```
 
@@ -97,54 +91,13 @@ $~$
 
 ---
 
-## Mitochrondrial genes
-
-Found 1,150 genes previously quantified in `MitoCarta` inventory.
-
-```{r, warning = FALSE}
-human_mito <- gdata::read.xls("../data/Human.MitoCarta2.0.xls",
-                   sheet = 2, header = TRUE, stringsAsFactors=FALSE)
-human_mito_ensembl <- human_mito$EnsemblGeneID
-
-which_mito <- which(rownames(count_filter) %in% human_mito_ensembl)
-which_mito_genes <- rownames(count_filter)[which_mito]
-
-length(which_mito)
-```
-
-Get mito gene info via `biomaRt`.
-
-```{r, eval = F}
-# do biomart to verfiy these genes
-ensembl <- useMart(host = "grch37.ensembl.org",
-                   biomart = "ENSEMBL_MART_ENSEMBL",
-                   dataset = "hsapiens_gene_ensembl")
-
-mito_genes_info <- getBM(
-  attributes = c("ensembl_gene_id", "chromosome_name",
-                 "external_gene_name", "transcript_count",
-                 "description"),
-  filters = "ensembl_gene_id",
-  values = which_mito_genes[grep("ENSG", which_mito_genes)],
-  mart = ensembl)
-
-
-fwrite(mito_genes_info, 
-       file = "../output/gene-filtering.Rmd/mito-genes-info.csv")
-```
-
-$~$
-
----
-
 ## Over-expressed genes
 
-There's one, and turns out this over-expressed gene is one of the mitochrondrial genes.
+There's one, and turns out this over-expressed gene.
 
 ```{r}
 which_over_expressed <- which(apply(count_filter, 1, function(x) any(x>(4^6)) ))
 over_expressed_genes <- rownames(count_filter)[which_over_expressed]
-over_expressed_genes %in% human_mito_ensembl
 over_expressed_genes
 ```
 
@@ -213,7 +166,7 @@ $~$
 Including 16,460 genes.
 
 ```{r}
-gene_filter <- unique(c(which_lowly_expressed, which_mito, which_over_expressed))
+gene_filter <- unique(c(which_lowly_expressed, which_over_expressed))
 
 genes_to_include <- setdiff(1:nrow(count_filter), gene_filter)
 length(genes_to_include)
@@ -226,57 +179,14 @@ $~$
 ## Make filtered data
 
 ```{r}
-cpm_filtered <- cpm[genes_to_include, ]
-
 eset_filtered <- eset[genes_to_include, pData(eset)$filter_all==TRUE]
 eset_filtered
 ```
 
 ```{r, echo = TRUE, eval=F}
-save(cpm_filtered, eset_filtered, 
-     file = "../output/gene-filtering.Rmd/eset-filtered.rdata")
+saveRDS(eset_filtered, 
+        file = "../output/gene-filtering.Rmd/eset-gene-filtering.rds")
 ```
-
-$~$
-
----
-
-## Compute log2 CPM
-
-Import data post sample and gene filtering.
-
-```{r}
-load(file="../output/gene-filtering.Rmd/eset-filtered.rdata")
-```
-
-Compute log2 CPM based on the library size before filtering.
-
-```{r}
-log2cpm <- log2(cpm_filtered+1)
-```
-
-$~$
-
----
-
-## PCA
-
-```{r}
-pca_log2cpm <- run_pca(log2cpm)
-
-pdata <- pData(eset_filtered)
-pdata$experiment <- as.factor(pdata$experiment)
-
-plot_grid(
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color="chip_id"),
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color="experiment"),
-  ncol=2)
-```
-
-
-$~$
 
 ---
 
