@@ -12,7 +12,7 @@
 <meta name="author" content="Joyce Hsiao" />
 
 
-<title>Gene filtering</title>
+<title>Gene filtering and sample filtering</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -20,9 +20,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -168,101 +165,6 @@ $(document).ready(function () {
 
 
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -309,42 +211,50 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Gene filtering</h1>
+<h1 class="title toc-ignore">Gene filtering and sample filtering</h1>
 <h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#import-data">Import data</a></li>
+<li><a href="#over-expressed-genes">Over-expressed genes</a></li>
+<li><a href="#filter-out-lowly-expressed-genes">Filter out lowly-expressed genes</a></li>
+<li><a href="#combine-filters">Combine filters</a></li>
+<li><a href="#make-filtered-data">Make filtered data</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-04-09</p>
+<p><strong>Last updated:</strong> 2018-04-10</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> d64c402</p>
+<p><strong>Code version:</strong> 77d10d4</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>I performed gene filtering based on the criterion set forth in our previous paper.</p>
 <ol style="list-style-type: decimal">
-<li>Remove mitochrodrial genes: filter out mitochrondrial genes verified and listed in <a href="https://www.broadinstitute.org/scientific-community/science/programs/metabolic-disease-program/publications/mitocarta/mitocarta-in-0">MitoCarta</a>.</li>
-</ol>
-<p><em>Results</em>:Found 1,150 genes previously quantified in <code>MitoCarta</code> inventory.</p>
-<p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/mito-genes-info.csv</code></p>
-<p><span class="math inline">\(~\)</span></p>
-<ol start="2" style="list-style-type: decimal">
 <li>Remove outlier genes: molecule counts &gt; 4,096 in any sample (x is the theoretical maximum of UMI count for 6-bp UMI)</li>
 </ol>
 <p><em>Results</em> There’s one, and turns out this over-expressed gene is one of the mitochrondrial genes.</p>
 <p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/over-expressed-genes-info.csv</code></p>
 <p><span class="math inline">\(~\)</span></p>
-<ol start="3" style="list-style-type: decimal">
+<ol start="2" style="list-style-type: decimal">
 <li>Remove lowly expressed genes: Lowly-expressed genes := gene mean &lt; 2 CPM.</li>
 </ol>
 <p><em>Results</em>: * Of 20,421 genes, 7,628 genes are classifed as lowly-expressed. Of these, 34 are ERCC control genes and 7,594 are endogenoeus genes.</p>
 <p><em>Output</em>: gene annotation saved in <code>../output/gene-filtering.Rmd/lowly-expressed-genes-info.csv</code></p>
-<p><strong>Finally</strong>, filtered eset (<code>eset_filtered</code>) and cpm normalized count (<code>cpm_filtered</code>) are saved in <code>../output/gene-filtering.Rmd/eset-filterd.rdata</code>.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><p>Include 1025 samples classifed as high quality samples (of all the 1536 samples).</p></li>
+<li><p>Finally, create a filtered dataset (<code>eset_filtered</code>) that includes 1025 samples and 12792 genes and save in <code>../output/gene-filtering.Rmd/eset-gene-filtering.rds</code>.</p></li>
+</ol>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
@@ -362,7 +272,7 @@ library(biomaRt)
 library(knitr)
 library(data.table)
 
-source(&quot;../code/pca.R&quot;)
+source(&quot;../code/utility.R&quot;)
 eset &lt;- readRDS(&quot;../data/eset-raw.rds&quot;)</code></pre>
 <p>Filter out low-quality single cell samples.</p>
 <pre class="r"><code>pdata_filter &lt;- pData(eset)[pData(eset)$filter_all == TRUE,]
@@ -372,46 +282,12 @@ dim(count_filter)</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
-<div id="mitochrondrial-genes" class="section level2">
-<h2>Mitochrondrial genes</h2>
-<p>Found 1,150 genes previously quantified in <code>MitoCarta</code> inventory.</p>
-<pre class="r"><code>human_mito &lt;- gdata::read.xls(&quot;../data/Human.MitoCarta2.0.xls&quot;,
-                   sheet = 2, header = TRUE, stringsAsFactors=FALSE)
-human_mito_ensembl &lt;- human_mito$EnsemblGeneID
-
-which_mito &lt;- which(rownames(count_filter) %in% human_mito_ensembl)
-which_mito_genes &lt;- rownames(count_filter)[which_mito]
-
-length(which_mito)</code></pre>
-<pre><code>[1] 1150</code></pre>
-<p>Get mito gene info via <code>biomaRt</code>.</p>
-<pre class="r"><code># do biomart to verfiy these genes
-ensembl &lt;- useMart(host = &quot;grch37.ensembl.org&quot;,
-                   biomart = &quot;ENSEMBL_MART_ENSEMBL&quot;,
-                   dataset = &quot;hsapiens_gene_ensembl&quot;)
-
-mito_genes_info &lt;- getBM(
-  attributes = c(&quot;ensembl_gene_id&quot;, &quot;chromosome_name&quot;,
-                 &quot;external_gene_name&quot;, &quot;transcript_count&quot;,
-                 &quot;description&quot;),
-  filters = &quot;ensembl_gene_id&quot;,
-  values = which_mito_genes[grep(&quot;ENSG&quot;, which_mito_genes)],
-  mart = ensembl)
-
-
-fwrite(mito_genes_info, 
-       file = &quot;../output/gene-filtering.Rmd/mito-genes-info.csv&quot;)</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<hr />
-</div>
 <div id="over-expressed-genes" class="section level2">
 <h2>Over-expressed genes</h2>
-<p>There’s one, and turns out this over-expressed gene is one of the mitochrondrial genes.</p>
+<p>There’s one, and turns out this over-expressed gene.</p>
 <pre class="r"><code>which_over_expressed &lt;- which(apply(count_filter, 1, function(x) any(x&gt;(4^6)) ))
 over_expressed_genes &lt;- rownames(count_filter)[which_over_expressed]
-over_expressed_genes %in% human_mito_ensembl</code></pre>
-<pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>over_expressed_genes</code></pre>
+over_expressed_genes</code></pre>
 <pre><code>[1] &quot;ENSG00000198886&quot;</code></pre>
 <p>Get over-expressed gene info via <code>biomaRt</code>.</p>
 <pre class="r"><code>over_expressed_genes_info &lt;- getBM(
@@ -461,22 +337,20 @@ fwrite(lowly_expressed_genes_info,
 <div id="combine-filters" class="section level2">
 <h2>Combine filters</h2>
 <p>Including 16,460 genes.</p>
-<pre class="r"><code>gene_filter &lt;- unique(c(which_lowly_expressed, which_mito, which_over_expressed))
+<pre class="r"><code>gene_filter &lt;- unique(c(which_lowly_expressed, which_over_expressed))
 
 genes_to_include &lt;- setdiff(1:nrow(count_filter), gene_filter)
 length(genes_to_include)</code></pre>
-<pre><code>[1] 11721</code></pre>
+<pre><code>[1] 12792</code></pre>
 <p><span class="math inline">\(~\)</span></p>
 <hr />
 </div>
 <div id="make-filtered-data" class="section level2">
 <h2>Make filtered data</h2>
-<pre class="r"><code>cpm_filtered &lt;- cpm[genes_to_include, ]
-
-eset_filtered &lt;- eset[genes_to_include, pData(eset)$filter_all==TRUE]
+<pre class="r"><code>eset_filtered &lt;- eset[genes_to_include, pData(eset)$filter_all==TRUE]
 eset_filtered</code></pre>
 <pre><code>ExpressionSet (storageMode: lockedEnvironment)
-assayData: 11721 features, 1025 samples 
+assayData: 12792 features, 1025 samples 
   element names: exprs 
 protocolData: none
 phenoData
@@ -485,40 +359,13 @@ phenoData
   varLabels: experiment well ... filter_all (43 total)
   varMetadata: labelDescription
 featureData
-  featureNames: EGFP ENSG00000000003 ... mCherry (11721 total)
+  featureNames: EGFP ENSG00000000003 ... mCherry (12792 total)
   fvarLabels: chr start ... source (6 total)
   fvarMetadata: labelDescription
 experimentData: use &#39;experimentData(object)&#39;
 Annotation:  </code></pre>
-<pre class="r"><code>save(cpm_filtered, eset_filtered, 
-     file = &quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<hr />
-</div>
-<div id="compute-log2-cpm" class="section level2">
-<h2>Compute log2 CPM</h2>
-<p>Import data post sample and gene filtering.</p>
-<pre class="r"><code>load(file=&quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
-<p>Compute log2 CPM based on the library size before filtering.</p>
-<pre class="r"><code>log2cpm &lt;- log2(cpm_filtered+1)</code></pre>
-<p><span class="math inline">\(~\)</span></p>
-<hr />
-</div>
-<div id="pca" class="section level2">
-<h2>PCA</h2>
-<pre class="r"><code>pca_log2cpm &lt;- run_pca(log2cpm)
-
-pdata &lt;- pData(eset_filtered)
-pdata$experiment &lt;- as.factor(pdata$experiment)
-
-plot_grid(
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color=&quot;chip_id&quot;),
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color=&quot;experiment&quot;),
-  ncol=2)</code></pre>
-<p><img src="figure/gene-filtering.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p><span class="math inline">\(~\)</span></p>
+<pre class="r"><code>saveRDS(eset_filtered, 
+        file = &quot;../output/gene-filtering.Rmd/eset-gene-filtering.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -557,15 +404,14 @@ loaded via a namespace (and not attached):
 [16] tibble_1.4.2         gtable_0.2.0         pkgconfig_2.0.1     
 [19] rlang_0.2.0          DBI_0.8              yaml_2.1.18         
 [22] bindrcpp_0.2         httr_1.3.1           stringr_1.3.0       
-[25] gtools_3.5.0         IRanges_2.12.0       S4Vectors_0.16.0    
-[28] bit64_0.9-7          stats4_3.4.1         rprojroot_1.3-2     
-[31] grid_3.4.1           glue_1.2.0           R6_2.2.2            
-[34] AnnotationDbi_1.40.0 XML_3.98-1.10        rmarkdown_1.9       
-[37] gdata_2.18.0         blob_1.1.0           fastcluster_1.1.24  
-[40] magrittr_1.5         backports_1.1.2      scales_0.5.0        
-[43] htmltools_0.3.6      assertthat_0.2.0     colorspace_1.3-2    
-[46] labeling_0.3         stringi_1.1.7        RCurl_1.95-4.10     
-[49] lazyeval_0.2.1       munsell_0.4.3       </code></pre>
+[25] IRanges_2.12.0       S4Vectors_0.16.0     bit64_0.9-7         
+[28] stats4_3.4.1         rprojroot_1.3-2      grid_3.4.1          
+[31] glue_1.2.0           R6_2.2.2             AnnotationDbi_1.40.0
+[34] XML_3.98-1.10        rmarkdown_1.9        blob_1.1.0          
+[37] fastcluster_1.1.24   magrittr_1.5         backports_1.1.2     
+[40] scales_0.5.0         htmltools_0.3.6      assertthat_0.2.0    
+[43] colorspace_1.3-2     stringi_1.1.7        RCurl_1.95-4.10     
+[46] lazyeval_0.2.1       munsell_0.4.3       </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -606,8 +452,6 @@ footer is added to webpages before the MathJax javascript. -->
 -->
 
 
-</div>
-</div>
 
 </div>
 

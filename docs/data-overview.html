@@ -20,9 +20,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -168,101 +165,6 @@ $(document).ready(function () {
 
 
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -314,29 +216,40 @@ div.section {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#packages">Packages</a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#fucci-intensity-data">FUCCI intensity data</a></li>
+<li><a href="#sequencing-data">Sequencing data</a></li>
+<li><a href="#match-intensity-with-sequencing-data">Match intensity with sequencing data</a></li>
+<li><a href="#access-expressionsets">Access expressionSets</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
 
 <!-- The file analysis/chunks.R contains chunks that define default settings
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-04-09</p>
+<p><strong>Last updated:</strong> 2018-04-10</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> a211c93</p>
+<p><strong>Code version:</strong> 77d10d4</p>
 <hr />
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<pre class="r"><code>library(Biobase)</code></pre>
+<hr />
+</div>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
 <p>We collected two types of data for each single cell sample: single-cell RNA-seq using C1 plates and FUCCI image intensity data.</p>
 <ul>
-<li>Raw RNA-seq data: <code>data/eset-raw.rds</code></li>
-</ul>
-<p>The filtered data are stored as follows:</p>
-<ul>
-<li>combine intensity and RNA-seq: <code>data/eset-filtered.rds</code><br />
-</li>
-<li>FUCCI intensity data: <code>data/intensity.rds</code><br />
-</li>
-<li>RNA-seq data: <code>output/gene-filtering.Rmd/eset-filtered.rdata</code></li>
+<li><p>Raw RNA-seq data: <code>data/eset-raw.rds</code></p></li>
+<li><p>FUCCI intensity data: <code>data/intensity.rds</code></p></li>
+<li><p>Filtered RNA-seq data: <code>output/gene-filtering.Rmd/eset-gene-filtering.rds</code></p></li>
+<li><p>Final data combining filtered intensity and RNA-seq, including 12792 genes and 990 samples: <code>data/eset-final.rds</code></p></li>
 </ul>
 <hr />
 </div>
@@ -368,30 +281,9 @@ colnames(ints)</code></pre>
 <ul>
 <li><p>Raw data from each C1 plate are stored separatley in <code>data/eset/</code> by experiment (batch) ID.</p></li>
 <li><p>Raw data combining C1 plate are stored in <code>data/eset-raw.rds</code>.</p></li>
-<li><p>Filtered raw data are stored in <code>output/gene-filtering.Rmd/eset-filtering.rdata</code> (both eSet and CPM data.table). These are filtered for genes and high quality samples using sequencing data results.</p></li>
+<li><p>Filtered raw data excluding low-quality sequencing samples and genes that are lowly expressed or overly expressed are stored in <code>output/gene-filtering.Rmd/eset-gene-filtering.rds</code> (both eSet and CPM data.table).</p></li>
 </ul>
-<pre class="r"><code>load(file=&quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)
-eset_filtered</code></pre>
-<pre><code>ExpressionSet (storageMode: lockedEnvironment)
-assayData: 11721 features, 1025 samples 
-  element names: exprs 
-protocolData: none
-phenoData
-  sampleNames: 20170905-A01 20170905-A02 ... 20170924-H12 (1025
-    total)
-  varLabels: experiment well ... filter_all (43 total)
-  varMetadata: labelDescription
-featureData
-  featureNames: EGFP ENSG00000000003 ... mCherry (11721 total)
-  fvarLabels: chr start ... source (6 total)
-  fvarMetadata: labelDescription
-experimentData: use &#39;experimentData(object)&#39;
-Annotation:  </code></pre>
-<pre class="r"><code>str(cpm_filtered)</code></pre>
-<pre><code> num [1:11721, 1:1025] 294 187 0 147 0 ...
- - attr(*, &quot;dimnames&quot;)=List of 2
-  ..$ : chr [1:11721] &quot;EGFP&quot; &quot;ENSG00000000003&quot; &quot;ENSG00000000005&quot; &quot;ENSG00000000419&quot; ...
-  ..$ : chr [1:1025] &quot;20170905-A01&quot; &quot;20170905-A02&quot; &quot;20170905-A03&quot; &quot;20170905-A06&quot; ...</code></pre>
+<pre class="r"><code>eset_filtered &lt;- readRDS(&quot;../output/gene-filtering.Rmd/eset-gene-filtering.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="match-intensity-with-sequencing-data" class="section level2">
@@ -407,41 +299,45 @@ length(sample_include_bothdata)</code></pre>
 <pre class="r"><code>ints_combo &lt;- ints[which(ints$unique %in% sample_include_bothdata), ]
 
 eset_combo &lt;- new(&quot;ExpressionSet&quot;, 
-              exprs = exprs(eset_filtered)[,which(pdata$unique %in% sample_include_bothdata)], 
-              phenoData = phenoData(eset_filtered)[which(pdata$unique %in% sample_include_bothdata), ], 
-              featureData = featureData(eset_filtered))
+      exprs = exprs(eset_filtered)[,which(pdata$unique %in% sample_include_bothdata)], 
+      phenoData = phenoData(eset_filtered)[which(pdata$unique %in% sample_include_bothdata), ], 
+      featureData = featureData(eset_filtered))
 
 pdata_combo &lt;- pData(eset_combo)
 pdata_combo$unique &lt;- paste(pdata_combo$image_individual, 
                             sprintf(&quot;%05d&quot;, pdata_combo$image_label), sep=&quot;_&quot;)
 
-all.equal(ints_combo$unique, pdata_combo$unique)
-
-pdata_table &lt;- rbind(varMetadata(phenoData(eset_combo)),
+all.equal(ints_combo$unique, pdata_combo$unique)</code></pre>
+<p>Import estimated cell time. Computed using cell times adjusted for plate effect <code>../output/images-normalize-anova.Rmd/pdata.adj.rds</code>. See <code>../docs/npreg.html</code> for methods.</p>
+<pre class="r"><code>theta &lt;- readRDS(file = &quot;../output/npreg.Rmd/theta.rds&quot;)</code></pre>
+<p>Make variable labels.</p>
+<pre class="r"><code>pdata_table &lt;- rbind(varMetadata(phenoData(eset_combo)),
                     &quot;mCherry background-corrected intensity (log10sum)&quot;,
                     &quot;EGFP background-corrected intensity (log10sum)&quot;,
                     &quot;DAPI background-corrected intensity (log10sum)&quot;,
                     &quot;nucleus size&quot;,
                     &quot;nucleus perimeter&quot;,
-                    &quot;nucleus eccentricity&quot;)
+                    &quot;nucleus eccentricity&quot;, 
+                    &quot;cell time&quot;)
 rownames(pdata_table) &lt;- c(rownames(varMetadata(phenoData(eset_combo))),
                            &quot;rfp.median.log10sum&quot;,
                            &quot;gfp.median.log10sum&quot;,
                            &quot;dapi.median.log10sum&quot;,
-                           &quot;size&quot;, &quot;perimeter&quot;, &quot;eccentricity&quot;)
+                           &quot;size&quot;, &quot;perimeter&quot;, &quot;eccentricity&quot;,
+                           &quot;theta&quot;)
 
 
 phenoData(eset_combo) &lt;- new(&quot;AnnotatedDataFrame&quot;, 
-                           data = data.frame(pData(eset_combo),
-                                             rfp.median.log10sum=ints_combo$rfp.median.log10sum,
-                                             gfp.median.log10sum=ints_combo$gfp.median.log10sum,
-                                             dapi.median.log10sum=ints_combo$dapi.median.log10sum,
-                                             size=ints_combo$size,
-                                             perimeter=ints_combo$perimeter,
-                                             eccentricity=ints_combo$eccentricity),
-                          varMetadata = pdata_table)
+  data = data.frame(pData(eset_combo),
+  rfp.median.log10sum=ints_combo$rfp.median.log10sum,
+  gfp.median.log10sum=ints_combo$gfp.median.log10sum,                               dapi.median.log10sum=ints_combo$dapi.median.log10sum,
+  size=ints_combo$size,
+  perimeter=ints_combo$perimeter,
+  eccentricity=ints_combo$eccentricity,
+  theta=theta),
+  varMetadata = pdata_table)
 
-saveRDS(eset_combo, file = &quot;../data/eset-filtered.rds&quot;)</code></pre>
+saveRDS(eset_combo, file = &quot;../data/eset-final.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="access-expressionsets" class="section level2">
@@ -528,8 +424,6 @@ footer is added to webpages before the MathJax javascript. -->
 -->
 
 
-</div>
-</div>
 
 </div>
 
