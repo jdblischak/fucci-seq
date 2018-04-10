@@ -136,7 +136,7 @@ We store feature-level (gene) read count and molecule count in `expressionSet` (
 
 To combine `eset` objects from the different C1 plates:
 
-`eset <- Reduce(combine, Map(readRDS, Sys.glob("../data/eset/*.rds")))`
+`eset <- Reduce(combine, Map(readRDS, Sys.glob("data/eset/*.rds")))`
 
 
 To access data stored in  `expressionSet`:
