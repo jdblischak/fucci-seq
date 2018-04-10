@@ -17,4 +17,5 @@ output/seqdata-select-cellcyclegenes.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/images-seq-correlation.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/images-circle-ordering-npreg.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/images-circle-ordering-sigcorgenes.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/npreg.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
