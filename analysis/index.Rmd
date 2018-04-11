@@ -36,7 +36,10 @@ We evaluated and pre-processed the results of image analysis as follows:
     * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
     * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
     * [Estimate variance explained in IBD and correct for batch effects in intensities](images-normalize-anova.html)
-    
+  
+4. We investigated the estimated cell time against the fucci intensities and considered [relations between estimated cell time and cell cycle states of G1, S, G2](images-time-eval.html).
+
+
 ---
 
 ## RNA-seq data preprcessing
@@ -60,41 +63,39 @@ We evaluated and pre-processed the results of image analysis as follows:
 ## Cell cycle signal in gene expression data
 
 1. We investigated cell cycle signals in the sequencing data alone.
-    
-  * Consider [transgene count in sequencing data](images-transgene.html)
-  * Compute linear correlation between gene expression levels [with DAPI and FUCCI intensities](images-seq-correlation.html)
+    * Consider [transgene count in sequencing data](images-transgene.html)
+    * Compute linear correlation between gene expression levels [with DAPI and FUCCI intensities](images-seq-correlation.html)
   
 2. We then assign categorical labels of cell cycle and explored the expresson profiles of these categories. 
-
-  * Cluster samples by [Partition around medoids(PAM)](images-pam.html)
-  * Cluster samples by [Guassian mixture modeling](images-mclust.html)
-  * Select a subset of samples that are closet to the cluster centers (cluster representives) [using silhouette index](images-subset-silhouette.html)
-  * Examine gene pression scores defined by the Macosko paper in the selected cluster representatives [before confounding correction](images-classify-fucci.html) and [after confounding correction](images-classify-fucci-adjusted.html)
-  * Examine gene expression scores defined by the Macosk paer [in the sorted cells of the Leng et al. 2015 paper](images-classify-leng.html)
+    * Cluster samples by [Partition around medoids(PAM)](images-pam.html)
+    * Cluster samples by [Guassian mixture modeling](images-mclust.html)
+    * Select a subset of samples that are closet to the cluster centers (cluster representives) [using silhouette index](images-subset-silhouette.html)
+    * Examine gene pression scores defined by the Macosko paper in the selected cluster representatives [before confounding correction](images-classify-fucci.html) and [after confounding correction](images-classify-fucci-adjusted.html)
+    * Examine gene expression scores defined by the Macosk paer [in the sorted cells of the Leng et al. 2015 paper](images-classify-leng.html)
 
 3. We ordered cells on a circle using FUCCI intensities alone. 
-
-  * First, I used GFP and RFP intensities to estimate a [least-square fit of unit circle which approximate the relative ordering of cells on cell cycle](images-circle-ordering.html)
-  * I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and [to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression](images-circle-ordering-eval.html)
-  * Here I put together lists of genes identified as signfiicantly correlatd with the PC-based fit [by linear correlation and circular-linear correlation, also cyclical genes by smash](images-circle-ordering-sigcorgenes.html)
-
+    * First, I used GFP and RFP intensities to estimate a [least-square fit of unit circle which approximate the relative ordering of cells on cell cycle](images-circle-ordering.html)
+    * I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and [to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression](images-circle-ordering-eval.html)
+    * Here I put together lists of genes identified as significantly correlatd with the PC-based fit [by linear correlation and circular-linear correlation, also cyclical genes by smash](images-circle-ordering-sigcorgenes.html)
+  
+4. I used nonparametric methods to identify genes that may be cyclical along cell cycle phases, using [smash and kernel regression](npreg.html).
 
 
 ---
 
 ## Model fitting
 
+* Learning about correlation for circular response variable: some simulations to check [its property and also relations with Fisher's z transformation](circ-simulation-correlation.html)
+    
+* 
+
+
+
 * CellcycleR 0.1.6
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
     * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
     * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
-    
-* Correlation for circular response variable: some simulations to check [its property and also relations with Fisher's z transformation](circ-correlation-simulation.html)
-    
-* Nonparametric circular regression
-    * First, evaluate smash for smoothing gene expression data and compare [results of smash with NPCirc](images-circle-ordering-npreg.html)
-
  
 ---
 
