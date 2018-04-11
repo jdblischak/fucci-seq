@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Select genes indicative of cell cycle state</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Select genes indicative of cell cycle state</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#estimate-cell-time">Estimate cell time</a></li>
+<li><a href="#results">Results</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-04-10</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> b8f2627</p>
+<hr />
+<div id="estimate-cell-time" class="section level2">
+<h2>Estimate cell time</h2>
+<pre class="r"><code>library(Biobase)
+# load gene expression
+df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+pc.fucci &lt;- prcomp(subset(pdata.adj, 
+                          select=c(&quot;rfp.median.log10sum.adjust&quot;,
+                                   &quot;gfp.median.log10sum.adjust&quot;)),
+                   center = T, scale. = T)
+Theta.cart &lt;- pc.fucci$x
+library(circular)
+Theta.fucci &lt;- coord2rad(Theta.cart)
+Theta.fucci &lt;- 2*pi - Theta.fucci</code></pre>
+<p>Cluster cell times to move the origin of the cell times</p>
+<pre class="r"><code># cluster cell time
+library(movMF)
+clust.res &lt;- lapply(2:5, function(k) {
+  movMF(Theta.cart, k=k, nruns = 100, kappa = list(common = TRUE))
+})
+k.list &lt;- sapply(clust.res, function(x) length(x$theta) + length(x$alpha) + 1)
+bic &lt;- sapply(1:length(clust.res), function(i) {
+  x &lt;- clust.res[[i]]
+  k &lt;- k.list[i]
+  n &lt;- nrow(Theta.cart)
+  -2*x$L + k *(log(n) - log(2*pi)) })
+plot(bic)
+labs &lt;- predict(clust.res[[2]])
+
+saveRDS(labs, file = &quot;../output/images-time-eval.Rmd/labs.rds&quot;)</code></pre>
+<pre class="r"><code>labs &lt;- readRDS(file = &quot;../output/images-time-eval.Rmd/labs.rds&quot;)
+
+summary(as.numeric(Theta.fucci)[labs==1])</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.277   1.978   2.392   2.336   2.692   3.525 </code></pre>
+<pre class="r"><code>summary(as.numeric(Theta.fucci)[labs==2])</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  3.579   4.348   4.689   4.675   5.007   5.809 </code></pre>
+<pre class="r"><code>summary(as.numeric(Theta.fucci)[labs==3])</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.004806 0.434017 0.874891 2.095213 5.830072 6.278717 </code></pre>
+<pre class="r"><code># move the origin to 1.27
+Theta.fucci.new &lt;- vector(&quot;numeric&quot;, length(Theta.fucci))
+cutoff &lt;- min(Theta.fucci[labs==1])
+Theta.fucci.new[Theta.fucci&gt;=cutoff] &lt;- Theta.fucci[Theta.fucci&gt;=cutoff] - cutoff
+Theta.fucci.new[Theta.fucci&lt;cutoff] &lt;- Theta.fucci[Theta.fucci&lt;cutoff] - cutoff + 2*pi</code></pre>
+<p>Try plotting for one gene</p>
+<pre class="r"><code>macosko[macosko$hgnc == &quot;CDK1&quot;,]</code></pre>
+<pre><code>    hgnc phase         ensembl
+113 CDK1    G2 ENSG00000170312</code></pre>
+<pre class="r"><code>cdk1 &lt;- log2cpm.all[rownames(log2cpm.all)==&quot;ENSG00000170312&quot;,]
+plot(x=Theta.fucci.new, y = cdk1)
+points(y=cdk1[labs==1], x=as.numeric(Theta.fucci.new)[labs==1], pch=16, cex=.7, col = &quot;red&quot;)
+points(y=cdk1[labs==2], x=as.numeric(Theta.fucci.new)[labs==2], pch=16, cex=.7, col = &quot;forestgreen&quot;)
+points(y=cdk1[labs==3], x=as.numeric(Theta.fucci.new)[labs==3], pch=16, cex=.7, col = &quot;blue&quot;)</code></pre>
+<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<pre class="r"><code>par(mfrow=c(2,2))
+ylims &lt;- with(pdata.adj, range(c(dapi.median.log10sum.adjust,
+                                 gfp.median.log10sum.adjust,
+                                 rfp.median.log10sum.adjust)))
+plot(as.numeric(Theta.fucci.new), pdata.adj$dapi.median.log10sum.adjust, col = &quot;blue&quot;, 
+     ylab= &quot;adjusted intensity values&quot;,
+     ylim = ylims, main = &quot;DAPI intensity values&quot;,
+     xlab =&quot;Estimated cell time&quot;)
+plot(as.numeric(Theta.fucci.new), pdata.adj$gfp.median.log10sum.adjust, col = &quot;forestgreen&quot;, 
+     ylab= &quot;adjusted intensity values&quot;,
+     ylim = ylims, main = &quot;GFP and RFP intensity values&quot;,
+     xlab =&quot;Estimated cell time&quot;)
+points(as.numeric(Theta.fucci.new), pdata.adj$rfp.median.log10sum.adjust, col = &quot;red&quot;)
+plot(as.numeric(Theta.fucci.new), pdata$molecules, main = &quot;Total molecule count&quot;,
+     xlab =&quot;Estimated cell time&quot;, ylab = &quot;Total molecule count&quot;)
+plot(pdata.adj$dapi.median.log10sum.adjust, pdata$molecules, main = &quot;DAPI vs. molecule count&quot;,
+     xlab = &quot;DAPI intensity adjusted for C1 batch&quot;, ylab = &quot;Total molecule count&quot;)</code></pre>
+<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Test the association between total sample molecule count and DAPI.</p>
+<ul>
+<li><p>After excluding outliers, pearson correlation is .2</p></li>
+<li><p>Consider lm(molecules ~ dapi). The adjusted R-squared is .04</p></li>
+<li><p>Consider lm(log10(molecules) ~ dapi). The adjusted R-squared is .04</p></li>
+<li><p>Weak linear trend between molecule count and DAPI…</p></li>
+</ul>
+<pre class="r"><code>xy &lt;- data.frame(dapi=pdata.adj$dapi.median.log10sum.adjust,
+                 molecules=pdata$molecules)
+xy &lt;- subset(xy, molecules &lt; 2*10^5 &amp; dapi &gt; -1)
+
+fit &lt;- lm(log10(molecules)~dapi, data=xy)
+summary(fit)</code></pre>
+<pre><code>
+Call:
+lm(formula = log10(molecules) ~ dapi, data = xy)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.316134 -0.056187  0.007504  0.060388  0.225894 
+
+Coefficients:
+            Estimate Std. Error  t value Pr(&gt;|t|)    
+(Intercept) 5.098818   0.002783 1832.186  &lt; 2e-16 ***
+dapi        0.082510   0.013209    6.246 6.27e-10 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.08695 on 975 degrees of freedom
+Multiple R-squared:  0.03848,   Adjusted R-squared:  0.03749 
+F-statistic: 39.02 on 1 and 975 DF,  p-value: 6.268e-10</code></pre>
+<pre class="r"><code>fit &lt;- lm(molecules~dapi, data=xy)
+summary(fit)</code></pre>
+<pre><code>
+Call:
+lm(formula = molecules ~ dapi, data = xy)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-67799 -17713   -348  16665  73746 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 128117.8      793.7 161.415  &lt; 2e-16 ***
+dapi         23538.3     3767.5   6.248 6.21e-10 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 24800 on 975 degrees of freedom
+Multiple R-squared:  0.03849,   Adjusted R-squared:  0.03751 
+F-statistic: 39.03 on 1 and 975 DF,  p-value: 6.211e-10</code></pre>
+<pre class="r"><code>par(mfrow=c(1,2))
+plot(x=xy$dapi, y = xy$molecules,
+     xlab = &quot;DAPI intensity&quot;, ylab = &quot;Total molecule count&quot;,
+     main = &quot;DAPI vs. molecule count \n adj-Rsq = .04&quot;)
+abline(lm(molecules~dapi, data=xy), col = &quot;red&quot;)
+plot(x=xy$dapi, y = log10(xy$molecules),
+     xlab = &quot;DAPI intensity&quot;, ylab = &quot;log10 total molecule count&quot;,
+     main = &quot;DAPI vs. log10 molecule count \n adj-Rsq = .04&quot;)
+abline(lm(log10(molecules)~dapi, data=xy), col = &quot;red&quot;)</code></pre>
+<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>cor(xy$dapi, xy$molecules, method = &quot;pearson&quot;)</code></pre>
+<pre><code>[1] 0.1962001</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] circular_0.4-93     Biobase_2.38.0      BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.16    mvtnorm_1.0-7   digest_0.6.15   rprojroot_1.3-2
+ [5] backports_1.1.2 git2r_0.21.0    magrittr_1.5    evaluate_0.10.1
+ [9] stringi_1.1.7   boot_1.3-19     rmarkdown_1.9   tools_3.4.1    
+[13] stringr_1.3.0   yaml_2.1.18     compiler_3.4.1  htmltools_0.3.6
+[17] knitr_1.20     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
