@@ -153,16 +153,20 @@ summary(fit)
 fit <- lm(molecules~dapi, data=xy)
 summary(fit)
 
+cor(xy$dapi, xy$molecules, method = "pearson")
+cor(xy$dapi, log10(xy$molecules), method = "pearson")
+
+
 par(mfrow=c(1,2))
 plot(x=xy$dapi, y = xy$molecules,
      xlab = "DAPI intensity", ylab = "Total molecule count",
-     main = "DAPI vs. molecule count \n adj-Rsq = .04")
+     main = "DAPI vs. molecule count \n adj-Rsq = .04; cor=.2")
 abline(lm(molecules~dapi, data=xy), col = "red")
 plot(x=xy$dapi, y = log10(xy$molecules),
      xlab = "DAPI intensity", ylab = "log10 total molecule count",
-     main = "DAPI vs. log10 molecule count \n adj-Rsq = .04")
+     main = "DAPI vs. log10 molecule count \n adj-Rsq = .04, cor=.2")
 abline(lm(log10(molecules)~dapi, data=xy), col = "red")
-cor(xy$dapi, xy$molecules, method = "pearson")
+
 ```
 
 
