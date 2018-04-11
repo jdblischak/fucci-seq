@@ -34,7 +34,7 @@ library("ggplot2")
 library("MASS")
 library("tibble")
 library("Biobase")
-source("../code/pca.R")
+source("../code/utility.R")
 theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
