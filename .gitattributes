@@ -4,6 +4,7 @@ output/gene-filtering.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 data/eset-raw.rds filter=lfs diff=lfs merge=lfs -text
 data/eset-final.rds filter=lfs diff=lfs merge=lfs -text
+data/eset-filtered.rds filter=lfs diff=lfs merge=lfs -text
 
 output/images-cellcycleR-convergence.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
 data/cellcycle-genes-previous-studies/* filter=lfs diff=lfs merge=lfs -text
