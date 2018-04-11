@@ -260,6 +260,7 @@ div.section {
 <li><a href="images-normalize-quantile.html">Quantile normalization for GFP, RFP and DAPI</a></li>
 <li><a href="images-normalize-anova.html">Estimate variance explained in IBD and correct for batch effects in intensities</a></li>
 </ul></li>
+<li>We investigated the estimated cell time against the fucci intensities and considered <a href="images-time-eval.html">relations between estimated cell time and cell cycle states of G1, S, G2</a>.</li>
 </ol>
 <hr />
 </div>
@@ -292,46 +293,40 @@ div.section {
 <div id="cell-cycle-signal-in-gene-expression-data" class="section level2">
 <h2>Cell cycle signal in gene expression data</h2>
 <ol style="list-style-type: decimal">
-<li>We investigated cell cycle signals in the sequencing data alone.</li>
-</ol>
+<li>We investigated cell cycle signals in the sequencing data alone.
 <ul>
 <li>Consider <a href="images-transgene.html">transgene count in sequencing data</a></li>
 <li>Compute linear correlation between gene expression levels <a href="images-seq-correlation.html">with DAPI and FUCCI intensities</a></li>
-</ul>
-<ol start="2" style="list-style-type: decimal">
-<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.</li>
-</ol>
+</ul></li>
+<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.
 <ul>
 <li>Cluster samples by <a href="images-pam.html">Partition around medoids(PAM)</a></li>
 <li>Cluster samples by <a href="images-mclust.html">Guassian mixture modeling</a></li>
 <li>Select a subset of samples that are closet to the cluster centers (cluster representives) <a href="images-subset-silhouette.html">using silhouette index</a></li>
 <li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
 <li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
-</ul>
-<ol start="3" style="list-style-type: decimal">
-<li>We ordered cells on a circle using FUCCI intensities alone.</li>
-</ol>
+</ul></li>
+<li>We ordered cells on a circle using FUCCI intensities alone.
 <ul>
 <li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle which approximate the relative ordering of cells on cell cycle</a></li>
 <li>I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
-<li>Here I put together lists of genes identified as signfiicantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
-</ul>
+<li>Here I put together lists of genes identified as significantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
+</ul></li>
+<li>I used nonparametric methods to identify genes that may be cyclical along cell cycle phases, using <a href="npreg.html">smash and kernel regression</a>.</li>
+</ol>
 <hr />
 </div>
 <div id="model-fitting" class="section level2">
 <h2>Model fitting</h2>
 <ul>
+<li><p>Learning about correlation for circular response variable: some simulations to check <a href="circ-simulation-correlation.html">its property and also relations with Fisher’s z transformation</a></p></li>
+<li></li>
 <li>CellcycleR 0.1.6
 <ul>
 <li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
 <li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
 <li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
 <li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
-</ul></li>
-<li><p>Correlation for circular response variable: some simulations to check <a href="circ-correlation-simulation.html">its property and also relations with Fisher’s z transformation</a></p></li>
-<li>Nonparametric circular regression
-<ul>
-<li>First, evaluate smash for smoothing gene expression data and compare <a href="images-circle-ordering-npreg.html">results of smash with NPCirc</a></li>
 </ul></li>
 </ul>
 <hr />
