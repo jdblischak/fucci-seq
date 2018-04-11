@@ -1,0 +1,176 @@
+---
+title: "Select genes indicative of cell cycle state"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+
+---
+
+## Estimate cell time
+
+```{r}
+library(Biobase)
+# load gene expression
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+
+pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+pc.fucci <- prcomp(subset(pdata.adj, 
+                          select=c("rfp.median.log10sum.adjust",
+                                   "gfp.median.log10sum.adjust")),
+                   center = T, scale. = T)
+Theta.cart <- pc.fucci$x
+library(circular)
+Theta.fucci <- coord2rad(Theta.cart)
+Theta.fucci <- 2*pi - Theta.fucci
+```
+
+Cluster cell times to move the origin of the cell times
+
+```{r, eval = F}
+# cluster cell time
+library(movMF)
+clust.res <- lapply(2:5, function(k) {
+  movMF(Theta.cart, k=k, nruns = 100, kappa = list(common = TRUE))
+})
+k.list <- sapply(clust.res, function(x) length(x$theta) + length(x$alpha) + 1)
+bic <- sapply(1:length(clust.res), function(i) {
+  x <- clust.res[[i]]
+  k <- k.list[i]
+  n <- nrow(Theta.cart)
+  -2*x$L + k *(log(n) - log(2*pi)) })
+plot(bic)
+labs <- predict(clust.res[[2]])
+
+saveRDS(labs, file = "../output/images-time-eval.Rmd/labs.rds")
+```
+
+
+```{r}
+labs <- readRDS(file = "../output/images-time-eval.Rmd/labs.rds")
+
+summary(as.numeric(Theta.fucci)[labs==1])
+summary(as.numeric(Theta.fucci)[labs==2])
+summary(as.numeric(Theta.fucci)[labs==3])
+
+# move the origin to 1.27
+Theta.fucci.new <- vector("numeric", length(Theta.fucci))
+cutoff <- min(Theta.fucci[labs==1])
+Theta.fucci.new[Theta.fucci>=cutoff] <- Theta.fucci[Theta.fucci>=cutoff] - cutoff
+Theta.fucci.new[Theta.fucci<cutoff] <- Theta.fucci[Theta.fucci<cutoff] - cutoff + 2*pi
+```
+
+Try plotting for one gene
+
+```{r}
+macosko[macosko$hgnc == "CDK1",]
+cdk1 <- log2cpm.all[rownames(log2cpm.all)=="ENSG00000170312",]
+plot(x=Theta.fucci.new, y = cdk1)
+points(y=cdk1[labs==1], x=as.numeric(Theta.fucci.new)[labs==1], pch=16, cex=.7, col = "red")
+points(y=cdk1[labs==2], x=as.numeric(Theta.fucci.new)[labs==2], pch=16, cex=.7, col = "forestgreen")
+points(y=cdk1[labs==3], x=as.numeric(Theta.fucci.new)[labs==3], pch=16, cex=.7, col = "blue")
+```
+
+---
+
+## Results
+
+```{r}
+par(mfrow=c(2,2))
+ylims <- with(pdata.adj, range(c(dapi.median.log10sum.adjust,
+                                 gfp.median.log10sum.adjust,
+                                 rfp.median.log10sum.adjust)))
+plot(as.numeric(Theta.fucci.new), pdata.adj$dapi.median.log10sum.adjust, col = "blue", 
+     ylab= "adjusted intensity values",
+     ylim = ylims, main = "DAPI intensity values",
+     xlab ="Estimated cell time")
+plot(as.numeric(Theta.fucci.new), pdata.adj$gfp.median.log10sum.adjust, col = "forestgreen", 
+     ylab= "adjusted intensity values",
+     ylim = ylims, main = "GFP and RFP intensity values",
+     xlab ="Estimated cell time")
+points(as.numeric(Theta.fucci.new), pdata.adj$rfp.median.log10sum.adjust, col = "red")
+plot(as.numeric(Theta.fucci.new), pdata$molecules, main = "Total molecule count",
+     xlab ="Estimated cell time", ylab = "Total molecule count")
+plot(pdata.adj$dapi.median.log10sum.adjust, pdata$molecules, main = "DAPI vs. molecule count",
+     xlab = "DAPI intensity adjusted for C1 batch", ylab = "Total molecule count")
+```
+
+Test the association between total sample molecule count and DAPI.
+
+* After excluding outliers, pearson correlation is .2
+
+* Consider lm(molecules ~ dapi). The adjusted R-squared is .04
+
+* Consider lm(log10(molecules) ~ dapi). The adjusted R-squared is .04
+
+* Weak linear trend between molecule count and DAPI...
+
+
+```{r}
+xy <- data.frame(dapi=pdata.adj$dapi.median.log10sum.adjust,
+                 molecules=pdata$molecules)
+xy <- subset(xy, molecules < 2*10^5 & dapi > -1)
+
+fit <- lm(log10(molecules)~dapi, data=xy)
+summary(fit)
+fit <- lm(molecules~dapi, data=xy)
+summary(fit)
+
+par(mfrow=c(1,2))
+plot(x=xy$dapi, y = xy$molecules,
+     xlab = "DAPI intensity", ylab = "Total molecule count",
+     main = "DAPI vs. molecule count \n adj-Rsq = .04")
+abline(lm(molecules~dapi, data=xy), col = "red")
+plot(x=xy$dapi, y = log10(xy$molecules),
+     xlab = "DAPI intensity", ylab = "log10 total molecule count",
+     main = "DAPI vs. log10 molecule count \n adj-Rsq = .04")
+abline(lm(log10(molecules)~dapi, data=xy), col = "red")
+cor(xy$dapi, xy$molecules, method = "pearson")
+```
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
