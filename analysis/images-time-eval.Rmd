@@ -193,6 +193,17 @@ abline(lm(log10(molecules)~dapi, data=xy), col = "red")
 
 ```
 
+---
+
+## Save re-ordered cell times
+
+```{r, eval = F}
+theta <- as.numeric(Theta.fucci.new)
+names(theta) <- colnames(log2cpm.all)
+
+saveRDS(theta,
+        file = "../output/images-time-eval.Rmd/theta.rds")
+```
 
 ---
 
