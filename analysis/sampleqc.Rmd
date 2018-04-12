@@ -24,6 +24,10 @@ knitr::read_chunk("chunks.R")
 ```{r code-version, echo=FALSE, results='asis'}
 ```
 
+The sample QC analysis is added to the final data files in
+[code/sampleqc.R](https://github.com/jdblischak/fucci-seq/blob/master/code/sampleqc.R).
+The analysis below visualizes the sample QC decisions.
+
 ## Setup
 
 ```{r packages, message=FALSE}

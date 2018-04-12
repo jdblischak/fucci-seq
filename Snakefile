@@ -354,7 +354,7 @@ rule expressionset:
            verify = dir_data + "verify/{chip}.txt",
            saf = dir_genome + ensembl_exons,
            qc = dir_output + "sampleqc.Rmd/{chip}.txt"
-    output: dir_data + "eset/{chip}.rds"
+    output: dir_data + "eset-pre-qc/{chip}.rds"
     shell: "Rscript code/create-expressionset.R {input.molecules} \
                                                 {input.lab} \
                                                 {input.totals} \
@@ -362,6 +362,13 @@ rule expressionset:
                                                 {input.saf} \
                                                 {input.qc} \
                                                 {output}"
+
+rule sampleqc:
+    input: expand(dir_data + "eset-pre-qc/{chip}.rds", chip = chips)
+    output: expand(dir_data + "eset/{chip}.rds", chip = chips)
+    params: dir_eset_in = dir_data + "eset-pre-qc",
+            dir_eset_out = dir_data + "eset"
+    shell: "Rscript code/sampleqc.R {params.dir_eset_in} {params.dir_eset_out} "
 
 rule expressionset_combined:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
