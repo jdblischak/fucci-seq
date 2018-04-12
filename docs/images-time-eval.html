@@ -220,6 +220,7 @@ div.section {
 <ul>
 <li><a href="#estimate-cell-time">Estimate cell time</a></li>
 <li><a href="#results">Results</a></li>
+<li><a href="#save-re-ordered-cell-times">Save re-ordered cell times</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -231,7 +232,7 @@ shared across the workflowr files. -->
 <p><strong>Last updated:</strong> 2018-04-11</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 8f11f42</p>
+<p><strong>Code version:</strong> cde0b19</p>
 <hr />
 <div id="estimate-cell-time" class="section level2">
 <h2>Estimate cell time</h2>
@@ -489,6 +490,15 @@ plot(x=xy$dapi, y = log10(xy$molecules),
      main = &quot;DAPI vs. log10 molecule count \n adj-Rsq = .03, cor=.2&quot;)
 abline(lm(log10(molecules)~dapi, data=xy), col = &quot;red&quot;)</code></pre>
 <p><img src="figure/images-time-eval.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="save-re-ordered-cell-times" class="section level2">
+<h2>Save re-ordered cell times</h2>
+<pre class="r"><code>theta &lt;- as.numeric(Theta.fucci.new)
+names(theta) &lt;- colnames(log2cpm.all)
+
+saveRDS(theta,
+        file = &quot;../output/images-time-eval.Rmd/theta.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
