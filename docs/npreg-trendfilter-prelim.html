@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>npreg: trendfilter</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">npreg: trendfilter</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#emprical-data-for-evaluating-methods">Emprical data for evaluating methods</a></li>
+<li><a href="#property-of-genes-with-many-zeros">Property of genes with many zeros</a></li>
+<li><a href="#simulate-from-the-empirical-data">Simulate from the empirical data</a></li>
+<li><a href="#fitting-trendfilter">Fitting trendfilter</a></li>
+<li><a href="#eval-for-selecting-polynomial-order">Eval for selecting polynomial order</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-04-17</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> a8ef094</p>
+<hr />
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)
+library(genlasso)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+theta &lt;- readRDS(&quot;../output/images-time-eval.Rmd/theta.rds&quot;)
+log2cpm.all.ord &lt;- log2cpm.all[,order(theta)]
+
+source(&quot;../code/utility.R&quot;)
+source(&quot;../code/npreg/npreg.methods.R&quot;)</code></pre>
+<p>–</p>
+</div>
+<div id="emprical-data-for-evaluating-methods" class="section level2">
+<h2>Emprical data for evaluating methods</h2>
+<p>Consider 5 genes previously identified to have cyclical patterns and 5 genes previously identified to not have cyclical patterns. Note that there’s a discrepany (albeit small) between the samples that was used to identify cyclical patterns and the samples that are in the finalized data.</p>
+<pre class="r"><code>examples &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+
+library(biomaRt)
+ensembl &lt;- useMart(biomart = &quot;ensembl&quot;, dataset = &quot;hsapiens_gene_ensembl&quot;)
+symbols &lt;- getBM(attributes = c(&quot;hgnc_symbol&quot;,&#39;ensembl_gene_id&#39;), 
+      filters = c(&#39;ensembl_gene_id&#39;),
+      values = colnames(examples)[-1], 
+      mart = ensembl)
+symbols &lt;- symbols[match(colnames(examples)[-1], symbols$ensembl_gene_id),]
+
+par(mfrow=c(2,5))
+for (i in 1:10) {
+  plot(examples$theta,
+       examples[,1+i], main = symbols$hgnc_symbol[i])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Get ENSG IDs.</p>
+<pre class="r"><code>cycles &lt;- symbols[1:5,]
+cycles.not &lt;- symbols[6:10,]</code></pre>
+<p>Get these genes from the updated data.</p>
+<pre class="r"><code>cycles.log2cpm &lt;- log2cpm.all.ord[rownames(log2cpm.all.ord) %in% cycles$ensembl_gene_id,]
+cycles.not.log2cpm &lt;- log2cpm.all.ord[rownames(log2cpm.all.ord) %in% cycles.not$ensembl_gene_id,]</code></pre>
+<p>confirm pattern in the udpated dataset.</p>
+<pre class="r"><code>par(mfrow=c(2,5))
+for (i in 1:5) {
+  plot(cycles.log2cpm[i,], main = cycles$hgnc_symbol[i])
+}
+for (i in 1:5) {
+  plot(cycles.not.log2cpm[i,], main = cycles.not$hgnc_symbol[i])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="property-of-genes-with-many-zeros" class="section level2">
+<h2>Property of genes with many zeros</h2>
+<ol style="list-style-type: decimal">
+<li><p>As expected, genes with many zeros tend to have lower mean non-zero molecule count.</p></li>
+<li><p>Note that at gene mean log2cpm of 4, the average molecule count is about 16 across the 880 samples, which is not many.</p></li>
+</ol>
+<pre class="r"><code>log2cpm.all.impute &lt;- log2cpm.all
+ii.zero &lt;- which(log2cpm.all == 0, arr.ind = TRUE)
+log2cpm.all.impute[ii.zero] &lt;- NA
+
+gene_nas &lt;- rowMeans(log2cpm.all==0)
+gene_means &lt;- rowMeans(log2cpm.all.impute, na.rm=TRUE)
+plot(x=gene_nas, y=gene_means)</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="simulate-from-the-empirical-data" class="section level2">
+<h2>Simulate from the empirical data</h2>
+<p>The goal of simulation is to compare the methods in their ability to recover cyclical patterns despite of zero observations.</p>
+<ol style="list-style-type: decimal">
+<li><p>Scenario 1: original data</p></li>
+<li><p>Scenario 2: subsample to include 20% missing</p></li>
+</ol>
+<pre class="r"><code>N &lt;- ncol(log2cpm.all)
+scene.1 &lt;- cycles.log2cpm
+scene.2 &lt;- do.call(rbind, lapply(1:nrow(cycles.log2cpm), function(g) {
+  yy &lt;- cycles.log2cpm[g,]
+  numzeros &lt;- round(N*0.2)
+  numzeros &lt;- numzeros - sum(yy==0)
+  which.nonzero &lt;- which(yy!=0)
+  ii.zeros &lt;- sample(which.nonzero,numzeros, replace = F)
+  yy[ii.zeros] &lt;- 0
+  return(yy)
+}))
+
+
+par(mfrow=c(2,5))
+for (i in 1:5) {
+  plot(scene.1[i,], main = cycles$hgnc_symbol[i])
+}
+for (i in 1:5) {
+  plot(scene.2[i,], main = cycles$hgnc_symbol[i])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fitting-trendfilter" class="section level2">
+<h2>Fitting trendfilter</h2>
+<p>out.1: excluding zero</p>
+<p>out.2: including zero</p>
+<pre class="r"><code>out.1 &lt;- lapply(1:5, function(i) {
+  yy &lt;- scene.2[i,]
+  theta.sam &lt;- theta
+  out.trend &lt;- fit.trendfilter(yy=yy, pos.yy=c(1:length(yy)))
+
+  return(list(yy.sam=yy,
+              theta.sam=theta.sam,
+              out.trend=out.trend))
+})
+
+out.2 &lt;- lapply(1:5, function(i) {
+  yy &lt;- scene.2[i,]
+  out.trend &lt;- fit.trendfilter.includezero(yy=yy, pos.yy=c(1:length(yy)))
+
+  return(list(yy.sam=yy,
+              theta.sam=theta,
+              out.trend=out.trend))
+})
+
+saveRDS(out.1, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out1.rds&quot;)
+saveRDS(out.2, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out2.rds&quot;)</code></pre>
+<pre class="r"><code>out.1 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out1.rds&quot;)
+out.2 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out2.rds&quot;)
+
+par(mfrow=c(2,5))
+for (i in 1:5) {
+  out &lt;- out.1[[i]]
+  plot(c(1:length(out$yy.sam)), out$yy.sam, col = &quot;gray50&quot;)
+  with(out$out.trend, 
+       points(trend.pos, trend.yy, col = &quot;royalblue&quot;), cex=.5, pch=16)
+}
+for (i in 1:5) {
+  out &lt;- out.2[[i]]
+  plot(c(1:length(out$yy.sam)), out$yy.sam, col = &quot;gray50&quot;)
+  with(out$out.trend, 
+       points(trend.pos, trend.yy, col = &quot;royalblue&quot;), cex=.5, pch=16)
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="eval-for-selecting-polynomial-order" class="section level2">
+<h2>Eval for selecting polynomial order</h2>
+<pre class="r"><code>theta &lt;- readRDS(&quot;../output/images-time-eval.Rmd/theta.rds&quot;)
+
+chip_ids &lt;- c(&quot;NA18511&quot;,&quot;NA18855&quot;,&quot;NA18870&quot;,&quot;NA19098&quot;,&quot;NA19101&quot;,&quot;NA19160&quot;)
+
+id &lt;- which(pdata$chip_id == chip_ids[1])
+log2cpm.sub &lt;- log2cpm.all[rownames(log2cpm.all) %in% symbols$ensembl_gene_id[1:5],]
+theta.train &lt;- theta[-id]
+theta.test &lt;- theta[id]
+
+out.order2 &lt;- lapply(1:5, function(i) {
+  yy &lt;- log2cpm.sub[i,]
+  yy.train &lt;- yy[-id]
+  yy.test &lt;- yy[id]
+  pos.yy.train &lt;- c(1:length(yy))[-id]
+  pos.yy.test &lt;- c(1:length(yy))[id]
+  nonzero.test &lt;- yy.test!=0
+    
+  out.trend &lt;- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 2)
+  f &lt;- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
+  
+  test.mad.pred &lt;- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
+  test.mad.constant &lt;- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
+  test.mad.ratio &lt;- test.mad.pred/test.mad.constant
+
+  return(list(yy=yy,
+              yy.train=yy.train,
+              pos.train=pos.yy.train,
+              yy.test=yy.test,
+              pos.test=pos.yy.test,
+              pred.train.yy=out.trend$trend.yy,
+              pred.train.xx=out.trend$trend.pos,
+              pred.test.yy=f(pos.yy.test),
+              pred.test.xx=pos.yy.test,
+              test.mad.ratio=test.mad.ratio,
+              train.mad.ratio=out.trend$trend.mad.ratio))
+})
+
+
+out.order3 &lt;- lapply(1:5, function(i) {
+  yy &lt;- log2cpm.sub[i,]
+  yy.train &lt;- yy[-id]
+  yy.test &lt;- yy[id]
+  pos.yy.train &lt;- c(1:length(yy))[-id]
+  pos.yy.test &lt;- c(1:length(yy))[id]
+  nonzero.test &lt;- yy.test!=0
+    
+  out.trend &lt;- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 3)
+  f &lt;- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
+  
+  test.mad.pred &lt;- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
+  test.mad.constant &lt;- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
+  test.mad.ratio &lt;- test.mad.pred/test.mad.constant
+
+  return(list(yy=yy,
+              yy.train=yy.train,
+              pos.train=pos.yy.train,
+              yy.test=yy.test,
+              pos.test=pos.yy.test,
+              pred.train.yy=out.trend$trend.yy,
+              pred.train.xx=out.trend$trend.pos,
+              pred.test.yy=f(pos.yy.test),
+              pred.test.xx=pos.yy.test,
+              test.mad.ratio=test.mad.ratio,
+              train.mad.ratio=out.trend$trend.mad.ratio))
+})
+
+saveRDS(out.order2, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order2.rds&quot;)
+saveRDS(out.order3, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order3.rds&quot;)</code></pre>
+<pre class="r"><code>out.order2 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order2.rds&quot;)
+out.order3 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order3.rds&quot;)
+
+par(mfrow=c(2,5))
+for (i in 1:length(out.order2)) {
+  with(out.order2[[i]], {
+    plot(y=yy.train, x=pos.train, col = &quot;gray50&quot;)
+    lines(y=pred.train.yy, x=pred.train.xx, col = &quot;black&quot;, lwd=1)
+    points(y=yy.test,x=pos.test, col = &quot;blue&quot;, pch=16, cex=.7)
+    lines(y=pred.test.yy, x=pred.test.xx, col = &quot;blue&quot;, lwd=2)
+  })
+}
+for (i in 1:length(out.order3)) {
+  with(out.order3[[i]], {
+    plot(y=yy.train, x=pos.train, col = &quot;gray50&quot;)
+    lines(y=pred.train.yy, x=pred.train.xx, col = &quot;black&quot;, lwd=1)
+    points(y=yy.test,x=pos.test, col = &quot;blue&quot;, pch=16, cex=.7)
+    lines(y=pred.test.yy, x=pred.test.xx, col = &quot;blue&quot;, lwd=2)
+  })
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>test.order2 &lt;- sapply(out.order2, function(x) x$test.mad.ratio)
+test.order3 &lt;- sapply(out.order3, function(x) x$test.mad.ratio)
+cbind(test.order2,test.order3)</code></pre>
+<pre><code>     test.order2 test.order3
+[1,]   1.0202802    1.003311
+[2,]   0.9649802    1.016837
+[3,]   0.9868747    1.020511
+[4,]   1.0450214    1.068419
+[5,]   1.0001935    1.161451</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] biomaRt_2.34.2      genlasso_1.3        igraph_1.2.1       
+ [4] smashr_1.1-0        caTools_1.17.1      data.table_1.10.4-3
+ [7] Matrix_1.2-10       wavethresh_4.6.8    MASS_7.3-47        
+[10] ashr_2.2-7          Rcpp_0.12.16        NPCirc_2.0.1       
+[13] matrixStats_0.53.1  dplyr_0.7.4         Biobase_2.38.0     
+[16] BiocGenerics_0.24.0 conicfit_1.0.4      geigen_2.1         
+[19] pracma_2.1.4        circular_0.4-93    
+
+loaded via a namespace (and not attached):
+ [1] httr_1.3.1           bit64_0.9-7          jsonlite_1.5        
+ [4] foreach_1.4.4        shiny_1.0.5          assertthat_0.2.0    
+ [7] stats4_3.4.1         blob_1.1.0           yaml_2.1.18         
+[10] progress_1.1.2       slam_0.1-42          pillar_1.2.1        
+[13] RSQLite_2.0          backports_1.1.2      lattice_0.20-35     
+[16] glue_1.2.0           digest_0.6.15        htmltools_0.3.6     
+[19] httpuv_1.3.6.2       XML_3.98-1.10        pkgconfig_2.0.1     
+[22] misc3d_0.8-4         xtable_1.8-2         mvtnorm_1.0-7       
+[25] git2r_0.21.0         tibble_1.4.2         IRanges_2.12.0      
+[28] movMF_0.2-2          magrittr_1.5         mime_0.5            
+[31] memoise_1.1.0        evaluate_0.10.1      doParallel_1.0.11   
+[34] truncnorm_1.0-8      tools_3.4.1          prettyunits_1.0.2   
+[37] stringr_1.3.0        S4Vectors_0.16.0     plotrix_3.7         
+[40] AnnotationDbi_1.40.0 bindrcpp_0.2         compiler_3.4.1      
+[43] rlang_0.2.0          grid_3.4.1           RCurl_1.95-4.10     
+[46] iterators_1.0.9      htmlwidgets_1.0      crosstalk_1.0.0     
+[49] bitops_1.0-6         rmarkdown_1.9        boot_1.3-19         
+[52] codetools_0.2-15     curl_3.1             DBI_0.8             
+[55] R6_2.2.2             knitr_1.20           bit_1.1-12          
+[58] bindr_0.1.1          rprojroot_1.3-2      shape_1.4.4         
+[61] stringi_1.1.7        pscl_1.5.2           SQUAREM_2017.10-1   </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
