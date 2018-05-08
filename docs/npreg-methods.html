@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Find genes with cyclical patterns</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Find genes with cyclical patterns</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#projected-normal-on-pcs-of-redgreen">Projected normal on PCs of Red/Green</a></li>
+<li><a href="#compare-different-methods">Compare different methods</a></li>
+<li><a href="#results-using-mad">Results using MAD</a></li>
+<li><a href="#results-using-pve-for-kernel-based-method">Results using PVE for kernel-based method</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-07</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> a2240aa</p>
+<hr />
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-filtered.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+# log2cpm.all &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.rds&quot;)
+# log2cpm.adjust &lt;- readRDS(&quot;../output/seqdata-batch-correction.Rmd/log2cpm.adjust.rds&quot;)
+# log2cpm &lt;- log2cpm.all[grep(&quot;ENSG&quot;, rownames(log2cpm.all)), ]
+
+# import corrected intensities
+pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+# log2cpm.high &lt;- log2cpm.detected[order(rowMeans(log2cpm.detected))[1:100], ]
+
+source(&quot;../code/utility.R&quot;)
+
+summary(colSums(counts))</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  22207   44586   52597   53445   61790  103255 </code></pre>
+<pre class="r"><code>summary(rowMeans(log2cpm.all&gt;0))</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.08884 0.48104 0.74756 0.69915 0.94691 1.00000 </code></pre>
+<pre class="r"><code>log2cpm.detected &lt;- log2cpm.all[rowMeans(log2cpm.all&gt;0)&gt;.8,]</code></pre>
+<hr />
+</div>
+<div id="projected-normal-on-pcs-of-redgreen" class="section level2">
+<h2>Projected normal on PCs of Red/Green</h2>
+<pre class="r"><code>pc.fucci &lt;- prcomp(subset(pdata.adj, 
+                          select=c(&quot;rfp.median.log10sum.adjust&quot;,
+                                   &quot;gfp.median.log10sum.adjust&quot;)),
+                   center = T, scale. = T)
+Theta.cart &lt;- pc.fucci$x
+library(circular)
+Theta.fucci &lt;- coord2rad(Theta.cart)
+
+df &lt;- data.frame(theta=as.numeric(Theta.fucci))
+rownames(df) &lt;- rownames(pdata.adj)
+Theta.fucci &lt;- 2*pi - Theta.fucci
+#saveRDS(as.numeric(Theta.fucci), file = &quot;../output/npreg.Rmd/theta.rds&quot;)</code></pre>
+<p>–</p>
+</div>
+<div id="compare-different-methods" class="section level2">
+<h2>Compare different methods</h2>
+<ul>
+<li><p>Analysis was done in a batch job. See <code>/code/npreg.Rmd</code> for codes for submitting the batch job.</p></li>
+<li><p>Three methods are compared: smash, kernel regression using NW-estimate, and kernel regression using LL-estimate.</p></li>
+<li><p>In running smash, I imputed the zero-valued expression with mean of expression for each gene. In running kernel methods, I omitted the zero-valued cells</p></li>
+<li><p>For comparison involving smash, we take 512 randomly selected cells and analyze these for all three methods. MAD is employed to evaluate the fit. Specifically, MAD(data-fitted mean)/MAD(data-data.mean).</p></li>
+<li><p>For comparison of the two kernel regression methods, I included all of the ~900 cells. PVE (proportion of variance explained) is computed to evalulate the fit. Specifically, 1-var(data-fitted mean)/var(data).</p></li>
+<li><p><code>smashr</code> package was used to run smash, and <code>NPCirc</code> package was used to run the two kernel regression methods.</p></li>
+</ul>
+<hr />
+</div>
+<div id="results-using-mad" class="section level2">
+<h2>Results using MAD</h2>
+<p>Compare MAD ratio of data from the fitted mean versus the grand mean (not fitted). Briefly,</p>
+<p><span class="math display">\[
+mad.ratio = MAD(expression_g - fitted.g)/MAD(expression_g - mean.g)
+\]</span></p>
+<pre class="r"><code>out.methods &lt;- readRDS(&quot;../output/npreg-methods.Rmd/out.methods.rds&quot;)
+
+mad.ratio &lt;- data.frame(smash.mad.ratio=sapply(out.methods, &quot;[[&quot;, &quot;smash.mad.ratio&quot;),
+                        smash.pois.mad.ratio=sapply(out.methods, &quot;[[&quot;, &quot;smash.pois.mad.ratio&quot;),
+                        npll.mad.ratio=sapply(out.methods, &quot;[[&quot;, &quot;npll.mad.ratio&quot;),
+                        npnw.mad.ratio=sapply(out.methods, &quot;[[&quot;, &quot;npnw.mad.ratio&quot;))
+
+pve &lt;- data.frame(npll.pve=sapply(out.methods, &quot;[[&quot;, &quot;npll.pve&quot;),
+                  npnw.pve=sapply(out.methods, &quot;[[&quot;, &quot;npnw.pve&quot;))
+
+boxplot(mad.ratio)</code></pre>
+<p><img src="figure/npreg-methods.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>boxplot(pve)</code></pre>
+<p><img src="figure/npreg-methods.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>enrichment function choose top ranked genes</p>
+<pre class="r"><code>enrich.order &lt;- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out &lt;- order(mad.ratio$smash.mad.ratio)
+  # cutoffs &lt;- c(100, 200, 300)
+  cycle.rich &lt;- sapply(cutoffs, function(x) {
+    sig.cycle &lt;- sum(allgenes[metrics[1:x]] %in% cyclegenes)/x
+    non.cycle &lt;- sum(allgenes[-metrics[1:x]] %in% cyclegenes)/(length(allgenes)-x)
+    cbind(as.numeric(sum(allgenes[metrics[1:x]] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) &lt;- cutoffs
+  rownames(cycle.rich) &lt;- c(&quot;nsig.genes.cycle&quot;, &quot;fold.sig.vs.nonsig.cycle&quot;)
+  cycle.rich 
+}</code></pre>
+<p>smash gaussian enrichment.</p>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(mad.ratio$smash.mad.ratio),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                              100       200       300
+nsig.genes.cycle         9.000000 15.000000 19.000000
+fold.sig.vs.nonsig.cycle 1.942012  1.622754  1.368612</code></pre>
+<p>smash poisson enrichment.</p>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(mad.ratio$smash.pois.mad.ratio),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                               100       200        300
+nsig.genes.cycle         2.0000000 10.000000 13.0000000
+fold.sig.vs.nonsig.cycle 0.4256809  1.071146  0.9252485</code></pre>
+<p>kernel LL-estimator enrichment</p>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(mad.ratio$npll.mad.ratio),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                             100       200       300
+nsig.genes.cycle         5.00000 8.0000000 11.000000
+fold.sig.vs.nonsig.cycle 1.07045 0.8535433  0.779802</code></pre>
+<p>kernel NW-estimator enrichment</p>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(mad.ratio$npnw.mad.ratio),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.detected))</code></pre>
+<pre><code>                               100       200      300
+nsig.genes.cycle         2.0000000 5.0000000 9.000000
+fold.sig.vs.nonsig.cycle 0.2665738 0.3290028 0.390767</code></pre>
+<p>Check smash genes.</p>
+<pre class="r"><code>ii.check &lt;- order(mad.ratio$smash.mad.ratio)[c(1:16)]
+
+library(mygene)
+par(mfrow=c(4,4), mar=c(3,2,2,1))
+ensg &lt;- rownames(log2cpm.detected)[ii.check]
+symbols &lt;- queryMany(ensg,  scopes=&quot;ensembl.gene&quot;, 
+                     fields=c(&quot;symbol&quot;), species=&quot;human&quot;)@listData$symbol</code></pre>
+<pre><code>Finished
+Pass returnall=TRUE to return lists of duplicate or missing query terms.</code></pre>
+<pre class="r"><code>for (i in 1:length(ii.check)) {
+  ii &lt;- ii.check[i]
+  with(out.methods[[ii]], {
+      plot(y=yy.train,
+           x=xx.train,
+           xlab = &quot;estimated cell time&quot;, ylab = &quot;log2CPM&quot;, col = &quot;gray30&quot;,
+           main=paste(symbols[i], &quot;,&quot;, round(mad.ratio$smash.mad.ratio[ii],2)))
+      lines(x=smash.xx,
+         y=smash.yy, col = &quot;red&quot;, pch = 16, cex=.6)
+  })
+}</code></pre>
+<p><img src="figure/npreg-methods.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Check kernel LL genes.</p>
+<pre class="r"><code>ii.check &lt;- order(mad.ratio$npll.mad.ratio)[c(1:20)]
+
+library(mygene)
+par(mfrow=c(4,5), mar=c(3,2,2,1))
+ensg &lt;- rownames(log2cpm.detected)[ii.check]
+symbols &lt;- queryMany(ensg,  scopes=&quot;ensembl.gene&quot;, 
+                     fields=c(&quot;symbol&quot;), species=&quot;human&quot;)@listData$symbol</code></pre>
+<pre><code>Finished
+Pass returnall=TRUE to return lists of duplicate or missing query terms.</code></pre>
+<pre class="r"><code>for (i in 1:length(ii.check)) {
+  ii &lt;- ii.check[i]
+  with(out.methods[[ii]], {
+      plot(y=yy.train,
+           x=xx.train,
+           xlab = &quot;estimated cell time&quot;, ylab = &quot;log2CPM&quot;, col = &quot;gray30&quot;,
+           main=paste(symbols[i], &quot;,&quot;, round(mad.ratio$smash.mad.ratio[ii],2)))
+      lines(x=smash.xx,
+         y=smash.yy, col = &quot;red&quot;, pch = 16, cex=.6)
+  })
+}</code></pre>
+<p><img src="figure/npreg-methods.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="results-using-pve-for-kernel-based-method" class="section level2">
+<h2>Results using PVE for kernel-based method</h2>
+<pre class="r"><code>pve &lt;- data.frame(npll.pve=sapply(out.methods, &quot;[[&quot;, &quot;npll.pve&quot;),
+                  npnw.pve=sapply(out.methods, &quot;[[&quot;, &quot;npnw.pve&quot;))
+boxplot(pve)</code></pre>
+<p><img src="figure/npreg-methods.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>enrichment function choose top ranked genes</p>
+<pre class="r"><code>enrich.pve &lt;- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out &lt;- order(mad.ratio$smash.mad.ratio)
+  # cutoffs &lt;- c(100, 200, 300)
+  cycle.rich &lt;- sapply(cutoffs, function(x) {
+    sig.cycle &lt;- sum(allgenes[metrics&gt;x] %in% cyclegenes)/length(allgenes[metrics&gt;x])
+    non.cycle &lt;- sum(allgenes[metrics&lt;x] %in% cyclegenes)/length(allgenes[metrics&lt;x])
+    cbind(as.numeric(sum(allgenes[metrics&gt;x] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) &lt;- cutoffs
+  rownames(cycle.rich) &lt;- c(&quot;nsig.genes.cycle&quot;, &quot;fold.sig.vs.nonsig.cycle&quot;)
+  cycle.rich 
+}</code></pre>
+<p>kernel LL-estimator enrichment</p>
+<pre class="r"><code>enrich.pve(cutoffs = c(.05, .1, .2, .3), 
+             metrics = pve$npll.pve,
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                               0.05       0.1       0.2       0.3
+nsig.genes.cycle         114.000000 48.000000 18.000000 11.000000
+fold.sig.vs.nonsig.cycle   1.133994  1.164018  1.204267  1.711535</code></pre>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(pve$npll.pve, decreasing=T),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                              100       200       300
+nsig.genes.cycle         7.000000 14.000000 17.000000
+fold.sig.vs.nonsig.cycle 1.504519  1.511554  1.219639</code></pre>
+<p>kernel NW-estimator enrichment</p>
+<pre class="r"><code>enrich.pve(cutoffs = c(.05, .1, .2, .3), 
+             metrics = pve$npnw.pve,
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                               0.05       0.1        0.2      0.3
+nsig.genes.cycle         107.000000 41.000000 10.0000000 6.000000
+fold.sig.vs.nonsig.cycle   1.095707  1.056067  0.8478942 1.268477</code></pre>
+<pre class="r"><code>enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = order(pve$npnw.pve, decreasing=T),
+             cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.all))</code></pre>
+<pre><code>                             100       200        300
+nsig.genes.cycle         5.00000 9.0000000 10.0000000
+fold.sig.vs.nonsig.cycle 1.07045 0.9621302  0.7075099</code></pre>
+<p>Print top 500 genes.</p>
+<pre class="r"><code>write.table(rownames(log2cpm.all)[order(pve$npll.pve, decreasing=T)[1:5000]],
+            file = &quot;../output/npreg-methods.Rmd/npll.genes.txt&quot;,
+            quote=F, col.names=F, row.names=F)
+
+write.table(rownames(log2cpm.all)[order(pve$npnw.pve, decreasing=T)[1:5000]],
+            file = &quot;../output/npreg-methods.Rmd/npnw.genes.txt&quot;,
+            quote=F, col.names=F, row.names=F)
+
+write.table(rownames(log2cpm.all),
+            file = &quot;../output/npreg-methods.Rmd/allgenes.txt&quot;,
+            quote=F, col.names=F, row.names=F)</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
