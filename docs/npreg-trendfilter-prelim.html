@@ -219,11 +219,12 @@ div.section {
 <div id="TOC">
 <ul>
 <li><a href="#data-and-packages">Data and packages</a></li>
-<li><a href="#emprical-data-for-evaluating-methods">Emprical data for evaluating methods</a></li>
+<li><a href="#consider-5-genes-previously-identified-to-be-cyclical">Consider 5 genes previously identified to be cyclical</a></li>
 <li><a href="#property-of-genes-with-many-zeros">Property of genes with many zeros</a></li>
-<li><a href="#simulate-from-the-empirical-data">Simulate from the empirical data</a></li>
+<li><a href="#make-simulated-data-from-the-5-identified-cyclical-genes">Make simulated data from the 5 identified cyclical genes</a><ul>
 <li><a href="#fitting-trendfilter">Fitting trendfilter</a></li>
-<li><a href="#eval-for-selecting-polynomial-order">Eval for selecting polynomial order</a></li>
+<li><a href="#results">Results</a></li>
+</ul></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -232,10 +233,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-04-17</p>
+<p><strong>Last updated:</strong> 2018-05-07</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> a8ef094</p>
+<p><strong>Code version:</strong> 41ea88d</p>
 <hr />
 <div id="data-and-packages" class="section level2">
 <h2>Data and packages</h2>
@@ -246,8 +247,6 @@ library(Biobase)
 library(dplyr)
 library(matrixStats)
 
-library(NPCirc)
-library(smashr)
 library(genlasso)</code></pre>
 <p>Load data</p>
 <pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
@@ -268,8 +267,8 @@ source(&quot;../code/utility.R&quot;)
 source(&quot;../code/npreg/npreg.methods.R&quot;)</code></pre>
 <p>–</p>
 </div>
-<div id="emprical-data-for-evaluating-methods" class="section level2">
-<h2>Emprical data for evaluating methods</h2>
+<div id="consider-5-genes-previously-identified-to-be-cyclical" class="section level2">
+<h2>Consider 5 genes previously identified to be cyclical</h2>
 <p>Consider 5 genes previously identified to have cyclical patterns and 5 genes previously identified to not have cyclical patterns. Note that there’s a discrepany (albeit small) between the samples that was used to identify cyclical patterns and the samples that are in the finalized data.</p>
 <pre class="r"><code>examples &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
 
@@ -302,6 +301,7 @@ for (i in 1:5) {
   plot(cycles.not.log2cpm[i,], main = cycles.not$hgnc_symbol[i])
 }</code></pre>
 <p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
 </div>
 <div id="property-of-genes-with-many-zeros" class="section level2">
 <h2>Property of genes with many zeros</h2>
@@ -319,8 +319,8 @@ plot(x=gene_nas, y=gene_means)</code></pre>
 <p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
-<div id="simulate-from-the-empirical-data" class="section level2">
-<h2>Simulate from the empirical data</h2>
+<div id="make-simulated-data-from-the-5-identified-cyclical-genes" class="section level2">
+<h2>Make simulated data from the 5 identified cyclical genes</h2>
 <p>The goal of simulation is to compare the methods in their ability to recover cyclical patterns despite of zero observations.</p>
 <ol style="list-style-type: decimal">
 <li><p>Scenario 1: original data</p></li>
@@ -347,9 +347,8 @@ for (i in 1:5) {
   plot(scene.2[i,], main = cycles$hgnc_symbol[i])
 }</code></pre>
 <p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="fitting-trendfilter" class="section level2">
-<h2>Fitting trendfilter</h2>
+<div id="fitting-trendfilter" class="section level3">
+<h3>Fitting trendfilter</h3>
 <p>out.1: excluding zero</p>
 <p>out.2: including zero</p>
 <pre class="r"><code>out.1 &lt;- lapply(1:5, function(i) {
@@ -373,6 +372,10 @@ out.2 &lt;- lapply(1:5, function(i) {
 
 saveRDS(out.1, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out1.rds&quot;)
 saveRDS(out.2, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out2.rds&quot;)</code></pre>
+</div>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<p>When including zeros in the fitting, the previously cyclical trend disappeared.</p>
 <pre class="r"><code>out.1 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out1.rds&quot;)
 out.2 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out2.rds&quot;)
 
@@ -392,107 +395,6 @@ for (i in 1:5) {
 <p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
-<div id="eval-for-selecting-polynomial-order" class="section level2">
-<h2>Eval for selecting polynomial order</h2>
-<pre class="r"><code>theta &lt;- readRDS(&quot;../output/images-time-eval.Rmd/theta.rds&quot;)
-
-chip_ids &lt;- c(&quot;NA18511&quot;,&quot;NA18855&quot;,&quot;NA18870&quot;,&quot;NA19098&quot;,&quot;NA19101&quot;,&quot;NA19160&quot;)
-
-id &lt;- which(pdata$chip_id == chip_ids[1])
-log2cpm.sub &lt;- log2cpm.all[rownames(log2cpm.all) %in% symbols$ensembl_gene_id[1:5],]
-theta.train &lt;- theta[-id]
-theta.test &lt;- theta[id]
-
-out.order2 &lt;- lapply(1:5, function(i) {
-  yy &lt;- log2cpm.sub[i,]
-  yy.train &lt;- yy[-id]
-  yy.test &lt;- yy[id]
-  pos.yy.train &lt;- c(1:length(yy))[-id]
-  pos.yy.test &lt;- c(1:length(yy))[id]
-  nonzero.test &lt;- yy.test!=0
-    
-  out.trend &lt;- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 2)
-  f &lt;- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
-  
-  test.mad.pred &lt;- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
-  test.mad.constant &lt;- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
-  test.mad.ratio &lt;- test.mad.pred/test.mad.constant
-
-  return(list(yy=yy,
-              yy.train=yy.train,
-              pos.train=pos.yy.train,
-              yy.test=yy.test,
-              pos.test=pos.yy.test,
-              pred.train.yy=out.trend$trend.yy,
-              pred.train.xx=out.trend$trend.pos,
-              pred.test.yy=f(pos.yy.test),
-              pred.test.xx=pos.yy.test,
-              test.mad.ratio=test.mad.ratio,
-              train.mad.ratio=out.trend$trend.mad.ratio))
-})
-
-
-out.order3 &lt;- lapply(1:5, function(i) {
-  yy &lt;- log2cpm.sub[i,]
-  yy.train &lt;- yy[-id]
-  yy.test &lt;- yy[id]
-  pos.yy.train &lt;- c(1:length(yy))[-id]
-  pos.yy.test &lt;- c(1:length(yy))[id]
-  nonzero.test &lt;- yy.test!=0
-    
-  out.trend &lt;- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 3)
-  f &lt;- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
-  
-  test.mad.pred &lt;- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
-  test.mad.constant &lt;- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
-  test.mad.ratio &lt;- test.mad.pred/test.mad.constant
-
-  return(list(yy=yy,
-              yy.train=yy.train,
-              pos.train=pos.yy.train,
-              yy.test=yy.test,
-              pos.test=pos.yy.test,
-              pred.train.yy=out.trend$trend.yy,
-              pred.train.xx=out.trend$trend.pos,
-              pred.test.yy=f(pos.yy.test),
-              pred.test.xx=pos.yy.test,
-              test.mad.ratio=test.mad.ratio,
-              train.mad.ratio=out.trend$trend.mad.ratio))
-})
-
-saveRDS(out.order2, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order2.rds&quot;)
-saveRDS(out.order3, file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order3.rds&quot;)</code></pre>
-<pre class="r"><code>out.order2 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order2.rds&quot;)
-out.order3 &lt;- readRDS(file = &quot;../output/npreg-trendfilter-prelim.Rmd/out.order3.rds&quot;)
-
-par(mfrow=c(2,5))
-for (i in 1:length(out.order2)) {
-  with(out.order2[[i]], {
-    plot(y=yy.train, x=pos.train, col = &quot;gray50&quot;)
-    lines(y=pred.train.yy, x=pred.train.xx, col = &quot;black&quot;, lwd=1)
-    points(y=yy.test,x=pos.test, col = &quot;blue&quot;, pch=16, cex=.7)
-    lines(y=pred.test.yy, x=pred.test.xx, col = &quot;blue&quot;, lwd=2)
-  })
-}
-for (i in 1:length(out.order3)) {
-  with(out.order3[[i]], {
-    plot(y=yy.train, x=pos.train, col = &quot;gray50&quot;)
-    lines(y=pred.train.yy, x=pred.train.xx, col = &quot;black&quot;, lwd=1)
-    points(y=yy.test,x=pos.test, col = &quot;blue&quot;, pch=16, cex=.7)
-    lines(y=pred.test.yy, x=pred.test.xx, col = &quot;blue&quot;, lwd=2)
-  })
-}</code></pre>
-<p><img src="figure/npreg-trendfilter-prelim.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>test.order2 &lt;- sapply(out.order2, function(x) x$test.mad.ratio)
-test.order3 &lt;- sapply(out.order3, function(x) x$test.mad.ratio)
-cbind(test.order2,test.order3)</code></pre>
-<pre><code>     test.order2 test.order3
-[1,]   1.0202802    1.003311
-[2,]   0.9649802    1.016837
-[3,]   0.9868747    1.020511
-[4,]   1.0450214    1.068419
-[5,]   1.0001935    1.161451</code></pre>
-<hr />
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -518,35 +420,27 @@ attached base packages:
 
 other attached packages:
  [1] biomaRt_2.34.2      genlasso_1.3        igraph_1.2.1       
- [4] smashr_1.1-0        caTools_1.17.1      data.table_1.10.4-3
- [7] Matrix_1.2-10       wavethresh_4.6.8    MASS_7.3-47        
-[10] ashr_2.2-7          Rcpp_0.12.16        NPCirc_2.0.1       
-[13] matrixStats_0.53.1  dplyr_0.7.4         Biobase_2.38.0     
-[16] BiocGenerics_0.24.0 conicfit_1.0.4      geigen_2.1         
-[19] pracma_2.1.4        circular_0.4-93    
+ [4] Matrix_1.2-10       MASS_7.3-47         matrixStats_0.53.1 
+ [7] dplyr_0.7.4         Biobase_2.38.0      BiocGenerics_0.24.0
+[10] conicfit_1.0.4      geigen_2.1          pracma_2.1.4       
+[13] circular_0.4-93    
 
 loaded via a namespace (and not attached):
- [1] httr_1.3.1           bit64_0.9-7          jsonlite_1.5        
- [4] foreach_1.4.4        shiny_1.0.5          assertthat_0.2.0    
- [7] stats4_3.4.1         blob_1.1.0           yaml_2.1.18         
-[10] progress_1.1.2       slam_0.1-42          pillar_1.2.1        
-[13] RSQLite_2.0          backports_1.1.2      lattice_0.20-35     
-[16] glue_1.2.0           digest_0.6.15        htmltools_0.3.6     
-[19] httpuv_1.3.6.2       XML_3.98-1.10        pkgconfig_2.0.1     
-[22] misc3d_0.8-4         xtable_1.8-2         mvtnorm_1.0-7       
-[25] git2r_0.21.0         tibble_1.4.2         IRanges_2.12.0      
-[28] movMF_0.2-2          magrittr_1.5         mime_0.5            
-[31] memoise_1.1.0        evaluate_0.10.1      doParallel_1.0.11   
-[34] truncnorm_1.0-8      tools_3.4.1          prettyunits_1.0.2   
-[37] stringr_1.3.0        S4Vectors_0.16.0     plotrix_3.7         
-[40] AnnotationDbi_1.40.0 bindrcpp_0.2         compiler_3.4.1      
-[43] rlang_0.2.0          grid_3.4.1           RCurl_1.95-4.10     
-[46] iterators_1.0.9      htmlwidgets_1.0      crosstalk_1.0.0     
-[49] bitops_1.0-6         rmarkdown_1.9        boot_1.3-19         
-[52] codetools_0.2-15     curl_3.1             DBI_0.8             
-[55] R6_2.2.2             knitr_1.20           bit_1.1-12          
-[58] bindr_0.1.1          rprojroot_1.3-2      shape_1.4.4         
-[61] stringi_1.1.7        pscl_1.5.2           SQUAREM_2017.10-1   </code></pre>
+ [1] progress_1.1.2       lattice_0.20-35      htmltools_0.3.6     
+ [4] stats4_3.4.1         yaml_2.1.18          blob_1.1.0          
+ [7] XML_3.98-1.10        rlang_0.2.0          pillar_1.2.1        
+[10] glue_1.2.0           DBI_0.8              bit64_0.9-7         
+[13] bindrcpp_0.2         bindr_0.1.1          stringr_1.3.0       
+[16] mvtnorm_1.0-7        evaluate_0.10.1      memoise_1.1.0       
+[19] knitr_1.20           IRanges_2.12.0       curl_3.1            
+[22] AnnotationDbi_1.40.0 Rcpp_0.12.16         backports_1.1.2     
+[25] S4Vectors_0.16.0     bit_1.1-12           digest_0.6.15       
+[28] stringi_1.1.7        grid_3.4.1           rprojroot_1.3-2     
+[31] tools_3.4.1          bitops_1.0-6         magrittr_1.5        
+[34] RCurl_1.95-4.10      tibble_1.4.2         RSQLite_2.0         
+[37] pkgconfig_2.0.1      prettyunits_1.0.2    assertthat_0.2.0    
+[40] rmarkdown_1.9        httr_1.3.1           R6_2.2.2            
+[43] boot_1.3-19          git2r_0.21.0         compiler_3.4.1      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
