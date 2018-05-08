@@ -43,8 +43,6 @@ library(Biobase)
 library(dplyr)
 library(matrixStats)
 
-library(NPCirc)
-library(smashr)
 library(genlasso)
 ```
 
@@ -71,7 +69,7 @@ source("../code/npreg/npreg.methods.R")
 
 --
 
-## Emprical data for evaluating methods
+## Consider 5 genes previously identified to be cyclical
 
 Consider 5 genes previously identified to have cyclical patterns and 5 genes previously identified to not have cyclical patterns. Note that there's a discrepany (albeit small) between the samples that was used to identify cyclical patterns and the samples that are in the finalized data.
 
@@ -119,6 +117,8 @@ for (i in 1:5) {
 }
 ```
 
+---
+
 ## Property of genes with many zeros
 
 1. As expected, genes with many zeros tend to have lower mean non-zero molecule count.
@@ -137,7 +137,7 @@ plot(x=gene_nas, y=gene_means)
 
 ---
 
-## Simulate from the empirical data
+## Make simulated data from the 5 identified cyclical genes
 
 The goal of simulation is to compare the methods in their ability to recover cyclical patterns despite of zero observations. 
 
@@ -169,7 +169,7 @@ for (i in 1:5) {
 }
 ```
 
-## Fitting trendfilter 
+### Fitting trendfilter 
 
 out.1: excluding zero
 
@@ -199,6 +199,9 @@ saveRDS(out.1, file = "../output/npreg-trendfilter-prelim.Rmd/out1.rds")
 saveRDS(out.2, file = "../output/npreg-trendfilter-prelim.Rmd/out2.rds")
 ```
 
+### Results
+
+When including zeros in the fitting, the previously cyclical trend disappeared. 
 
 ```{r}
 out.1 <- readRDS(file = "../output/npreg-trendfilter-prelim.Rmd/out1.rds")
@@ -219,108 +222,6 @@ for (i in 1:5) {
 }
 ```
 
-
----
-
-## Eval for selecting polynomial order
-
-```{r, eval =F}
-theta <- readRDS("../output/images-time-eval.Rmd/theta.rds")
-
-chip_ids <- c("NA18511","NA18855","NA18870","NA19098","NA19101","NA19160")
-
-id <- which(pdata$chip_id == chip_ids[1])
-log2cpm.sub <- log2cpm.all[rownames(log2cpm.all) %in% symbols$ensembl_gene_id[1:5],]
-theta.train <- theta[-id]
-theta.test <- theta[id]
-
-out.order2 <- lapply(1:5, function(i) {
-  yy <- log2cpm.sub[i,]
-  yy.train <- yy[-id]
-  yy.test <- yy[id]
-  pos.yy.train <- c(1:length(yy))[-id]
-  pos.yy.test <- c(1:length(yy))[id]
-  nonzero.test <- yy.test!=0
-    
-  out.trend <- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 2)
-  f <- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
-  
-  test.mad.pred <- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
-  test.mad.constant <- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
-  test.mad.ratio <- test.mad.pred/test.mad.constant
-
-  return(list(yy=yy,
-              yy.train=yy.train,
-              pos.train=pos.yy.train,
-              yy.test=yy.test,
-              pos.test=pos.yy.test,
-              pred.train.yy=out.trend$trend.yy,
-              pred.train.xx=out.trend$trend.pos,
-              pred.test.yy=f(pos.yy.test),
-              pred.test.xx=pos.yy.test,
-              test.mad.ratio=test.mad.ratio,
-              train.mad.ratio=out.trend$trend.mad.ratio))
-})
-
-
-out.order3 <- lapply(1:5, function(i) {
-  yy <- log2cpm.sub[i,]
-  yy.train <- yy[-id]
-  yy.test <- yy[id]
-  pos.yy.train <- c(1:length(yy))[-id]
-  pos.yy.test <- c(1:length(yy))[id]
-  nonzero.test <- yy.test!=0
-    
-  out.trend <- fit.trendfilter(yy=yy.train, pos.yy = pos.yy.train, polyorder = 3)
-  f <- approxfun(x=out.trend$trend.pos, y=out.trend$trend.yy, rule=2)  
-  
-  test.mad.pred <- mad(yy.test[nonzero.test]-f(pos.yy.test[nonzero.test]), constant = 1)
-  test.mad.constant <- mad(yy.test[nonzero.test]-mean(yy.test[nonzero.test]), constant = 1)
-  test.mad.ratio <- test.mad.pred/test.mad.constant
-
-  return(list(yy=yy,
-              yy.train=yy.train,
-              pos.train=pos.yy.train,
-              yy.test=yy.test,
-              pos.test=pos.yy.test,
-              pred.train.yy=out.trend$trend.yy,
-              pred.train.xx=out.trend$trend.pos,
-              pred.test.yy=f(pos.yy.test),
-              pred.test.xx=pos.yy.test,
-              test.mad.ratio=test.mad.ratio,
-              train.mad.ratio=out.trend$trend.mad.ratio))
-})
-
-saveRDS(out.order2, file = "../output/npreg-trendfilter-prelim.Rmd/out.order2.rds")
-saveRDS(out.order3, file = "../output/npreg-trendfilter-prelim.Rmd/out.order3.rds")
-```
-
-```{r}
-out.order2 <- readRDS(file = "../output/npreg-trendfilter-prelim.Rmd/out.order2.rds")
-out.order3 <- readRDS(file = "../output/npreg-trendfilter-prelim.Rmd/out.order3.rds")
-
-par(mfrow=c(2,5))
-for (i in 1:length(out.order2)) {
-  with(out.order2[[i]], {
-    plot(y=yy.train, x=pos.train, col = "gray50")
-    lines(y=pred.train.yy, x=pred.train.xx, col = "black", lwd=1)
-    points(y=yy.test,x=pos.test, col = "blue", pch=16, cex=.7)
-    lines(y=pred.test.yy, x=pred.test.xx, col = "blue", lwd=2)
-  })
-}
-for (i in 1:length(out.order3)) {
-  with(out.order3[[i]], {
-    plot(y=yy.train, x=pos.train, col = "gray50")
-    lines(y=pred.train.yy, x=pred.train.xx, col = "black", lwd=1)
-    points(y=yy.test,x=pos.test, col = "blue", pch=16, cex=.7)
-    lines(y=pred.test.yy, x=pred.test.xx, col = "blue", lwd=2)
-  })
-}
-
-test.order2 <- sapply(out.order2, function(x) x$test.mad.ratio)
-test.order3 <- sapply(out.order3, function(x) x$test.mad.ratio)
-cbind(test.order2,test.order3)
-```
 
 
 ---
