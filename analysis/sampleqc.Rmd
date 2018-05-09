@@ -34,7 +34,7 @@ library("ggplot2")
 library("MASS")
 library("tibble")
 library("Biobase")
-source("../code/pca.R")
+source("../code/utility.R")
 theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
@@ -80,6 +80,7 @@ plot_reads
 ---
 
 ## Unmapped ratios
+
 Note: Using the 40 % cutoff of samples with no cells excludes all the samples
 
 ```{r unmapped-ratios}
