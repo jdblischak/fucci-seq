@@ -25,8 +25,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -36,10 +36,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -319,19 +321,20 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-06</p>
+<p><strong>Last updated:</strong> 2018-05-09</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> fd3bf7b</p>
+<p><strong>Code version:</strong> 119c6b2</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <pre class="r"><code>library(&quot;cowplot&quot;)
 library(&quot;dplyr&quot;)
 library(&quot;edgeR&quot;)
 library(&quot;ggplot2&quot;)
-library(&quot;reshape2&quot;)
+library(&quot;MASS&quot;)
+library(&quot;tibble&quot;)
 library(&quot;Biobase&quot;)
-source(&quot;../code/pca.R&quot;)
+source(&quot;../code/utility.R&quot;)
 theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
@@ -343,20 +346,20 @@ anno &lt;- pData(eset)</code></pre>
 </div>
 <div id="total-mapped-reads" class="section level2">
 <h2>Total mapped reads</h2>
-<p>Note: Using the 15% cutoff of samples with no cells excludes all the samples</p>
+<p>Note: Using the 20 % cutoff of samples with no cells excludes all the samples</p>
 <pre class="r"><code>## calculate the cut-off  
-cut_off_reads &lt;- quantile(anno[anno$cell_number == 0,&quot;mapped&quot;], 0.85)
+cut_off_reads &lt;- quantile(anno[anno$cell_number == 0,&quot;mapped&quot;], 0.82)
 
 cut_off_reads</code></pre>
-<pre><code>     85% 
-733229.6 </code></pre>
+<pre><code>    82% 
+1309921 </code></pre>
 <pre class="r"><code>anno$cut_off_reads &lt;- anno$mapped &gt; cut_off_reads
 
 ## numbers of cells 
 sum(anno[anno$cell_number == 1, &quot;mapped&quot;] &gt; cut_off_reads)</code></pre>
-<pre><code>[1] 1146</code></pre>
+<pre><code>[1] 978</code></pre>
 <pre class="r"><code>sum(anno[anno$cell_number == 1, &quot;mapped&quot;] &lt;= cut_off_reads)</code></pre>
-<pre><code>[1] 161</code></pre>
+<pre><code>[1] 349</code></pre>
 <pre class="r"><code>## density plots
 plot_reads &lt;- ggplot(anno[anno$cell_number == 0 |
                           anno$cell_number == 1 , ],
@@ -371,23 +374,23 @@ plot_reads</code></pre>
 </div>
 <div id="unmapped-ratios" class="section level2">
 <h2>Unmapped ratios</h2>
-<p>Note: Using the 30 % cutoff of samples with no cells excludes all the samples</p>
+<p>Note: Using the 40 % cutoff of samples with no cells excludes all the samples</p>
 <pre class="r"><code>## calculate unmapped ratios
 anno$unmapped_ratios &lt;- anno$unmapped/anno$umi
 
 ## cut off 
-cut_off_unmapped &lt;- quantile(anno[anno$cell_number == 0,&quot;unmapped_ratios&quot;], 0.3)
+cut_off_unmapped &lt;- quantile(anno[anno$cell_number == 0,&quot;unmapped_ratios&quot;], 0.40)
 
 cut_off_unmapped</code></pre>
-<pre><code>      30% 
-0.4216077 </code></pre>
+<pre><code>      40% 
+0.4362152 </code></pre>
 <pre class="r"><code>anno$cut_off_unmapped &lt;- anno$unmapped_ratios &lt; cut_off_unmapped
 
 ## numbers of cells 
 sum(anno[anno$cell_number == 1, &quot;unmapped_ratios&quot;] &gt;= cut_off_unmapped)</code></pre>
-<pre><code>[1] 254</code></pre>
+<pre><code>[1] 221</code></pre>
 <pre class="r"><code>sum(anno[anno$cell_number == 1, &quot;unmapped_ratios&quot;] &lt; cut_off_unmapped)</code></pre>
-<pre><code>[1] 1053</code></pre>
+<pre><code>[1] 1106</code></pre>
 <pre class="r"><code>## density plots
 plot_unmapped &lt;- ggplot(anno[anno$cell_number == 0 |
                              anno$cell_number == 1 , ],
@@ -397,7 +400,8 @@ plot_unmapped &lt;- ggplot(anno[anno$cell_number == 0 |
        labs(x = &quot;Unmapped reads/ total reads&quot;, title = &quot;Unmapped reads percentage&quot;)
 
 plot_unmapped</code></pre>
-<p><img src="figure/sampleqc.Rmd/unmapped-ratios-1.png" width="672" style="display: block; margin: auto;" /> Look at the unmapped percentage per sample by C1 experimnet and by individual.</p>
+<p><img src="figure/sampleqc.Rmd/unmapped-ratios-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Look at the unmapped percentage per sample by C1 experimnet and by individual.</p>
 <pre class="r"><code>unmapped_exp &lt;- ggplot(anno, aes(x = as.factor(experiment), y = unmapped_ratios, color = as.factor(experiment))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
@@ -426,18 +430,18 @@ plot_grid(unmapped_exp + theme(legend.position = &quot;none&quot;),
 anno$ercc_percentage &lt;- anno$reads_ercc / anno$mapped
 
 ## cut off 
-cut_off_ercc &lt;- quantile(anno[anno$cell_number == 0,&quot;ercc_percentage&quot;], 0.15)
+cut_off_ercc &lt;- quantile(anno[anno$cell_number == 0,&quot;ercc_percentage&quot;], 0.20)
 
 cut_off_ercc</code></pre>
-<pre><code>      15% 
-0.1673614 </code></pre>
+<pre><code>     20% 
+0.179423 </code></pre>
 <pre class="r"><code>anno$cut_off_ercc &lt;- anno$ercc_percentage &lt; cut_off_ercc
 
 ## numbers of cells 
 sum(anno[anno$cell_number == 1, &quot;ercc_percentage&quot;] &gt;= cut_off_ercc)</code></pre>
-<pre><code>[1] 225</code></pre>
+<pre><code>[1] 223</code></pre>
 <pre class="r"><code>sum(anno[anno$cell_number == 1, &quot;ercc_percentage&quot;] &lt; cut_off_ercc)</code></pre>
-<pre><code>[1] 1082</code></pre>
+<pre><code>[1] 1104</code></pre>
 <pre class="r"><code>## density plots
 plot_ercc &lt;- ggplot(anno[anno$cell_number == 0 |
                                 anno$cell_number == 1 , ],
@@ -474,18 +478,18 @@ plot_grid(ercc_exp + theme(legend.position = &quot;none&quot;),
 <div id="number-of-genes-detected" class="section level2">
 <h2>Number of genes detected</h2>
 <pre class="r"><code>## cut off 
-cut_off_genes &lt;- quantile(anno[anno$cell_number == 0,&quot;detect_hs&quot;], 0.85)
+cut_off_genes &lt;- quantile(anno[anno$cell_number == 0,&quot;detect_hs&quot;], 0.80)
 
 cut_off_genes</code></pre>
-<pre><code>   85% 
-5901.4 </code></pre>
+<pre><code>   80% 
+6291.8 </code></pre>
 <pre class="r"><code>anno$cut_off_genes &lt;- anno$detect_hs &gt; cut_off_genes
 
 ## numbers of cells 
 sum(anno[anno$cell_number == 1, &quot;detect_hs&quot;] &gt; cut_off_genes)</code></pre>
-<pre><code>[1] 1079</code></pre>
+<pre><code>[1] 1040</code></pre>
 <pre class="r"><code>sum(anno[anno$cell_number == 1, &quot;detect_hs&quot;] &lt;= cut_off_genes)</code></pre>
-<pre><code>[1] 228</code></pre>
+<pre><code>[1] 287</code></pre>
 <pre class="r"><code>## density plots
 plot_gene &lt;- ggplot(anno[anno$cell_number == 0 |
                          anno$cell_number == 1 , ],
@@ -543,12 +547,6 @@ plot_grid(egfp_mol + theme(legend.position = c(.5,.9)),
 <h2>Linear Discriminat Analysis</h2>
 <div id="total-molecule-vs-concentration" class="section level3">
 <h3>Total molecule vs concentration</h3>
-<pre class="r"><code>library(MASS)</code></pre>
-<pre><code>
-Attaching package: &#39;MASS&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:dplyr&#39;:
-
-    select</code></pre>
 <pre class="r"><code>## create 3 groups according to cell number
 group_3 &lt;- rep(&quot;two&quot;,dim(anno)[1])
          group_3[grep(&quot;0&quot;, anno$cell_number)] &lt;- &quot;no&quot;
@@ -567,9 +565,39 @@ table(data_lda_p, data[, &quot;group&quot;])</code></pre>
 <pre><code>          
 data_lda_p   no  one  two
        no     0    0    0
-       one   36 1297  147
+       one   16 1317  147
        two    0   11   45</code></pre>
 <pre class="r"><code>data$data_lda_p &lt;- data_lda_p
+
+## identify the outlier
+outliers_lda &lt;- data %&gt;% rownames_to_column(&quot;sample_id&quot;) %&gt;% filter(cell_number == 1, data_lda_p == &quot;two&quot;)
+outliers_lda</code></pre>
+<pre><code>      sample_id experiment well cell_number concentration  mapped
+1  20170910-H09   20170910  H09           1     1.6540139 3013565
+2  20170914-B04   20170914  B04           1     1.3324572 2284753
+3  20170914-C04   20170914  C04           1     1.2389752 2489489
+4  20170916-A08   20170916  A08           1     0.4900687 2276922
+5  20170921-A12   20170921  A12           1     1.7967793 1868421
+6  20170921-C01   20170921  C01           1     1.4171401 1543484
+7  20170921-D04   20170921  D04           1     1.0853582 1753336
+8  20170921-H09   20170921  H09           1     0.5802048 1541776
+9  20170924-A04   20170924  A04           1     0.9856825 1414428
+10 20170924-E01   20170924  E01           1     0.4581647 1817801
+11 20170924-E03   20170924  E03           1     0.4484874 1924140
+   molecules group data_lda_p
+1     281516   one        two
+2     190473   one        two
+3     205586   one        two
+4     169065   one        two
+5     205868   one        two
+6     202756   one        two
+7     255148   one        two
+8     415411   one        two
+9     253058   one        two
+10    187137   one        two
+11    346383   one        two</code></pre>
+<pre class="r"><code>## create filter
+anno$molecule_outlier &lt;- row.names(anno) %in% outliers_lda$sample_id
 
 ## plot before and after
 plot_before &lt;- ggplot(data, aes(x = concentration, y = molecules / 10^3,
@@ -611,16 +639,28 @@ data_ercc_lda_p &lt;- predict(data_ercc_lda,  newdata = data[,c(&quot;ercc_conve
 table(data_ercc_lda_p, data[, &quot;group&quot;])</code></pre>
 <pre><code>               
 data_ercc_lda_p   no  one  two
-            no    15   29    1
-            one   21 1275  165
-            two    0    4   26</code></pre>
+            no     5   20    0
+            one   11 1303  166
+            two    0    5   26</code></pre>
 <pre class="r"><code>data$data_ercc_lda_p &lt;- data_ercc_lda_p
 
-
-## cutoff
-#out_ercc_con &lt;- anno %&gt;% filter(cell_number == &quot;1&quot;, ercc_conversion &gt; .094)
-
-anno$conversion_outlier &lt;- anno$cell_number == 1 &amp; anno$ercc_conversion &gt; .094
+## identify the outlier
+outliers_conversion &lt;- data %&gt;% rownames_to_column(&quot;sample_id&quot;) %&gt;% filter(cell_number == 1, data_ercc_lda_p == &quot;two&quot;)
+outliers_conversion</code></pre>
+<pre><code>     sample_id experiment well cell_number concentration  mapped molecules
+1 20170908-C07   20170908  C07           1     2.6936993  850577     95163
+2 20170920-A10   20170920  A10           1     0.1369852   81371     28680
+3 20170921-H09   20170921  H09           1     0.5802048 1541776    415411
+4 20170924-A04   20170924  A04           1     0.9856825 1414428    253058
+5 20170924-E03   20170924  E03           1     0.4484874 1924140    346383
+  group data_lda_p conversion ercc_conversion data_ercc_lda_p
+1   one        one  0.1126820      0.08186312             two
+2   one        one  0.3585794      0.24727354             two
+3   one        two  0.2716902      0.13085675             two
+4   one        two  0.1809263      0.09389137             two
+5   one        two  0.1813526      0.10260360             two</code></pre>
+<pre class="r"><code>## create filter
+anno$conversion_outlier &lt;- row.names(anno) %in% outliers_conversion$sample_id
 
 ## plot before and after
 plot_ercc_before &lt;- ggplot(data, aes(x = ercc_conversion, y = conversion,
@@ -679,32 +719,34 @@ anno$filter_all &lt;- anno$cell_number == 1 &amp;
                    anno$mol_egfp &gt; 0 &amp;
                    anno$valid_id &amp;
                    anno$cut_off_reads &amp;
-                   ## anno$cut_off_unmapped &amp;
+                   anno$cut_off_unmapped &amp;
                    anno$cut_off_ercc &amp;
-                   anno$cut_off_genes 
+                   anno$cut_off_genes &amp;
+                   anno$molecule_outlier == &quot;FALSE&quot; &amp;
+                   anno$conversion_outlier == &quot;FALSE&quot;
 sort(table(anno[anno$filter_all, &quot;chip_id&quot;]))</code></pre>
 <pre><code>
 NA18511 NA19160 NA19101 NA18855 NA19098 NA18870 
-    131     133     142     198     202     227 </code></pre>
+    104     123     124     171     187     214 </code></pre>
 <pre class="r"><code>table(anno[anno$filter_all, c(&quot;experiment&quot;,&quot;chip_id&quot;)])</code></pre>
 <pre><code>          chip_id
 experiment NA18511 NA18855 NA18870 NA19098 NA19101 NA19160
-  20170905       0      38      31       0       0       0
-  20170906       0       0       0      48      24       0
-  20170907       0      33       0      26       0       0
-  20170908       0       0      38       0      38       0
-  20170910       0      38       0       0      27       0
-  20170912       0       0      43      39       0       0
-  20170913       0      50       0       0       0      10
-  20170914       0       0       0       0      27      36
-  20170915      27      39       0       0       0       0
-  20170916      20       0       0       0      26       0
-  20170917       0       0       0      43       0      12
-  20170919      12       0       0      46       0       0
-  20170920      41       0       0       0       0      18
-  20170921       0       0      46       0       0      26
-  20170922      31       0      30       0       0       0
-  20170924       0       0      39       0       0      31</code></pre>
+  20170905       0      37      32       0       0       0
+  20170906       0       0       0      41      22       0
+  20170907       0      29       0      23       0       0
+  20170908       0       0      32       0      31       0
+  20170910       0      30       0       0      24       0
+  20170912       0       0      42      37       0       0
+  20170913       0      41       0       0       0       9
+  20170914       0       0       0       0      24      34
+  20170915      24      34       0       0       0       0
+  20170916      13       0       0       0      23       0
+  20170917       0       0       0      40       0      12
+  20170919      11       0       0      46       0       0
+  20170920      39       0       0       0       0      18
+  20170921       0       0      45       0       0      22
+  20170922      17       0      25       0       0       0
+  20170924       0       0      38       0       0      28</code></pre>
 </div>
 <div id="plots" class="section level3">
 <h3>Plots</h3>
@@ -771,6 +813,9 @@ plot_grid(genes_unmapped + theme(legend.position = c(.7,.9)),
           reads_spike_num + theme(legend.position = &quot;none&quot;),
           labels = letters[3:4])</code></pre>
 <p><img src="figure/sampleqc.Rmd/plots-2.png" width="3600" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>write.table(data.frame(row.names(anno), anno[,&quot;filter_all&quot;]),
+            file = &quot;../data/quality-single-cells.txt&quot;, quote = FALSE,
+            sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
 <hr />
 </div>
 </div>
@@ -829,12 +874,11 @@ write.table(pheno_labels,
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: x86_64-redhat-linux-gnu (64-bit)
 Running under: Scientific Linux 7.2 (Nitrogen)
 
 Matrix products: default
-BLAS: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
-LAPACK: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -845,28 +889,27 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] parallel  methods   stats     graphics  grDevices utils     datasets 
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
 [8] base     
 
 other attached packages:
- [1] testit_0.6          MASS_7.3-45         Biobase_2.38.0     
- [4] BiocGenerics_0.24.0 reshape2_1.4.2      edgeR_3.20.7       
- [7] limma_3.34.6        dplyr_0.7.4         cowplot_0.9.1      
-[10] ggplot2_2.2.1      
+ [1] testit_0.7          bindrcpp_0.2        Biobase_2.38.0     
+ [4] BiocGenerics_0.24.0 tibble_1.4.2        MASS_7.3-47        
+ [7] edgeR_3.20.9        limma_3.34.9        dplyr_0.7.4        
+[10] cowplot_0.9.2       ggplot2_2.2.1      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13       RColorBrewer_1.1-2 compiler_3.4.1    
- [4] git2r_0.19.0       plyr_1.8.4         bindr_0.1         
- [7] tools_3.4.1        digest_0.6.12      evaluate_0.10.1   
-[10] tibble_1.3.3       gtable_0.2.0       lattice_0.20-34   
-[13] pkgconfig_2.0.1    rlang_0.1.2        yaml_2.1.14       
-[16] bindrcpp_0.2       stringr_1.2.0      knitr_1.16        
-[19] locfit_1.5-9.1     rprojroot_1.2      grid_3.4.1        
-[22] glue_1.1.1         R6_2.2.0           rmarkdown_1.6     
-[25] magrittr_1.5       backports_1.0.5    scales_0.5.0      
-[28] htmltools_0.3.6    assertthat_0.1     colorspace_1.3-2  
-[31] labeling_0.3       stringi_1.1.2      lazyeval_0.2.0    
-[34] munsell_0.4.3     </code></pre>
+ [1] Rcpp_0.12.16       RColorBrewer_1.1-2 pillar_1.2.1      
+ [4] compiler_3.4.1     git2r_0.21.0       plyr_1.8.4        
+ [7] bindr_0.1.1        tools_3.4.1        digest_0.6.15     
+[10] evaluate_0.10.1    gtable_0.2.0       lattice_0.20-35   
+[13] pkgconfig_2.0.1    rlang_0.2.0        yaml_2.1.18       
+[16] stringr_1.3.0      knitr_1.20         locfit_1.5-9.1    
+[19] rprojroot_1.3-2    grid_3.4.1         glue_1.2.0        
+[22] R6_2.2.2           rmarkdown_1.9      magrittr_1.5      
+[25] backports_1.1.2    scales_0.5.0       htmltools_0.3.6   
+[28] assertthat_0.2.0   colorspace_1.3-2   labeling_0.3      
+[31] stringi_1.1.7      lazyeval_0.2.1     munsell_0.4.3     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
