@@ -71,7 +71,6 @@ dependencies:
   - r-gplots
   - r-heatmap3
   - r-mclust
-  - r-parallel
   - r-scales
   - r-rcolorbrewer
   - r-reshape2
