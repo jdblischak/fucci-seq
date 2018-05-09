@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>npreg: trendfilter on normalized data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">npreg: trendfilter on normalized data</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#evaluate-data-after-standardizing-expression">Evaluate data after standardizing expression</a></li>
+<li><a href="#fit-trendfilter-to-the-data-after-quantile-normalization">Fit trendfilter to the data after quantile normalization</a></li>
+<li><a href="#make-a-permuted-distribution">Make a permuted distribution</a></li>
+<li><a href="#genes-with-the-small-pve">Genes with the small PVE</a></li>
+<li><a href="#output-summary-statistics">Output summary statistics</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-08</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 85120ce</p>
+<hr />
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)
+library(genlasso)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+source(&quot;../code/utility.R&quot;)
+source(&quot;../code/npreg/npreg.methods.R&quot;)</code></pre>
+<p>–</p>
+</div>
+<div id="evaluate-data-after-standardizing-expression" class="section level2">
+<h2>Evaluate data after standardizing expression</h2>
+<p>Map log2cpm expression to standard normal distribution. The transformation is non-linear. Sort N expression values from the largest to the smalles. General N standard normal random variable. For the non-zero expression value, find the correspnoding standard normal random variable that has the same quantile and subsitute the value with the corresponding normal random variable value. We then find the stanadard normal random variable values correspond to non-zero expression values and randomly assign these non-zero expression values to a standard normal random variable value.</p>
+<ul>
+<li><p>For genes with relatively low fraction of deteted cells, this method allows to move the zero expression values closer to the non-zero expression value.</p></li>
+<li><p>For genes with high fraction of undetected cells, this method creates a</p></li>
+</ul>
+<pre class="r"><code>log2cpm.quant &lt;- do.call(rbind, mclapply(1:nrow(log2cpm.all), function(g) {
+  yy &lt;- log2cpm.all[g,]
+  is.zero &lt;- which(yy == 0)
+  qq.map &lt;- qqnorm(yy)
+  yy.qq &lt;- qq.map$x
+  yy.qq[is.zero] &lt;- sample(qq.map$x[is.zero])
+  return(yy.qq)
+}, mc.cores=8) )
+rownames(log2cpm.quant) &lt;- rownames(log2cpm.all)
+
+saveRDS(log2cpm.quant, file = &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)</code></pre>
+<p>check genes with low/high fraction of undetected cells.</p>
+<pre class="r"><code>log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+
+ii.high &lt;- order(rowMeans(log2cpm.all &gt; 0), decreasing = F)[1:5]
+par(mfcol=c(3,5))
+for (i in 1:5) {
+  plot(log2cpm.all[ii.high[i],])
+  plot(log2cpm.quant[ii.high[i],])
+  plot(log2cpm.all[ii.high[i],], log2cpm.quant[ii.high[i],])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ii.low &lt;- order(rowMeans(log2cpm.all &gt; 0), decreasing = T)[1:5]
+par(mfcol=c(3,5))
+for (i in 1:5) {
+  plot(log2cpm.all[ii.low[i],])
+  plot(log2cpm.quant[ii.low[i],])
+  plot(log2cpm.all[ii.low[i],], log2cpm.quant[ii.low[i],])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Check genes that we previously found to have cyclical patterns. This doesn’t distor genes previously found to have cyclical patterns.</p>
+<pre class="r"><code>cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+
+par(mfcol=c(3,5))
+for (gene in colnames(cyclegenes)[2:6]) {
+  ind &lt;- rownames(log2cpm.all) == gene
+  plot(log2cpm.all[ind,])
+  plot(log2cpm.quant[ind,])
+  plot(log2cpm.all[ind,], log2cpm.quant[ind,])
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="fit-trendfilter-to-the-data-after-quantile-normalization" class="section level2">
+<h2>Fit trendfilter to the data after quantile normalization</h2>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.1.sh</code></p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.2.sh</code></p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.3.sh</code></p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.4.sh</code></p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.5.sh</code></p>
+<p>Split the data to five chunks by genes and submit the chunks to independent batch jobs.</p>
+<pre class="r"><code>log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+
+saveRDS(log2cpm.quant[1:2200,], 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.1.rds&quot;)
+saveRDS(log2cpm.quant[2201:4400,], 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.2.rds&quot;)
+saveRDS(log2cpm.quant[4401:6600,], 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.3.rds&quot;)
+saveRDS(log2cpm.quant[6601:8800,], 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.4.rds&quot;)
+saveRDS(log2cpm.quant[8801:11040,], 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.5.rds&quot;)
+
+fit.quant.1 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.1.rds&quot;)
+fit.quant.2 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.2.rds&quot;)
+fit.quant.3 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.3.rds&quot;)
+fit.quant.4 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.4.rds&quot;)
+fit.quant.5 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.5.rds&quot;)
+
+fit.quant &lt;- c(fit.quant.1,fit.quant.2,fit.quant.3,fit.quant.4,fit.quant.5)
+saveRDS(fit.quant, 
+        &quot;../output/npreg-trendfilter-quantile.Rmd/fit.quant.rds&quot;)</code></pre>
+<p>consider PVE</p>
+<pre class="r"><code>fit.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.quant.rds&quot;)
+
+pve &lt;- sapply(fit.quant, &quot;[[&quot;, &quot;trend.pve&quot;)
+summary(pve)</code></pre>
+<pre><code>      Min.    1st Qu.     Median       Mean    3rd Qu.       Max. 
+-0.0043839  0.0000798  0.0002166  0.0008961  0.0004973  0.3266288 </code></pre>
+<p>select genes with the highest PVE</p>
+<pre class="r"><code>pve.genes &lt;- names(pve)[order(c(pve), decreasing = T)[1:10]]</code></pre>
+<p>plot top 10</p>
+<pre class="r"><code>par(mfrow=c(2,5))
+for (g in 1:length(pve.genes)) {
+  ii.g &lt;- which(names(fit.quant)==pve.genes[g])
+  plot(log2cpm.quant[rownames(log2cpm.quant)==pve.genes[g]])
+  points(fit.quant[[ii.g]]$trend.yy, pch=16, col = &quot;blue&quot;, cex=.7)
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>quickily check top 100 enrichment for cell cycle genes.</p>
+<pre class="r"><code>enrich.order &lt;- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out &lt;- order(mad.ratio$smash.mad.ratio)
+  # cutoffs &lt;- c(100, 200, 300)
+  cycle.rich &lt;- sapply(cutoffs, function(x) {
+    which_top &lt;- order(metrics, decreasing = T)[1:x]
+    sig.cycle &lt;- sum(allgenes[which_top] %in% cyclegenes)/x
+    non.cycle &lt;- sum(allgenes[-which_top] %in% cyclegenes)/(length(allgenes)-x)
+    cbind(as.numeric(sum(allgenes[which_top] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) &lt;- cutoffs
+  rownames(cycle.rich) &lt;- c(&quot;nsig.genes.cycle&quot;, &quot;fold.sig.vs.nonsig.cycle&quot;)
+  cycle.rich
+}
+
+enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = pve, cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.quant))</code></pre>
+<pre><code>                              100       200   300
+nsig.genes.cycle         54.00000 73.000000 86.00
+fold.sig.vs.nonsig.cycle 12.78701  8.931377  7.16</code></pre>
+</div>
+<div id="make-a-permuted-distribution" class="section level2">
+<h2>Make a permuted distribution</h2>
+<p>Consider two genes, one with large fraction of undetected cells and one with small fraction of undeteted cells. See if the null distribution is similar.</p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.perm.lowmisss.sh</code></p>
+<p><code>sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.perm.highmisss.sh</code></p>
+<pre class="r"><code>perm.lowmiss &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.perm.lowmiss.rds&quot;)
+
+perm.highmiss &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/fit.trend.perm.highmiss.rds&quot;)
+
+pve.perm.lowmiss &lt;- sapply(perm.lowmiss, &quot;[[&quot;, &quot;trend.pve&quot;)
+pve.perm.highmiss &lt;- sapply(perm.highmiss, &quot;[[&quot;, &quot;trend.pve&quot;)
+
+summary(pve.perm.lowmiss)</code></pre>
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+3.700e-08 4.998e-05 1.388e-04 2.821e-04 3.382e-04 1.617e-02 </code></pre>
+<pre class="r"><code>summary(pve.perm.highmiss)</code></pre>
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+1.340e-07 5.089e-05 1.389e-04 2.664e-04 3.403e-04 4.214e-03 </code></pre>
+<p>Turns out the p-value based on permuted data is not the same for genes with low and high fraction of undetected cells.</p>
+<pre class="r"><code>par(mfrow=c(1,2))
+hist(pve.perm.lowmiss, nclass=30,
+     main = &quot;Fraction undetected &lt; 10%&quot;, xlab = &quot;p-value&quot;)
+hist(pve.perm.highmiss, nclass=30,
+     main = &quot;Fraction undetected &gt; 80%&quot;, xlab = &quot;p-value&quot;)</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Compute p-value based on two different distributions. High consistency between the two.</p>
+<pre class="r"><code>B &lt;- length(pve.perm.lowmiss)
+pval.perm.low &lt;- sapply(fit.quant, function(x) (1+sum(pve.perm.lowmiss &gt; x$trend.pve))/(1+B))
+pval.perm.high &lt;- sapply(fit.quant, function(x) (1+sum(pve.perm.highmiss &gt; x$trend.pve))/(1+B))
+
+summary(pval.perm.low)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.000999 0.163836 0.365634 0.415336 0.648352 1.000000 </code></pre>
+<pre class="r"><code>summary(pval.perm.high)</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.000999 0.150849 0.360639 0.411520 0.630370 1.000000 </code></pre>
+<pre class="r"><code>plot(pval.perm.low, pval.perm.high)</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>sum(pval.perm.high &lt; .001)</code></pre>
+<pre><code>[1] 278</code></pre>
+<pre class="r"><code>sum(pval.perm.low &lt; .001)</code></pre>
+<pre><code>[1] 101</code></pre>
+<p>use permutated distribution based data with low missing value. more conservative</p>
+<pre class="r"><code>which.sig &lt;- pval.perm.low &lt; .001
+
+enrich.sigval &lt;- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out &lt;- order(mad.ratio$smash.mad.ratio)
+  # cutoffs &lt;- c(100, 200, 300)
+  cycle.rich &lt;- sapply(cutoffs, function(x) {
+    #which_top &lt;- order(metrics, decreasing = T)[1:x]
+    sig.cycle &lt;- sum(allgenes[metrics &lt; x] %in% cyclegenes)/sum(metrics &lt; x)
+    non.cycle &lt;- sum(allgenes[metrics &gt; x] %in% cyclegenes)/sum(metrics &gt; x)
+    cbind(sum(metrics &lt; x), as.numeric(sum(allgenes[metrics &lt; x] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) &lt;- cutoffs
+  rownames(cycle.rich) &lt;- c(&quot;nsig.genes&quot;, &quot;nsig.genes.cycle&quot;, &quot;fold.sig.vs.nonsig.cycle&quot;)
+  cycle.rich
+}
+
+
+enrich.sigval(cutoffs = c(.001, .005, .01), metrics=pval.perm.low,
+              cyclegenes = macosko$ensembl,
+              allgenes = rownames(log2cpm.quant))</code></pre>
+<pre><code>                             0.001      0.005       0.01
+nsig.genes               101.00000 476.000000 553.000000
+nsig.genes.cycle          54.00000  99.000000  99.000000
+fold.sig.vs.nonsig.cycle  12.65925   5.268908   4.502205</code></pre>
+<hr />
+</div>
+<div id="genes-with-the-small-pve" class="section level2">
+<h2>Genes with the small PVE</h2>
+<pre class="r"><code>out.stats &lt;- data.frame(pve=sapply(fit.quant, &quot;[[&quot;, &quot;trend.pve&quot;),
+                        pval.perm=pval.perm.low,
+                        row.names = rownames(log2cpm.quant))
+
+out.stats.ordered &lt;- out.stats[order(out.stats$pve, decreasing = T),]
+out.stats.ordered.sig &lt;- out.stats.ordered[out.stats.ordered$pval.perm &lt; .001,]
+  
+
+library(biomaRt)
+ensembl &lt;- useMart(biomart = &quot;ensembl&quot;, dataset = &quot;hsapiens_gene_ensembl&quot;)
+symbols &lt;- getBM(attributes = c(&quot;hgnc_symbol&quot;,&#39;ensembl_gene_id&#39;), 
+      filters = c(&#39;ensembl_gene_id&#39;),
+      values = rownames(out.stats.ordered.sig), 
+      mart = ensembl)
+out.stats.ordered.sig$symbols &lt;- symbols$hgnc_symbol[match(rownames(out.stats.ordered.sig),
+                                                           symbols$ensembl_gene_id)]
+out.stats.ordered.sig$symbols[is.na(out.stats.ordered.sig$symbols)] &lt;- rownames(out.stats.ordered.sig)[is.na(out.stats.ordered.sig$symbols)]
+
+sig.genes &lt;- rownames(out.stats.ordered.sig)
+par(mfrow=c(4,5)) 
+for (g in 1:20) {
+  ii.g &lt;- which(rownames(log2cpm.quant) == sig.genes[g])
+  plot(log2cpm.quant[ii.g,],
+       main=out.stats.ordered.sig$symbols[g])
+  points(fit.quant[[ii.g]]$trend.yy, col = &quot;blue&quot;, pch=16, cex=.7)
+}</code></pre>
+<p><img src="figure/npreg-trendfilter-quantile.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="output-summary-statistics" class="section level2">
+<h2>Output summary statistics</h2>
+<pre class="r"><code>saveRDS(out.stats.ordered.sig,
+        &quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+
+saveRDS(out.stats,
+        &quot;../output/npreg-trendfilter-quantile.Rmd/quant.stats.rds&quot;)
+
+
+write.table(rownames(out.stats.ordered.sig),
+            quote = F, col.names = F, row.names = F,
+            file = &quot;../output/npreg-trendfilter-quantile.Rmd/siggens.txt&quot;)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.1 (2017-06-30)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.2 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] biomaRt_2.34.2      genlasso_1.3        igraph_1.2.1       
+ [4] smashr_1.1-0        caTools_1.17.1      data.table_1.10.4-3
+ [7] Matrix_1.2-10       wavethresh_4.6.8    MASS_7.3-47        
+[10] ashr_2.2-7          Rcpp_0.12.16        NPCirc_2.0.1       
+[13] matrixStats_0.53.1  dplyr_0.7.4         Biobase_2.38.0     
+[16] BiocGenerics_0.24.0 conicfit_1.0.4      geigen_2.1         
+[19] pracma_2.1.4        circular_0.4-93    
+
+loaded via a namespace (and not attached):
+ [1] httr_1.3.1           bit64_0.9-7          jsonlite_1.5        
+ [4] foreach_1.4.4        shiny_1.0.5          assertthat_0.2.0    
+ [7] stats4_3.4.1         blob_1.1.0           yaml_2.1.18         
+[10] progress_1.1.2       slam_0.1-42          pillar_1.2.1        
+[13] RSQLite_2.0          backports_1.1.2      lattice_0.20-35     
+[16] glue_1.2.0           digest_0.6.15        htmltools_0.3.6     
+[19] httpuv_1.3.6.2       XML_3.98-1.10        pkgconfig_2.0.1     
+[22] misc3d_0.8-4         xtable_1.8-2         mvtnorm_1.0-7       
+[25] git2r_0.21.0         tibble_1.4.2         IRanges_2.12.0      
+[28] movMF_0.2-2          magrittr_1.5         mime_0.5            
+[31] memoise_1.1.0        evaluate_0.10.1      doParallel_1.0.11   
+[34] truncnorm_1.0-8      tools_3.4.1          prettyunits_1.0.2   
+[37] stringr_1.3.0        S4Vectors_0.16.0     plotrix_3.7         
+[40] AnnotationDbi_1.40.0 bindrcpp_0.2         compiler_3.4.1      
+[43] rlang_0.2.0          grid_3.4.1           RCurl_1.95-4.10     
+[46] iterators_1.0.9      htmlwidgets_1.0      crosstalk_1.0.0     
+[49] bitops_1.0-6         rmarkdown_1.9        boot_1.3-19         
+[52] codetools_0.2-15     curl_3.1             DBI_0.8             
+[55] R6_2.2.2             knitr_1.20           bit_1.1-12          
+[58] bindr_0.1.1          rprojroot_1.3-2      shape_1.4.4         
+[61] stringi_1.1.7        pscl_1.5.2           SQUAREM_2017.10-1   </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
