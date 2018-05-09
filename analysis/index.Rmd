@@ -31,31 +31,15 @@ We evaluated and pre-processed the results of image analysis as follows:
     * [Compare correction approaches using median versus mean background](images-metrics.html)
     * [Explore associations between nucleus shape metrics vs intensities](images-metrics-cell-shape.html)
 
-3. We analyzed intensity variation across individuals and batches and determined on an approach that removes batch effect in the data.  
+3. We analyzed intensity variation across individuals and batches and considers approaches for removing batch effects in the data.
     * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
     * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
     * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
     * [Estimate variance explained in IBD and correct for batch effects in intensities](images-normalize-anova.html)
-  
-4. We investigated the estimated cell time against the fucci intensities and considered [relations between estimated cell time and cell cycle states of G1, S, G2](images-time-eval.html).
 
-
----
-
-## RNA-seq data preprcessing
-
-1. The first step in preprocessing RNA-seq data consists of QC and filtering. 
-    * Sample QC and filtering
-        * [Sample QC criteria](sampleqc.html)  
-        * [Sequencing depth](totals.html)  
-        * [Reads versus molecules](reads-v-molecules.html)  
-    
-    * Gene QC and filtering
-        * [gene filtering](gene-filtering.html)
-        * [PCA with technical fators](pca-tf.html)
-
-2. We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
-    * [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
+4. We investigated the cell time estimates based on FUCCI intensities.
+    * Consider the mean-adjusted FUCCI intensities, what's the relationship between cell time [estimates and DAPI and sample molecule count](images-time-eval.html)? 
+    * Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What's the differences between cell time estimates from [the two normalization approaches](images-time-compare-normalize.html)?
 
 
 ---
@@ -78,25 +62,53 @@ We evaluated and pre-processed the results of image analysis as follows:
     * I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and [to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression](images-circle-ordering-eval.html)
     * Here I put together lists of genes identified as significantly correlatd with the PC-based fit [by linear correlation and circular-linear correlation, also cyclical genes by smash](images-circle-ordering-sigcorgenes.html)
   
-4. I used nonparametric methods to identify genes that may be cyclical along cell cycle phases, using [smash and kernel regression](npreg.html).
+4. I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
+    * Fit [smash and kernel regression on circular variables](npreg-methods.html) on a subset of genes with detection rate > .8.
+    * Fit [trendfilter](npreg-trendfilter-prelim.html) on a subset of genes (5) that are observed (visually) to have cyclical pattern. trendfilter is robust to small proportion of undetected cells, approx 2 or 3%. In cases of simulation when increasing proportion of undetected cells to 20%, we observed a flat line in gene expression for genes previously identified to tend to a cyclical pattern. 
+    * Next, we fit trendfilter on all genes after transforming the data to follow standard normal distribution, permutation-based p-values for PVE are used to select [101 significant cyclical genes](npreg-trendfilter-quantile.html).
 
-
+<!-- * Consider three statistics to score the fit [](npreg-statistic-calibrate.html) -->
+    
 ---
 
 ## Model fitting
 
+* [Supervised learning based on spml](method-spml.html)
+
+* [Semi-supervised learning based on trendfilter](method-npreg.html)
+
 * Learning about correlation for circular response variable: some simulations to check [its property and also relations with Fisher's z transformation](circ-simulation-correlation.html)
     
-* 
-
-
-
 * CellcycleR 0.1.6
     * [Model convergence assessment](images-cellcycleR-convergence.html)
     * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
     * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
     * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
  
+---
+
+## RNA-seq data preprcessing
+
+1. The first step in preprocessing RNA-seq data consists of QC and filtering. 
+    * Sample QC and filtering
+        * [Sample QC criteria](sampleqc.html)  
+        * [Sequencing depth](totals.html)  
+        * [Reads versus molecules](reads-v-molecules.html)  
+    
+    * Gene QC and filtering
+        * [gene filtering](gene-filtering.html)
+        * [PCA with technical fators](pca-tf.html)
+
+2. We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
+    * [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
+
+
+---
+
+## Summary analysis
+
+* [Seminar talk 2018-04-16](talk-20180416.html)
+
 ---
 
 ## One-time investigations

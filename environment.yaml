@@ -45,6 +45,7 @@ dependencies:
   - fastqc
   - git
   - git-lfs
+  - glpk
   - ipdb
   - ipython
   - multiqc
@@ -58,11 +59,14 @@ dependencies:
   - r-circular
   - r-cluster
   - r-ccremover
+  - r-conicfit
+  - r-corshrink
   - r-cowplot
   - r-data.table
   - r-dplyr
   - r-dt
   - r-gdata
+  - r-genlasso
   - r-ggplot2
   - r-gplots
   - r-heatmap3

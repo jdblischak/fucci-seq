@@ -12,7 +12,7 @@
 <meta name="author" content="Joyce Hsiao" />
 
 
-<title>Select genes indicative of cell cycle state</title>
+<title>Evaluate projected cell time</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -211,7 +211,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Select genes indicative of cell cycle state</h1>
+<h1 class="title toc-ignore">Evaluate projected cell time</h1>
 <h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
@@ -220,6 +220,7 @@ div.section {
 <ul>
 <li><a href="#estimate-cell-time">Estimate cell time</a></li>
 <li><a href="#results">Results</a></li>
+<li><a href="#save-re-ordered-cell-times">Save re-ordered cell times</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -228,10 +229,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-04-10</p>
+<p><strong>Last updated:</strong> 2018-04-11</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> b8f2627</p>
+<p><strong>Code version:</strong> cde0b19</p>
 <hr />
 <div id="estimate-cell-time" class="section level2">
 <h2>Estimate cell time</h2>
@@ -241,17 +242,11 @@ df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
 pdata &lt;- pData(df)
 fdata &lt;- fData(df)
 
-# select endogeneous genes
-counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
-
-log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
-
-
-pdata.adj &lt;- readRDS(&quot;../output/images-normalize-anova.Rmd/pdata.adj.rds&quot;)
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(exprs(df))/pdata$molecules)))
 
 macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
 
-pc.fucci &lt;- prcomp(subset(pdata.adj, 
+pc.fucci &lt;- prcomp(subset(pdata, 
                           select=c(&quot;rfp.median.log10sum.adjust&quot;,
                                    &quot;gfp.median.log10sum.adjust&quot;)),
                    center = T, scale. = T)
@@ -279,16 +274,16 @@ saveRDS(labs, file = &quot;../output/images-time-eval.Rmd/labs.rds&quot;)</code>
 
 summary(as.numeric(Theta.fucci)[labs==1])</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  1.277   1.978   2.392   2.336   2.692   3.525 </code></pre>
+  2.885   3.537   3.941   3.896   4.243   5.069 </code></pre>
 <pre class="r"><code>summary(as.numeric(Theta.fucci)[labs==2])</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  3.579   4.348   4.689   4.675   5.007   5.809 </code></pre>
+  1.179   1.646   2.091   2.063   2.455   2.861 </code></pre>
 <pre class="r"><code>summary(as.numeric(Theta.fucci)[labs==3])</code></pre>
 <pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-0.004806 0.434017 0.874891 2.095213 5.830072 6.278717 </code></pre>
-<pre class="r"><code># move the origin to 1.27
+0.004025 0.304041 1.112189 3.000234 5.923906 6.282360 </code></pre>
+<pre class="r"><code># move the origin to 1.17
 Theta.fucci.new &lt;- vector(&quot;numeric&quot;, length(Theta.fucci))
-cutoff &lt;- min(Theta.fucci[labs==1])
+cutoff &lt;- min(Theta.fucci[labs==2])
 Theta.fucci.new[Theta.fucci&gt;=cutoff] &lt;- Theta.fucci[Theta.fucci&gt;=cutoff] - cutoff
 Theta.fucci.new[Theta.fucci&lt;cutoff] &lt;- Theta.fucci[Theta.fucci&lt;cutoff] - cutoff + 2*pi</code></pre>
 <p>Try plotting for one gene</p>
@@ -305,24 +300,80 @@ points(y=cdk1[labs==3], x=as.numeric(Theta.fucci.new)[labs==3], pch=16, cex=.7, 
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
+<p>Check data points with outlier DAPI values</p>
+<pre class="r"><code>ii.min.dapi &lt;- order(pData(df)$dapi.median.log10sum.adjust)[1:2]
+
+pData(df)[ii.min.dapi,]</code></pre>
+<pre><code>             experiment well cell_number concentration         ERCC
+20170924-E08   20170924  E08           1      1.125631 50x dilution
+20170924-F03   20170924  F03           1      2.157178 50x dilution
+             individual.1 individual.2 image_individual image_label
+20170924-E08      NA18870      NA19160      19160_18870          29
+20170924-F03      NA18870      NA19160      19160_18870          33
+                 raw     umi  mapped unmapped reads_ercc reads_hs
+20170924-E08 4494424 3083676 2197773   885903     169730  2027183
+20170924-F03 4884157 3348082 2349374   998708     158751  2189654
+             reads_egfp reads_mcherry molecules mol_ercc mol_hs mol_egfp
+20170924-E08        783            77    134694     3220 131433       39
+20170924-F03        957            12    156481     3373 153055       46
+             mol_mcherry detect_ercc detect_hs chip_id chipmix freemix
+20170924-E08           2          40      8284 NA19160 0.21325 0.08510
+20170924-F03           7          40      8691 NA18870 0.39507 0.15026
+               snps reads avg_dp min_dp snps_w_min valid_id cut_off_reads
+20170924-E08 311848  7531   0.02      1       3354     TRUE          TRUE
+20170924-F03 311848  8223   0.03      1       3694     TRUE          TRUE
+             unmapped_ratios cut_off_unmapped ercc_percentage cut_off_ercc
+20170924-E08       0.2872880             TRUE      0.07722818         TRUE
+20170924-F03       0.2982926             TRUE      0.06757162         TRUE
+             cut_off_genes ercc_conversion conversion conversion_outlier
+20170924-E08          TRUE      0.01897131 0.06483529              FALSE
+20170924-F03          TRUE      0.02124711 0.06989917              FALSE
+             molecule_outlier filter_all rfp.median.log10sum
+20170924-E08            FALSE       TRUE            1.702458
+20170924-F03            FALSE       TRUE            2.155286
+             gfp.median.log10sum dapi.median.log10sum
+20170924-E08            1.421271             1.176911
+20170924-F03            1.421271             1.146540
+             rfp.median.log10sum.adjust gfp.median.log10sum.adjust
+20170924-E08                -0.54086625                  -1.333926
+20170924-F03                 0.07550985                  -1.212614
+             dapi.median.log10sum.adjust size perimeter eccentricity
+20170924-E08                   -1.561447  703       107    0.9337102
+20170924-F03                   -1.476240  405        62    0.6811795
+                theta
+20170924-E08 2.070977
+20170924-F03 2.382573</code></pre>
 <pre class="r"><code>par(mfrow=c(2,2))
-ylims &lt;- with(pdata.adj, range(c(dapi.median.log10sum.adjust,
-                                 gfp.median.log10sum.adjust,
-                                 rfp.median.log10sum.adjust)))
-plot(as.numeric(Theta.fucci.new), pdata.adj$dapi.median.log10sum.adjust, col = &quot;blue&quot;, 
+ylims &lt;- with(pdata, range(c(dapi.median.log10sum.adjust,
+                             gfp.median.log10sum.adjust,
+                             rfp.median.log10sum.adjust)))
+plot(as.numeric(Theta.fucci.new), pdata$dapi.median.log10sum.adjust, col = &quot;blue&quot;, 
      ylab= &quot;adjusted intensity values&quot;,
      ylim = ylims, main = &quot;DAPI intensity values&quot;,
      xlab =&quot;Estimated cell time&quot;)
-plot(as.numeric(Theta.fucci.new), pdata.adj$gfp.median.log10sum.adjust, col = &quot;forestgreen&quot;, 
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$dapi.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+plot(as.numeric(Theta.fucci.new), pdata$gfp.median.log10sum.adjust, col = &quot;forestgreen&quot;, 
      ylab= &quot;adjusted intensity values&quot;,
      ylim = ylims, main = &quot;GFP and RFP intensity values&quot;,
      xlab =&quot;Estimated cell time&quot;)
-points(as.numeric(Theta.fucci.new), pdata.adj$rfp.median.log10sum.adjust, col = &quot;red&quot;)
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$gfp.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+points(as.numeric(Theta.fucci.new), pdata$rfp.median.log10sum.adjust, col = &quot;red&quot;)
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$rfp.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+
 plot(as.numeric(Theta.fucci.new), pdata$molecules, main = &quot;Total molecule count&quot;,
-     xlab =&quot;Estimated cell time&quot;, ylab = &quot;Total molecule count&quot;)
-plot(pdata.adj$dapi.median.log10sum.adjust, pdata$molecules, main = &quot;DAPI vs. molecule count&quot;,
-     xlab = &quot;DAPI intensity adjusted for C1 batch&quot;, ylab = &quot;Total molecule count&quot;)</code></pre>
-<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+     xlab =&quot;Estimated cell time&quot;, ylab = &quot;Total molecule count&quot;, col = &quot;gray50&quot;)
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$molecules[ii.min.dapi], pch=4, lwd=2, cex=1)
+
+plot(pdata$dapi.median.log10sum.adjust, pdata$molecules, main = &quot;DAPI vs. molecule count&quot;,
+     xlab = &quot;DAPI intensity adjusted for C1 batch&quot;, ylab = &quot;Total molecule count&quot;, 
+     col = &quot;gray50&quot;)
+points(pdata$dapi.median.log10sum.adjust[ii.min.dapi],
+       pdata$molecules[ii.min.dapi], pch=4, lwd=2, cex=1)</code></pre>
+<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Test the association between total sample molecule count and DAPI.</p>
 <ul>
 <li><p>After excluding outliers, pearson correlation is .2</p></li>
@@ -330,30 +381,61 @@ plot(pdata.adj$dapi.median.log10sum.adjust, pdata$molecules, main = &quot;DAPI v
 <li><p>Consider lm(log10(molecules) ~ dapi). The adjusted R-squared is .04</p></li>
 <li><p>Weak linear trend between molecule count and DAPI…</p></li>
 </ul>
-<pre class="r"><code>xy &lt;- data.frame(dapi=pdata.adj$dapi.median.log10sum.adjust,
-                 molecules=pdata$molecules)
-xy &lt;- subset(xy, molecules &lt; 2*10^5 &amp; dapi &gt; -1)
+<pre class="r"><code>xy &lt;- data.frame(dapi=pdata$dapi.median.log10sum.adjust,
+                 molecules=pdata$molecules,
+                 chip_id=pdata$chip_id)
+xy &lt;- xy[xy$dapi &gt; -1,]
 
-fit &lt;- lm(log10(molecules)~dapi, data=xy)
+fit &lt;- lm(molecules~dapi+factor(chip_id), data=xy)
 summary(fit)</code></pre>
 <pre><code>
 Call:
-lm(formula = log10(molecules) ~ dapi, data = xy)
+lm(formula = molecules ~ dapi + factor(chip_id), data = xy)
 
 Residuals:
-      Min        1Q    Median        3Q       Max 
--0.316134 -0.056187  0.007504  0.060388  0.225894 
+   Min     1Q Median     3Q    Max 
+-54492 -15575  -1546  13723  71917 
 
 Coefficients:
-            Estimate Std. Error  t value Pr(&gt;|t|)    
-(Intercept) 5.098818   0.002783 1832.186  &lt; 2e-16 ***
-dapi        0.082510   0.013209    6.246 6.27e-10 ***
+                       Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)            128330.1     2191.8  58.550  &lt; 2e-16 ***
+dapi                    17081.8     3732.2   4.577 5.40e-06 ***
+factor(chip_id)NA18855  -7233.1     2838.5  -2.548  0.01100 *  
+factor(chip_id)NA18870   2640.0     2680.6   0.985  0.32495    
+factor(chip_id)NA19098   -833.6     2733.1  -0.305  0.76043    
+factor(chip_id)NA19101  17348.1     2976.0   5.829 7.81e-09 ***
+factor(chip_id)NA19160   9631.3     3034.5   3.174  0.00156 ** 
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 0.08695 on 975 degrees of freedom
-Multiple R-squared:  0.03848,   Adjusted R-squared:  0.03749 
-F-statistic: 39.02 on 1 and 975 DF,  p-value: 6.268e-10</code></pre>
+Residual standard error: 22160 on 879 degrees of freedom
+Multiple R-squared:  0.1335,    Adjusted R-squared:  0.1276 
+F-statistic: 22.57 on 6 and 879 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>fit &lt;- lm(log10(molecules)~dapi+factor(chip_id), data=xy)
+summary(fit)</code></pre>
+<pre><code>
+Call:
+lm(formula = log10(molecules) ~ dapi + factor(chip_id), data = xy)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.20393 -0.04962  0.00043  0.04868  0.21492 
+
+Coefficients:
+                        Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)             5.103490   0.007289 700.187  &lt; 2e-16 ***
+dapi                    0.058028   0.012411   4.675 3.39e-06 ***
+factor(chip_id)NA18855 -0.027545   0.009439  -2.918  0.00361 ** 
+factor(chip_id)NA18870  0.006707   0.008914   0.752  0.45197    
+factor(chip_id)NA19098 -0.005623   0.009089  -0.619  0.53626    
+factor(chip_id)NA19101  0.054951   0.009896   5.553 3.73e-08 ***
+factor(chip_id)NA19160  0.030816   0.010091   3.054  0.00233 ** 
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.0737 on 879 degrees of freedom
+Multiple R-squared:  0.1371,    Adjusted R-squared:  0.1312 
+F-statistic: 23.28 on 6 and 879 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>fit &lt;- lm(molecules~dapi, data=xy)
 summary(fit)</code></pre>
 <pre><code>
@@ -362,30 +444,61 @@ lm(formula = molecules ~ dapi, data = xy)
 
 Residuals:
    Min     1Q Median     3Q    Max 
--67799 -17713   -348  16665  73746 
+-49959 -16957   -585  15862  86073 
 
 Coefficients:
             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 128117.8      793.7 161.415  &lt; 2e-16 ***
-dapi         23538.3     3767.5   6.248 6.21e-10 ***
+(Intercept) 131005.0      784.9 166.902  &lt; 2e-16 ***
+dapi         20835.5     3794.1   5.492 5.21e-08 ***
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 
-Residual standard error: 24800 on 975 degrees of freedom
-Multiple R-squared:  0.03849,   Adjusted R-squared:  0.03751 
-F-statistic: 39.03 on 1 and 975 DF,  p-value: 6.211e-10</code></pre>
+Residual standard error: 23350 on 884 degrees of freedom
+Multiple R-squared:  0.03299,   Adjusted R-squared:  0.0319 
+F-statistic: 30.16 on 1 and 884 DF,  p-value: 5.209e-08</code></pre>
+<pre class="r"><code>fit &lt;- lm(log10(molecules)~dapi, data=xy)
+summary(fit)</code></pre>
+<pre><code>
+Call:
+lm(formula = log10(molecules) ~ dapi, data = xy)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.201411 -0.053816  0.004652  0.056963  0.222330 
+
+Coefficients:
+            Estimate Std. Error  t value Pr(&gt;|t|)    
+(Intercept) 5.110141   0.002613 1955.683  &lt; 2e-16 ***
+dapi        0.071475   0.012630    5.659 2.06e-08 ***
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+Residual standard error: 0.07772 on 884 degrees of freedom
+Multiple R-squared:  0.03496,   Adjusted R-squared:  0.03387 
+F-statistic: 32.02 on 1 and 884 DF,  p-value: 2.057e-08</code></pre>
+<pre class="r"><code>cor(xy$dapi, xy$molecules, method = &quot;pearson&quot;)</code></pre>
+<pre><code>[1] 0.1816292</code></pre>
+<pre class="r"><code>cor(xy$dapi, log10(xy$molecules), method = &quot;pearson&quot;)</code></pre>
+<pre><code>[1] 0.1869765</code></pre>
 <pre class="r"><code>par(mfrow=c(1,2))
 plot(x=xy$dapi, y = xy$molecules,
      xlab = &quot;DAPI intensity&quot;, ylab = &quot;Total molecule count&quot;,
-     main = &quot;DAPI vs. molecule count \n adj-Rsq = .04&quot;)
+     main = &quot;DAPI vs. molecule count \n adj-Rsq = .03; cor=.2&quot;)
 abline(lm(molecules~dapi, data=xy), col = &quot;red&quot;)
 plot(x=xy$dapi, y = log10(xy$molecules),
      xlab = &quot;DAPI intensity&quot;, ylab = &quot;log10 total molecule count&quot;,
-     main = &quot;DAPI vs. log10 molecule count \n adj-Rsq = .04&quot;)
+     main = &quot;DAPI vs. log10 molecule count \n adj-Rsq = .03, cor=.2&quot;)
 abline(lm(log10(molecules)~dapi, data=xy), col = &quot;red&quot;)</code></pre>
-<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>cor(xy$dapi, xy$molecules, method = &quot;pearson&quot;)</code></pre>
-<pre><code>[1] 0.1962001</code></pre>
+<p><img src="figure/images-time-eval.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="save-re-ordered-cell-times" class="section level2">
+<h2>Save re-ordered cell times</h2>
+<pre class="r"><code>theta &lt;- as.numeric(Theta.fucci.new)
+names(theta) &lt;- colnames(log2cpm.all)
+
+saveRDS(theta,
+        file = &quot;../output/images-time-eval.Rmd/theta.rds&quot;)</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">

@@ -1,5 +1,5 @@
 ---
-title: "Select genes indicative of cell cycle state"
+title: "Evaluate projected cell time"
 author: "Joyce Hsiao"
 output: 
   html_document:
@@ -42,17 +42,11 @@ df <- readRDS(file="../data/eset-final.rds")
 pdata <- pData(df)
 fdata <- fData(df)
 
-# select endogeneous genes
-counts <- exprs(df)[grep("ENSG", rownames(df)), ]
-
-log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
-
-
-pdata.adj <- readRDS("../output/images-normalize-anova.Rmd/pdata.adj.rds")
+log2cpm.all <- t(log2(1+(10^6)*(t(exprs(df))/pdata$molecules)))
 
 macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
 
-pc.fucci <- prcomp(subset(pdata.adj, 
+pc.fucci <- prcomp(subset(pdata, 
                           select=c("rfp.median.log10sum.adjust",
                                    "gfp.median.log10sum.adjust")),
                    center = T, scale. = T)
@@ -90,9 +84,9 @@ summary(as.numeric(Theta.fucci)[labs==1])
 summary(as.numeric(Theta.fucci)[labs==2])
 summary(as.numeric(Theta.fucci)[labs==3])
 
-# move the origin to 1.27
+# move the origin to 1.17
 Theta.fucci.new <- vector("numeric", length(Theta.fucci))
-cutoff <- min(Theta.fucci[labs==1])
+cutoff <- min(Theta.fucci[labs==2])
 Theta.fucci.new[Theta.fucci>=cutoff] <- Theta.fucci[Theta.fucci>=cutoff] - cutoff
 Theta.fucci.new[Theta.fucci<cutoff] <- Theta.fucci[Theta.fucci<cutoff] - cutoff + 2*pi
 ```
@@ -108,28 +102,52 @@ points(y=cdk1[labs==2], x=as.numeric(Theta.fucci.new)[labs==2], pch=16, cex=.7, 
 points(y=cdk1[labs==3], x=as.numeric(Theta.fucci.new)[labs==3], pch=16, cex=.7, col = "blue")
 ```
 
+
+
 ---
 
 ## Results
 
+Check data points with outlier DAPI values
+
 ```{r}
+ii.min.dapi <- order(pData(df)$dapi.median.log10sum.adjust)[1:2]
+
+pData(df)[ii.min.dapi,]
+```
+
+
+```{r, fig.width=7, fig.height=7}
 par(mfrow=c(2,2))
-ylims <- with(pdata.adj, range(c(dapi.median.log10sum.adjust,
-                                 gfp.median.log10sum.adjust,
-                                 rfp.median.log10sum.adjust)))
-plot(as.numeric(Theta.fucci.new), pdata.adj$dapi.median.log10sum.adjust, col = "blue", 
+ylims <- with(pdata, range(c(dapi.median.log10sum.adjust,
+                             gfp.median.log10sum.adjust,
+                             rfp.median.log10sum.adjust)))
+plot(as.numeric(Theta.fucci.new), pdata$dapi.median.log10sum.adjust, col = "blue", 
      ylab= "adjusted intensity values",
      ylim = ylims, main = "DAPI intensity values",
      xlab ="Estimated cell time")
-plot(as.numeric(Theta.fucci.new), pdata.adj$gfp.median.log10sum.adjust, col = "forestgreen", 
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$dapi.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+plot(as.numeric(Theta.fucci.new), pdata$gfp.median.log10sum.adjust, col = "forestgreen", 
      ylab= "adjusted intensity values",
      ylim = ylims, main = "GFP and RFP intensity values",
      xlab ="Estimated cell time")
-points(as.numeric(Theta.fucci.new), pdata.adj$rfp.median.log10sum.adjust, col = "red")
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$gfp.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+points(as.numeric(Theta.fucci.new), pdata$rfp.median.log10sum.adjust, col = "red")
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$rfp.median.log10sum.adjust[ii.min.dapi], pch=4, lwd=2, cex=1)
+
 plot(as.numeric(Theta.fucci.new), pdata$molecules, main = "Total molecule count",
-     xlab ="Estimated cell time", ylab = "Total molecule count")
-plot(pdata.adj$dapi.median.log10sum.adjust, pdata$molecules, main = "DAPI vs. molecule count",
-     xlab = "DAPI intensity adjusted for C1 batch", ylab = "Total molecule count")
+     xlab ="Estimated cell time", ylab = "Total molecule count", col = "gray50")
+points(as.numeric(Theta.fucci.new)[ii.min.dapi],
+       pdata$molecules[ii.min.dapi], pch=4, lwd=2, cex=1)
+
+plot(pdata$dapi.median.log10sum.adjust, pdata$molecules, main = "DAPI vs. molecule count",
+     xlab = "DAPI intensity adjusted for C1 batch", ylab = "Total molecule count", 
+     col = "gray50")
+points(pdata$dapi.median.log10sum.adjust[ii.min.dapi],
+       pdata$molecules[ii.min.dapi], pch=4, lwd=2, cex=1)
 ```
 
 Test the association between total sample molecule count and DAPI.
@@ -144,13 +162,19 @@ Test the association between total sample molecule count and DAPI.
 
 
 ```{r}
-xy <- data.frame(dapi=pdata.adj$dapi.median.log10sum.adjust,
-                 molecules=pdata$molecules)
-xy <- subset(xy, molecules < 2*10^5 & dapi > -1)
+xy <- data.frame(dapi=pdata$dapi.median.log10sum.adjust,
+                 molecules=pdata$molecules,
+                 chip_id=pdata$chip_id)
+xy <- xy[xy$dapi > -1,]
 
-fit <- lm(log10(molecules)~dapi, data=xy)
+fit <- lm(molecules~dapi+factor(chip_id), data=xy)
 summary(fit)
+fit <- lm(log10(molecules)~dapi+factor(chip_id), data=xy)
+summary(fit)
+
 fit <- lm(molecules~dapi, data=xy)
+summary(fit)
+fit <- lm(log10(molecules)~dapi, data=xy)
 summary(fit)
 
 cor(xy$dapi, xy$molecules, method = "pearson")
@@ -160,15 +184,26 @@ cor(xy$dapi, log10(xy$molecules), method = "pearson")
 par(mfrow=c(1,2))
 plot(x=xy$dapi, y = xy$molecules,
      xlab = "DAPI intensity", ylab = "Total molecule count",
-     main = "DAPI vs. molecule count \n adj-Rsq = .04; cor=.2")
+     main = "DAPI vs. molecule count \n adj-Rsq = .03; cor=.2")
 abline(lm(molecules~dapi, data=xy), col = "red")
 plot(x=xy$dapi, y = log10(xy$molecules),
      xlab = "DAPI intensity", ylab = "log10 total molecule count",
-     main = "DAPI vs. log10 molecule count \n adj-Rsq = .04, cor=.2")
+     main = "DAPI vs. log10 molecule count \n adj-Rsq = .03, cor=.2")
 abline(lm(log10(molecules)~dapi, data=xy), col = "red")
 
 ```
 
+---
+
+## Save re-ordered cell times
+
+```{r, eval = F}
+theta <- as.numeric(Theta.fucci.new)
+names(theta) <- colnames(log2cpm.all)
+
+saveRDS(theta,
+        file = "../output/images-time-eval.Rmd/theta.rds")
+```
 
 ---
 

@@ -24,11 +24,11 @@ library(matrixStats)
 library(NPCirc)
 library(smashr)
 library(parallel)
-
+library(genlasso)
 
 ## Load data
 dir <- "/project2/gilad/joycehsiao/fucci-seq"
-df <- readRDS(file.path(dir,"data/eset-filtered.rds"))
+df <- readRDS(file.path(dir,"data/eset-final.rds"))
 pdata <- pData(df)
 fdata <- fData(df)
 
@@ -44,27 +44,23 @@ pdata.adj <- readRDS(file.path(dir,"output/images-normalize-anova.Rmd/pdata.adj.
 
 source(file.path(dir,"code/utility.R"))
 
-## Projected normal on PCs of Red/Green
-pc.fucci <- prcomp(subset(pdata.adj,
-                        select=c("rfp.median.log10sum.adjust",
-                                 "gfp.median.log10sum.adjust")),
-                 center = T, scale. = T)
-Theta.cart <- pc.fucci$x
-Theta.fucci <- coord2rad(Theta.cart)
+## cell time
+theta <- readRDS(file.path(dir, "output/images-time-eval.Rmd/theta.rds"))
 
+# ## order cells based on estimated time
+partitions <- partitionSamples.n(c(1:length(theta)), runs=1,
+                                 c(512,length(theta)-512))[[1]][[1]]
 
-## order cells based on estimated time
-partitions <- partitionSamples.n(c(1:length(Theta.fucci)), runs=1,
-                                 c(512,400))[[1]][[1]]
-ord <- order(as.numeric(Theta.fucci))
-
+ord <- order(theta)
 log2cpm.ord <- log2cpm.all[,ord]
+counts.ord <- counts[,ord]
 
-theta.ord <- as.numeric(Theta.fucci)[ord]
+theta.ord <- theta[ord]
 
 indices.train <- partitions[[1]]
 
 out.methods <- mclapply(1:nrow(log2cpm.ord), function(g) {
+#out.methods <- mclapply(1:10, function(g) {
 
   yy <- log2cpm.ord[g,]
   yy.train <- yy[indices.train]
@@ -73,6 +69,7 @@ out.methods <- mclapply(1:nrow(log2cpm.ord), function(g) {
 
   yy.train.nonzero <- yy.train[not.zero.train]
   xx.train.nonzero <- xx.train[not.zero.train]
+
   # local linear kernel estimate
   fit.npcirc.ll <- kern.reg.circ.lin(x = xx.train.nonzero,
                                      y = yy.train.nonzero, method="LL")
@@ -93,7 +90,7 @@ out.methods <- mclapply(1:nrow(log2cpm.ord), function(g) {
   npnw.mad.ratio <- npnw.mad.pred/npnw.mad.constant
   npnw.pve <- 1-var(yy.train.nonzero-npnw.pred.y.train)/var(yy.train.nonzero)
 
-  # smash
+  # smash gaussian
   is.zeros <- which(yy.train == 0)
   yy.train.impute <- yy.train
   for (i in 1:length(is.zeros)) {
@@ -107,7 +104,27 @@ out.methods <- mclapply(1:nrow(log2cpm.ord), function(g) {
   smash.mad.constant <- mad(yy.train.impute-mean(yy.train.impute), constant = 1)
   smash.mad.ratio <- smash.mad.pred/smash.mad.constant
 
+  # smash poisson
+  yy.counts <- counts.ord[g,]
+  yy.counts.train <- yy.counts[indices.train]
+  xx.train <- theta.ord[indices.train]
+  not.zero.train <- yy.counts.train > 0
+
+  is.zeros <- which(yy.counts.train == 0)
+  yy.counts.train.impute <- yy.counts.train
+  for (i in 1:length(is.zeros)) {
+    pos <- is.zeros[i]
+    impute.val <- round(mean(yy.counts.train[-is.zeros]))
+    yy.counts.train.impute[pos] <- impute.val
+  }
+  fit.smash.pois <- smash(x = yy.counts.train.impute, model="poiss")
+
+  smash.pois.mad.pred <- mad(yy.counts.train.impute-fit.smash.pois, constant = 1)
+  smash.pois.mad.constant <- mad(yy.counts.train.impute-mean(yy.counts.train.impute), constant = 1)
+  smash.pois.mad.ratio <- smash.pois.mad.pred/smash.pois.mad.constant
+
   return(list(smash.mad.ratio=smash.mad.ratio,
+              smash.pois.mad.ratio=smash.pois.mad.ratio,
               npll.mad.ratio=npll.mad.ratio,
               npnw.mad.ratio=npnw.mad.ratio,
               npll.pve=npll.pve,
@@ -116,6 +133,7 @@ out.methods <- mclapply(1:nrow(log2cpm.ord), function(g) {
               xx.train=theta.ord[indices.train],
               smash.xx=theta.ord[indices.train],
               smash.yy=fit.smash,
+              smash.yy.pois=fit.smash.pois,
               npll.xx=xx.train.nonzero,
               npll.yy=npll.pred.y.train,
               npnw.xx=xx.train.nonzero,
