@@ -1,0 +1,359 @@
+---
+title: "npreg: trendfilter on normalized data"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)
+library(genlasso)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+source("../code/utility.R")
+source("../code/npreg/npreg.methods.R")
+```
+
+--
+
+## Evaluate data after standardizing expression
+
+Map log2cpm expression to standard normal distribution. The transformation is non-linear. Sort N expression values from the largest to the smalles. General N standard normal random variable. For the non-zero expression value, find the correspnoding standard normal random variable that has the same quantile and subsitute the value with the corresponding normal random variable value. We then find the stanadard normal random variable values correspond to non-zero expression values and randomly assign these non-zero expression values to a standard normal random variable value. 
+
+* For genes with relatively low fraction of deteted cells, this method allows to move the zero expression values closer to the non-zero expression value. 
+
+* For genes with high fraction of undetected cells, this method creates a 
+
+```{r, eval = F}
+log2cpm.quant <- do.call(rbind, mclapply(1:nrow(log2cpm.all), function(g) {
+  yy <- log2cpm.all[g,]
+  is.zero <- which(yy == 0)
+  qq.map <- qqnorm(yy)
+  yy.qq <- qq.map$x
+  yy.qq[is.zero] <- sample(qq.map$x[is.zero])
+  return(yy.qq)
+}, mc.cores=8) )
+rownames(log2cpm.quant) <- rownames(log2cpm.all)
+
+saveRDS(log2cpm.quant, file = "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+```
+
+check genes with low/high fraction of undetected cells. 
+
+```{r}
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+ii.high <- order(rowMeans(log2cpm.all > 0), decreasing = F)[1:5]
+par(mfcol=c(3,5))
+for (i in 1:5) {
+  plot(log2cpm.all[ii.high[i],])
+  plot(log2cpm.quant[ii.high[i],])
+  plot(log2cpm.all[ii.high[i],], log2cpm.quant[ii.high[i],])
+}
+
+ii.low <- order(rowMeans(log2cpm.all > 0), decreasing = T)[1:5]
+par(mfcol=c(3,5))
+for (i in 1:5) {
+  plot(log2cpm.all[ii.low[i],])
+  plot(log2cpm.quant[ii.low[i],])
+  plot(log2cpm.all[ii.low[i],], log2cpm.quant[ii.low[i],])
+}
+```
+
+Check genes that we previously found to have cyclical patterns. This doesn't distor genes previously found to have cyclical patterns.
+
+```{r}
+cyclegenes <- readRDS("../output/npreg-methods.Rmd/cyclegenes.rds")
+
+par(mfcol=c(3,5))
+for (gene in colnames(cyclegenes)[2:6]) {
+  ind <- rownames(log2cpm.all) == gene
+  plot(log2cpm.all[ind,])
+  plot(log2cpm.quant[ind,])
+  plot(log2cpm.all[ind,], log2cpm.quant[ind,])
+}
+```
+
+---
+
+## Fit trendfilter to the data after quantile normalization
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.1.sh`
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.2.sh`
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.3.sh`
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.4.sh`
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.5.sh`
+
+Split the data to five chunks by genes and submit the chunks to independent batch jobs.
+
+```{r, eval=F}
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+saveRDS(log2cpm.quant[1:2200,], 
+        "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.1.rds")
+saveRDS(log2cpm.quant[2201:4400,], 
+        "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.2.rds")
+saveRDS(log2cpm.quant[4401:6600,], 
+        "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.3.rds")
+saveRDS(log2cpm.quant[6601:8800,], 
+        "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.4.rds")
+saveRDS(log2cpm.quant[8801:11040,], 
+        "../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.5.rds")
+
+fit.quant.1 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.1.rds")
+fit.quant.2 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.2.rds")
+fit.quant.3 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.3.rds")
+fit.quant.4 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.4.rds")
+fit.quant.5 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.quant.5.rds")
+
+fit.quant <- c(fit.quant.1,fit.quant.2,fit.quant.3,fit.quant.4,fit.quant.5)
+saveRDS(fit.quant, 
+        "../output/npreg-trendfilter-quantile.Rmd/fit.quant.rds")
+```
+
+consider PVE
+
+```{r}
+fit.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.quant.rds")
+
+pve <- sapply(fit.quant, "[[", "trend.pve")
+summary(pve)
+```
+
+select genes with the highest PVE
+
+```{r}
+pve.genes <- names(pve)[order(c(pve), decreasing = T)[1:10]]
+```
+
+plot top 10
+
+```{r}
+par(mfrow=c(2,5))
+for (g in 1:length(pve.genes)) {
+  ii.g <- which(names(fit.quant)==pve.genes[g])
+  plot(log2cpm.quant[rownames(log2cpm.quant)==pve.genes[g]])
+  points(fit.quant[[ii.g]]$trend.yy, pch=16, col = "blue", cex=.7)
+}
+```
+
+quickily check top 100 enrichment for cell cycle genes.
+
+```{r}
+enrich.order <- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out <- order(mad.ratio$smash.mad.ratio)
+  # cutoffs <- c(100, 200, 300)
+  cycle.rich <- sapply(cutoffs, function(x) {
+    which_top <- order(metrics, decreasing = T)[1:x]
+    sig.cycle <- sum(allgenes[which_top] %in% cyclegenes)/x
+    non.cycle <- sum(allgenes[-which_top] %in% cyclegenes)/(length(allgenes)-x)
+    cbind(as.numeric(sum(allgenes[which_top] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) <- cutoffs
+  rownames(cycle.rich) <- c("nsig.genes.cycle", "fold.sig.vs.nonsig.cycle")
+  cycle.rich
+}
+
+enrich.order(cutoffs = c(100, 200, 300), 
+             metrics = pve, cyclegenes = macosko$ensembl,
+             allgenes = rownames(log2cpm.quant))
+```  
+  
+  
+
+## Make a permuted distribution
+
+Consider two genes, one with large fraction of undetected cells and one with small fraction of undeteted cells. See if the null distribution is similar.
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.perm.lowmisss.sh`
+
+`sbatch code/npreg-trendfilter-quantile.Rmd trendfilter.perm.highmisss.sh`
+
+
+```{r}
+perm.lowmiss <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.perm.lowmiss.rds")
+
+perm.highmiss <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.trend.perm.highmiss.rds")
+
+pve.perm.lowmiss <- sapply(perm.lowmiss, "[[", "trend.pve")
+pve.perm.highmiss <- sapply(perm.highmiss, "[[", "trend.pve")
+
+summary(pve.perm.lowmiss)
+summary(pve.perm.highmiss)
+```
+
+Turns out the p-value based on permuted data is not the same for genes with low and high fraction of undetected cells.
+
+```{r}
+par(mfrow=c(1,2))
+hist(pve.perm.lowmiss, nclass=30,
+     main = "Fraction undetected < 10%", xlab = "p-value")
+hist(pve.perm.highmiss, nclass=30,
+     main = "Fraction undetected > 80%", xlab = "p-value")
+```
+
+Compute p-value based on two different distributions. High consistency between the two.
+
+```{r}
+B <- length(pve.perm.lowmiss)
+pval.perm.low <- sapply(fit.quant, function(x) (1+sum(pve.perm.lowmiss > x$trend.pve))/(1+B))
+pval.perm.high <- sapply(fit.quant, function(x) (1+sum(pve.perm.highmiss > x$trend.pve))/(1+B))
+
+summary(pval.perm.low)
+summary(pval.perm.high)
+
+plot(pval.perm.low, pval.perm.high)
+sum(pval.perm.high < .001)
+sum(pval.perm.low < .001)
+```
+
+use permutated distribution based data with low missing value. more conservative
+
+```{r}
+which.sig <- pval.perm.low < .001
+
+enrich.sigval <- function(cutoffs, metrics, cyclegenes, allgenes) {
+  #  out <- order(mad.ratio$smash.mad.ratio)
+  # cutoffs <- c(100, 200, 300)
+  cycle.rich <- sapply(cutoffs, function(x) {
+    #which_top <- order(metrics, decreasing = T)[1:x]
+    sig.cycle <- sum(allgenes[metrics < x] %in% cyclegenes)/sum(metrics < x)
+    non.cycle <- sum(allgenes[metrics > x] %in% cyclegenes)/sum(metrics > x)
+    cbind(sum(metrics < x), as.numeric(sum(allgenes[metrics < x] %in% cyclegenes)), 
+          sig.cycle/non.cycle)
+  })
+  colnames(cycle.rich) <- cutoffs
+  rownames(cycle.rich) <- c("nsig.genes", "nsig.genes.cycle", "fold.sig.vs.nonsig.cycle")
+  cycle.rich
+}
+
+
+enrich.sigval(cutoffs = c(.001, .005, .01), metrics=pval.perm.low,
+              cyclegenes = macosko$ensembl,
+              allgenes = rownames(log2cpm.quant))
+```
+
+
+---
+
+## Genes with the small PVE
+
+```{r}
+out.stats <- data.frame(pve=sapply(fit.quant, "[[", "trend.pve"),
+                        pval.perm=pval.perm.low,
+                        row.names = rownames(log2cpm.quant))
+
+out.stats.ordered <- out.stats[order(out.stats$pve, decreasing = T),]
+out.stats.ordered.sig <- out.stats.ordered[out.stats.ordered$pval.perm < .001,]
+  
+
+library(biomaRt)
+ensembl <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+symbols <- getBM(attributes = c("hgnc_symbol",'ensembl_gene_id'), 
+      filters = c('ensembl_gene_id'),
+      values = rownames(out.stats.ordered.sig), 
+      mart = ensembl)
+out.stats.ordered.sig$symbols <- symbols$hgnc_symbol[match(rownames(out.stats.ordered.sig),
+                                                           symbols$ensembl_gene_id)]
+out.stats.ordered.sig$symbols[is.na(out.stats.ordered.sig$symbols)] <- rownames(out.stats.ordered.sig)[is.na(out.stats.ordered.sig$symbols)]
+
+sig.genes <- rownames(out.stats.ordered.sig)
+par(mfrow=c(4,5)) 
+for (g in 1:20) {
+  ii.g <- which(rownames(log2cpm.quant) == sig.genes[g])
+  plot(log2cpm.quant[ii.g,],
+       main=out.stats.ordered.sig$symbols[g])
+  points(fit.quant[[ii.g]]$trend.yy, col = "blue", pch=16, cex=.7)
+}
+```
+
+---
+
+## Output summary statistics
+
+```{r, eval=F}
+saveRDS(out.stats.ordered.sig,
+        "../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds")
+
+saveRDS(out.stats,
+        "../output/npreg-trendfilter-quantile.Rmd/quant.stats.rds")
+
+
+write.table(rownames(out.stats.ordered.sig),
+            quote = F, col.names = F, row.names = F,
+            file = "../output/npreg-trendfilter-quantile.Rmd/siggens.txt")
+```
+
+
+
+---
+
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
+
