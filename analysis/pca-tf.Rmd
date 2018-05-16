@@ -40,7 +40,7 @@ library("ggplot2")
 library("heatmap3")
 library("reshape2")
 library("Biobase")
-source("../code/pca.R")
+source("../code/utility.R")
 ```
 
 ## PCA
@@ -102,6 +102,9 @@ heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8),
 
 heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
                        ylab="technical factor", main = "Before filter w/o scale")
+
+plot_pca(pca_hs$PCs, pcx = 1, pcy = 2, explained = pca_hs$explained,
+         metadata = pData(eset_hs))
 ```
 
 
@@ -110,13 +113,14 @@ heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
 Import data post [sample and gene filtering](gene-filtering.Rmd)
 
 ```{r filter-data}
-load(file="../output/gene-filtering.Rmd/eset-filtered.rdata")
+eset_filter <- readRDS("../data/eset-filtered.rds")
 ```
 
 Compute log2 CPM based on the library size before filtering.
 
 ```{r log2}
-log2cpm <- log2(cpm_filtered+1)
+log2cpm <- cpm(exprs(eset), log = TRUE)
+dim(log2cpm)
 ```
 
 ```{r after-filter}
