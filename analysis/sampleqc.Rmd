@@ -39,7 +39,7 @@ theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-indi_palette <- c("orangered4", "tomato", "lightpink3", "navyblue", "turquoise1", "dodgerblue2")
+indi_palette <- c("tomato4", "chocolate1", "rosybrown", "purple4", "plum3", "slateblue")
 ```
 
 ```{r data}
@@ -487,19 +487,16 @@ write.table(data.frame(row.names(anno), anno[,"filter_all"]),
 ```
 
 ```{r}
-ggplot(anno, aes(x = detect_hs, y = ercc_percentage * 100,
+ggplot(anno, aes(x = mol_hs, y = detect_hs,
                    col = as.factor(chip_id), 
                    height = 600, width = 2000)) +
                scale_colour_manual(values = indi_palette) +
                scale_shape_manual(values=c(1:10)) +
                geom_point(alpha = 0.6) + 
-               geom_vline(xintercept = cut_off_genes, 
-                          colour="grey", linetype = "longdash") +
-               geom_hline(yintercept = cut_off_ercc * 100, 
-                          colour="grey", linetype = "longdash") +
-               theme(legend.position = c(.7,.9)) +
-               labs(x = "Number of detected genes / samlpe", 
-                    y = "Percentage of ERCC spike-in reads (%)") 
+               labs(col = "Individual") +
+               theme(legend.position = c(.7,.5)) +
+               labs(x = "Total molecule counts / samlpe", 
+                    y = "Number of detected genes / sample") 
 
 ```
 
