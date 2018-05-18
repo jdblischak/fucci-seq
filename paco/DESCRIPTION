@@ -1,0 +1,29 @@
+Package: paco
+Type: Package
+Title: Predicting the cyclical ordering of single cells using gene expression data
+Version: 0.99.1
+Date: 2016-12-22
+Authors@R: c(
+  person("Chiaowen Joyce", "Hsiao", email = "joyce.hsiao1@gmail.com", role = c("aut","cre")),
+  person("Matthew", "Stephens", email = "stephens999@gmail.com", role ="aut") ) 
+Maintainer: Chiaowen Joyce Hsiao <joyce.hsiao1@uchicago.edu>
+Description: Predicting the cyclical ordering of single cells using gene expression data.
+Depends:
+    R (>= 3.2), 
+    assertthat,
+    circular,
+    genlasso,
+    ggplot2,
+    parallel,
+    Rfast,
+    testit
+Imports:
+    MASS,
+    parallel,
+    zoo
+RoxygenNote: 6.0.1
+License: GPL (>=2)
+Encoding: UTF-8
+LazyData: true
+
+
