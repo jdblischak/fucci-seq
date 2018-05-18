@@ -319,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-06</p>
+<p><strong>Last updated:</strong> 2018-05-18</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> fd3bf7b</p>
+<p><strong>Code version:</strong> f053912</p>
 <hr />
 <div id="setup" class="section level2">
 <h2>Setup</h2>
@@ -333,7 +333,7 @@ library(&quot;ggplot2&quot;)
 library(&quot;heatmap3&quot;)
 library(&quot;reshape2&quot;)
 library(&quot;Biobase&quot;)
-source(&quot;../code/pca.R&quot;)</code></pre>
+source(&quot;../code/utility.R&quot;)</code></pre>
 </div>
 <div id="pca" class="section level2">
 <h2>PCA</h2>
@@ -395,27 +395,31 @@ heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8),
 <pre class="r"><code>heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = &quot;none&quot;,
                        ylab=&quot;technical factor&quot;, main = &quot;Before filter w/o scale&quot;)</code></pre>
 <p><img src="figure/pca-tf.Rmd/before-filter-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pca(pca_hs$PCs, pcx = 1, pcy = 2, explained = pca_hs$explained,
+         metadata = pData(eset_hs), color=&quot;chip_id&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/before-filter-3.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="after-filter" class="section level3">
 <h3>After filter</h3>
 <p>Import data post <a href="gene-filtering.Rmd">sample and gene filtering</a></p>
-<pre class="r"><code>load(file=&quot;../output/gene-filtering.Rmd/eset-filtered.rdata&quot;)</code></pre>
+<pre class="r"><code>eset_filter &lt;- readRDS(&quot;../data/eset-filtered.rds&quot;)</code></pre>
 <p>Compute log2 CPM based on the library size before filtering.</p>
-<pre class="r"><code>log2cpm &lt;- log2(cpm_filtered+1)</code></pre>
+<pre class="r"><code>log2cpm &lt;- cpm(exprs(eset_filter), log = TRUE)
+dim(log2cpm)</code></pre>
+<pre><code>[1] 11093   923</code></pre>
 <pre class="r"><code>pca_log2cpm &lt;- run_pca(log2cpm)
 
-pdata &lt;- pData(eset_filtered)
+pdata &lt;- pData(eset_filter)
 pdata$experiment &lt;- as.factor(pdata$experiment)
 
-plot_grid(
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color=&quot;chip_id&quot;),
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color=&quot;experiment&quot;),
-  ncol=2)</code></pre>
+plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;chip_id&quot;)</code></pre>
 <p><img src="figure/pca-tf.Rmd/after-filter-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color=&quot;experiment&quot;)</code></pre>
+<p><img src="figure/pca-tf.Rmd/after-filter-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>## selection of technical factor
-covariates &lt;- pData(eset_filtered) %&gt;% dplyr::select(experiment, well, chip_id, 
+covariates &lt;- pData(eset_filter) %&gt;% dplyr::select(experiment, well, chip_id, 
                                                      concentration, raw:unmapped,
                                                      starts_with(&quot;detect&quot;),  molecules)
 ## look at the first 6 PCs
@@ -447,10 +451,10 @@ heatmap(cor_tech, symm = TRUE)</code></pre>
 log2cpm_mean &lt;- rowMeans(log2cpm)
 summary(log2cpm_mean)</code></pre>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.3048  1.3316  2.9092  3.3464  4.9083 13.6379 </code></pre>
+  2.447   3.482   4.505   4.865   5.882  13.434 </code></pre>
 <pre class="r"><code>log2cpm_top &lt;- log2cpm[rank(log2cpm_mean) / length(log2cpm_mean) &gt; 1 - 0.1, ]
 dim(log2cpm_top)</code></pre>
-<pre><code>[1] 1149 1025</code></pre>
+<pre><code>[1] 1110  923</code></pre>
 <pre class="r"><code>pca_top &lt;- run_pca(log2cpm_top)
 
 ## look at the first 6 PCs

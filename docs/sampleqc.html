@@ -25,8 +25,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -36,12 +36,10 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs) {
-  hljs.configure({languages: []});
-  hljs.initHighlightingOnLoad();
-  if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-  }
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
 }
 </script>
 
@@ -321,10 +319,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-05-09</p>
+<p><strong>Last updated:</strong> 2018-05-18</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 119c6b2</p>
+<p><strong>Code version:</strong> f053912</p>
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <pre class="r"><code>library(&quot;cowplot&quot;)
@@ -338,7 +336,8 @@ source(&quot;../code/utility.R&quot;)
 theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
-cbPalette &lt;- c(&quot;#999999&quot;, &quot;#E69F00&quot;, &quot;#56B4E9&quot;, &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)</code></pre>
+cbPalette &lt;- c(&quot;#999999&quot;, &quot;#E69F00&quot;, &quot;#56B4E9&quot;, &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
+indi_palette &lt;- c(&quot;tomato4&quot;, &quot;chocolate1&quot;, &quot;rosybrown&quot;, &quot;purple4&quot;, &quot;plum3&quot;, &quot;slateblue&quot;)</code></pre>
 <pre class="r"><code>fname &lt;- Sys.glob(&quot;../data/eset/*.rds&quot;)
 eset &lt;- Reduce(combine, Map(readRDS, fname))
 anno &lt;- pData(eset)</code></pre>
@@ -413,6 +412,7 @@ plot_unmapped</code></pre>
 unmapped_indi &lt;- ggplot(anno, aes(x = chip_id, y = unmapped_ratios, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_color_manual(values = indi_palette) +
   labs(x = &quot;C1 chip&quot;, y = &quot;Unmapped reads/ total reads&quot;,
        title = &quot;Unmapped reads percentage&quot;) +
   theme(legend.title = element_blank(),
@@ -464,6 +464,7 @@ plot_ercc</code></pre>
 ercc_indi &lt;- ggplot(anno, aes(x = chip_id, y = ercc_percentage, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_colour_manual(values = indi_palette) +
   labs(x = &quot;C1 chip&quot;, y = &quot;ERCC percentage&quot;,
        title = &quot;ERCC percentage per sample&quot;) +
   theme(legend.title = element_blank(),
@@ -511,6 +512,7 @@ plot_gene</code></pre>
 number_indi &lt;- ggplot(anno, aes(x = chip_id, y = detect_hs, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_colour_manual(values = indi_palette) +
   labs(x = &quot;C1 chip&quot;, y = &quot;Number of genes detected&quot;,
        title = &quot;Number of genes per sample&quot;) +
   theme(legend.title = element_blank(),
@@ -755,7 +757,7 @@ experiment NA18511 NA18855 NA18870 NA19098 NA19101 NA19160
                        col = as.factor(chip_id), 
                        label = as.character(cell_number),
                        height = 600, width = 2000)) +
-                   scale_colour_manual(values=cbPalette) +
+                   scale_colour_manual(values = indi_palette) +
                    geom_text(fontface = 3, alpha = 0.5) + 
                    geom_vline(xintercept = cut_off_genes, 
                               colour=&quot;grey&quot;, linetype = &quot;longdash&quot;) +
@@ -769,7 +771,7 @@ genes_spike &lt;- ggplot(anno,
                    col = as.factor(chip_id), 
                    label = as.character(cell_number), 
                    height = 600, width = 2000)) +
-               scale_colour_manual(values=cbPalette) +
+               scale_colour_manual(values = indi_palette) +
                scale_shape_manual(values=c(1:10)) +
                geom_text(fontface = 3, alpha = 0.5) + 
                geom_vline(xintercept = cut_off_genes, 
@@ -816,6 +818,17 @@ plot_grid(genes_unmapped + theme(legend.position = c(.7,.9)),
 <pre class="r"><code>write.table(data.frame(row.names(anno), anno[,&quot;filter_all&quot;]),
             file = &quot;../data/quality-single-cells.txt&quot;, quote = FALSE,
             sep = &quot;\t&quot;, row.names = FALSE, col.names = FALSE)</code></pre>
+<pre class="r"><code>ggplot(anno, aes(x = mol_hs, y = detect_hs,
+                   col = as.factor(chip_id), 
+                   height = 600, width = 2000)) +
+               scale_colour_manual(values = indi_palette) +
+               scale_shape_manual(values=c(1:10)) +
+               geom_point(alpha = 0.6) + 
+               labs(col = &quot;Individual&quot;) +
+               theme(legend.position = c(.7,.5)) +
+               labs(x = &quot;Total molecule counts / samlpe&quot;, 
+                    y = &quot;Number of detected genes / sample&quot;) </code></pre>
+<p><img src="figure/sampleqc.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
@@ -874,11 +887,12 @@ write.table(pheno_labels,
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-redhat-linux-gnu (64-bit)
-Running under: Scientific Linux 7.2 (Nitrogen)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
 
 Matrix products: default
-BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+BLAS: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
+LAPACK: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -889,27 +903,27 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[1] parallel  methods   stats     graphics  grDevices utils     datasets 
 [8] base     
 
 other attached packages:
- [1] testit_0.7          bindrcpp_0.2        Biobase_2.38.0     
- [4] BiocGenerics_0.24.0 tibble_1.4.2        MASS_7.3-47        
- [7] edgeR_3.20.9        limma_3.34.9        dplyr_0.7.4        
-[10] cowplot_0.9.2       ggplot2_2.2.1      
+ [1] testit_0.6          bindrcpp_0.2        Biobase_2.38.0     
+ [4] BiocGenerics_0.24.0 tibble_1.3.3        MASS_7.3-45        
+ [7] edgeR_3.20.7        limma_3.34.6        dplyr_0.7.4        
+[10] cowplot_0.9.1       ggplot2_2.2.1      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.16       RColorBrewer_1.1-2 pillar_1.2.1      
- [4] compiler_3.4.1     git2r_0.21.0       plyr_1.8.4        
- [7] bindr_0.1.1        tools_3.4.1        digest_0.6.15     
-[10] evaluate_0.10.1    gtable_0.2.0       lattice_0.20-35   
-[13] pkgconfig_2.0.1    rlang_0.2.0        yaml_2.1.18       
-[16] stringr_1.3.0      knitr_1.20         locfit_1.5-9.1    
-[19] rprojroot_1.3-2    grid_3.4.1         glue_1.2.0        
-[22] R6_2.2.2           rmarkdown_1.9      magrittr_1.5      
-[25] backports_1.1.2    scales_0.5.0       htmltools_0.3.6   
-[28] assertthat_0.2.0   colorspace_1.3-2   labeling_0.3      
-[31] stringi_1.1.7      lazyeval_0.2.1     munsell_0.4.3     </code></pre>
+ [1] Rcpp_0.12.13       RColorBrewer_1.1-2 compiler_3.4.1    
+ [4] git2r_0.19.0       plyr_1.8.4         bindr_0.1         
+ [7] tools_3.4.1        digest_0.6.12      evaluate_0.10.1   
+[10] gtable_0.2.0       lattice_0.20-34    pkgconfig_2.0.1   
+[13] rlang_0.1.2        yaml_2.1.14        stringr_1.2.0     
+[16] knitr_1.16         locfit_1.5-9.1     rprojroot_1.2     
+[19] grid_3.4.1         glue_1.1.1         R6_2.2.0          
+[22] rmarkdown_1.6      magrittr_1.5       backports_1.0.5   
+[25] scales_0.5.0       htmltools_0.3.6    assertthat_0.1    
+[28] colorspace_1.3-2   labeling_0.3       stringi_1.1.2     
+[31] lazyeval_0.2.0     munsell_0.4.3     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
