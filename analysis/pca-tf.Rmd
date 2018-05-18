@@ -40,7 +40,7 @@ library("ggplot2")
 library("heatmap3")
 library("reshape2")
 library("Biobase")
-source("../code/pca.R")
+source("../code/utility.R")
 ```
 
 ## PCA
@@ -102,6 +102,9 @@ heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8),
 
 heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
                        ylab="technical factor", main = "Before filter w/o scale")
+
+plot_pca(pca_hs$PCs, pcx = 1, pcy = 2, explained = pca_hs$explained,
+         metadata = pData(eset_hs), color="chip_id")
 ```
 
 
@@ -110,32 +113,32 @@ heatmap3(r2_before, cexRow=1, cexCol=1, margins=c(8,8), scale = "none",
 Import data post [sample and gene filtering](gene-filtering.Rmd)
 
 ```{r filter-data}
-load(file="../output/gene-filtering.Rmd/eset-filtered.rdata")
+eset_filter <- readRDS("../data/eset-filtered.rds")
 ```
 
 Compute log2 CPM based on the library size before filtering.
 
 ```{r log2}
-log2cpm <- log2(cpm_filtered+1)
+log2cpm <- cpm(exprs(eset_filter), log = TRUE)
+dim(log2cpm)
 ```
 
 ```{r after-filter}
 pca_log2cpm <- run_pca(log2cpm)
 
-pdata <- pData(eset_filtered)
+pdata <- pData(eset_filter)
 pdata$experiment <- as.factor(pdata$experiment)
 
-plot_grid(
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color="chip_id"),
-  plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
-         metadata=pdata, color="experiment"),
-  ncol=2)
+plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color="chip_id")
+  
+plot_pca(x=pca_log2cpm$PCs, explained=pca_log2cpm$explained,
+         metadata=pdata, color="experiment")
 ```
 
 ```{r after-filter-tf}
 ## selection of technical factor
-covariates <- pData(eset_filtered) %>% dplyr::select(experiment, well, chip_id, 
+covariates <- pData(eset_filter) %>% dplyr::select(experiment, well, chip_id, 
                                                      concentration, raw:unmapped,
                                                      starts_with("detect"),  molecules)
 ## look at the first 6 PCs

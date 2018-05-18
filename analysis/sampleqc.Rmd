@@ -39,6 +39,7 @@ theme_set(cowplot::theme_cowplot())
 
 # The palette with grey:
 cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+indi_palette <- c("tomato4", "chocolate1", "rosybrown", "purple4", "plum3", "slateblue")
 ```
 
 ```{r data}
@@ -124,6 +125,7 @@ unmapped_exp <- ggplot(anno, aes(x = as.factor(experiment), y = unmapped_ratios,
 unmapped_indi <- ggplot(anno, aes(x = chip_id, y = unmapped_ratios, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_color_manual(values = indi_palette) +
   labs(x = "C1 chip", y = "Unmapped reads/ total reads",
        title = "Unmapped reads percentage") +
   theme(legend.title = element_blank(),
@@ -179,6 +181,7 @@ ercc_exp <- ggplot(anno, aes(x = as.factor(experiment), y = ercc_percentage, col
 ercc_indi <- ggplot(anno, aes(x = chip_id, y = ercc_percentage, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_colour_manual(values = indi_palette) +
   labs(x = "C1 chip", y = "ERCC percentage",
        title = "ERCC percentage per sample") +
   theme(legend.title = element_blank(),
@@ -229,6 +232,7 @@ number_exp <- ggplot(anno, aes(x = as.factor(experiment), y = detect_hs, color =
 number_indi <- ggplot(anno, aes(x = chip_id, y = detect_hs, color = as.factor(chip_id))) +
   geom_violin() + 
   geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  scale_colour_manual(values = indi_palette) +
   labs(x = "C1 chip", y = "Number of genes detected",
        title = "Number of genes per sample") +
   theme(legend.title = element_blank(),
@@ -418,7 +422,7 @@ genes_unmapped <-  ggplot(anno,
                        col = as.factor(chip_id), 
                        label = as.character(cell_number),
                        height = 600, width = 2000)) +
-                   scale_colour_manual(values=cbPalette) +
+                   scale_colour_manual(values = indi_palette) +
                    geom_text(fontface = 3, alpha = 0.5) + 
                    geom_vline(xintercept = cut_off_genes, 
                               colour="grey", linetype = "longdash") +
@@ -432,7 +436,7 @@ genes_spike <- ggplot(anno,
                    col = as.factor(chip_id), 
                    label = as.character(cell_number), 
                    height = 600, width = 2000)) +
-               scale_colour_manual(values=cbPalette) +
+               scale_colour_manual(values = indi_palette) +
                scale_shape_manual(values=c(1:10)) +
                geom_text(fontface = 3, alpha = 0.5) + 
                geom_vline(xintercept = cut_off_genes, 
@@ -471,6 +475,7 @@ reads_spike_num <- ggplot(anno,
 plot_grid(genes_unmapped + theme(legend.position = c(.7,.9)), 
           genes_spike + theme(legend.position = "none"),
           labels = letters[1:2])
+
 plot_grid(reads_unmapped_num + theme(legend.position = c(.7,.9)), 
           reads_spike_num + theme(legend.position = "none"),
           labels = letters[3:4])
@@ -480,6 +485,20 @@ plot_grid(reads_unmapped_num + theme(legend.position = c(.7,.9)),
 write.table(data.frame(row.names(anno), anno[,"filter_all"]),
             file = "../data/quality-single-cells.txt", quote = FALSE,
             sep = "\t", row.names = FALSE, col.names = FALSE)
+```
+
+```{r}
+ggplot(anno, aes(x = mol_hs, y = detect_hs,
+                   col = as.factor(chip_id), 
+                   height = 600, width = 2000)) +
+               scale_colour_manual(values = indi_palette) +
+               scale_shape_manual(values=c(1:10)) +
+               geom_point(alpha = 0.6) + 
+               labs(col = "Individual") +
+               theme(legend.position = c(.7,.5)) +
+               labs(x = "Total molecule counts / samlpe", 
+                    y = "Number of detected genes / sample") 
+
 ```
 
 ---
