@@ -259,7 +259,7 @@ cycle.npreg.outsample <- function(Y_test, theta_est,
                                      mu_est=mstep$mu_est,
                                      sigma_est=mstep$sigma_est)$loglik_est
   out <- list(Y_ordered=mstep$Y,
-              cell_times_est=mstep$cell_times_est,
+              cell_times_est=mstep$theta,
               loglik_est=mstep.loglik,
               mu_est=mstep$mu_est,
               sigma_est=mstep$sigma_est)
@@ -270,7 +270,57 @@ cycle.npreg.outsample <- function(Y_test, theta_est,
 
 
 
+#' @title BIC for npreg results
+#'
+#' @nbins the observations are grouped into \code{nbins} in predicting expected cyclical trend
+#'
+#' @export
+bic.npreg <- function(Y, loglik, nbins) {
+  N <- ncol(Y)
+  bic <- N*log(nbins-1) - 2*loglik
+  return(bic)
+}
+
+
+#' @title Proportion of variance explained by the fitted cyclical trend
+#'
+#' @param Y gene by sample expression matrix
+#' @param mu_est Fitted cyclical trend per gene for each sample
+#'
+#' @export
+pve <- function(Y, mu_est) {
+
+  G <- nrow(Y)
+  out <- sapply(1:G, function(g) {
+    yy <- Y[g,]
+    trend.yy <- mu_est[g,]
+    pve <- 1-var(yy-trend.yy)/var(yy)
+    return(pve)
+  })
+  names(out) <- rownames(Y)
+  return(out)
+}
 
 
 
+
+
+#' @title Mean squared deviation from the predicted cyclical trend
+#'
+#' @param Y gene by sample expression matrix
+#' @param mu_est Fitted cyclical trend per gene for each sample
+#'
+#' @export
+msd <- function(Y, mu_est) {
+  N <- ncol(Y)
+  G <- nrow(Y)
+  out <- sapply(1:G, function(g) {
+    yy <- Y[g,]
+    trend.yy <- mu_est[g,]
+    msd <- (1/N)*sum((yy-trend.yy)^2)
+    return(msd)
+  })
+  names(out) <- rownames(Y)
+  return(out)
+}
 

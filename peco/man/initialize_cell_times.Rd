@@ -11,3 +11,7 @@ initialize_cell_times(Y, nbins = NULL)
 
 \item{nbins}{Y is grouped to nbins between 0 to 2pi.}
 }
+\description{
+Estimate cell times using PC1 and PC2. If \code{nbins} is specified,
+  then group the estimated cell times to \code{nbins} groups.
+}
