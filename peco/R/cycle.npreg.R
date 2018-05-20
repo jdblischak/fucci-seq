@@ -1,7 +1,11 @@
 #' @title Initialize cell time estimates for the nonparametric approach
 #'
+#' @description Estimate cell times using PC1 and PC2. If \code{nbins} is specified,
+#'   then group the estimated cell times to \code{nbins} groups.
+#'
 #' @param Y gene by sample matrix
 #' @param nbins Y is grouped to nbins between 0 to 2pi.
+#'
 #' @export
 initialize_cell_times <- function(Y, nbins=NULL) {
   library(circular)
@@ -38,6 +42,7 @@ cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est) {
 
   nbins <- ncol(mu_est)
   N <- ncol(Y)
+  G <- nrow(Y)
   loglik_per_cell_by_celltimes <- matrix(0, N, nbins)
 
   for (n in 1:N) {
