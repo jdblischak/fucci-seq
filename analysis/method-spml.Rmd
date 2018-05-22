@@ -1,0 +1,230 @@
+---
+title: "Estimate cyclical ordering using spml"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Outline of the approach
+
+Perform 5-fold cross-validation. Do the following for each fold:
+
+1. Fit spml to training samples, and use the gene weights learned from training samples to predict cell times in testing samples
+
+2. Compute correlation between predicted cell times and the fucci-labeled cell times. The correlation quanties the extent to which the two data series are rotationally dependent. The larger the value the fewer rotations/transformations needed to rotate data series A to data series B. Also compute 95% confidence interval using bootstraping to quantify the level of statistical significance of correlations. 
+
+* Note there are some issues in the computations of the permutation-based p-values. The p-values turned out to be the same across folds... 
+
+* Importantly, the method estimates the average direction (or angle) given the covariates, which does not address the question that we are asking. 
+
+* I stopped pursing this idea and instead focus on nonparametric regerssion methods.
+
+* The approach implemented here references the method described in Presnell, Brett, Scott P. Morrison, and Ramon C. Littell. "Projected Multivariate Linear Models for Directional Data." Journal of the American Statistical Association 93, no. 443 (1998): 1068-077. doi:10.2307/2669850. R package `Rfast` was used to perform the computations.
+
+
+---
+
+## Simple example, say for 5 genes, hold 100 cells out each time, do 10 times
+
+Get data
+
+```{r}
+library(Biobase)
+
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+
+# import previously identifid cell cycle genes
+cyclegenes <- readRDS("../output/npreg-methods.Rmd/cyclegenes.rds")
+cyclegenes.names <- colnames(cyclegenes)[2:6]
+
+quant.sub <- log2cpm.quant[rownames(log2cpm.quant) %in% cyclegenes.names, ]
+```
+
+Analysis
+
+```{r}
+source("../code/utility.R")
+
+N <- dim(quant.sub)[2]
+parts <- partitionSamples(c(1:N), runs=5, nsize.each = c(rep(177,4), 180))
+
+res <- lapply(1:5, function(iter) {
+  ii_train <- parts$partitions[[iter]][[1]]
+  ii_test <- parts$partitions[[iter]][[2]]
+  theta_test <- pdata$theta[ii_test]
+  theta_train <- pdata$theta[ii_train]
+  cycle.spml.testmodel(Y_test = quant.sub[,ii_test], 
+                  Y_train = quant.sub[,ii_train],
+                  theta_test = theta_test, 
+                  theta_train = theta_train)
+})
+
+# the permutation-based pvalue is questionable...
+tab <- do.call(rbind, lapply(res, function(xx) {
+  data.frame(rho=xx$rho,
+             boot_95ci_low=xx$boot_95ci_low,
+             boot_95ci_high=xx$boot_95ci_high,
+             pval=xx$pval)
+}) )
+
+with(tab, rho > boot_95ci_low & rho < boot_95ci_high)
+```
+
+
+---
+
+## Use PVE significant genes
+
+Get data
+
+```{r}
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+out.stats.ordered.sig.101 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+out.stats.ordered.sig.476 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
+
+quant.101 <- log2cpm.quant[rownames(log2cpm.quant) %in% rownames(out.stats.ordered.sig.101), ]
+quant.476 <- log2cpm.quant[rownames(log2cpm.quant) %in% rownames(out.stats.ordered.sig.476), ]
+```
+
+Analysis code
+
+```{r}
+source("../code/utility.R")
+
+# 20 fold 
+nfold <- 5
+N <- dim(quant.101)[2]
+parts <- partitionSamples(c(1:N), runs=nfold, nsize.each=c(177,177,177,177,180))
+df <- quant.101
+res <- lapply(1:nfold, function(i) {
+  ii_train <- parts$partitions[[i]]$train
+  ii_test <- parts$partitions[[i]]$test
+  theta_test <- pdata$theta[ii_test]
+  theta_train <- pdata$theta[ii_train]
+  cycle.spml.testmodel(Y_test = df[,ii_test], 
+                  Y_train = df[,ii_train],
+                  theta_test = theta_test, 
+                  theta_train = theta_train)
+})
+
+# the permutation-based pvalue is questionable...
+tab <- do.call(rbind, lapply(res, function(xx) {
+  data.frame(rho=xx$rho,
+             boot_95ci_low=xx$boot_95ci_low,
+             boot_95ci_high=xx$boot_95ci_high,
+             pval=xx$pval)
+}) )
+
+with(tab, rho > boot_95ci_low & rho < boot_95ci_high)
+```
+
+Results too perfect: turns out more investigations are needed for the correlation between circular variables. 
+
+Check prediction for some random data
+
+```{r}
+# select external validation samples
+set.seed(99)
+nvalid <- round(ncol(log2cpm.quant)*.15)
+ii.valid <- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid <- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+theta.nonvalid <- pdata$theta[ii.nonvalid]
+theta.valid <- pdata$theta[ii.valid]
+
+
+sig.genes <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds")
+expr.sig <- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+# set training samples
+source("../peco/R/primes.R")
+source("../peco/R/partitionSamples.R")
+parts <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices <- parts$partitions
+
+Y_train <- expr.sig[,part_indices[[1]]$train]
+theta_train <- theta.nonvalid[part_indices[[1]]$train]
+
+Y_test <- expr.sig[,part_indices[[1]]$test]
+theta_test <- theta.nonvalid[part_indices[[1]]$test]
+
+
+fit_train <- cycle.spml.trainmodel(Y_train, theta_train)
+
+pred_cart <- cbind(1,t(Y_test))%*%fit_train$be
+pred_polar <- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] < 0)
+
+rho_test <- rFLIndTestRand(pred_polar, theta_test, 9999)
+boot_ci <- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
