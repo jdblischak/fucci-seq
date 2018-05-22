@@ -1,3 +1,23 @@
+library(NPCirc)
+res <- lapply(1:5, function(i) {
+  bw.reg.circ.lin(circular(theta_train), Y_train[i,], method="NW", lower=1, upper=20)
+
+  fit=kern.reg.circ.lin(theta_train, Y_train[i,], method = "NW")
+  fun=approxfun(x=as.numeric(fit$x), y=fit$y, rule=2)
+  #plot(fun(fit$datax))
+  return(list(fun=fun, fit=fit))
+})
+
+par(mfrow=c(2,5))
+for(i in 1:5) {
+  plot(fold.train[[1]]$Y_ordered[i,])
+  points(fold.train[[1]]$mu_est[i,], col="blue", cex=.6, pch=16)}
+for(i in 1:5) {plot(res[[i]]$fun(res[[i]]$fit$datax), ylim = c(min(Y_train), max(Y_train)))}
+
+plot(as.numeric(f$x), f$y)
+plot(f$datax, f$datay)
+
+
 #' @title Estimate gene weights for cell time
 #'
 #' @param Y gene by sample expression matrix
