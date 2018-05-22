@@ -1,0 +1,141 @@
+---
+title: "Trying out spml package"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+
+
+---
+
+
+## Behavior of spml
+
+Use `spml` functions implemented in `Rfast` package. See https://cran.r-project.org/web/packages/Rfast/index.html
+
+
+### Univariate 
+
+In a simple univariate case, the model converges to the same likelihood over 50 runs in same number of iterations, given a fixed toelerance or between two difference tolerance levels.
+
+```{r}
+# simulate a scenario where 
+# the response variable y is bivariate normal random variables
+# with mean Mu and variance Sigma
+# We are interested in the relatsionship Mu = BX
+# where X is a n by p matrix representing possibly gene expression profile of n cells
+
+library(Rfast)
+library(circular)
+N <- 100
+set.seed(17)
+X <- rnorm(N)
+B1 <- cbind(3,1)
+B2 <- cbind(2,-3)
+Mu <- cbind(3 + 1*X, 2 - 3*X)
+#Mu <- X %*% t(B)
+Y <- cbind(rnorm(N, Mu[,1],1),
+           rnorm(N, Mu[,2],1))
+# project Y onto unit circle
+U <- Y / sqrt( rowsums(Y^2) )
+Theta <- coord2rad(U, contro.circular(modulo = "2pi", units = "radians", zero = 0))
+
+nevals <- 50
+res.covariate.one <- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, seb = TRUE)
+})
+sapply(res.covariate.one, "[[", "loglik")
+sapply(res.covariate.one, "[[", "iters")
+```
+
+Do we get very different results if changing tolerance?
+
+```{r}
+nevals <- 50
+res.covariate.one.2 <- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, tol = 1e-10, seb = TRUE)
+})
+sapply(res.covariate.one.2, "[[", "loglik")
+sapply(res.covariate.one.2, "[[", "iters")
+```
+
+Compare results when tolerance is 1e-07 versus 1e-10. No difference. 
+
+```{r}
+res.covariate.one[[1]]$loglik
+res.covariate.one.2[[1]]$loglik
+```
+
+
+### P large but P < N
+
+Okay with 10 variable. Converges to the same likelihood in 50 runs.
+
+```{r}
+# simulate a scenario where 
+# the response variable y is bivariate normal random variables
+# with mean Mu and variance Sigma
+# We are interested in the relatsionship Mu = BX
+# where X is a n by p matrix representing possibly gene expression profile of n cells
+
+library(Rfast)
+N <- 100
+P <- 10
+set.seed(17)
+X <- matrix(rnorm(N*P), nrow= N, ncol = P)
+B1 <- cbind(3,1, 2, 5, 1, .5, .3, .1, 1, 2)
+B2 <- cbind(2,-3, 1, 2, .2, .3, .1, .9, 5, 1)
+B <- rbind(B1, B2)
+Mu <- X%*%t(B)
+Y <- cbind(rnorm(N, Mu[,1],1),
+           rnorm(N, Mu[,2],1))
+# project Y onto unit circle
+U <- Y / sqrt( rowsums(Y^2) )
+Theta <- coord2rad(U, contro.circular(modulo = "2pi", units = "radians", zero = 0))
+
+nevals <- 50
+res.covariate.many <- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, seb = TRUE)
+})
+sapply(res.covariate.many, "[[", "loglik")
+sapply(res.covariate.many, "[[", "iters")
+```
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
