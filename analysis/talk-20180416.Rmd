@@ -1,0 +1,369 @@
+---
+title: "Some analysis for a talk"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Data and packages
+
+Packages
+
+```{r}
+library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)
+library(genlasso)
+library(ggplot2)
+```
+
+Load data
+
+```{r}
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+theta <- readRDS("../output/images-time-eval.Rmd/theta.rds")
+log2cpm.all.ord <- log2cpm.all[,order(theta)]
+
+source("../code/utility.R")
+```
+
+---
+
+
+
+```{r}
+df <- readRDS(file="../data/eset-raw.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+table(pdata$cell_number)
+```
+
+```{r}
+## Total mapped reads cutoff
+cut_off_reads <- quantile(pdata[pdata$cell_number == 0,"mapped"], 0.82)
+pdata$cut_off_reads <- pdata$mapped > cut_off_reads
+
+
+## Unmapped ratio cutoff
+pdata$unmapped_ratios <- with(pdata, unmapped/umi)
+cut_off_unmapped <- quantile(pdata[pdata$cell_number == 0,"unmapped_ratios"], 0.40)
+pdata$cut_off_unmapped <- pdata$unmapped_ratios < cut_off_unmapped
+
+plot_unmapped <- ggplot(pdata[pdata$cell_number == 0 |
+                             pdata$cell_number == 1 , ],
+       aes(x = unmapped_ratios *100, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_unmapped *100, colour="grey", linetype = "longdash") +
+       labs(x = "Unmapped reads/ total reads", title = "Unmapped reads percentage")
+plot_unmapped
+
+
+## ERCC percentage cutoff
+pdata$ercc_percentage <- pdata$reads_ercc / pdata$mapped
+cut_off_ercc <- quantile(pdata[pdata$cell_number == 0,"ercc_percentage"], 0.20)
+pdata$cut_off_ercc <- pdata$ercc_percentage < cut_off_ercc
+
+
+plot_ercc <- ggplot(pdata[pdata$cell_number == 0 |
+                                pdata$cell_number == 1 , ],
+       aes(x = ercc_percentage *100, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_ercc *100, colour="grey", linetype = "longdash") +
+       labs(x = "ERCC reads / total mapped reads", title = "ERCC reads percentage")
+plot_ercc
+
+
+
+## Number of genes detected cutoff
+cut_off_genes <- quantile(pdata[pdata$cell_number == 0,"detect_hs"], 0.80)
+pdata$cut_off_genes <- pdata$detect_hs > cut_off_genes
+
+plot_gene <- ggplot(pdata[pdata$cell_number == 0 |
+                         pdata$cell_number == 1 , ],
+       aes(x = detect_hs, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_genes, colour="grey", linetype = "longdash") +
+       labs(x = "Gene numbers", title = "Numbers of detected genes")
+plot_gene
+```
+
+Mapped reads
+
+```{r}
+eset_final <- readRDS(file="../data/eset-final.rds")
+
+ggplot(pData(eset_final), 
+       aes(x = factor(experiment), y = mapped, color = factor(experiment))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = "C1 chip", y = "Number of reads",
+       title = "Number of mapped sequences per single cell") +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+
+
+## Gene QC
+
+
+```{r}
+eset_raw <- readRDS(file="../data/eset-raw.rds")
+count_filter <- exprs(eset_raw[,pData(eset_raw)$filter_all == TRUE])
+count_ensg <- count_filter[grep("ENSG", rownames(count_filter)),]
+
+which_over_expressed <- which(apply(count_ensg, 1, function(x) any(x>(4^6)) ))
+over_expressed_genes <- rownames(count_ensg)[which_over_expressed]
+over_expressed_genes
+
+cpm_ensg <- t(t(count_ensg)/pData(eset_raw)$molecules)*(10^6)
+which_lowly_expressed <- which(rowMeans(cpm_ensg) < 2)
+log2cpm_filt <- log2(1+10^6*count_ensg/pData(eset_raw)$molecules)
+genedetect_filt <- count_ensg
+plot(x=rowMeans(log2cpm_filt), y=rowMeans(genedetect_filt>0),
+     xlab = "Mean log2CPM",
+     ylab = "Fraction of genes detected", col = "gray40", pch=16)
+points(x=rowMeans(log2cpm_filt)[which_lowly_expressed], 
+       y=rowMeans(genedetect_filt>0)[which_lowly_expressed], col = "red")
+
+dim(count_ensg)
+dim(count_ensg[-which_lowly_expressed,])
+
+
+# genes_to_include <- setdiff(1:nrow(count_ensg), gene_filter)
+# length(genes_to_include)
+```
+
+
+## Sequencing data variation
+
+
+```{r}
+eset_final <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(eset_final)
+fdata <- fData(eset_final)
+pdata$chip_id <- factor(pdata$chip_id)
+pdata$experiment <- factor(pdata$experiment)
+
+library(cowplot)
+library(ggplot2)
+library(gridExtra)
+rotatedAxisElementText = function(angle,position='x'){
+  angle     = angle[1]; 
+  position  = position[1]
+  positions = list(x=0,y=90,top=180,right=270)
+  if(!position %in% names(positions))
+    stop(sprintf("'position' must be one of [%s]",paste(names(positions),collapse=", ")),call.=FALSE)
+  if(!is.numeric(angle))
+    stop("'angle' must be numeric",call.=FALSE)
+  rads  = (angle - positions[[ position ]])*pi/180
+#  hjust = 0.5*(1 - sin(rads))
+  hjust = .5+sin(rads)
+  vjust = 1
+#  vjust = 0.5*(1 + cos(rads))
+  element_text(angle=angle,vjust=vjust,hjust=hjust)
+}
+batch.plot <- plot_grid(
+  ggplot(pdata, 
+        aes(x=experiment, y=rfp.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,'x')),
+  ggplot(pdata, 
+        aes(x=experiment, y=gfp.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,'x')),
+  ggplot(pdata, 
+        aes(x=experiment, y=dapi.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,'x')),
+  ncol=3)
+batch.plot
+
+
+library(car)
+lm.rfp <- lm(rfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+lm.gfp <- lm(gfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+lm.dapi <- lm(dapi.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+
+
+aov.lm.rfp <- Anova(lm.rfp, type = "III")
+aov.lm.gfp <- Anova(lm.gfp, type = "III")
+aov.lm.dapi <- Anova(lm.dapi, type = "III")
+
+aov.lm.rfp
+aov.lm.gfp
+aov.lm.dapi
+```
+
+
+## Label cell cycle phase
+
+```{r}
+ggplot(pdata, 
+       aes(x=gfp.median.log10sum.adjust, 
+           y=rfp.median.log10sum.adjust)) + 
+    geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+    labs(x="GFP intensity (log10 pixel sum)", 
+         y = "RFP intensity (log10 pixel sum)") + 
+#    facet_wrap(~as.factor(chip_id), ncol=3) +
+    theme_gray() + theme(legend.position="none")
+
+
+
+
+# compute projected cell time
+pc.fucci <- prcomp(subset(pdata, 
+                          select=c("rfp.median.log10sum.adjust",
+                                   "gfp.median.log10sum.adjust")),
+                   center = T, scale. = T)
+Theta.cart <- pc.fucci$x
+library(circular)
+Theta.fucci <- coord2rad(Theta.cart)
+Theta.fucci <- (2*pi)-as.numeric(Theta.fucci)
+
+(pc.fucci$sdev^2)/sum(pc.fucci$sdev^2)
+
+plot(Theta.cart[,1],
+     Theta.cart[,2], xlab = "PC1 (51%)", ylab = "PC2 (49%)",
+     main = "FUCCI data PCA")
+
+
+library(movMF)
+res <- movMF(Theta.cart, k=3, nruns=50,
+             kappa = list(common = TRUE))
+clust <- predict(res)  
+summary(as.numeric(Theta.fucci)[clust==1])
+summary(as.numeric(Theta.fucci)[clust==2])
+summary(as.numeric(Theta.fucci)[clust==3])
+
+theta.adj <- Theta.fucci
+cutoff <- min(Theta.fucci[clust==1])
+theta.adj <- (Theta.fucci - cutoff)%% (2*pi)
+
+plot(theta.adj, Theta.fucci)
+
+plot(circular(theta.adj), stack=TRUE)
+hist(theta.adj, nclass=25, xlab = "Cell time",
+     main = "Estimated cell time",
+     xlim = c(0, 2.1*pi))
+
+with(pdata,
+     {
+ par(mfrow=c(2,2))
+  plot(x=theta.adj,
+     y=gfp.median.log10sum.adjust,
+     xlab = "Estiamted cell time",
+     ylab = "FUCCI intensites",
+     col = "forestgreen", pch=16, cex=.7,
+      ylim = range(gfp.median.log10sum.adjust,rfp.median.log10sum.adjust))
+  points(x=theta.adj,
+        y=rfp.median.log10sum.adjust,
+        col = "red", pch=16, cex=.7)
+  plot(x=theta.adj,
+       y=dapi.median.log10sum.adjust,
+        xlab = "Estiamted cell time",
+        ylab = "DAPI intensites",
+       col = "blue", pch=16, cex=.7)
+  plot(x=theta.adj,
+       y=molecules,
+       xlab = "Estiamted cell time",
+       ylab = "Sample molecule count",
+       col = "black", pch=1, cex=.7)
+})
+
+
+# select some marker genes
+counts <- exprs(eset_final)[grep("ENSG", rownames(eset_final)), ]
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+cdk1 <- macosko$ensembl[macosko$hgnc=="CDK1"]
+cdc6 <- macosko$ensembl[macosko$hgnc=="CDC6"]
+tpx2 <- macosko$ensembl[macosko$hgnc=="TPX2"]
+
+# saveRDS(data.frame(theta=theta.adj,
+#                    cdk1=log2cpm.all[rownames(log2cpm.all) == cdk1,],
+#                    cdc6=log2cpm.all[rownames(log2cpm.all) == cdc6,],
+#                    tpx2=log2cpm.all[rownames(log2cpm.all) == tpx2,]),
+#         file = "../output_tmp/cycle.rds")
+par(mfrow=c(2,2))
+plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == cdk1,],
+     main = "CDK1 (G2 phase)",
+     ylab = "log2cpm", xlab = "Estimated cell time")
+plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == cdc6,],
+     main = "CDC6 (G1/S phase)",
+     ylab = "log2cpm", xlab = "Estimated cell time")
+plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == tpx2,],
+     main = "TPX2 (M phase)",
+     ylab = "log2cpm", xlab = "Estimated cell time")
+
+```
+
+
+## Individual differences in cell cycle phase distributions
+
+```{r}
+
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
