@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Some analysis for a talk</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Some analysis for a talk</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#data-and-packages">Data and packages</a></li>
+<li><a href="#gene-qc">Gene QC</a></li>
+<li><a href="#sequencing-data-variation">Sequencing data variation</a></li>
+<li><a href="#label-cell-cycle-phase">Label cell cycle phase</a></li>
+<li><a href="#individual-differences-in-cell-cycle-phase-distributions">Individual differences in cell cycle phase distributions</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-22</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> ebd5dd1</p>
+<hr />
+<div id="data-and-packages" class="section level2">
+<h2>Data and packages</h2>
+<p>Packages</p>
+<pre class="r"><code>library(circular)
+library(conicfit)
+library(Biobase)
+library(dplyr)
+library(matrixStats)
+
+library(NPCirc)
+library(smashr)
+library(genlasso)
+library(ggplot2)</code></pre>
+<p>Load data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+theta &lt;- readRDS(&quot;../output/images-time-eval.Rmd/theta.rds&quot;)
+log2cpm.all.ord &lt;- log2cpm.all[,order(theta)]
+
+source(&quot;../code/utility.R&quot;)</code></pre>
+<hr />
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-raw.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+table(pdata$cell_number)</code></pre>
+<pre><code>
+   0    1    2    3    4    5    6    7    8   12   20 
+  15 1327  100   51   21   14    2    2    2    1    1 </code></pre>
+<pre class="r"><code>## Total mapped reads cutoff
+cut_off_reads &lt;- quantile(pdata[pdata$cell_number == 0,&quot;mapped&quot;], 0.82)
+pdata$cut_off_reads &lt;- pdata$mapped &gt; cut_off_reads
+
+
+## Unmapped ratio cutoff
+pdata$unmapped_ratios &lt;- with(pdata, unmapped/umi)
+cut_off_unmapped &lt;- quantile(pdata[pdata$cell_number == 0,&quot;unmapped_ratios&quot;], 0.40)
+pdata$cut_off_unmapped &lt;- pdata$unmapped_ratios &lt; cut_off_unmapped
+
+plot_unmapped &lt;- ggplot(pdata[pdata$cell_number == 0 |
+                             pdata$cell_number == 1 , ],
+       aes(x = unmapped_ratios *100, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_unmapped *100, colour=&quot;grey&quot;, linetype = &quot;longdash&quot;) +
+       labs(x = &quot;Unmapped reads/ total reads&quot;, title = &quot;Unmapped reads percentage&quot;)
+plot_unmapped</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## ERCC percentage cutoff
+pdata$ercc_percentage &lt;- pdata$reads_ercc / pdata$mapped
+cut_off_ercc &lt;- quantile(pdata[pdata$cell_number == 0,&quot;ercc_percentage&quot;], 0.20)
+pdata$cut_off_ercc &lt;- pdata$ercc_percentage &lt; cut_off_ercc
+
+
+plot_ercc &lt;- ggplot(pdata[pdata$cell_number == 0 |
+                                pdata$cell_number == 1 , ],
+       aes(x = ercc_percentage *100, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_ercc *100, colour=&quot;grey&quot;, linetype = &quot;longdash&quot;) +
+       labs(x = &quot;ERCC reads / total mapped reads&quot;, title = &quot;ERCC reads percentage&quot;)
+plot_ercc</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## Number of genes detected cutoff
+cut_off_genes &lt;- quantile(pdata[pdata$cell_number == 0,&quot;detect_hs&quot;], 0.80)
+pdata$cut_off_genes &lt;- pdata$detect_hs &gt; cut_off_genes
+
+plot_gene &lt;- ggplot(pdata[pdata$cell_number == 0 |
+                         pdata$cell_number == 1 , ],
+       aes(x = detect_hs, fill = as.factor(cell_number))) + 
+       geom_density(alpha = 0.5) +
+       geom_vline(xintercept = cut_off_genes, colour=&quot;grey&quot;, linetype = &quot;longdash&quot;) +
+       labs(x = &quot;Gene numbers&quot;, title = &quot;Numbers of detected genes&quot;)
+plot_gene</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Mapped reads</p>
+<pre class="r"><code>eset_final &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+
+ggplot(pData(eset_final), 
+       aes(x = factor(experiment), y = mapped, color = factor(experiment))) +
+  geom_violin() + 
+  geom_boxplot(alpha = .01, width = .2, position = position_dodge(width = .9)) +
+  labs(x = &quot;C1 chip&quot;, y = &quot;Number of reads&quot;,
+       title = &quot;Number of mapped sequences per single cell&quot;) +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="gene-qc" class="section level2">
+<h2>Gene QC</h2>
+<pre class="r"><code>eset_raw &lt;- readRDS(file=&quot;../data/eset-raw.rds&quot;)
+count_filter &lt;- exprs(eset_raw[,pData(eset_raw)$filter_all == TRUE])
+count_ensg &lt;- count_filter[grep(&quot;ENSG&quot;, rownames(count_filter)),]
+
+which_over_expressed &lt;- which(apply(count_ensg, 1, function(x) any(x&gt;(4^6)) ))
+over_expressed_genes &lt;- rownames(count_ensg)[which_over_expressed]
+over_expressed_genes</code></pre>
+<pre><code>character(0)</code></pre>
+<pre class="r"><code>cpm_ensg &lt;- t(t(count_ensg)/pData(eset_raw)$molecules)*(10^6)
+which_lowly_expressed &lt;- which(rowMeans(cpm_ensg) &lt; 2)
+log2cpm_filt &lt;- log2(1+10^6*count_ensg/pData(eset_raw)$molecules)
+genedetect_filt &lt;- count_ensg
+plot(x=rowMeans(log2cpm_filt), y=rowMeans(genedetect_filt&gt;0),
+     xlab = &quot;Mean log2CPM&quot;,
+     ylab = &quot;Fraction of genes detected&quot;, col = &quot;gray40&quot;, pch=16)
+points(x=rowMeans(log2cpm_filt)[which_lowly_expressed], 
+       y=rowMeans(genedetect_filt&gt;0)[which_lowly_expressed], col = &quot;red&quot;)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>dim(count_ensg)</code></pre>
+<pre><code>[1] 20327   923</code></pre>
+<pre class="r"><code>dim(count_ensg[-which_lowly_expressed,])</code></pre>
+<pre><code>[1] 11804   923</code></pre>
+<pre class="r"><code># genes_to_include &lt;- setdiff(1:nrow(count_ensg), gene_filter)
+# length(genes_to_include)</code></pre>
+</div>
+<div id="sequencing-data-variation" class="section level2">
+<h2>Sequencing data variation</h2>
+<pre class="r"><code>eset_final &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(eset_final)
+fdata &lt;- fData(eset_final)
+pdata$chip_id &lt;- factor(pdata$chip_id)
+pdata$experiment &lt;- factor(pdata$experiment)
+
+library(cowplot)
+library(ggplot2)
+library(gridExtra)
+rotatedAxisElementText = function(angle,position=&#39;x&#39;){
+  angle     = angle[1]; 
+  position  = position[1]
+  positions = list(x=0,y=90,top=180,right=270)
+  if(!position %in% names(positions))
+    stop(sprintf(&quot;&#39;position&#39; must be one of [%s]&quot;,paste(names(positions),collapse=&quot;, &quot;)),call.=FALSE)
+  if(!is.numeric(angle))
+    stop(&quot;&#39;angle&#39; must be numeric&quot;,call.=FALSE)
+  rads  = (angle - positions[[ position ]])*pi/180
+#  hjust = 0.5*(1 - sin(rads))
+  hjust = .5+sin(rads)
+  vjust = 1
+#  vjust = 0.5*(1 + cos(rads))
+  element_text(angle=angle,vjust=vjust,hjust=hjust)
+}
+batch.plot &lt;- plot_grid(
+  ggplot(pdata, 
+        aes(x=experiment, y=rfp.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,&#39;x&#39;)),
+  ggplot(pdata, 
+        aes(x=experiment, y=gfp.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,&#39;x&#39;)),
+  ggplot(pdata, 
+        aes(x=experiment, y=dapi.median.log10sum,
+            col=experiment)) +
+  geom_violin() + geom_boxplot(width=.1) +
+    theme(axis.text.x = rotatedAxisElementText(30,&#39;x&#39;)),
+  ncol=3)
+batch.plot</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(car)
+lm.rfp &lt;- lm(rfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+lm.gfp &lt;- lm(gfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+lm.dapi &lt;- lm(dapi.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label), 
+             data = pdata)
+
+
+aov.lm.rfp &lt;- Anova(lm.rfp, type = &quot;III&quot;)
+aov.lm.gfp &lt;- Anova(lm.gfp, type = &quot;III&quot;)
+aov.lm.dapi &lt;- Anova(lm.dapi, type = &quot;III&quot;)
+
+aov.lm.rfp</code></pre>
+<pre><code>Anova Table (Type III tests)
+
+Response: rfp.median.log10sum
+                     Sum Sq  Df  F value    Pr(&gt;F)    
+(Intercept)          45.043   1 197.2052 &lt; 2.2e-16 ***
+factor(chip_id)       1.352   5   1.1834 0.3154772    
+factor(experiment)    9.837  15   2.8713 0.0002049 ***
+factor(image_label)  27.033  95   1.2458 0.0655855 .  
+Residuals           176.330 772                       
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>aov.lm.gfp</code></pre>
+<pre><code>Anova Table (Type III tests)
+
+Response: gfp.median.log10sum
+                    Sum Sq  Df  F value  Pr(&gt;F)    
+(Intercept)         58.124   1 575.1676 &lt; 2e-16 ***
+factor(chip_id)      1.365   5   2.7024 0.01974 *  
+factor(experiment)  11.844  15   7.8136 &lt; 2e-16 ***
+factor(image_label) 12.378  95   1.2894 0.04034 *  
+Residuals           78.014 772                     
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>aov.lm.dapi</code></pre>
+<pre><code>Anova Table (Type III tests)
+
+Response: dapi.median.log10sum
+                    Sum Sq  Df   F value  Pr(&gt;F)    
+(Intercept)         55.309   1 1527.5716 &lt; 2e-16 ***
+factor(chip_id)      0.443   5    2.4469 0.03263 *  
+factor(experiment)  11.055  15   20.3545 &lt; 2e-16 ***
+factor(image_label)  3.160  95    0.9187 0.69323    
+Residuals           27.952 772                      
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+<div id="label-cell-cycle-phase" class="section level2">
+<h2>Label cell cycle phase</h2>
+<pre class="r"><code>ggplot(pdata, 
+       aes(x=gfp.median.log10sum.adjust, 
+           y=rfp.median.log10sum.adjust)) + 
+    geom_point(alpha = .5, cex = .7) + 
+#      xlim(1,3.5) + ylim(1,3.5) + 
+    labs(x=&quot;GFP intensity (log10 pixel sum)&quot;, 
+         y = &quot;RFP intensity (log10 pixel sum)&quot;) + 
+#    facet_wrap(~as.factor(chip_id), ncol=3) +
+    theme_gray() + theme(legend.position=&quot;none&quot;)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># compute projected cell time
+pc.fucci &lt;- prcomp(subset(pdata, 
+                          select=c(&quot;rfp.median.log10sum.adjust&quot;,
+                                   &quot;gfp.median.log10sum.adjust&quot;)),
+                   center = T, scale. = T)
+Theta.cart &lt;- pc.fucci$x
+library(circular)
+Theta.fucci &lt;- coord2rad(Theta.cart)
+Theta.fucci &lt;- (2*pi)-as.numeric(Theta.fucci)
+
+(pc.fucci$sdev^2)/sum(pc.fucci$sdev^2)</code></pre>
+<pre><code>[1] 0.5134325 0.4865675</code></pre>
+<pre class="r"><code>plot(Theta.cart[,1],
+     Theta.cart[,2], xlab = &quot;PC1 (51%)&quot;, ylab = &quot;PC2 (49%)&quot;,
+     main = &quot;FUCCI data PCA&quot;)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(movMF)
+res &lt;- movMF(Theta.cart, k=3, nruns=50,
+             kappa = list(common = TRUE))
+clust &lt;- predict(res)  
+summary(as.numeric(Theta.fucci)[clust==1])</code></pre>
+<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+0.004025 0.304041 1.112189 3.000234 5.923906 6.282360 </code></pre>
+<pre class="r"><code>summary(as.numeric(Theta.fucci)[clust==2])</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  2.885   3.537   3.941   3.896   4.243   5.069 </code></pre>
+<pre class="r"><code>summary(as.numeric(Theta.fucci)[clust==3])</code></pre>
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.179   1.646   2.091   2.063   2.455   2.861 </code></pre>
+<pre class="r"><code>theta.adj &lt;- Theta.fucci
+cutoff &lt;- min(Theta.fucci[clust==1])
+theta.adj &lt;- (Theta.fucci - cutoff)%% (2*pi)
+
+plot(theta.adj, Theta.fucci)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(circular(theta.adj), stack=TRUE)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>hist(theta.adj, nclass=25, xlab = &quot;Cell time&quot;,
+     main = &quot;Estimated cell time&quot;,
+     xlim = c(0, 2.1*pi))</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>with(pdata,
+     {
+ par(mfrow=c(2,2))
+  plot(x=theta.adj,
+     y=gfp.median.log10sum.adjust,
+     xlab = &quot;Estiamted cell time&quot;,
+     ylab = &quot;FUCCI intensites&quot;,
+     col = &quot;forestgreen&quot;, pch=16, cex=.7,
+      ylim = range(gfp.median.log10sum.adjust,rfp.median.log10sum.adjust))
+  points(x=theta.adj,
+        y=rfp.median.log10sum.adjust,
+        col = &quot;red&quot;, pch=16, cex=.7)
+  plot(x=theta.adj,
+       y=dapi.median.log10sum.adjust,
+        xlab = &quot;Estiamted cell time&quot;,
+        ylab = &quot;DAPI intensites&quot;,
+       col = &quot;blue&quot;, pch=16, cex=.7)
+  plot(x=theta.adj,
+       y=molecules,
+       xlab = &quot;Estiamted cell time&quot;,
+       ylab = &quot;Sample molecule count&quot;,
+       col = &quot;black&quot;, pch=1, cex=.7)
+})
+
+
+# select some marker genes
+counts &lt;- exprs(eset_final)[grep(&quot;ENSG&quot;, rownames(eset_final)), ]
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+cdk1 &lt;- macosko$ensembl[macosko$hgnc==&quot;CDK1&quot;]
+cdc6 &lt;- macosko$ensembl[macosko$hgnc==&quot;CDC6&quot;]
+tpx2 &lt;- macosko$ensembl[macosko$hgnc==&quot;TPX2&quot;]
+
+# saveRDS(data.frame(theta=theta.adj,
+#                    cdk1=log2cpm.all[rownames(log2cpm.all) == cdk1,],
+#                    cdc6=log2cpm.all[rownames(log2cpm.all) == cdc6,],
+#                    tpx2=log2cpm.all[rownames(log2cpm.all) == tpx2,]),
+#         file = &quot;../output_tmp/cycle.rds&quot;)
+par(mfrow=c(2,2))</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == cdk1,],
+     main = &quot;CDK1 (G2 phase)&quot;,
+     ylab = &quot;log2cpm&quot;, xlab = &quot;Estimated cell time&quot;)
+plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == cdc6,],
+     main = &quot;CDC6 (G1/S phase)&quot;,
+     ylab = &quot;log2cpm&quot;, xlab = &quot;Estimated cell time&quot;)
+plot(x=theta.adj,
+     y= log2cpm.all[rownames(log2cpm.all) == tpx2,],
+     main = &quot;TPX2 (M phase)&quot;,
+     ylab = &quot;log2cpm&quot;, xlab = &quot;Estimated cell time&quot;)</code></pre>
+<p><img src="figure/talk-20180416.Rmd/unnamed-chunk-8-7.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="individual-differences-in-cell-cycle-phase-distributions" class="section level2">
+<h2>Individual differences in cell cycle phase distributions</h2>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] movMF_0.2-2         car_2.1-6           gridExtra_2.3      
+ [4] cowplot_0.9.2       ggplot2_2.2.1       genlasso_1.3       
+ [7] igraph_1.2.1        smashr_1.1-0        caTools_1.17.1     
+[10] data.table_1.10.4-3 Matrix_1.2-12       wavethresh_4.6.8   
+[13] MASS_7.3-49         ashr_2.2-7          Rcpp_0.12.16       
+[16] NPCirc_2.0.1        matrixStats_0.53.1  dplyr_0.7.4        
+[19] Biobase_2.38.0      BiocGenerics_0.24.0 conicfit_1.0.4     
+[22] geigen_2.1          pracma_2.1.4        circular_0.4-93    
+
+loaded via a namespace (and not attached):
+ [1] jsonlite_1.5       splines_3.4.4      foreach_1.4.4     
+ [4] shiny_1.0.5        assertthat_0.2.0   yaml_2.1.18       
+ [7] slam_0.1-42        pillar_1.2.1       backports_1.1.2   
+[10] lattice_0.20-35    quantreg_5.35      glue_1.2.0        
+[13] digest_0.6.15      skmeans_0.2-11     minqa_1.2.4       
+[16] colorspace_1.3-2   htmltools_0.3.6    httpuv_1.3.6.2    
+[19] plyr_1.8.4         pkgconfig_2.0.1    misc3d_0.8-4      
+[22] SparseM_1.77       xtable_1.8-2       mvtnorm_1.0-7     
+[25] scales_0.5.0       MatrixModels_0.4-1 lme4_1.1-15       
+[28] git2r_0.21.0       tibble_1.4.2       mgcv_1.8-23       
+[31] nnet_7.3-12        lazyeval_0.2.1     pbkrtest_0.4-7    
+[34] magrittr_1.5       mime_0.5           evaluate_0.10.1   
+[37] nlme_3.1-131.1     doParallel_1.0.11  truncnorm_1.0-8   
+[40] tools_3.4.4        stringr_1.3.0      munsell_0.4.3     
+[43] cluster_2.0.6      plotrix_3.7        bindrcpp_0.2      
+[46] compiler_3.4.4     rlang_0.2.0        nloptr_1.0.4      
+[49] grid_3.4.4         iterators_1.0.9    htmlwidgets_1.0   
+[52] crosstalk_1.0.0    bitops_1.0-6       labeling_0.3      
+[55] rmarkdown_1.9      boot_1.3-20        gtable_0.2.0      
+[58] codetools_0.2-15   R6_2.2.2           knitr_1.20        
+[61] clue_0.3-54        bindr_0.1.1        rprojroot_1.3-2   
+[64] shape_1.4.4        stringi_1.1.7      pscl_1.5.2        
+[67] SQUAREM_2017.10-1 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
