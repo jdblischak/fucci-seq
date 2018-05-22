@@ -19,6 +19,13 @@ partitionSamples <- function(y, runs, nsize.each = NULL) {
       dat$y[indices]
     })
   })
-  return(list(partitions=out,
+
+  part_indices <- vector("list", runs)
+  for (i in 1:length(out)) {
+    part_indices[[i]] <- list(test=c(out[[i]][[i]]))
+    part_indices[[i]]$train <- setdiff(c(1:length(y)), part_indices[[i]]$test)
+  }
+
+  return(list(partitions=part_indices,
               seeds=seeds))
 }

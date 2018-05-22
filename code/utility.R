@@ -124,13 +124,72 @@ partitionSamples <- function(y, runs, nsize.each = NULL) {
 
 
 
+
+
+
+#' @title Estimate gene weights for cell time
+#'
+#' @param Y gene by sample expression matrix
+#' @param theta sample cell time vector
+#'
+#' @export
+cycle.spml.trainmodel <- function(Y, theta) {
+
+  library(Rfast)
+  library(assertthat)
+  fit <- spml.reg(theta, t(Y), seb=TRUE)
+  return(fit)
+}
+
+
+#' @title Estimate gene weights for cell time
+#'
+#' @param Y_test gene by testing samples
+#' @param theta_test gene by training samples
+#' @param theta_train cell times for training samples
+#' @param theta_test cell times for test samples
+#'
+#' @export
+cycle.spml.testmodel <- function(Y_test, Y_train, theta_test, theta_train) {
+
+  library(Rfast)
+  library(assertthat)
+  assert_that(is.matrix(Y_test))
+  assert_that(dim(Y_test)[2]==length(theta_test),
+              msg = "dimension of testing expression matrix doesn't match length of cell time vector")
+  assert_that(is.matrix(Y_train))
+  assert_that(dim(Y_train)[2]==length(theta_train),
+              msg = "dimension of training expression matrix doesn't match length of cell time vector")
+
+  fit_train <- cycle.spml.trainmodel(Y_train, theta_train)
+
+  pred_cart <- cbind(1,t(Y_test))%*%fit_train$be
+  pred_polar <- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] < 0)
+
+  rho_test <- rFLIndTestRand(pred_polar, theta_test, 9999)
+  boot_ci <- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)
+
+  return(list(betahat=fit_train$be,
+              theta_pred=pred_polar,
+              theta_test=theta_test,
+              rho=rho_test[1],
+              boot_95ci_low=boot_ci[1],
+              boot_95ci_high=boot_ci[2],
+              pval=rho_test[2]))
+}
+
+
+
+
+
 #' @title compute Fisher-Lee correlation coefficient
+#'
 #' @param lcdat1 length n vector of radians
 #' @param lcdat2 length n vector of radians
 #'
 #' @references Pewsey et al. Circular statistics in R
 #'
-#' @return
+#' @export
 rFLCorrCoeff <- function(lcdat1, lcdat2) {
   A <- sum(cos(lcdat1)*cos(lcdat2))
   B <- sum(sin(lcdat1)*sin(lcdat2))
@@ -151,7 +210,7 @@ rFLCorrCoeff <- function(lcdat1, lcdat2) {
 #'
 #' @references Pewsey et al. Circular statistics in R
 #'
-#' @return
+#' @export
 rFLIndTestRand <- function(lcdat1, lcdat2, NR) {
   rFLObs <- rFLCorrCoeff(lcdat1, lcdat2)
   nxtrm <- 1
@@ -162,7 +221,9 @@ rFLIndTestRand <- function(lcdat1, lcdat2, NR) {
   pval <- nxtrm/(NR+1); return(c(rFLObs,pval))
 }
 
+
 #' @title compute boostrap confidence interval for correlation coefficient
+#'
 #' @param lcdat1 length n vector of radians
 #' @param lcdat2 length n vector of radians
 #' @param ConfLevel percent confidence interval
@@ -170,7 +231,7 @@ rFLIndTestRand <- function(lcdat1, lcdat2, NR) {
 #'
 #' @references Pewsey et al. Circular statistics in R
 #'
-#' @return
+#' @export
 rhoFLCIBoot <- function(lcdat1, lcdat2, ConfLevel, B) {
   alpha <- (100-ConfLevel)/100; n <- length(lcdat1)
   rFL <- 0
@@ -185,82 +246,59 @@ rhoFLCIBoot <- function(lcdat1, lcdat2, ConfLevel, B) {
 }
 
 
-
-#' @title Estimate gene weights for cell time
-#' @param Y gene by sample expression matrix
-#' @param theta sample cell time vector
+#' @title Print prime numbers
 #'
-#' @return
-cycle.trainmodel <- function(Y, theta) {
-
-  library(Rfast)
-  library(assertthat)
-  fit <- spml.reg(theta, t(Y), seb=TRUE)
-  return(fit)
-}
-
-
-#' @title Estimate gene weights for cell time
-#' @param Y gene by sample expression matrix
-#' @param theta sample cell time vector
+#' @param nprimes number of prime numbers needed (default starting from 1)
+#' @param prime.start start search for prime numbers from this value
 #'
-#' @return
-cycle.testmodel <- function(Y_test, Y_train, theta_test, theta_train) {
+#' @export
+primes <- function(nprimes, prime.start=1) {
+  is.prime <- function(n) n == 2L || all(n %% 2L:max(2,floor(sqrt(n))) != 0)
+  out <- c()
+  num <- prime.start
 
-  library(Rfast)
-  library(assertthat)
-  assert_that(is.matrix(Y_test))
-  assert_that(dim(Y_test)[2]==length(theta_test),
-              msg = "dimension of testing expression matrix doesn't match length of cell time vector")
-  assert_that(is.matrix(Y_train))
-  assert_that(dim(Y_train)[2]==length(theta_train),
-              msg = "dimension of training expression matrix doesn't match length of cell time vector")
-
-  fit_train <- cycle.trainmodel(Y_train, theta_train)
-
-  pred_cart <- cbind(1,t(Y_test))%*%fit.train$be
-  pred_polar <- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] < 0)
-
-  rho_test <- rFLIndTestRand(pred_polar, theta_test, 9999)
-  boot_ci <- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)
-
-  return(list(betahat=fit_train$be,
-              theta_pred=pred_polar,
-              theta_test=theta_test,
-              rho=rho_test[1],
-              boot_95ci_low=boot_ci[1],
-              boot_95ci_high=boot_ci[2],
-              pval=rho_test[2]))
+  while(length(out)<nprimes) {
+    if (is.prime(num) ) {
+      out <- c(out, num) } else {
+        out <- out
+      }
+    num <- num+1
+  }
+  return(out)
 }
 
 
 
-#' @title fitting trendfilter
-fit.trendfilter.generic <- function(yy, pos.yy=c(1:length(yy)), polyorder=2) {
-  library(genlasso)
+#' @title partition samples by specified sizes of training and testing data
+#'
+#' @param y data vector
+#' @param runs number of times that data vector will be partitioned
+#' @param nsize_each number of samples in each partition
+#'
+#' @export
+partitionSamples <- function(y, runs, nsize.each = NULL) {
+  dat <- data.frame(y)
+  dat$index <- c(1:length(y))
+  nseeds <- runs*length(nsize.each)
+  seeds <- matrix(primes(nseeds), nrow=runs, ncol=length(nsize.each))
 
-  yy.rep <- rep(yy,3)
-  #  theta.nonzero.rep <- rep(theta.nonzero,3)
-  pos.rep <- rep(pos.yy,3)
-  include <- rep(c(FALSE, TRUE, FALSE), each = length(yy))
+  out <- lapply(1:runs, function(r) {
+    lapply(1:length(nsize.each), function(i) {
+      set.seed(seeds[r,i])
+      indices <- sample(dat$index, size=nsize.each[i])
+      indices <- sort(indices)
+      dat$y[indices]
+    })
+  })
 
-  # trendfilter
-  fit.trend <- trendfilter(yy.rep,
-                           ord=polyorder, approx = F, maxsteps = 1000)
-  cv.trend <- cv.trendfilter(fit.trend)
-  which.lambda <- cv.trend$i.1se
-  yy.trend.pred <- predict(fit.trend, lambda=cv.trend$lambda.1se,
-                           df=fit.trend$df[which.lambda])$fit
-  trend.yy <- yy.trend.pred[include]
-  pve <- 1-var(yy-trend.yy)/var(yy)
+  part_indices <- vector("list", runs)
+  for (i in 1:length(out)) {
+    part_indices[[i]] <- list(test=c(out[[i]][[i]]))
+    part_indices[[i]]$train <- setdiff(c(1:length(y)), part_indices[[i]]$test)
+  }
 
-  # trend.mad.pred <- mad(yy.nonzero.rep[include]-yy.trend.pred[include], constant = 1)
-  # trend.mad.constant <- mad(yy.nonzero.rep[include]-mean(yy.nonzero.rep[include]), constant = 1)
-  # trend.mad.ratio <- trend.mad.pred/trend.mad.constant
-
-  return(list(trend.yy=trend.yy,
-              trend.pos=pos.rep[include],
-              #trend.mad.ratio=trend.mad.ratio,
-              trend.pve=pve))
+  return(list(partitions=part_indices,
+              seeds=seeds))
 }
+
 

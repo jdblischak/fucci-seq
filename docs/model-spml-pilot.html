@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Trying out spml package</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Trying out spml package</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#behavior-of-spml">Behavior of spml</a><ul>
+<li><a href="#univariate">Univariate</a></li>
+<li><a href="#p-large-but-p-n">P large but P &lt; N</a></li>
+</ul></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-22</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> f4b7373</p>
+<hr />
+<div id="behavior-of-spml" class="section level2">
+<h2>Behavior of spml</h2>
+<p>Use <code>spml</code> functions implemented in <code>Rfast</code> package. See <a href="https://cran.r-project.org/web/packages/Rfast/index.html" class="uri">https://cran.r-project.org/web/packages/Rfast/index.html</a></p>
+<div id="univariate" class="section level3">
+<h3>Univariate</h3>
+<p>In a simple univariate case, the model converges to the same likelihood over 50 runs in same number of iterations, given a fixed toelerance or between two difference tolerance levels.</p>
+<pre class="r"><code># simulate a scenario where 
+# the response variable y is bivariate normal random variables
+# with mean Mu and variance Sigma
+# We are interested in the relatsionship Mu = BX
+# where X is a n by p matrix representing possibly gene expression profile of n cells
+
+library(Rfast)
+library(circular)
+
+N &lt;- 100
+set.seed(17)
+X &lt;- rnorm(N)
+B1 &lt;- cbind(3,1)
+B2 &lt;- cbind(2,-3)
+Mu &lt;- cbind(3 + 1*X, 2 - 3*X)
+#Mu &lt;- X %*% t(B)
+Y &lt;- cbind(rnorm(N, Mu[,1],1),
+           rnorm(N, Mu[,2],1))
+# project Y onto unit circle
+U &lt;- Y / sqrt( rowsums(Y^2) )
+Theta &lt;- coord2rad(U, contro.circular(modulo = &quot;2pi&quot;, units = &quot;radians&quot;, zero = 0))
+
+nevals &lt;- 50
+res.covariate.one &lt;- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, seb = TRUE)
+})
+sapply(res.covariate.one, &quot;[[&quot;, &quot;loglik&quot;)</code></pre>
+<pre><code> [1] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+ [8] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[15] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[22] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[29] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[36] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[43] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[50] 11.81058</code></pre>
+<pre class="r"><code>sapply(res.covariate.one, &quot;[[&quot;, &quot;iters&quot;)</code></pre>
+<pre><code> [1] 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+[36] 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8</code></pre>
+<p>Do we get very different results if changing tolerance?</p>
+<pre class="r"><code>nevals &lt;- 50
+res.covariate.one.2 &lt;- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, tol = 1e-10, seb = TRUE)
+})
+sapply(res.covariate.one.2, &quot;[[&quot;, &quot;loglik&quot;)</code></pre>
+<pre><code> [1] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+ [8] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[15] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[22] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[29] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[36] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[43] 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058 11.81058
+[50] 11.81058</code></pre>
+<pre class="r"><code>sapply(res.covariate.one.2, &quot;[[&quot;, &quot;iters&quot;)</code></pre>
+<pre><code> [1] 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9
+[36] 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9</code></pre>
+<p>Compare results when tolerance is 1e-07 versus 1e-10. No difference.</p>
+<pre class="r"><code>res.covariate.one[[1]]$loglik</code></pre>
+<pre><code>[1] 11.81058</code></pre>
+<pre class="r"><code>res.covariate.one.2[[1]]$loglik</code></pre>
+<pre><code>[1] 11.81058</code></pre>
+</div>
+<div id="p-large-but-p-n" class="section level3">
+<h3>P large but P &lt; N</h3>
+<p>Okay with 10 variable. Converges to the same likelihood in 50 runs.</p>
+<pre class="r"><code># simulate a scenario where 
+# the response variable y is bivariate normal random variables
+# with mean Mu and variance Sigma
+# We are interested in the relatsionship Mu = BX
+# where X is a n by p matrix representing possibly gene expression profile of n cells
+
+library(Rfast)
+N &lt;- 100
+P &lt;- 10
+set.seed(17)
+X &lt;- matrix(rnorm(N*P), nrow= N, ncol = P)
+B1 &lt;- cbind(3,1, 2, 5, 1, .5, .3, .1, 1, 2)
+B2 &lt;- cbind(2,-3, 1, 2, .2, .3, .1, .9, 5, 1)
+B &lt;- rbind(B1, B2)
+Mu &lt;- X%*%t(B)
+Y &lt;- cbind(rnorm(N, Mu[,1],1),
+           rnorm(N, Mu[,2],1))
+# project Y onto unit circle
+U &lt;- Y / sqrt( rowsums(Y^2) )
+Theta &lt;- coord2rad(U, contro.circular(modulo = &quot;2pi&quot;, units = &quot;radians&quot;, zero = 0))
+
+nevals &lt;- 50
+res.covariate.many &lt;- lapply(1:nevals, function(i) {
+  set.seed(i)
+  spml.reg(y=Theta, x=X, seb = TRUE)
+})
+sapply(res.covariate.many, &quot;[[&quot;, &quot;loglik&quot;)</code></pre>
+<pre><code> [1] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+ [8] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[15] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[22] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[29] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[36] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[43] 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008 72.06008
+[50] 72.06008</code></pre>
+<pre class="r"><code>sapply(res.covariate.many, &quot;[[&quot;, &quot;iters&quot;)</code></pre>
+<pre><code> [1] 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9
+[36] 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9</code></pre>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] circular_0.4-93    Rfast_1.9.0        RcppZiggurat_0.1.4
+[4] Rcpp_0.12.16      
+
+loaded via a namespace (and not attached):
+ [1] mvtnorm_1.0-7   digest_0.6.15   rprojroot_1.3-2 backports_1.1.2
+ [5] git2r_0.21.0    magrittr_1.5    evaluate_0.10.1 stringi_1.1.7  
+ [9] boot_1.3-20     rmarkdown_1.9   tools_3.4.4     stringr_1.3.0  
+[13] yaml_2.1.18     parallel_3.4.4  compiler_3.4.4  htmltools_0.3.6
+[17] knitr_1.20     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

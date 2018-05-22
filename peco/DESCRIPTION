@@ -1,4 +1,4 @@
-Package: paco
+Package: peco
 Type: Package
 Title: Predicting the cyclical ordering of single cells using gene expression data
 Version: 0.99.1
