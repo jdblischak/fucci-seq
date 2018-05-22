@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Estimate cyclical ordering using spml</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Estimate cyclical ordering using spml</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#outline-of-the-approach">Outline of the approach</a></li>
+<li><a href="#simple-example-say-for-5-genes-hold-100-cells-out-each-time-do-10-times">Simple example, say for 5 genes, hold 100 cells out each time, do 10 times</a></li>
+<li><a href="#use-pve-significant-genes">Use PVE significant genes</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-05-22</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> d1b408b</p>
+<hr />
+<div id="outline-of-the-approach" class="section level2">
+<h2>Outline of the approach</h2>
+<p>Perform 5-fold cross-validation. Do the following for each fold:</p>
+<ol style="list-style-type: decimal">
+<li><p>Fit spml to training samples, and use the gene weights learned from training samples to predict cell times in testing samples</p></li>
+<li><p>Compute correlation between predicted cell times and the fucci-labeled cell times. The correlation quanties the extent to which the two data series are rotationally dependent. The larger the value the fewer rotations/transformations needed to rotate data series A to data series B. Also compute 95% confidence interval using bootstraping to quantify the level of statistical significance of correlations.</p></li>
+</ol>
+<ul>
+<li><p>Note there are some issues in the computations of the permutation-based p-values. The p-values turned out to be the same across folds…</p></li>
+<li><p>Importantly, the method estimates the average direction (or angle) given the covariates, which does not address the question that we are asking.</p></li>
+<li><p>I stopped pursing this idea and instead focus on nonparametric regerssion methods.</p></li>
+<li><p>The approach implemented here references the method described in Presnell, Brett, Scott P. Morrison, and Ramon C. Littell. “Projected Multivariate Linear Models for Directional Data.” Journal of the American Statistical Association 93, no. 443 (1998): 1068-077. <a href="doi:10.2307/2669850" class="uri">doi:10.2307/2669850</a>. R package <code>Rfast</code> was used to perform the computations.</p></li>
+</ul>
+<hr />
+</div>
+<div id="simple-example-say-for-5-genes-hold-100-cells-out-each-time-do-10-times" class="section level2">
+<h2>Simple example, say for 5 genes, hold 100 cells out each time, do 10 times</h2>
+<p>Get data</p>
+<pre class="r"><code>library(Biobase)
+
+df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+
+
+# import previously identifid cell cycle genes
+cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+cyclegenes.names &lt;- colnames(cyclegenes)[2:6]
+
+quant.sub &lt;- log2cpm.quant[rownames(log2cpm.quant) %in% cyclegenes.names, ]</code></pre>
+<p>Analysis</p>
+<pre class="r"><code>source(&quot;../code/utility.R&quot;)
+
+N &lt;- dim(quant.sub)[2]
+parts &lt;- partitionSamples(c(1:N), runs=5, nsize.each = c(rep(177,4), 180))
+
+res &lt;- lapply(1:5, function(iter) {
+  ii_train &lt;- parts$partitions[[iter]][[1]]
+  ii_test &lt;- parts$partitions[[iter]][[2]]
+  theta_test &lt;- pdata$theta[ii_test]
+  theta_train &lt;- pdata$theta[ii_train]
+  cycle.spml.testmodel(Y_test = quant.sub[,ii_test], 
+                  Y_train = quant.sub[,ii_train],
+                  theta_test = theta_test, 
+                  theta_train = theta_train)
+})
+
+# the permutation-based pvalue is questionable...
+tab &lt;- do.call(rbind, lapply(res, function(xx) {
+  data.frame(rho=xx$rho,
+             boot_95ci_low=xx$boot_95ci_low,
+             boot_95ci_high=xx$boot_95ci_high,
+             pval=xx$pval)
+}) )
+
+with(tab, rho &gt; boot_95ci_low &amp; rho &lt; boot_95ci_high)</code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<hr />
+</div>
+<div id="use-pve-significant-genes" class="section level2">
+<h2>Use PVE significant genes</h2>
+<p>Get data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+
+out.stats.ordered.sig.101 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
+out.stats.ordered.sig.476 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds&quot;)
+
+quant.101 &lt;- log2cpm.quant[rownames(log2cpm.quant) %in% rownames(out.stats.ordered.sig.101), ]
+quant.476 &lt;- log2cpm.quant[rownames(log2cpm.quant) %in% rownames(out.stats.ordered.sig.476), ]</code></pre>
+<p>Analysis code</p>
+<pre class="r"><code>source(&quot;../code/utility.R&quot;)
+
+# 20 fold 
+nfold &lt;- 5
+N &lt;- dim(quant.101)[2]
+parts &lt;- partitionSamples(c(1:N), runs=nfold, nsize.each=c(177,177,177,177,180))
+df &lt;- quant.101
+res &lt;- lapply(1:nfold, function(i) {
+  ii_train &lt;- parts$partitions[[i]]$train
+  ii_test &lt;- parts$partitions[[i]]$test
+  theta_test &lt;- pdata$theta[ii_test]
+  theta_train &lt;- pdata$theta[ii_train]
+  cycle.spml.testmodel(Y_test = df[,ii_test], 
+                  Y_train = df[,ii_train],
+                  theta_test = theta_test, 
+                  theta_train = theta_train)
+})
+
+# the permutation-based pvalue is questionable...
+tab &lt;- do.call(rbind, lapply(res, function(xx) {
+  data.frame(rho=xx$rho,
+             boot_95ci_low=xx$boot_95ci_low,
+             boot_95ci_high=xx$boot_95ci_high,
+             pval=xx$pval)
+}) )
+
+with(tab, rho &gt; boot_95ci_low &amp; rho &lt; boot_95ci_high)</code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<p>Results too perfect: turns out more investigations are needed for the correlation between circular variables.</p>
+<p>Check prediction for some random data</p>
+<pre class="r"><code># select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta.nonvalid &lt;- pdata$theta[ii.nonvalid]
+theta.valid &lt;- pdata$theta[ii.valid]
+
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions
+
+Y_train &lt;- expr.sig[,part_indices[[1]]$train]
+theta_train &lt;- theta.nonvalid[part_indices[[1]]$train]
+
+Y_test &lt;- expr.sig[,part_indices[[1]]$test]
+theta_test &lt;- theta.nonvalid[part_indices[[1]]$test]
+
+
+fit_train &lt;- cycle.spml.trainmodel(Y_train, theta_train)
+
+pred_cart &lt;- cbind(1,t(Y_test))%*%fit_train$be
+pred_polar &lt;- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] &lt; 0)
+
+rho_test &lt;- rFLIndTestRand(pred_polar, theta_test, 9999)
+boot_ci &lt;- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.4 (2018-03-15)
+Platform: x86_64-redhat-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/R/lib/libRblas.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] assertthat_0.2.0    Rfast_1.9.0         RcppZiggurat_0.1.4 
+[4] Rcpp_0.12.16        Biobase_2.38.0      BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] digest_0.6.15   rprojroot_1.3-2 backports_1.1.2 git2r_0.21.0   
+ [5] magrittr_1.5    evaluate_0.10.1 stringi_1.1.7   rmarkdown_1.9  
+ [9] tools_3.4.4     stringr_1.3.0   yaml_2.1.18     compiler_3.4.4 
+[13] htmltools_0.3.6 knitr_1.20     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
