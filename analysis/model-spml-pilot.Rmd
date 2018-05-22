@@ -53,6 +53,7 @@ In a simple univariate case, the model converges to the same likelihood over 50 
 
 library(Rfast)
 library(circular)
+
 N <- 100
 set.seed(17)
 X <- rnorm(N)
