@@ -57,12 +57,22 @@ cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est) {
   }
 
   # use multinomial sampling to assign samples
-  prob_per_cell_by_celltimes <- sweep(exp(loglik_per_cell_by_celltimes), 1,
-                                      FUN = "/",
-                                      STATS = rowMax(exp(loglik_per_cell_by_celltimes)))
+  prob_per_cell_by_celltimes <- matrix(0, N, nbins)
+  for (n in 1:N) {
+    maxll <- max(exp(loglik_per_cell_by_celltimes)[n,])
+    if (maxll == 0) {
+      prob_per_cell_by_celltimes[n,] <- rep(0, nbins)
+    } else {
+      prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
+    }
+  }
 
   cell_times_samp_ind <- sapply(1:N, function(n) {
-    which(rmultinom(1,1,prob_per_cell_by_celltimes[n,])==1)
+    if (max(prob_per_cell_by_celltimes[n,])==0) {
+      sample(1:nbins, 1, replace=F)
+    } else {
+      which.max(prob_per_cell_by_celltimes[n,])
+    }
   })
 
   cell_times_est <- sapply(1:N, function(n) {
@@ -102,6 +112,7 @@ cycle.npreg.mstep <- function(Y, theta, ncores=12, ...) {
   # for each gene, estimate the cyclical pattern of gene expression
   # conditioned on the given cell times
   fit <- mclapply(1:G, function(g) {
+    print(g)
     y_g <- Y_ordered[g,]
     fit_g <- fit.trendfilter.generic(yy=y_g)
     mu_g <- fit_g$trend.yy
@@ -200,7 +211,7 @@ cycle.npreg.estep <- function(Y, theta, mu_est, sigma_est,
 #' @title Estimate cell cycle ordering in the current sample
 #'
 #' @export
-cycle.npreg.insample <- function(Y, theta, nbins=200, ncores=12,...) {
+cycle.npreg.insample <- function(Y, theta, nbins=NULL, ncores=12,...) {
 
   # order data by initial cell times
   G <- nrow(Y)
@@ -210,22 +221,36 @@ cycle.npreg.insample <- function(Y, theta, nbins=200, ncores=12,...) {
 
   # initialize mu and sigma
   initial <- cycle.npreg.mstep(Y = Y_ordered,
-                              theta = theta_ordered_initial, ncores = 10)
+                              theta = theta_ordered_initial, ncores = ncores)
+
   # compute expected cell time under initial mu and sigma
-  estep <- cycle.npreg.estep(Y = initial$Y,
+  if (!is.null(nbins)) {
+    estep <- cycle.npreg.estep(Y = initial$Y,
+                               theta = initial$theta,
+                               mu_est = initial$mu_est,
+                               sigma_est = initial$sigma_est, nbins = nbins)
+    estep_Y <- estep$Y
+    }
+  if (is.null(nbins)) {
+    estep <- cycle.npreg.loglik(Y = initial$Y,
                              theta = initial$theta,
-                             mu_est = initial$mu_est,
-                             sigma_est = initial$sigma_est, nbins = nbins)
+                             mu_est= initial$mu_est,
+                             sigma_est=initial$sigma_est)
+    estep_Y <- initial$Y
+  }
+
   # compute estimated mu and sigma given expected cell time
-  mstep <- cycle.npreg.mstep(Y = estep$Y,
+  # use the re-ordered Y from the estep
+  mstep <- cycle.npreg.mstep(Y = estep_Y,
                              theta = estep$cell_times_est, ncores = 10)
 
+  # compute log-likelihood of the final fit
   mstep.loglik <- cycle.npreg.loglik(Y = mstep$Y,
                                      theta = mstep$theta,
                                      mu_est=mstep$mu_est,
                                      sigma_est=mstep$sigma_est)$loglik_est
-  out <- list(Y_ordered=estep$Y,
-              cell_times_est=estep$cell_times_est,
+  out <- list(Y_ordered=mstep$Y,
+              cell_times_est=mstep$theta,
               loglik_est=mstep.loglik,
               mu_est=mstep$mu_est,
               sigma_est=mstep$sigma_est)
@@ -251,6 +276,7 @@ cycle.npreg.outsample <- function(Y_test, theta_est,
                              mu_est = mu_est, sigma_est = sigma_est)
 
   # compute estimated mu and sigma given expected cell time
+  # this is just for plotting purposes
   mstep <- cycle.npreg.mstep(Y = Y_test,
                              theta = pred$cell_times_est, ncores = 10)
 

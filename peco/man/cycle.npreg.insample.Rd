@@ -4,5 +4,5 @@
 \alias{cycle.npreg.insample}
 \title{Estimate cell cycle ordering in the current sample}
 \usage{
-\method{cycle}{npreg.insample}(Y, theta, nbins = 200, ncores = 12, ...)
+\method{cycle}{npreg.insample}(Y, theta, nbins = NULL, ncores = 12, ...)
 }
