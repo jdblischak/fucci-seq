@@ -31,6 +31,75 @@ initialize_cell_times <- function(Y, nbins=NULL) {
 }
 
 
+#' @title Estimate parameters for the cyclial ordering using nonparametric smoothing
+#'
+#' @description Conditioned on observed cell times, estimate the cyclical trend
+#'   for each gene, and compute the likelihood of the observed cell times.
+#'
+#' @param Y gene by sample expression matrix (log2CPM).
+#' @param theta observed cellt times
+cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
+                                                       "npcirc.nw",
+                                                       "npcirc.ll"),
+                              ncores=12, ...) {
+
+      G <- nrow(Y)
+      N <- ncol(Y)
+      Y_ordered <- Y[,order(theta)]
+
+      # len <- 2*pi/nbins/2
+      # theta_ordered <- seq(len, 2*pi-len, length.out=nbins)
+      theta_ordered <- theta[order(theta)]
+
+      # for each gene, estimate the cyclical pattern of gene expression
+      # conditioned on the given cell times
+      fit <- mclapply(1:G, function(g) {
+        #    print(g)
+        y_g <- Y_ordered[g,]
+
+        if (method.trend=="npcirc.nw") {
+          fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "NW",
+                                     t=theta_ordered)
+          fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
+          mu_g <- fun_g(theta_ordered)
+        }
+        if (method.trend=="npcirc.ll") {
+          fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "LL",
+                                     t=theta_ordered)
+          fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
+          mu_g <- fun_g(theta_ordered)
+        }
+        if (method.trend=="trendfilter") {
+          fit_g <- fit.trendfilter.generic(yy=y_g, polyorder = polyorder)
+          mu_g <- fit_g$trend.yy
+        }
+        sigma_g <- sqrt(sum((y_g-mu_g)^2)/N)
+
+        list(y_g =y_g,
+             mu_g=mu_g,
+             sigma_g=sigma_g,
+             fun_g=fun_g)
+      }, mc.cores = ncores)
+
+      sigma_est <- sapply(fit, "[[", "sigma_g")
+      names(sigma_est) <- rownames(Y_ordered)
+
+      mu_est <- do.call(rbind, lapply(fit, "[[", "mu_g"))
+      colnames(mu_est) <- colnames(Y_ordered)
+      rownames(mu_est) <- rownames(Y_ordered)
+
+      funs <- sapply(fit, "[[", "fun_g")
+      names(funs) <- rownames(Y_ordered)
+
+      return(list(Y = Y_ordered,
+                  theta = theta_ordered,
+                  mu_est = mu_est,
+                  sigma_est = sigma_est,
+                  funs = funs))
+    }
+
+
+
 #' @title log-likelihood of nonparametric smoothing
 #'
 #' @param Y gene by sample expression matrix
@@ -38,54 +107,133 @@ initialize_cell_times <- function(Y, nbins=NULL) {
 #' @param sigma_est vector of standard errors for each gene
 #'
 #' @export
-cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est) {
+#' @title log-likelihood of nonparametric smoothing
+#'
+#' @param Y gene by sample expression matrix
+#' @param mu_est gene by sample matrix of expected mean
+#' @param sigma_est vector of standard errors for each gene
+#'
+#' @export
+cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est,
+                               funs_est,
+                               insample=F, outsample=F) {
 
-  nbins <- ncol(mu_est)
-  N <- ncol(Y)
-  G <- nrow(Y)
-  loglik_per_cell_by_celltimes <- matrix(0, N, nbins)
+  if (insample==TRUE) {
+    nbins <- ncol(mu_est)
+    N <- ncol(Y)
+    G <- nrow(Y)
+    loglik_per_cell_by_celltimes <- matrix(0, N, nbins)
+    for (n in 1:N) {
+      # for each cell, sum up the loglikelihood for each gene
+      # at the observed cell times
+      loglik_per_cell <- do.call(rbind, lapply(1:G, function(g) {
+        dnorm(Y[g,n], mu_est[g,], sigma_est[g], log = TRUE)
+      }))
+      loglik_per_cell <- colSums(loglik_per_cell)
 
-  for (n in 1:N) {
-    # for each cell, sum up the loglikelihood for each gene
-    # at the observed cell times
-    loglik_per_cell <- do.call(rbind, lapply(1:G, function(g) {
-      dnorm(Y[g,n], mu_est[g,], sigma_est[g], log = TRUE)
-    }))
-    loglik_per_cell <- colSums(loglik_per_cell)
+      loglik_per_cell_by_celltimes[n,] <- loglik_per_cell
+    }
 
-    loglik_per_cell_by_celltimes[n,] <- loglik_per_cell
+    # use max likelihood to assign samples
+    prob_per_cell_by_celltimes <- matrix(0, N, nbins)
+    for (n in 1:N) {
+      maxll <- max(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
+      if (maxll == 0) {
+        prob_per_cell_by_celltimes[n,] <- rep(0, nbins)
+      } else {
+        prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
+      }
+    }
+
+    cell_times_samp_ind <- sapply(1:N, function(n) {
+      if (max(prob_per_cell_by_celltimes[n,], na.rm=T)==0) {
+        sample(1:nbins, 1, replace=F)
+      } else {
+        which.max(prob_per_cell_by_celltimes[n,])
+      }
+    })
+
+    cell_times_est <- sapply(1:N, function(n) {
+      theta[cell_times_samp_ind[n]]
+    })
+    names(cell_times_est) <- colnames(Y)
+
+    # compute likelihood based on the selected cell times
+    loglik_max_per_cell <- sapply(1:N, function(n) {
+      ll <- loglik_per_cell_by_celltimes[n,]
+      ll[cell_times_samp_ind[n]]
+    })
+    loglik_est <- sum(loglik_max_per_cell)
+
   }
 
-  # use multinomial sampling to assign samples
-  prob_per_cell_by_celltimes <- matrix(0, N, nbins)
-  for (n in 1:N) {
-    maxll <- max(exp(loglik_per_cell_by_celltimes)[n,])
-    if (maxll == 0) {
-      prob_per_cell_by_celltimes[n,] <- rep(0, nbins)
-    } else {
-      prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
+
+  if(outsample==TRUE) {
+    nbins <- ncol(Y)
+    N <- ncol(Y)
+    G <- nrow(Y)
+    loglik_per_cell_by_celltimes <- matrix(0, N, nbins)
+
+    #len <- 2*pi/nbins/2
+    #theta_choose <- seq(len, 2*pi-len, length.out=nbins)
+#    len <- 2*pi/nbins/2
+    theta_choose <- initialize_cell_times(Y)
+    names(theta_choose) <- colnames(Y)
+
+#     library(movMF)
+#     vm_clust <- movMF(cbind(cos(theta_choose), sin(theta_choose)),
+#             k=3, nruns=20, kappa=list(common=TRUE))
+# #    vm_clust_mem <- predict(vm_clust)
+#     #set.seed(88)
+#     rvm_clust <- rmovMF(length(theta_choose), theta=vm_clust$theta,
+#                         alpha=vm_clust$alpha)
+#     library(circular)
+#     rvm_clust <- coord2rad(rvm_clust)
+#     theta_choose <- rvm_clust
+
+    for (n in 1:N) {
+      # for each cell, sum up the loglikelihood for each gene
+      # at the observed cell times
+      loglik_per_cell <- do.call(rbind, lapply(1:G, function(g) {
+        dnorm(Y[g,n], funs_est[[g]](theta_choose), sigma_est[g], log = TRUE)
+      }))
+      loglik_per_cell <- colSums(loglik_per_cell)
+
+      loglik_per_cell_by_celltimes[n,] <- loglik_per_cell
     }
+
+    # use max likelihood to assign samples
+    prob_per_cell_by_celltimes <- matrix(0, N, nbins)
+    for (n in 1:N) {
+     # print(n)
+      maxll <- max(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
+      if (maxll == 0) {
+        prob_per_cell_by_celltimes[n,] <- rep(0, nbins)
+      } else {
+        prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
+      }
+    }
+    cell_times_samp_ind <- sapply(1:N, function(n) {
+      if (max(prob_per_cell_by_celltimes[n,], na.rm=T)==0) {
+        sample(1:nbins, 1, replace=F)
+      } else {
+        which.max(prob_per_cell_by_celltimes[n,])
+      }
+    })
+    cell_times_est <- sapply(1:N, function(n) {
+      theta_choose[cell_times_samp_ind[n]]
+    })
+    names(cell_times_est) <- colnames(Y)
+
+    # compute likelihood based on the selected cell times
+    loglik_max_per_cell <- sapply(1:N, function(n) {
+      ll <- loglik_per_cell_by_celltimes[n,]
+      ll[cell_times_samp_ind[n]]
+    })
+    loglik_est <- sum(loglik_max_per_cell)
+
   }
 
-  cell_times_samp_ind <- sapply(1:N, function(n) {
-    if (max(prob_per_cell_by_celltimes[n,])==0) {
-      sample(1:nbins, 1, replace=F)
-    } else {
-      which.max(prob_per_cell_by_celltimes[n,])
-    }
-  })
-
-  cell_times_est <- sapply(1:N, function(n) {
-    theta[cell_times_samp_ind[n]]
-  })
-  names(cell_times_est) <- colnames(Y)
-
-  # compute likelihood based on the selected cell times
-  loglik_max_per_cell <- sapply(1:N, function(n) {
-    ll <- loglik_per_cell_by_celltimes[n,]
-    ll[cell_times_samp_ind[n]]
-  })
-  loglik_est <- sum(loglik_max_per_cell)
 
   return(list(loglik_est=loglik_est,
               cell_times_est=cell_times_est))
@@ -94,124 +242,16 @@ cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est) {
 
 
 
-#' @title Estimate parameters for the cyclial ordering using nonparametric smoothing
-#'
-#' @description Conditioned on observed cell times, estimate the cyclical trend
-#'   for each gene, and compute the likelihood of the observed cell times.
-#'
-#' @param Y gene by sample expression matrix (log2CPM).
-#' @param theta observed cellt times
-
-cycle.npreg.mstep <- function(Y, theta, ncores=12, ...) {
-
-  G <- nrow(Y)
-  N <- ncol(Y)
-  Y_ordered <- Y[,order(theta)]
-  theta_ordered <- theta[order(theta)]
-
-  # for each gene, estimate the cyclical pattern of gene expression
-  # conditioned on the given cell times
-  fit <- mclapply(1:G, function(g) {
-    print(g)
-    y_g <- Y_ordered[g,]
-    fit_g <- fit.trendfilter.generic(yy=y_g)
-    mu_g <- fit_g$trend.yy
-    sigma_g <- sqrt(sum((y_g-mu_g)^2)/N)
-    lambda_g <- fit_g$lambda
-
-    list(y_g =y_g,
-         mu_g=mu_g,
-         sigma_g=sigma_g,
-         lambda_g=lambda_g)
-  }, mc.cores = ncores)
-
-  lambda <- sapply(fit, "[[", "lambda_g")
-  names(lambda) <- rownames(Y_ordered)
-
-  sigma_est <- sapply(fit, "[[", "sigma_g")
-  names(sigma_est) <- rownames(Y_ordered)
-
-  mu_est <- do.call(rbind, lapply(fit, "[[", "mu_g"))
-  colnames(mu_est) <- colnames(Y_ordered)
-  rownames(mu_est) <- rownames(Y_ordered)
-
-  return(list(Y = Y_ordered,
-              theta = theta_ordered,
-              mu_est = mu_est,
-              sigma_est = sigma_est,
-              lambda = lambda))
-}
-
-
-
-
-
-#' @title Compute estimates in one iteration
-#'
-#' @description Given the estimated cell times, gene mean and gene variation,
-#'   (possibly from m-step), compute the expected cell times at midpoint of defined bins
-#'
-#' @param Y gene by sample log2CPM gene expression matrix
-#' @param theta cell time estimate to be used in estimating cyclical patterns
-#'    of gene exprssion levels for each gene
-#' @param ncores number of cores to be used
-#'
-#' @export
-cycle.npreg.estep <- function(Y, theta, mu_est, sigma_est,
-                              nbins=100, ncores, ...) {
-
-  G <- nrow(Y)
-  N <- ncol(Y)
-  theta_ordered <- theta[order(theta)]
-  Y_ordered <- Y[,order(theta)]
-
-  # split cell_times to nbins equaly sized bins
-  while (TRUE) {
-    breaks <- quantile(theta_ordered, prob=seq(0,1,1/nbins))
-
-    if (sum(duplicated(breaks)) == 0) break
-
-    nbins <- nbins-sum(duplicated(breaks))
-    breaks <- quantile(theta_ordered, prob=seq(0,1,1/nbins))
-  }
-
-  theta_ordered_bins <- data.frame(theta_ordered=theta_ordered,
-                                        bins=cut(theta_ordered,
-                                                 breaks=breaks,
-                                                 include.lowest = TRUE))
-  # mean cell time in each bin
-  theta_ordered_bins_mean <- aggregate(theta_ordered ~ bins,
-                                            data=theta_ordered_bins,
-                                            FUN=mean)
-
-  # expected mean gene expression in each bin
-  mu_g_bins <- do.call(rbind, lapply(1:G, function(g) {
-    tmp <- aggregate(mu_est[g,]~theta_ordered_bins$bins,
-                     FUN=mean)
-    return(tmp[,2])
-  }))
-  colnames(mu_g_bins) <- as.character(theta_ordered_bins_mean$bins)
-  rownames(mu_g_bins) <- rownames(mu_est)
-
-  loglik_max_est <- cycle.npreg.loglik(Y = Y_ordered,
-                                       theta = theta_ordered,
-                                       mu_est = mu_g_bins,
-                                       sigma_est = sigma_est)
-
-  Y_ordered_update <- Y_ordered[,order(loglik_max_est$cell_times_est)]
-  cell_times_est_update <- with(loglik_max_est, cell_times_est[order(cell_times_est)])
-
-  return(list(Y = Y_ordered_update,
-              cell_times_est = cell_times_est_update,
-              nbins=length(breaks)-1))
-}
-
-
 
 #' @title Estimate cell cycle ordering in the current sample
 #'
+#' @param update T/F to update cell times
+#'
 #' @export
-cycle.npreg.insample <- function(Y, theta, nbins=NULL, ncores=12,...) {
+cycle.npreg.insample <- function(Y, theta,
+                                 ncores=12,
+                                 method.trend=c("trendfilter", "npcirc.nw", "npcirc.ll"),
+                                 ...) {
 
   # order data by initial cell times
   G <- nrow(Y)
@@ -220,51 +260,38 @@ cycle.npreg.insample <- function(Y, theta, nbins=NULL, ncores=12,...) {
   Y_ordered <- Y[,order(theta)]
 
   # initialize mu and sigma
-  initial <- cycle.npreg.mstep(Y = Y_ordered,
-                              theta = theta_ordered_initial, ncores = ncores)
+  initial_mstep <- cycle.npreg.mstep(Y = Y_ordered,
+                                     theta = theta_ordered_initial,
+                                     method.trend=method.trend,
+                                     ncores = ncores)
 
-  # compute expected cell time under initial mu and sigma
-  if (!is.null(nbins)) {
-    estep <- cycle.npreg.estep(Y = initial$Y,
-                               theta = initial$theta,
-                               mu_est = initial$mu_est,
-                               sigma_est = initial$sigma_est, nbins = nbins)
-    estep_Y <- estep$Y
-    }
-  if (is.null(nbins)) {
-    estep <- cycle.npreg.loglik(Y = initial$Y,
-                             theta = initial$theta,
-                             mu_est= initial$mu_est,
-                             sigma_est=initial$sigma_est)
-    estep_Y <- initial$Y
-  }
+  # compute log-likelihood under initial mu and sigma
+  initial_estep <- cycle.npreg.loglik(Y = initial_mstep$Y,
+                                      theta = initial_mstep$theta,
+                                      mu_est = initial_mstep$mu_est,
+                                      sigma_est = initial_mstep$sigma_est,
+                                      insample=T, funs_est=NULL)
 
-  # compute estimated mu and sigma given expected cell time
-  # use the re-ordered Y from the estep
-  mstep <- cycle.npreg.mstep(Y = estep_Y,
-                             theta = estep$cell_times_est, ncores = 10)
-
-  # compute log-likelihood of the final fit
-  mstep.loglik <- cycle.npreg.loglik(Y = mstep$Y,
-                                     theta = mstep$theta,
-                                     mu_est=mstep$mu_est,
-                                     sigma_est=mstep$sigma_est)$loglik_est
-  out <- list(Y_ordered=mstep$Y,
-              cell_times_est=mstep$theta,
-              loglik_est=mstep.loglik,
-              mu_est=mstep$mu_est,
-              sigma_est=mstep$sigma_est)
+  out <- list(Y_ordered=initial_mstep$Y,
+              loglik_est=initial_estep$loglik_est,
+              cell_times_est=theta_ordered_initial[match(colnames(initial_mstep$Y),
+                                                         names(theta_ordered_initial))],
+              mu_est=initial_mstep$mu_est,
+              sigma_est=initial_mstep$sigma_est,
+              funs_est=initial_mstep$funs)
+  return(out)
 }
-
-
-
 
 
 #' @title Predict cell cycle ordering in the test samples
 #'
 #' @export
-cycle.npreg.outsample <- function(Y_test, theta_est,
-                                  mu_est, sigma_est, ncores=12,...) {
+cycle.npreg.outsample <- function(Y_test,
+                                  sigma_est,
+                                  funs_est,
+                                  ncores=12,
+                                  maxiter=10,
+                                  tol=1, verbose=TRUE,...) {
 
   # order data by initial cell times
   G <- nrow(Y_test)
@@ -272,81 +299,130 @@ cycle.npreg.outsample <- function(Y_test, theta_est,
 
   # compute expected cell time for the test samples
   # under mu and sigma estimated from the training samples
-  pred <- cycle.npreg.loglik(Y = Y_test, theta = theta_est,
-                             mu_est = mu_est, sigma_est = sigma_est)
+  initial_loglik <- cycle.npreg.loglik(Y = Y_test,
+                             sigma_est = sigma_est,
+                             funs_est=funs_est, outsample=T)
+  initial_mstep <- cycle.npreg.mstep(Y = Y_test,
+                             theta = initial_loglik$cell_times_est,
+                             ncores = ncores)
 
-  # compute estimated mu and sigma given expected cell time
-  # this is just for plotting purposes
-  mstep <- cycle.npreg.mstep(Y = Y_test,
-                             theta = pred$cell_times_est, ncores = 10)
+  loglik_previous <- initial_loglik$loglik_est
+  mu_est_previous <- initial_mstep$mu_est
+  sigma_est_previous <- initial_mstep$sigma_est
+  funs_est_previous <- initial_mstep$funs
+  cell_times_previous <- initial_mstep$theta
+  Y_previous <- initial_mstep$Y
 
-  mstep.loglik <- cycle.npreg.loglik(Y = mstep$Y,
-                                     theta = mstep$theta,
-                                     mu_est=mstep$mu_est,
-                                     sigma_est=mstep$sigma_est)$loglik_est
-  out <- list(Y_ordered=mstep$Y,
-              cell_times_est=mstep$theta,
-              loglik_est=mstep.loglik,
-              mu_est=mstep$mu_est,
-              sigma_est=mstep$sigma_est)
-}
+  iter <- 0
+  while(TRUE) {
+    current_loglik <- cycle.npreg.loglik(Y = Y_previous,
+                                  theta = cell_times_previous,
+                                  mu_est = mu_est_previous,
+                                  sigma_est = sigma_est_previous,
+                                  insample=T)
+    current_mstep <- cycle.npreg.mstep(Y = Y_previous,
+                                       theta = current_loglik$cell_times_est,
+                                       ncores = ncores)
+
+    loglik_current <- current_loglik$loglik_est
+    mu_est_current <- current_mstep$mu_est
+    sigma_est_current <- current_mstep$sigma_est
+    funs_est_current <- current_mstep$funs
+    cell_times_current <- current_mstep$theta
+    Y_current <- current_mstep$Y
+
+    if (verbose) message("log-likelihood:", loglik_current)
+    eps <- loglik_current - loglik_previous
+
+    # loop out if converged
+    if (!(eps > tol & iter < maxiter)) break
+
+    iter <- iter + 1
+    loglik_previous <- loglik_current
+    Y_previous <- Y_current
+    mu_est_previous <- mu_est_current
+    sigma_est_previous <- sigma_est_current
+    cell_times_previous <- cell_times_current
+    funs_est_previous <- funs_est_current
+  }
 
 
-
-
-
-
-#' @title BIC for npreg results
-#'
-#' @nbins the observations are grouped into \code{nbins} in predicting expected cyclical trend
-#'
-#' @export
-bic.npreg <- function(Y, loglik, nbins) {
-  N <- ncol(Y)
-  bic <- N*log(nbins-1) - 2*loglik
-  return(bic)
-}
-
-
-#' @title Proportion of variance explained by the fitted cyclical trend
-#'
-#' @param Y gene by sample expression matrix
-#' @param mu_est Fitted cyclical trend per gene for each sample
-#'
-#' @export
-pve <- function(Y, mu_est) {
-
-  G <- nrow(Y)
-  out <- sapply(1:G, function(g) {
-    yy <- Y[g,]
-    trend.yy <- mu_est[g,]
-    pve <- 1-var(yy-trend.yy)/var(yy)
-    return(pve)
-  })
-  names(out) <- rownames(Y)
+  out <- list(Y_ordered=Y_current,
+              cell_times_est=cell_times_current,
+              loglik_est=loglik_current,
+              mu_est=mu_est_current,
+              sigma_est=sigma_est_current,
+              funs_est=funs_est_current)
   return(out)
 }
 
 
 
 
-
-#' @title Mean squared deviation from the predicted cyclical trend
+# res <- lapply(1:5, function(i) {
+#   bw.reg.circ.lin(circular(theta_train), Y_train[i,], method="LL", lower=1, upper=20)
+#
+#   fit=kern.reg.circ.lin(theta_train, Y_train[i,], method = "LL")
+#   fun=approxfun(x=as.numeric(fit$x), y=fit$y, rule=2)
+#   #plot(fun(fit$datax))
+#   return(list(fun=fun, fit=fit))
+# })
+#
+# par(mfrow=c(2,5))
+# for(i in 1:5) {
+#   plot(fold.train[[1]]$Y_ordered[i,])
+#   points(fold.train[[1]]$mu_est[i,], col="blue", cex=.6, pch=16)}
+# for(i in 1:5) {plot(res[[i]]$fun(res[[i]]$fit$datax), ylim = c(min(Y_train), max(Y_train)))}
+#
 #'
-#' @param Y gene by sample expression matrix
-#' @param mu_est Fitted cyclical trend per gene for each sample
 #'
-#' @export
-msd <- function(Y, mu_est) {
-  N <- ncol(Y)
-  G <- nrow(Y)
-  out <- sapply(1:G, function(g) {
-    yy <- Y[g,]
-    trend.yy <- mu_est[g,]
-    msd <- (1/N)*sum((yy-trend.yy)^2)
-    return(msd)
-  })
-  names(out) <- rownames(Y)
-  return(out)
-}
-
+#' #' @title Estimate gene weights for cell time
+#' #'
+#' #' @param Y gene by sample expression matrix
+#' #' @param theta sample cell time vector
+#' #'
+#' #' @export
+#' cycle.spml.trainmodel <- function(Y, theta) {
+#'
+#'   library(Rfast)
+#'   library(assertthat)
+#'   fit <- spml.reg(theta, t(Y), seb=TRUE)
+#'   return(fit)
+#' }
+#'
+#'
+#' #' @title Estimate gene weights for cell time
+#' #'
+#' #' @param Y_test gene by testing samples
+#' #' @param theta_test gene by training samples
+#' #' @param theta_train cell times for training samples
+#' #' @param theta_test cell times for test samples
+#' #'
+#' #' @export
+#' cycle.spml.testmodel <- function(Y_test, Y_train, theta_test, theta_train) {
+#'
+#'   library(Rfast)
+#'   library(assertthat)
+#'   assert_that(is.matrix(Y_test))
+#'   assert_that(dim(Y_test)[2]==length(theta_test),
+#'               msg = "dimension of testing expression matrix doesn't match length of cell time vector")
+#'   assert_that(is.matrix(Y_train))
+#'   assert_that(dim(Y_train)[2]==length(theta_train),
+#'               msg = "dimension of training expression matrix doesn't match length of cell time vector")
+#'
+#'   fit_train <- cycle.spml.trainmodel(Y_train, theta_train)
+#'
+#'   pred_cart <- cbind(1,t(Y_test))%*%fit_train$be
+#'   pred_polar <- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] < 0)
+#'
+#'   rho_test <- rFLIndTestRand(pred_polar, theta_test, 9999)
+#'   boot_ci <- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)
+#'
+#'   return(list(betahat=fit_train$be,
+#'               theta_pred=pred_polar,
+#'               theta_test=theta_test,
+#'               rho=rho_test[1],
+#'               boot_95ci_low=boot_ci[1],
+#'               boot_95ci_high=boot_ci[2],
+#'               pval=rho_test[2]))
+#' }
