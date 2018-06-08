@@ -2,7 +2,7 @@
 % Please edit documentation in R/cycle.npreg.R
 \name{cycle.npreg.outsample}
 \alias{cycle.npreg.outsample}
-\title{Predict cell cycle ordering in the test samples in iterative steps}
+\title{Predict test-sample ordering using training lables (no update)}
 \usage{
 \method{cycle}{npreg.outsample}(Y_test, sigma_est, funs_est,
   method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"),

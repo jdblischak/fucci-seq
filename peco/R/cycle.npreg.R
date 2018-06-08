@@ -52,7 +52,7 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                                                        "npcirc.nw",
                                                        "npcirc.ll"),
                               ncores=12, ...) {
-
+      library(NPCirc)
       G <- nrow(Y)
       N <- ncol(Y)
       Y_ordered <- Y[,order(theta)]
@@ -279,82 +279,81 @@ cycle.npreg.insample <- function(Y, theta,
 }
 
 
-#' @title Predict cell cycle ordering in the test samples in iterative steps
-#'
-#' @export
-cycle.npreg.outsample <- function(Y_test,
-                                  sigma_est,
-                                  funs_est,
-                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
-                                  method.initialize.theta=c("pca", "uniform"),
-                                  ncores=12,
-                                  maxiter=10,
-                                  tol=1, verbose=TRUE,...) {
-
-  # order data by initial cell times
-  G <- nrow(Y_test)
-  N <- ncol(Y_test)
-
-  # compute expected cell time for the test samples
-  # under mu and sigma estimated from the training samples
-  initial_loglik <- cycle.npreg.loglik(Y = Y_test,
-                             sigma_est = sigma_est,
-                             funs_est=funs_est, outsample=T)
-  initial_mstep <- cycle.npreg.mstep(Y = Y_test,
-                             theta = initial_loglik$cell_times_est,
-                             method.trend = method.trend,
-                             ncores = ncores)
-
-  loglik_previous <- initial_loglik$loglik_est
-  mu_est_previous <- initial_mstep$mu_est
-  sigma_est_previous <- initial_mstep$sigma_est
-  funs_est_previous <- initial_mstep$funs
-  cell_times_previous <- initial_mstep$theta
-  Y_previous <- initial_mstep$Y
-
-  iter <- 0
-  while(TRUE) {
-    current_loglik <- cycle.npreg.loglik(Y = Y_previous,
-                                  theta = cell_times_previous,
-                                  mu_est = mu_est_previous,
-                                  sigma_est = sigma_est_previous,
-                                  insample=T)
-    current_mstep <- cycle.npreg.mstep(Y = Y_previous,
-                                       theta = current_loglik$cell_times_est,
-                                       method.trend = method.trend,
-                                       ncores = ncores)
-
-    loglik_current <- current_loglik$loglik_est
-    mu_est_current <- current_mstep$mu_est
-    sigma_est_current <- current_mstep$sigma_est
-    funs_est_current <- current_mstep$funs
-    cell_times_current <- current_mstep$theta
-    Y_current <- current_mstep$Y
-
-    if (verbose) message("log-likelihood:", loglik_current)
-    eps <- loglik_current - loglik_previous
-
-    # loop out if converged
-    if (!(eps > tol & iter < maxiter)) break
-
-    iter <- iter + 1
-    loglik_previous <- loglik_current
-    Y_previous <- Y_current
-    mu_est_previous <- mu_est_current
-    sigma_est_previous <- sigma_est_current
-    cell_times_previous <- cell_times_current
-    funs_est_previous <- funs_est_current
-  }
 
 
-  out <- list(Y_ordered=Y_current,
-              cell_times_est=cell_times_current,
-              loglik_est=loglik_current,
-              mu_est=mu_est_current,
-              sigma_est=sigma_est_current,
-              funs_est=funs_est_current)
-  return(out)
-}
+# cycle.npreg.outsample <- function(Y_test,
+#                                   sigma_est,
+#                                   funs_est,
+#                                   method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+#                                   method.initialize.theta=c("pca", "uniform"),
+#                                   ncores=12,
+#                                   maxiter=10,
+#                                   tol=1, verbose=TRUE,...) {
+#
+#   # order data by initial cell times
+#   G <- nrow(Y_test)
+#   N <- ncol(Y_test)
+#
+#   # compute expected cell time for the test samples
+#   # under mu and sigma estimated from the training samples
+#   initial_loglik <- cycle.npreg.loglik(Y = Y_test,
+#                              sigma_est = sigma_est,
+#                              funs_est=funs_est, outsample=T)
+#   initial_mstep <- cycle.npreg.mstep(Y = Y_test,
+#                              theta = initial_loglik$cell_times_est,
+#                              method.trend = method.trend,
+#                              ncores = ncores)
+#
+#   loglik_previous <- initial_loglik$loglik_est
+#   mu_est_previous <- initial_mstep$mu_est
+#   sigma_est_previous <- initial_mstep$sigma_est
+#   funs_est_previous <- initial_mstep$funs
+#   cell_times_previous <- initial_mstep$theta
+#   Y_previous <- initial_mstep$Y
+#
+#   iter <- 0
+#   while(TRUE) {
+#     current_loglik <- cycle.npreg.loglik(Y = Y_previous,
+#                                   theta = cell_times_previous,
+#                                   mu_est = mu_est_previous,
+#                                   sigma_est = sigma_est_previous,
+#                                   insample=T)
+#     current_mstep <- cycle.npreg.mstep(Y = Y_previous,
+#                                        theta = current_loglik$cell_times_est,
+#                                        method.trend = method.trend,
+#                                        ncores = ncores)
+#
+#     loglik_current <- current_loglik$loglik_est
+#     mu_est_current <- current_mstep$mu_est
+#     sigma_est_current <- current_mstep$sigma_est
+#     funs_est_current <- current_mstep$funs
+#     cell_times_current <- current_mstep$theta
+#     Y_current <- current_mstep$Y
+#
+#     if (verbose) message("log-likelihood:", loglik_current)
+#     eps <- loglik_current - loglik_previous
+#
+#     # loop out if converged
+#     if (!(eps > tol & iter < maxiter)) break
+#
+#     iter <- iter + 1
+#     loglik_previous <- loglik_current
+#     Y_previous <- Y_current
+#     mu_est_previous <- mu_est_current
+#     sigma_est_previous <- sigma_est_current
+#     cell_times_previous <- cell_times_current
+#     funs_est_previous <- funs_est_current
+#   }
+#
+#
+#   out <- list(Y_ordered=Y_current,
+#               cell_times_est=cell_times_current,
+#               loglik_est=loglik_current,
+#               mu_est=mu_est_current,
+#               sigma_est=sigma_est_current,
+#               funs_est=funs_est_current)
+#   return(out)
+# }
 
 
 
@@ -362,7 +361,7 @@ cycle.npreg.outsample <- function(Y_test,
 #' @title Predict test-sample ordering using training lables (no update)
 #'
 #' @export
-cycle.npreg.outsample.noiter <- function(Y_test,
+cycle.npreg.outsample <- function(Y_test,
                                   sigma_est,
                                   funs_est,
                                   method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
