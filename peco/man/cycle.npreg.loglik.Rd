@@ -4,9 +4,17 @@
 \alias{cycle.npreg.loglik}
 \title{log-likelihood of nonparametric smoothing}
 \usage{
-\method{cycle}{npreg.loglik}(Y, theta, mu_est, sigma_est)
+\method{cycle}{npreg.loglik}(Y, theta, mu_est, sigma_est, funs_est,
+  method.initialize.theta = c("pca", "uniform"), insample = F,
+  outsample = F, ...)
 }
 \arguments{
+\item{Y}{gene by sample expression matrix}
+
+\item{mu_est}{gene by sample matrix of expected mean}
+
+\item{sigma_est}{vector of standard errors for each gene}
+
 \item{Y}{gene by sample expression matrix}
 
 \item{mu_est}{gene by sample matrix of expected mean}

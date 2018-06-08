@@ -25,9 +25,9 @@ fit.trendfilter.generic <- function(yy, pos.yy=c(1:length(yy)), polyorder=2) {
   # trend.mad.constant <- mad(yy.nonzero.rep[include]-mean(yy.nonzero.rep[include]), constant = 1)
   # trend.mad.ratio <- trend.mad.pred/trend.mad.constant
 
-  return(list(trend.yy=trend.yy,
+  return(list(trend.yy=trend.yy[which(include)]
               #trend.pos=pos.rep,
-              include=include
+#              include=include
               #trend.mad.ratio=trend.mad.ratio,
               #lambda=cv.trend$lambda.1se,
               #trend.pve=pve

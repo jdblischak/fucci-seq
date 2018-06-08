@@ -4,7 +4,8 @@
 \alias{cycle.npreg.mstep}
 \title{Estimate parameters for the cyclial ordering using nonparametric smoothing}
 \usage{
-\method{cycle}{npreg.mstep}(Y, theta, ncores = 12, ...)
+\method{cycle}{npreg.mstep}(Y, theta, method.trend = c("trendfilter",
+  "npcirc.nw", "npcirc.ll"), ncores = 12, ...)
 }
 \arguments{
 \item{Y}{gene by sample expression matrix (log2CPM).}

@@ -7,27 +7,37 @@
 #' @param nbins Y is grouped to nbins between 0 to 2pi.
 #'
 #' @export
-initialize_cell_times <- function(Y, nbins=NULL) {
+initialize_cell_times <- function(Y,
+                                  method.initialize.theta=c("pca", "uniform"), ...) {
   library(circular)
-  pc_res <- prcomp(t(Y), scale = TRUE)
-  theta <- coord2rad(cbind(pc_res$x[,1], pc_res$x[,2]))
-  theta <- as.numeric(theta)
-  names(theta) <- colnames(Y)
-
-  if (is.null(nbins)) {
-    return(theta)
-  } else {
-    bin.count <- c(1:nbins)
-    bin.length <- (2 * pi)/nbins
-    theta.assign <- c(1:length(theta))
-    mids <- seq(bin.length/2, 2 * pi - pi/nbins, length = nbins)
-    for (i in 1:nbins) {
-      ii.bin <- theta <= i * bin.length & theta > (i - 1) * bin.length
-      bin.count[i] <- sum(ii.bin)
-      theta.assign[ii.bin] <- mids[i]
-    }
-    return(theta.assign)
+  if (method.initialize.theta=="pca") {
+    pc_res <- prcomp(t(Y), scale = TRUE)
+    theta <- coord2rad(cbind(pc_res$x[,1], pc_res$x[,2]))
+    theta <- as.numeric(theta)
+    names(theta) <- colnames(Y)
   }
+  if (method.initialize.theta=="uniform") {
+    len <- 2*pi/ncol(Y)/2
+    theta <- seq(len, 2*pi-len, length.out=nbins)
+    names(theta) <- colnames(Y)
+    return(theta)
+  }
+
+  return(theta)
+  # if (is.null(nbins)) {
+  #   return(theta)
+  # } else {
+  #   bin.count <- c(1:nbins)
+  #   bin.length <- (2 * pi)/nbins
+  #   theta.assign <- c(1:length(theta))
+  #   mids <- seq(bin.length/2, 2 * pi - pi/nbins, length = nbins)
+  #   for (i in 1:nbins) {
+  #     ii.bin <- theta <= i * bin.length & theta > (i - 1) * bin.length
+  #     bin.count[i] <- sum(ii.bin)
+  #     theta.assign[ii.bin] <- mids[i]
+  #   }
+  #   return(theta.assign)
+  # }
 }
 
 
@@ -115,8 +125,8 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
 #'
 #' @export
 cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est,
-                               funs_est,
-                               insample=F, outsample=F) {
+                               funs_est, method.initialize.theta=c("pca", "uniform"),
+                               insample=F, outsample=F, ...) {
 
   if (insample==TRUE) {
     nbins <- ncol(mu_est)
@@ -174,22 +184,8 @@ cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est,
     G <- nrow(Y)
     loglik_per_cell_by_celltimes <- matrix(0, N, nbins)
 
-    #len <- 2*pi/nbins/2
-    #theta_choose <- seq(len, 2*pi-len, length.out=nbins)
-#    len <- 2*pi/nbins/2
-    theta_choose <- initialize_cell_times(Y)
+    theta_choose <- initialize_cell_times(Y, method.initialize.theta=method.initialize.theta)
     names(theta_choose) <- colnames(Y)
-
-#     library(movMF)
-#     vm_clust <- movMF(cbind(cos(theta_choose), sin(theta_choose)),
-#             k=3, nruns=20, kappa=list(common=TRUE))
-# #    vm_clust_mem <- predict(vm_clust)
-#     #set.seed(88)
-#     rvm_clust <- rmovMF(length(theta_choose), theta=vm_clust$theta,
-#                         alpha=vm_clust$alpha)
-#     library(circular)
-#     rvm_clust <- coord2rad(rvm_clust)
-#     theta_choose <- rvm_clust
 
     for (n in 1:N) {
       # for each cell, sum up the loglikelihood for each gene
@@ -250,7 +246,7 @@ cycle.npreg.loglik <- function(Y, theta, mu_est, sigma_est,
 #' @export
 cycle.npreg.insample <- function(Y, theta,
                                  ncores=12,
-                                 method.trend=c("trendfilter", "npcirc.nw", "npcirc.ll"),
+                                 method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
                                  ...) {
 
   # order data by initial cell times
@@ -283,12 +279,14 @@ cycle.npreg.insample <- function(Y, theta,
 }
 
 
-#' @title Predict cell cycle ordering in the test samples
+#' @title Predict cell cycle ordering in the test samples in iterative steps
 #'
 #' @export
 cycle.npreg.outsample <- function(Y_test,
                                   sigma_est,
                                   funs_est,
+                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+                                  method.initialize.theta=c("pca", "uniform"),
                                   ncores=12,
                                   maxiter=10,
                                   tol=1, verbose=TRUE,...) {
@@ -304,6 +302,7 @@ cycle.npreg.outsample <- function(Y_test,
                              funs_est=funs_est, outsample=T)
   initial_mstep <- cycle.npreg.mstep(Y = Y_test,
                              theta = initial_loglik$cell_times_est,
+                             method.trend = method.trend,
                              ncores = ncores)
 
   loglik_previous <- initial_loglik$loglik_est
@@ -322,6 +321,7 @@ cycle.npreg.outsample <- function(Y_test,
                                   insample=T)
     current_mstep <- cycle.npreg.mstep(Y = Y_previous,
                                        theta = current_loglik$cell_times_est,
+                                       method.trend = method.trend,
                                        ncores = ncores)
 
     loglik_current <- current_loglik$loglik_est
@@ -359,70 +359,39 @@ cycle.npreg.outsample <- function(Y_test,
 
 
 
-# res <- lapply(1:5, function(i) {
-#   bw.reg.circ.lin(circular(theta_train), Y_train[i,], method="LL", lower=1, upper=20)
-#
-#   fit=kern.reg.circ.lin(theta_train, Y_train[i,], method = "LL")
-#   fun=approxfun(x=as.numeric(fit$x), y=fit$y, rule=2)
-#   #plot(fun(fit$datax))
-#   return(list(fun=fun, fit=fit))
-# })
-#
-# par(mfrow=c(2,5))
-# for(i in 1:5) {
-#   plot(fold.train[[1]]$Y_ordered[i,])
-#   points(fold.train[[1]]$mu_est[i,], col="blue", cex=.6, pch=16)}
-# for(i in 1:5) {plot(res[[i]]$fun(res[[i]]$fit$datax), ylim = c(min(Y_train), max(Y_train)))}
-#
+#' @title Predict test-sample ordering using training lables (no update)
 #'
-#'
-#' #' @title Estimate gene weights for cell time
-#' #'
-#' #' @param Y gene by sample expression matrix
-#' #' @param theta sample cell time vector
-#' #'
-#' #' @export
-#' cycle.spml.trainmodel <- function(Y, theta) {
-#'
-#'   library(Rfast)
-#'   library(assertthat)
-#'   fit <- spml.reg(theta, t(Y), seb=TRUE)
-#'   return(fit)
-#' }
-#'
-#'
-#' #' @title Estimate gene weights for cell time
-#' #'
-#' #' @param Y_test gene by testing samples
-#' #' @param theta_test gene by training samples
-#' #' @param theta_train cell times for training samples
-#' #' @param theta_test cell times for test samples
-#' #'
-#' #' @export
-#' cycle.spml.testmodel <- function(Y_test, Y_train, theta_test, theta_train) {
-#'
-#'   library(Rfast)
-#'   library(assertthat)
-#'   assert_that(is.matrix(Y_test))
-#'   assert_that(dim(Y_test)[2]==length(theta_test),
-#'               msg = "dimension of testing expression matrix doesn't match length of cell time vector")
-#'   assert_that(is.matrix(Y_train))
-#'   assert_that(dim(Y_train)[2]==length(theta_train),
-#'               msg = "dimension of training expression matrix doesn't match length of cell time vector")
-#'
-#'   fit_train <- cycle.spml.trainmodel(Y_train, theta_train)
-#'
-#'   pred_cart <- cbind(1,t(Y_test))%*%fit_train$be
-#'   pred_polar <- atan( pred_cart[, 2] / pred_cart[, 1] ) + pi * I(pred_cart[, 1] < 0)
-#'
-#'   rho_test <- rFLIndTestRand(pred_polar, theta_test, 9999)
-#'   boot_ci <- rhoFLCIBoot(pred_polar, theta_test, 95, 9999)
-#'
-#'   return(list(betahat=fit_train$be,
-#'               theta_pred=pred_polar,
-#'               theta_test=theta_test,
-#'               rho=rho_test[1],
-#'               boot_95ci_low=boot_ci[1],
-#'               boot_95ci_high=boot_ci[2],
-#'               pval=rho_test[2]))
-#' }
+#' @export
+cycle.npreg.outsample.noiter <- function(Y_test,
+                                  sigma_est,
+                                  funs_est,
+                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+                                  method.initialize.theta=c("pca", "uniform"),
+                                  ncores=12,
+                                  maxiter=10,
+                                  tol=1, verbose=TRUE,...) {
+
+  # compute expected cell time for the test samples
+  # under mu and sigma estimated from the training samples
+  initial_loglik <- cycle.npreg.loglik(Y = Y_test,
+                                       sigma_est = sigma_est,
+                                       method.initialize.theta=method.initialize.theta,
+                                       funs_est=funs_est, outsample=T)
+  updated_estimates <- cycle.npreg.mstep(Y = Y_test,
+                                     theta = initial_loglik$cell_times_est,
+                                     method.trend = method.trend,
+                                     ncores = ncores)
+  theta_update <- updated_estimates$theta
+  names(theta_update) <- colnames(updated_estimates$Y)
+
+  out <- list(Y_ordered=updated_estimates$Y,
+              cell_times_update=theta_update,
+              loglik_update=initial_loglik$loglik_est,
+              mu_update=updated_estimates$mu_est,
+              sigma_update=updated_estimates$sigma_est,
+              funs_update=updated_estimates$funs,
+              sigma_update=sigma_est,
+              funs_update=funs_est)
+  return(out)
+}
+
