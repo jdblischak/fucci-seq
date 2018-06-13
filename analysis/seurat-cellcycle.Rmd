@@ -1,0 +1,183 @@
+---
+title: "Replicate Seurate scoring strategy for cell cycle"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Background 
+
+Here I attempt to replicate the strategy used in Seurat for scoring cell cycle phases. The core idea is the same as what is commonly used in the literature. The strategy is outlined as follows:
+
+1. Identify the phase-specific gene sets: Tiroshi et al. 2016 identified a set of 98 genes using the overlap gene sets from single-cell studiesa and the bulk HeLa cell studies. 
+
+2. Preprocess gene expression levels: Compute log2(CPM + 1) for each gene. Compute "relative expression levels" of gene $g$ for sample $i$ relative to all samples (cells). 
+
+3. Compute background or reference gene expression levels: Group all genes into K bins based on the gene-specific expression averages. Then, consider the 95 cell cycle genes. For those in the G1/S class, find the background genes that have similar levels of gene expression averages from the full-set of genes, then compute the background average accordingly. This way, the background or reference is specific to each gene class. Under this scheme, a gene is allowed to score both high and low on two difference classes. 
+
+
+---
+
+
+## Analysis
+
+```{r}
+library(Seurat)
+
+mat <- read.table(file = "~/Dropbox/GitHub/fucci-seq-mynotes/cell_cycle_vignette_files/nestorawa_forcellcycle_expressionMatrix.txt", header = TRUE, as.is = TRUE, row.names = 1)
+
+cc.genes <- readLines(con = "~/Dropbox/GitHub/fucci-seq-mynotes/cell_cycle_vignette_files/regev_lab_cell_cycle_genes.txt")
+
+s.genes <- cc.genes[1:43]
+g2m.genes <- cc.genes[44:97]
+
+######------ Run the Seurat code
+obj <- CreateSeuratObject(raw.data = mat)
+obj <- NormalizeData(object = obj)
+obj <- FindVariableGenes(object = obj, do.plot = FALSE, display.progress = FALSE)
+obj <- ScaleData(object = obj, display.progress = FALSE)
+obj <- CellCycleScoring(object = obj, 
+                        s.genes = s.genes, g2m.genes = g2m.genes, 
+                        set.ident = TRUE)
+obj@meta.data$S.Score
+obj@meta.data$G2M.Score
+obj@meta.data$Phase
+
+
+######------ Reproduce the Seurat code
+dat <- obj@data
+dim(dat)
+dim(mat)
+mat[1:3,1:3]
+dat[1:3,1:3]
+
+mat_normed <- t(log2(1+((10^4)*(t(mat)/colSums(mat)))))
+mat_normed[1:3, 1:3]
+
+object <- obj
+
+# CellCycleScoring
+enrich.name <- "Cell Cycle"
+genes.list <- list(S.Score = s.genes, G2M.Score = g2m.genes)
+object.cc <- AddModuleScore(object = obj, genes.list = genes.list, 
+                    enrich.name = enrich.name, ctrl.size = min(vapply(X = genes.list, 
+                    FUN = length, FUN.VALUE = numeric(1))))
+head(object.cc@meta.data$`Cell Cycle1`)
+head(object.cc@meta.data$`Cell Cycle2`)
+
+cc.columns <- grep(pattern = enrich.name, x = colnames(x = object.cc@meta.data))
+cc.scores <- object.cc@meta.data[, cc.columns]
+rm(object.cc)
+gc(verbose = FALSE)
+assignments <- apply(X = cc.scores, MARGIN = 1, FUN = function(scores, 
+                                                               first = "S", second = "G2M", null = "G1") {
+  if (all(scores < 0)) {
+    return(null)
+  }
+  else {
+    return(c(first, second)[which(x = scores == max(scores))])
+  }
+})
+
+
+
+# AddModuleScore
+object = obj
+genes.list = genes.list
+enrich.name = enrich.name
+ctrl.size = min(vapply(X = genes.list, 
+                       FUN = length, FUN.VALUE = numeric(1)))
+n.bin=25
+seed.use=1
+random.seed=1
+use.k=FALSE
+
+genes.list <- lapply(X = genes.list, FUN = function(x) {
+  return(intersect(x = x, y = rownames(x = object@data)))
+})
+cluster.length <- length(x = genes.list)
+
+# order genes by gene-specific averages
+genes.pool = rownames(x = object@data)
+data.avg <- Matrix::rowMeans(x = object@data[genes.pool, ])
+data.avg <- data.avg[order(data.avg)]
+data.cut <- as.numeric(x = Hmisc::cut2(x = data.avg, m = round(x = length(x = data.avg)/n.bin)))
+names(x = data.cut) <- names(x = data.avg)
+ctrl.use <- vector(mode = "list", length = cluster.length)
+for (i in 1:cluster.length) {
+  genes.use <- genes.list[[i]]
+  for (j in 1:length(x = genes.use)) {
+    ctrl.use[[i]] <- c(ctrl.use[[i]], names(x = sample(x = data.cut[which(x = data.cut == 
+                                                                            data.cut[genes.use[j]])], size = ctrl.size, replace = FALSE)))
+  }
+}
+ctrl.use <- lapply(X = ctrl.use, FUN = unique)
+ctrl.scores <- matrix(data = numeric(length = 1L), nrow = length(x = ctrl.use), 
+                      ncol = ncol(x = object@data))
+for (i in 1:length(ctrl.use)) {
+  genes.use <- ctrl.use[[i]]
+  ctrl.scores[i, ] <- Matrix::colMeans(x = object@data[genes.use, 
+                                                       ])
+}
+genes.scores <- matrix(data = numeric(length = 1L), nrow = cluster.length, 
+                       ncol = ncol(x = object@data))
+for (i in 1:cluster.length) {
+  genes.use <- genes.list[[i]]
+  data.use <- object@data[genes.use, , drop = FALSE]
+  genes.scores[i, ] <- Matrix::colMeans(x = data.use)
+}
+genes.scores.use <- genes.scores - ctrl.scores
+
+plot(object.cc@meta.data$`Cell Cycle1`,genes.scores.use[1,])
+
+s_score <- genes.scores.use[1,]
+g2m_score <- genes.scores.use[2,]
+phase <- sapply(1:length(s_score), function(i) {
+  if (s_score[i] < 0 & g2m_score[i] < 0) {
+    return("G1") 
+  } else {
+    return(c("S", "G2M")[which.max(c(s_score[i], g2m_score[i]))])
+  } })
+table(phase, assignments)
+
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
+
