@@ -2,10 +2,10 @@
 #'
 #' @export
 initialize_grids <- function(Y, grids=100,
-                             method.grid=c("pca"), ...) {
+                             method.grid=c("pca", "uniform"), ...) {
 
-  len <- (2*pi)/(2*100)
-  theta_grids <- seq(len, (2*pi)-(len), length.out=100)
+  len <- (2*pi)/(2*grids)
+  theta_grids <- seq(len, (2*pi)-(len), length.out=grids)
 
   library(circular)
   if (method.grid=="pca") {
@@ -24,6 +24,10 @@ initialize_grids <- function(Y, grids=100,
                                              abs(theta_grids-(2*pi-grid_approx[i]))))
       theta_initial <- theta_grids[theta_initial_ind]
     }
+  }
+
+  if (method.grid=="uniform") {
+    theta_initial <- theta_grids
   }
 
   return(theta_initial)
@@ -73,13 +77,20 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                               ncores=12, ...) {
       library(NPCirc)
       library(genlasso)
+      library(assertthat)
       G <- nrow(Y)
       N <- ncol(Y)
-      Y_ordered <- Y[,order(theta)]
 
-      # len <- 2*pi/nbins/2
-      # theta_ordered <- seq(len, 2*pi-len, length.out=nbins)
-      theta_ordered <- theta[order(theta)]
+      if (!assert_that(all.equal(names(theta), colnames(Y)))) {
+        Y_ordered <- Y[,match(names(theta), colnames(Y))]
+        ord <- order(theta)
+        theta_ordered <- theta[ord]
+        Y_ordered <- Y_ordered[,ord]
+      } else {
+        ord <- order(theta)
+        theta_ordered <- theta[ord]
+        Y_ordered <- Y[,ord]
+      }
 
       # for each gene, estimate the cyclical pattern of gene expression
       # conditioned on the given cell times
@@ -154,10 +165,10 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
 
   N <- ncol(Y)
   G <- nrow(Y)
-  loglik_per_cell_by_celltimes <- matrix(0, N, N)
 
   theta_choose <- initialize_grids(Y, grids=grids, method.grid=method.grid)
-  names(theta_choose) <- colnames(Y)
+  loglik_per_cell_by_celltimes <- matrix(0, N, grids)
+
 
   for (n in 1:N) {
     # for each cell, sum up the loglikelihood for each gene
@@ -171,19 +182,19 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
   }
 
   # use max likelihood to assign samples
-  prob_per_cell_by_celltimes <- matrix(0, N, N)
+  prob_per_cell_by_celltimes <- matrix(0, N, grids)
   for (n in 1:N) {
     # print(n)
     maxll <- max(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
     if (maxll == 0) {
-      prob_per_cell_by_celltimes[n,] <- rep(0, N)
+      prob_per_cell_by_celltimes[n,] <- rep(0, grids)
     } else {
       prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
     }
   }
   cell_times_samp_ind <- sapply(1:N, function(n) {
     if (max(prob_per_cell_by_celltimes[n,], na.rm=T)==0) {
-      sample(1:nbins, 1, replace=F)
+      sample(1:grids, 1, replace=F)
     } else {
       which.max(prob_per_cell_by_celltimes[n,])
     }
@@ -217,6 +228,7 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
 #' @export
 cycle.npreg.insample <- function(Y, theta,
                                  ncores=12,
+                                 polyorder=3,
                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
                                  ...) {
 
@@ -229,6 +241,7 @@ cycle.npreg.insample <- function(Y, theta,
   # initialize mu and sigma
   initial_mstep <- cycle.npreg.mstep(Y = Y_ordered,
                                      theta = theta_ordered_initial,
+                                     polyorder=polyorder,
                                      method.trend=method.trend,
                                      ncores = ncores)
 
@@ -250,6 +263,7 @@ cycle.npreg.outsample <- function(Y_test,
                                   sigma_est,
                                   funs_est,
                                   method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+                                  polyorder=3,
                                   method.grid=c("pca", "uniform"),
                                   ncores=12,...) {
 
@@ -262,16 +276,17 @@ cycle.npreg.outsample <- function(Y_test,
   updated_estimates <- cycle.npreg.mstep(Y = Y_test,
                                      theta = initial_loglik$cell_times_est,
                                      method.trend = method.trend,
+                                     polyorder=polyorder,
                                      ncores = ncores)
-  theta_update <- updated_estimates$theta
-  names(theta_update) <- colnames(updated_estimates$Y)
 
-  out <- list(Y_ordered=updated_estimates$Y,
-              cell_times_update=theta_update,
-              loglik_update=initial_loglik$loglik_est,
-              mu_update=updated_estimates$mu_est,
-              sigma_update=updated_estimates$sigma_est,
-              funs_update=updated_estimates$funs)
+  out <- list(Y=Y_test,
+              cell_times_est=initial_loglik$cell_times_est,
+              loglik_est=initial_loglik$loglik_est,
+              Y_reordered=updated_estimates$Y,
+              cell_times_reordered=updated_estimates$theta,
+              mu_reordered=updated_estimates$mu_est,
+              sigma_reordered=updated_estimates$sigma_est,
+              funs_reordered=updated_estimates$funs)
   return(out)
 }
 
@@ -299,6 +314,7 @@ cycle.npreg.unsupervised <- function(Y_test,
   updated_estimates <- cycle.npreg.mstep(Y = Y_test,
                                          theta = initial_loglik$cell_times_est,
                                          method.trend = method.trend,
+                                         polyorder=polyorder,
                                          ncores = ncores)
   theta_update <- updated_estimates$theta
   names(theta_update) <- colnames(updated_estimates$Y)
