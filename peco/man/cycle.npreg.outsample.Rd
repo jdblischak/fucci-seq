@@ -2,8 +2,10 @@
 % Please edit documentation in R/cycle.npreg.R
 \name{cycle.npreg.outsample}
 \alias{cycle.npreg.outsample}
-\title{Predict cell cycle ordering in the test samples}
+\title{Predict test-sample ordering using training lables (no update)}
 \usage{
-\method{cycle}{npreg.outsample}(Y_test, theta_est, mu_est, sigma_est,
-  ncores = 12, ...)
+\method{cycle}{npreg.outsample}(Y_test, sigma_est, funs_est,
+  method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"),
+  method.initialize.theta = c("pca", "uniform"), ncores = 12,
+  maxiter = 10, tol = 1, verbose = TRUE, ...)
 }

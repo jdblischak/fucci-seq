@@ -14,34 +14,50 @@ output:
 
 ---
 
-## Microscopy image analysis
+## Summary analysis
 
-* [Processing images - from images to intensities](images-process.html)
+* [Seminar talk 2018-04-16](talk-20180416.html)
+* Some code for generating plots for the paper
+    * `code/paper.plot.images.R`
 
-We evaluated and pre-processed the results of image analysis as follows:
+---
 
-1. We visually inspect images deteced to have none or more than one nucleus. For cases that are inconsistent with visual inspection, we correct the number of nuclei detected.  
-    * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
-    * [Inspect images with no nucleus](images-zero-nuclei.html)
-        
-2. We applied background correction to the intensity measurements of GFP, RFP and DAPI based on the following analyses.  
-    * [CONFESS results](confess-prelim.html)
-    * [QC analysis including no. nuclei detected, DAPI, and intensity variation](images-qc.html)
-    * [Explore using log10 sum pixel intensity for signal metrics](images-qc-followup.html)
-    * [Compare correction approaches using median versus mean background](images-metrics.html)
-    * [Explore associations between nucleus shape metrics vs intensities](images-metrics-cell-shape.html)
+## Semi-supervised model
 
-3. We analyzed intensity variation across individuals and batches and considers approaches for removing batch effects in the data.
-    * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
-    * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
-    * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
-    * [Estimate variance explained in IBD and correct for batch effects in intensities](images-normalize-anova.html)
+* Using [trendfilter](method-npreg.html)
+* Using [nonparametric circular regression](method-npreg-npcirc.nw.html)
+* Model training: [number of geness and cyclical function fit](method-npreg-prelim-results.html)
 
-4. We investigated the cell time estimates based on FUCCI intensities.
-    * Consider the mean-adjusted FUCCI intensities, what's the relationship between cell time [estimates and DAPI and sample molecule count](images-time-eval.html)? 
-    * Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What's the differences between cell time estimates from [the two normalization approaches](images-time-compare-normalize.html)?
+Evaluate prediction results in terms of estimation error and compare with Seurat classification
+    * [On 101 genes](method-npreg-prelim-results.html)
+
+---
+
+## Unsupservised model
+
+* Using [trendfilter](method-npreg.html)
+* Using [nonparametric circular regression](method-npreg-npcirc.nw.html)
+* Model training
+    * [methods comparison (trendfilter, npcirc.nw, npcirc.ll) and number of genes](method-npreg-prelim-results.html)
+    * [proportion of variance explained and comparison with Seurat](method-npreg-training-pve.html)
 
 
+---
+
+## Explore aproaches to fitting cyclical trend
+
+* Apply spherically projected multivariate linear model
+    * [First trying out spml package](model-spml.pilot.html)
+    * [To predictd cell times using traing/test samples set-up](method-spml.html)
+
+* Learning about correlation for circular response variable: some simulations to check [its property and also relations with Fisher's z transformation](circ-simulation-correlation.html)
+    
+* CellcycleR 0.1.6
+    * [Model convergence assessment](images-cellcycleR-convergence.html)
+    * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
+    * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
+    * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
+ 
 ---
 
 ## Cell cycle signal in gene expression data
@@ -70,24 +86,6 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 ---
 
-## Model fitting
-
-* [Semi-supervised learning based on trendfilter](method-npreg.html)
-
-* Apply spherically projected multivariate linear model
-    * [First trying out spml package](model-spml.pilot.html)
-    * [To predictd cell times using traing/test samples set-up](method-spml.html)
-
-* Learning about correlation for circular response variable: some simulations to check [its property and also relations with Fisher's z transformation](circ-simulation-correlation.html)
-    
-* CellcycleR 0.1.6
-    * [Model convergence assessment](images-cellcycleR-convergence.html)
-    * [Fitting on intensities across plates and individuals](images-cellcycleR.html)
-    * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
-    * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
- 
----
-
 ## RNA-seq data preprcessing
 
 1. The first step in preprocessing RNA-seq data consists of QC and filtering. 
@@ -106,9 +104,34 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 ---
 
-## Summary analysis
+## Microscopy image analysis
 
-* [Seminar talk 2018-04-16](talk-20180416.html)
+* [Processing images - from images to intensities](images-process.html)
+
+We evaluated and pre-processed the results of image analysis as follows:
+
+1. We visually inspect images deteced to have none or more than one nucleus. For cases that are inconsistent with visual inspection, we correct the number of nuclei detected.  
+    * [Inspect images with multiple nuclei](images-multiple-nuclei.html)
+    * [Inspect images with no nucleus](images-zero-nuclei.html)
+        
+2. We applied background correction to the intensity measurements of GFP, RFP and DAPI based on the following analyses.  
+    * [CONFESS results](confess-prelim.html)
+    * [QC analysis including no. nuclei detected, DAPI, and intensity variation](images-qc.html)
+    * [Explore using log10 sum pixel intensity for signal metrics](images-qc-followup.html)
+    * [Compare correction approaches using median versus mean background](images-metrics.html)
+    * [Explore associations between nucleus shape metrics vs intensities](images-metrics-cell-shape.html)
+
+3. We analyzed intensity variation across individuals and batches and considers approaches for removing batch effects in the data.
+    * [Visualize signal variation by plate and individual identity](images-qc-labels.html)
+    * [Visualize the structure of signal variation by individual identity](images-qc-variation.html)
+    * [Quantile normalization for GFP, RFP and DAPI](images-normalize-quantile.html)
+    * [Estimate variance explained in IBD and correct for batch effects in intensities](images-normalize-anova.html)
+
+4. We investigated the cell time estimates based on FUCCI intensities.
+    * Consider the mean-adjusted FUCCI intensities, what's the relationship between cell time [estimates and DAPI and sample molecule count](images-time-eval.html)? 
+    * Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What's the differences between cell time estimates from [the two normalization approaches](images-time-compare-normalize.html)?
+
+
 
 ---
 
@@ -118,4 +141,4 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 * I selected a set of cell cycle [genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.](seqdata-select-cellcyclegenes.html)
 
-
+* [Replicate Seurat example of scoring cell cycle phases](seurat-cellcycle.Rmd)

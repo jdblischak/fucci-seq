@@ -24,4 +24,4 @@ output/npreg-trendfilter-prelim.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/npreg-trendfilter-quantile.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/images-time-eval.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-npreg.Rmd/* filter=lfs diff=lfs merge=lfs -text
-
+output/method-npreg-prelim-results.Rmd/* filter=lfs diff=lfs merge=lfs -text

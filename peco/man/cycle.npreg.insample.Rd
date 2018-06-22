@@ -4,5 +4,9 @@
 \alias{cycle.npreg.insample}
 \title{Estimate cell cycle ordering in the current sample}
 \usage{
-\method{cycle}{npreg.insample}(Y, theta, nbins = 200, ncores = 12, ...)
+\method{cycle}{npreg.insample}(Y, theta, ncores = 12,
+  method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"), ...)
+}
+\arguments{
+\item{update}{T/F to update cell times}
 }

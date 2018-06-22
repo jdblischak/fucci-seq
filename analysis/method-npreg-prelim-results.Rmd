@@ -1,0 +1,543 @@
+---
+title: "Model training: number of genes and cyclical function fit"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+
+## Compare npcirc.nw vs trendfilter
+
+Extract data from the top 101 genes identified 
+
+```{r}
+library(Biobase)
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+counts <- counts[,order(pdata$theta)]
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+
+# select external validation samples
+set.seed(99)
+nvalid <- round(ncol(log2cpm.quant)*.15)
+ii.valid <- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid <- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+theta <- pdata$theta
+names(theta) <- rownames(pdata)
+
+# theta.nonvalid <- theta_moved[ii.nonvalid]
+theta.nonvalid <- theta[ii.nonvalid]
+theta.valid <- theta[ii.valid]
+
+sig.genes <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+expr.sig <- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]
+
+expr.sig <- expr.sig[1:10,]
+
+# get predicted times
+# set training samples
+source("../peco/R/primes.R")
+source("../peco/R/partitionSamples.R")
+parts <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices <- parts$partitions
+```
+
+Fitting 
+
+```{r}
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/cycle.npreg.R")
+source("../code/utility.R")
+```
+
+
+```{r, eval = F}
+fits.nw <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr.sig[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits.nw[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.nw, file = "../output/method-npreg-prelim-results.Rmd/fits.nw.rds")
+
+
+fits.trend2 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    polyorder=2,
+                                    ncores=10,
+                                    method.trend="trendfilter")
+  # fitting test data
+  Y_test <- expr.sig[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="trendfilter",
+                                    polyorder=2,
+                                    ncores=12)
+  
+  fits.trend2[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.trend2, file = "../output/method-npreg-prelim-results.Rmd/fits.trend2.rds")
+
+
+fits.trend3 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    polyorder=3,
+                                    ncores=10,
+                                    method.trend="trendfilter")
+  # fitting test data
+  Y_test <- expr.sig[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="trendfilter",
+                                    ncores=12)
+  
+  fits.trend3[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.trend3, file = "../output/method-npreg-prelim-results.Rmd/fits.trend3.rds")
+```
+
+load results
+
+```{r}
+fits.nw <- readRDS(file = "../output/method-npreg-prelim-results.Rmd/fits.nw.rds")
+fits.trend2 <- readRDS(file = "../output/method-npreg-prelim-results.Rmd/fits.trend2.rds")
+fits.trend3 <- readRDS(file = "../output/method-npreg-prelim-results.Rmd/fits.trend3.rds")
+```
+
+
+### Results
+
+```{r}
+run=1
+Y_test <- expr.sig[,part_indices[[run]]$test]
+theta_test <- theta.nonvalid[part_indices[[run]]$test]
+
+time_nw <- fits.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.nw[[1]]$fit.test$cell_times_est))]
+time_trend2 <- fits.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.trend2[[1]]$fit.test$cell_times_est))]
+time_trend3 <- fits.trend3[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.trend3[[1]]$fit.test$cell_times_est))]
+
+par(mfrow=c(2,2))
+plot(theta_test, time_nw)
+plot(theta_test, time_trend2)
+plot(theta_test, time_trend3)
+```
+
+Misclassification rate
+
+```{r}
+xy_time <- lapply(1:5, function(run) {
+   xy <- data.frame(
+     ref_time=theta.nonvalid[part_indices[[run]]$test],
+     pred_time_nw=fits.nw[[run]]$fit.test$cell_times_est[
+       match(names(theta.nonvalid[part_indices[[run]]$test]),
+             names(fits.nw[[run]]$fit.test$cell_times_est))],
+     pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+       match(names(theta.nonvalid[part_indices[[run]]$test]),
+             names(fits.trend2[[run]]$fit.test$cell_times_est))],
+     pred_time_trend3=fits.trend3[[run]]$fit.test$cell_times_est[
+       match(names(theta.nonvalid[part_indices[[run]]$test]),
+             names(fits.trend3[[run]]$fit.test$cell_times_est))])
+   return(xy)
+})
+
+for (i in 1:5) {
+  xy_time[[i]]$diff_time_nw <- pmin(
+    abs(xy_time[[i]]$pred_time_nw-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_nw-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[i]]$diff_time_trend2 <- pmin(
+    abs(xy_time[[i]]$pred_time_trend2-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_trend2-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[i]]$diff_time_trend3 <- pmin(
+    abs(xy_time[[i]]$pred_time_trend3-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_trend3-(2*pi-xy_time[[i]]$ref_time)))
+}
+
+mean(sapply(xy_time, function(x) mean(x$diff_time_nw))/2/pi)
+mean(sapply(xy_time, function(x) mean(x$diff_time_trend2))/2/pi)
+mean(sapply(xy_time, function(x) mean(x$diff_time_trend3))/2/pi)
+```
+
+---
+
+## npcirc.nw on top 101 genes
+
+Extract data from the top 101 genes identified 
+
+```{r}
+library(Biobase)
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+counts <- counts[,order(pdata$theta)]
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+
+# select external validation samples
+set.seed(99)
+nvalid <- round(ncol(log2cpm.quant)*.15)
+ii.valid <- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid <- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+theta <- pdata$theta
+names(theta) <- rownames(pdata)
+
+# theta.nonvalid <- theta_moved[ii.nonvalid]
+theta.nonvalid <- theta[ii.nonvalid]
+theta.valid <- theta[ii.valid]
+
+sig.genes.101 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+expr.sig.101 <- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes.101), ]
+
+sig.genes.476 <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
+expr.sig.476 <- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes.476), ]
+
+# get Seurat genes
+library(biomaRt)
+ensembl <- useMart("ensembl",dataset="hsapiens_gene_ensembl")
+symbols <- getBM(attributes=c('ensembl_gene_id','hgnc_symbol'), 
+      filter='ensembl_gene_id', 
+      values = rownames(log2cpm.all), mart = ensembl)
+head(symbols)
+
+cc.genes.symbol <- readLines(con = "../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
+# s.genes <- cc.genes[1:43]
+# g2m.genes <- cc.genes[44:97]
+cc.genes.ensembl <- symbols$ensembl_gene_id[which(symbols$hgnc_symbol %in% cc.genes.symbol)]
+expr.seurat <- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% cc.genes.ensembl, ]
+
+
+# get predicted times
+# set training samples
+source("../peco/R/primes.R")
+source("../peco/R/partitionSamples.R")
+parts <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices <- parts$partitions
+```
+
+overlap between our top genes and seurat genes
+
+```{r, eval=F}
+library(VennDiagram)
+grid.draw(venn.diagram(list(
+    "peco top 101 genes" = rownames(sig.genes.101),
+    "Seurat 92 genes" = cc.genes.ensembl), filename=NULL))
+
+grid.draw(venn.diagram(list(
+    "peco top 476 genes" = rownames(sig.genes.476),
+    "Seurat 92 genes" = cc.genes.ensembl), filename=NULL))
+```
+
+Fitting 
+
+```{r}
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/cycle.npreg.R")
+source("../code/utility.R")
+```
+
+
+```{r, eval = F}
+fits.101 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig.101[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr.sig.101[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits.101[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.101, file = "../output/method-npreg-prelim-results.Rmd/fits.101.rds")
+
+
+fits.476 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig.476[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr.sig.476[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits.476[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.476, file = "../output/method-npreg-prelim-results.Rmd/fits.476.rds")
+
+
+fits.seurat <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.seurat[,part_indices[[run]]$train]
+  theta_train <- theta.nonvalid[part_indices[[run]]$train]
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr.seurat[,part_indices[[run]]$test]
+  theta_test <- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits.seurat[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.seurat, file = "../output/method-npreg-prelim-results.Rmd/fits.seurat.rds")
+```
+
+quick checking on the results
+
+```{r}
+fits.101 <- readRDS("../output/method-npreg-prelim-results.Rmd/fits.101.rds")
+fits.476 <- readRDS("../output/method-npreg-prelim-results.Rmd/fits.476.rds")
+fits.seurat <- readRDS("../output/method-npreg-prelim-results.Rmd/fits.seurat.rds")
+```
+
+average log-likelihood
+
+```{r}
+mean(sapply(1:5, function(run) {
+  fits.101[[run]]$fit.test$loglik_est}))
+
+mean(sapply(1:5, function(run) {
+  fits.476[[run]]$fit.test$loglik_est}))
+
+mean(sapply(1:5, function(run) {
+  fits.seurat[[run]]$fit.test$loglik_est}))
+```
+
+
+```{r}
+run=1
+Y_test.101 <- expr.sig.101[,part_indices[[run]]$test]
+Y_test.476 <- expr.sig.476[,part_indices[[run]]$test]
+Y_test.seurat <- expr.seurat[,part_indices[[run]]$test]
+theta_test <- theta.nonvalid[part_indices[[run]]$test]
+
+all.equal(names(theta_test), names(fits.101[[1]]$fit.test$cell_times_est))
+all.equal(names(theta_test), names(fits.476[[1]]$fit.test$cell_times_est))
+all.equal(names(theta_test), names(fits.seurat[[1]]$fit.test$cell_times_est))
+
+
+par(mfrow=c(1,2))
+plot(theta_test, fits.101[[1]]$fit.test$cell_times_est,
+     xlab="reference cell time (from fucci)", 
+     ylab="estimated cell time using training data",
+     main = "top 101 genes")
+plot(theta_test, fits.476[[1]]$fit.test$cell_times_est,
+     xlab="reference cell time (from fucci)", 
+     ylab="estimated cell time using training data",
+     main = "top 476 genes")
+
+par(mfrow=c(1,1))
+plot(theta_test, fits.seurat[[1]]$fit.test$cell_times_est,
+     xlab="reference cell time (from fucci)", 
+     ylab="estimated cell time using training data",
+     main = "Seurat 92 genes")
+```
+
+
+Compute differences in predicted time.
+
+```{r}
+xy_time <- lapply(1:5, function(run) {
+  xy <- data.frame(
+    ref_time=theta.nonvalid[part_indices[[run]]$test],
+    pred_time.101=fits.101[[run]]$fit.test$cell_times_est,
+    pred_time.476=fits.476[[run]]$fit.test$cell_times_est,
+    pred_time.seurat=fits.seurat[[run]]$fit.test$cell_times_est,
+    dapi=pdata$dapi.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))],
+    gfp=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))],
+    rfp=pdata$rfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))])
+  return(xy)
+})
+
+for (run in 1:5) {
+  xy_time[[run]]$diff_time.101 <- pmin(
+    abs(xy_time[[run]]$pred_time.101-xy_time[[i]]$ref_time),
+    abs(xy_time[[run]]$pred_time.101-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[run]]$diff_time.476 <- pmin(
+    abs(xy_time[[run]]$pred_time.476-xy_time[[i]]$ref_time),
+    abs(xy_time[[run]]$pred_time.476-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[run]]$diff_time.seurat <- pmin(
+    abs(xy_time[[run]]$pred_time.seurat-xy_time[[i]]$ref_time),
+    abs(xy_time[[run]]$pred_time.seurat-(2*pi-xy_time[[i]]$ref_time)))
+}
+saveRDS(xy_time, file = "../output/method-npreg-prelim-results.Rmd/xy_time.rds")
+```
+
+```{r}
+xy_time <- readRDS(file = "../output/method-npreg-prelim-results.Rmd/xy_time.rds")
+
+cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.101))/2/pi),
+      sd(sapply(xy_time, function(x) mean(x$diff_time.101))/2/pi))
+cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.476))/2/pi),
+      sd(sapply(xy_time, function(x) mean(x$diff_time.476))/2/pi))
+cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.seurat))/2/pi),
+      sd(sapply(xy_time, function(x) mean(x$diff_time.seurat))/2/pi))
+```
+
+
+## print 101 genes reults
+
+```{r}
+par(mfrow=c(1,2))
+plot(xy_time[[1]]$pred_time.101, xy_time[[1]]$ref_time,
+     ylab="reference cell time (from fucci)", 
+     xlab="estimated cell time")
+abline(0,1, col="blue")
+plot(xy_time[[1]]$pred_time.101, xy_time[[1]]$diff_time.101,
+     xlab="estimated cell time (from fucci)", 
+     ylab="differences in cell times")
+title("Top 101 cyclical genes", outer=TRUE, line=-1)
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+

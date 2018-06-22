@@ -4,7 +4,7 @@
 \alias{initialize_cell_times}
 \title{Initialize cell time estimates for the nonparametric approach}
 \usage{
-initialize_cell_times(Y, nbins = NULL)
+initialize_cell_times(Y, method.initialize.theta = c("pca", "uniform"), ...)
 }
 \arguments{
 \item{Y}{gene by sample matrix}

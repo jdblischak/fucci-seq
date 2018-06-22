@@ -246,6 +246,63 @@ rhoFLCIBoot <- function(lcdat1, lcdat2, ConfLevel, B) {
 }
 
 
+
+#' @title JS test for rotational dependence between circular variables
+#'
+#' @param lcdat1 length n vector of radians
+#' @param lcdat2 length n vector of radians
+#' @param ConfLevel percent confidence interval
+#' @param B number of bootstrap sample
+#'
+#' @references Pewsey et al. Circular statistics in R
+#'
+#' @export
+JSTestRand <- function(cdat1, cdat2, NR) {
+  library(circular)
+  CorrJSObs <- cor.circular(cdat1, cdat2); nxtrm <- 1
+  for (r in 1:NR) {
+    cdat1Rand <- sample(cdat1); CorrJSRand <- cor.circular(cdat1Rand, cdat2)
+    if (abs(CorrJSRand) >= abs(CorrJSObs)) {nxtrm <- nxtrm + 1} }
+  pval <- nxtrm/(NR+1); return(c(CorrJSObs, pval))
+}
+
+
+
+#' @title enrichment of neighborhoold samples
+circ.dist.neighbors <- function(labels, k) {
+  mat_neighbors <- matrix(0, ncol=length(labels), nrow=length(labels))
+  colnames(mat_neighbors) <- labels
+  rownames(mat_neighbors) <- labels
+  N <- length(labels)
+  band <- round(k/2)
+
+  for (i in 1:ncol(mat_neighbors)) {
+    if (i == 1) {
+      neighbors <- c(labels[c((N-band+i):N)], labels[c((i+1):(i+band))])
+      mat_neighbors[,i] <- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i > 1 & i <= band) {
+      neighbors <- c(labels[c(1:(i-1), c((N-band+i):N))], labels[c((i+1):(i+band))])
+      mat_neighbors[,i] <- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i > band & i <= (N-band)) {
+      neighbors <- c(labels[c((i-band):(i-1))], labels[c((i+1):(i+band))])
+      mat_neighbors[,i] <- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i > (N-band)) {
+      neighbors <- c(labels[c((i-band):(i-1))], labels[c((i+1):N, (band -(N-i)):1)])
+      mat_neighbors[,i] <- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i == N) {
+      neighbors <- c(labels[c((N-band):(N-1))], labels[c(1:band)])
+      mat_neighbors[,i] <- rownames(mat_neighbors) %in% neighbors
+    }
+
+  }
+  return(mat_neighbors)
+}
+
+
 #' @title Print prime numbers
 #'
 #' @param nprimes number of prime numbers needed (default starting from 1)
