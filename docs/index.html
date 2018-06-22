@@ -217,11 +217,13 @@ div.section {
 <div id="TOC">
 <ul>
 <li><a href="#overview">Overview</a></li>
-<li><a href="#microscopy-image-analysis">Microscopy image analysis</a></li>
-<li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
-<li><a href="#model-fitting">Model fitting</a></li>
-<li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
 <li><a href="#summary-analysis">Summary analysis</a></li>
+<li><a href="#semi-supervised-model">Semi-supervised model</a></li>
+<li><a href="#unsupservised-model">Unsupservised model</a></li>
+<li><a href="#explore-aproaches-to-fitting-cyclical-trend">Explore aproaches to fitting cyclical trend</a></li>
+<li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
+<li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
+<li><a href="#microscopy-image-analysis">Microscopy image analysis</a></li>
 <li><a href="#one-time-investigations">One-time investigations</a></li>
 </ul>
 </div>
@@ -232,6 +234,116 @@ div.section {
 <ul>
 <li><a href="data-overview.html">Data description</a></li>
 </ul>
+<hr />
+</div>
+<div id="summary-analysis" class="section level2">
+<h2>Summary analysis</h2>
+<ul>
+<li><a href="talk-20180416.html">Seminar talk 2018-04-16</a></li>
+<li>Some code for generating plots for the paper
+<ul>
+<li><code>code/paper.plot.images.R</code></li>
+</ul></li>
+</ul>
+<hr />
+</div>
+<div id="semi-supervised-model" class="section level2">
+<h2>Semi-supervised model</h2>
+<ul>
+<li>Using <a href="method-npreg.html">trendfilter</a></li>
+<li>Using <a href="method-npreg-npcirc.nw.html">nonparametric circular regression</a></li>
+<li>Model training: <a href="method-npreg-prelim-results.html">number of geness and cyclical function fit</a></li>
+</ul>
+<p>Evaluate prediction results in terms of estimation error and compare with Seurat classification * <a href="method-npreg-prelim-results.html">On 101 genes</a></p>
+<hr />
+</div>
+<div id="unsupservised-model" class="section level2">
+<h2>Unsupservised model</h2>
+<ul>
+<li>Using <a href="method-npreg.html">trendfilter</a></li>
+<li>Using <a href="method-npreg-npcirc.nw.html">nonparametric circular regression</a></li>
+<li>Model training
+<ul>
+<li><a href="method-npreg-prelim-results.html">methods comparison (trendfilter, npcirc.nw, npcirc.ll) and number of genes</a></li>
+<li><a href="method-npreg-training-pve.html">proportion of variance explained and comparison with Seurat</a></li>
+</ul></li>
+</ul>
+<hr />
+</div>
+<div id="explore-aproaches-to-fitting-cyclical-trend" class="section level2">
+<h2>Explore aproaches to fitting cyclical trend</h2>
+<ul>
+<li>Apply spherically projected multivariate linear model
+<ul>
+<li><a href="model-spml.pilot.html">First trying out spml package</a></li>
+<li><a href="method-spml.html">To predictd cell times using traing/test samples set-up</a></li>
+</ul></li>
+<li><p>Learning about correlation for circular response variable: some simulations to check <a href="circ-simulation-correlation.html">its property and also relations with Fisher’s z transformation</a></p></li>
+<li>CellcycleR 0.1.6
+<ul>
+<li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
+<li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
+<li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
+<li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
+</ul></li>
+</ul>
+<hr />
+</div>
+<div id="cell-cycle-signal-in-gene-expression-data" class="section level2">
+<h2>Cell cycle signal in gene expression data</h2>
+<ol style="list-style-type: decimal">
+<li>We investigated cell cycle signals in the sequencing data alone.
+<ul>
+<li>Consider <a href="images-transgene.html">transgene count in sequencing data</a></li>
+<li>Compute linear correlation between gene expression levels <a href="images-seq-correlation.html">with DAPI and FUCCI intensities</a></li>
+</ul></li>
+<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.
+<ul>
+<li>Cluster samples by <a href="images-pam.html">Partition around medoids(PAM)</a></li>
+<li>Cluster samples by <a href="images-mclust.html">Guassian mixture modeling</a></li>
+<li>Select a subset of samples that are closet to the cluster centers (cluster representives) <a href="images-subset-silhouette.html">using silhouette index</a></li>
+<li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
+<li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
+</ul></li>
+<li>We ordered cells on a circle using FUCCI intensities alone.
+<ul>
+<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle which approximate the relative ordering of cells on cell cycle</a></li>
+<li>I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
+<li>Here I put together lists of genes identified as significantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
+</ul></li>
+<li>I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
+<ul>
+<li>Fit <a href="npreg-methods.html">smash and kernel regression on circular variables</a> on a subset of genes with detection rate &gt; .8.</li>
+<li>Fit <a href="npreg-trendfilter-prelim.html">trendfilter</a> on a subset of genes (5) that are observed (visually) to have cyclical pattern. trendfilter is robust to small proportion of undetected cells, approx 2 or 3%. In cases of simulation when increasing proportion of undetected cells to 20%, we observed a flat line in gene expression for genes previously identified to tend to a cyclical pattern.</li>
+<li>Next, we fit trendfilter on all genes after transforming the data to follow standard normal distribution, permutation-based p-values for PVE are used to select <a href="npreg-trendfilter-quantile.html">101 significant cyclical genes</a>.</li>
+</ul></li>
+</ol>
+<hr />
+</div>
+<div id="rna-seq-data-preprcessing" class="section level2">
+<h2>RNA-seq data preprcessing</h2>
+<ol style="list-style-type: decimal">
+<li>The first step in preprocessing RNA-seq data consists of QC and filtering.
+<ul>
+<li>Sample QC and filtering
+<ul>
+<li><a href="sampleqc.html">Sample QC criteria</a><br />
+</li>
+<li><a href="totals.html">Sequencing depth</a><br />
+</li>
+<li><a href="reads-v-molecules.html">Reads versus molecules</a></li>
+</ul></li>
+<li>Gene QC and filtering
+<ul>
+<li><a href="gene-filtering.html">gene filtering</a></li>
+<li><a href="pca-tf.html">PCA with technical fators</a></li>
+</ul></li>
+</ul></li>
+<li>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
+<ul>
+<li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
+</ul></li>
+</ol>
 <hr />
 </div>
 <div id="microscopy-image-analysis" class="section level2">
@@ -269,95 +381,12 @@ div.section {
 </ol>
 <hr />
 </div>
-<div id="cell-cycle-signal-in-gene-expression-data" class="section level2">
-<h2>Cell cycle signal in gene expression data</h2>
-<ol style="list-style-type: decimal">
-<li>We investigated cell cycle signals in the sequencing data alone.
-<ul>
-<li>Consider <a href="images-transgene.html">transgene count in sequencing data</a></li>
-<li>Compute linear correlation between gene expression levels <a href="images-seq-correlation.html">with DAPI and FUCCI intensities</a></li>
-</ul></li>
-<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.
-<ul>
-<li>Cluster samples by <a href="images-pam.html">Partition around medoids(PAM)</a></li>
-<li>Cluster samples by <a href="images-mclust.html">Guassian mixture modeling</a></li>
-<li>Select a subset of samples that are closet to the cluster centers (cluster representives) <a href="images-subset-silhouette.html">using silhouette index</a></li>
-<li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
-<li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
-</ul></li>
-<li>We ordered cells on a circle using FUCCI intensities alone.
-<ul>
-<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle which approximate the relative ordering of cells on cell cycle</a></li>
-<li>I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
-<li>Here I put together lists of genes identified as significantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
-</ul></li>
-<li>I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
-<ul>
-<li>Fit <a href="npreg-methods.html">smash and kernel regression on circular variables</a> on a subset of genes with detection rate &gt; .8.</li>
-<li>Fit <a href="npreg-trendfilter-prelim.html">trendfilter</a> on a subset of genes (5) that are observed (visually) to have cyclical pattern. trendfilter is robust to small proportion of undetected cells, approx 2 or 3%. In cases of simulation when increasing proportion of undetected cells to 20%, we observed a flat line in gene expression for genes previously identified to tend to a cyclical pattern.</li>
-<li>Next, we fit trendfilter on all genes after transforming the data to follow standard normal distribution, permutation-based p-values for PVE are used to select <a href="npreg-trendfilter-quantile.html">101 significant cyclical genes</a>.</li>
-</ul></li>
-</ol>
-<hr />
-</div>
-<div id="model-fitting" class="section level2">
-<h2>Model fitting</h2>
-<ul>
-<li><p><a href="method-npreg.html">Semi-supervised learning based on trendfilter</a></p></li>
-<li>Apply spherically projected multivariate linear model
-<ul>
-<li><a href="model-spml.pilot.html">First trying out spml package</a></li>
-<li><a href="method-spml.html">To predictd cell times using traing/test samples set-up</a></li>
-</ul></li>
-<li><p>Learning about correlation for circular response variable: some simulations to check <a href="circ-simulation-correlation.html">its property and also relations with Fisher’s z transformation</a></p></li>
-<li>CellcycleR 0.1.6
-<ul>
-<li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
-<li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
-<li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
-<li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
-</ul></li>
-</ul>
-<hr />
-</div>
-<div id="rna-seq-data-preprcessing" class="section level2">
-<h2>RNA-seq data preprcessing</h2>
-<ol style="list-style-type: decimal">
-<li>The first step in preprocessing RNA-seq data consists of QC and filtering.
-<ul>
-<li>Sample QC and filtering
-<ul>
-<li><a href="sampleqc.html">Sample QC criteria</a><br />
-</li>
-<li><a href="totals.html">Sequencing depth</a><br />
-</li>
-<li><a href="reads-v-molecules.html">Reads versus molecules</a></li>
-</ul></li>
-<li>Gene QC and filtering
-<ul>
-<li><a href="gene-filtering.html">gene filtering</a></li>
-<li><a href="pca-tf.html">PCA with technical fators</a></li>
-</ul></li>
-</ul></li>
-<li>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
-<ul>
-<li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
-</ul></li>
-</ol>
-<hr />
-</div>
-<div id="summary-analysis" class="section level2">
-<h2>Summary analysis</h2>
-<ul>
-<li><a href="talk-20180416.html">Seminar talk 2018-04-16</a></li>
-</ul>
-<hr />
-</div>
 <div id="one-time-investigations" class="section level2">
 <h2>One-time investigations</h2>
 <ul>
 <li><p>Why some gene symbols (genes) correspond to <a href="ensembl.html">multiple Ensembl IDs?</a></p></li>
 <li><p>I selected a set of cell cycle <a href="seqdata-select-cellcyclegenes.html">genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.</a></p></li>
+<li><p><a href="seurat-cellcycle.Rmd">Replicate Seurat example of scoring cell cycle phases</a></p></li>
 </ul>
 </div>
 
