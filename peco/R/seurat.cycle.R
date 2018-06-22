@@ -1,9 +1,9 @@
-# Description
-# Compute phase specific cell cycle scores as outlined in Seurat
+#' @title Seurat code for cell cycle scoring
+#' @description Compute phase specific cell cycle scores as outlined in Seurat
 
 #' @param Y log2 normalized gene expression matrix
 #'
-#' @return
+#' @export
 seurat.cycle <- function(Y, s.genes, g2m.genes, n.bin=25,
          seed.use=1, random.seed=1) {
 

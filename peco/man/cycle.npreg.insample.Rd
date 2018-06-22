@@ -4,7 +4,7 @@
 \alias{cycle.npreg.insample}
 \title{Estimate cell cycle ordering in the current sample}
 \usage{
-\method{cycle}{npreg.insample}(Y, theta, ncores = 12,
+\method{cycle}{npreg.insample}(Y, theta, ncores = 12, polyorder = 3,
   method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"), ...)
 }
 \arguments{

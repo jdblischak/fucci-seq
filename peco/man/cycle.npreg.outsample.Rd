@@ -5,7 +5,6 @@
 \title{Predict test-sample ordering using training lables (no update)}
 \usage{
 \method{cycle}{npreg.outsample}(Y_test, sigma_est, funs_est,
-  method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"),
-  method.initialize.theta = c("pca", "uniform"), ncores = 12,
-  maxiter = 10, tol = 1, verbose = TRUE, ...)
+  method.trend = c("npcirc.nw", "npcirc.ll", "trendfilter"), polyorder = 3,
+  method.grid = c("pca", "uniform"), ncores = 12, ...)
 }
