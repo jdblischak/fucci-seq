@@ -5,7 +5,7 @@
 \title{Estimate parameters for the cyclial ordering using nonparametric smoothing}
 \usage{
 \method{cycle}{npreg.mstep}(Y, theta, method.trend = c("trendfilter",
-  "npcirc.nw", "npcirc.ll"), ncores = 12, ...)
+  "npcirc.nw", "npcirc.ll"), polyorder = 3, ncores = 12, ...)
 }
 \arguments{
 \item{Y}{gene by sample expression matrix (log2CPM).}
@@ -15,4 +15,33 @@
 \description{
 Conditioned on observed cell times, estimate the cyclical trend
   for each gene, and compute the likelihood of the observed cell times.
+}
+\details{
+#' @title Initialize cell time estimates for the nonparametric approach
+#'
+#' @description Estimate cell times using PC1 and PC2. If \code{nbins} is specified,
+#'   then group the estimated cell times to \code{nbins} groups.
+#'
+#' @param Y gene by sample matrix
+#' @param nbins Y is grouped to nbins between 0 to 2pi.
+#'
+#' @export
+initialize_cell_times <- function(Y,
+                                  method.initialize.theta=c("pca", "uniform"), ...) {
+  library(circular)
+  if (method.initialize.theta=="pca") {
+    pc_res <- prcomp(t(Y), scale = TRUE)
+    theta <- coord2rad(cbind(pc_res$x[,1], pc_res$x[,2]))
+    theta <- as.numeric(theta)
+    names(theta) <- colnames(Y)
+  }
+  if (method.initialize.theta=="uniform") {
+    len <- 2*pi/ncol(Y)/2
+    theta <- seq(len, 2*pi-len, length.out=nbins)
+    names(theta) <- colnames(Y)
+    return(theta)
+  }
+
+return(theta)
+}
 }
