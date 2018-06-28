@@ -1,4 +1,6 @@
 *.gz filter=lfs diff=lfs merge=lfs -text
+*.rds filter=lfs diff=lfs merge=lfs -text
+*.rda filter=lfs diff=lfs merge=lfs -text
 data/eset/*.rds filter=lfs diff=lfs merge=lfs -text
 output/gene-filtering.Rmd/* filter=lfs diff=lfs merge=lfs -text 
 
@@ -9,6 +11,7 @@ data/eset-filtered.rds filter=lfs diff=lfs merge=lfs -text
 output/images-cellcycleR-convergence.Rmd/*rds filter=lfs diff=lfs merge=lfs -text
 data/cellcycle-genes-previous-studies/* filter=lfs diff=lfs merge=lfs -text
 data/rnaseq-previous-studies/* filter=lfs diff=lfs merge=lfs -text
+data/rnaseq-previous-studies/*/* filter=lfs diff=lfs merge=lfs -text
 output/cellcycler-seqdata-leng.Rmd/*rda filter=lfs diff=lfs merge=lfs -text
 output/images-subset-silhouette.Rmd/si_pam.rda filter=lfs diff=lfs merge=lfs -text
 output/images-normalize-anova.Rmd/* filter=lfs diff=lfs merge=lfs -text
