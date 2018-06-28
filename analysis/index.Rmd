@@ -22,24 +22,29 @@ output:
 
 ---
 
-## Semi-supervised model
+## Prediction results
 
-* Using [trendfilter](method-npreg.html)
-* Using [nonparametric circular regression](method-npreg-npcirc.nw.html)
-* Model training: [number of geness and cyclical function fit](method-npreg-prelim-results.html)
+* Evaluate the withheld samples [on top 101 cyclical genes](method-eval-withheld.html), and on [top 10 cyclial genes](method-eval-withheld-top10.html)
+    * Explore method performances: [compare peco with Seurat](method-eval-withheld-explore.html)
 
-Evaluate prediction results in terms of estimation error and compare with Seurat classification
-    * [On 101 genes](method-npreg-prelim-results.html)
+* Eval Leng et al. data [on top 101 cyclical genes](method-eval-leng.html).
+* Eval Bottcher et al. data [on top 101 cyclical genes](method-eval-bottcher.html).
+* Eval Buettner et al. data [on top 101 cyclical genes](method-eval-buettner.html).
 
 ---
 
-## Unsupservised model
+## Model training 
 
-* Using [trendfilter](method-npreg.html)
-* Using [nonparametric circular regression](method-npreg-npcirc.nw.html)
-* Model training
-    * [methods comparison (trendfilter, npcirc.nw, npcirc.ll) and number of genes](method-npreg-prelim-results.html)
-    * [proportion of variance explained and comparison with Seurat](method-npreg-training-pve.html)
+* [Early analysis using trendfilter](method-npreg.html) (to be updated...)
+* Investigate the property and quality of [the cell time labels derived from GFP and RFP](method-labels.html): PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.
+* Training dataset
+    * Prediction results from trendfilter order 2 and order 3 with npcirc.nw [on the odd-numbered genes in the top 101 cyclical genes](method-npreg-prelim-results.html)
+    * Prediction results of the various classifers (supervised, PC, unsupervised) [on top 101 cyclical genes](method-train-classifiers.html), and on [top 10 cyclial genes](method-train-classifiers-top10.html).
+    
+    
+
+method-train-classifiers-non101.html
+
 
 
 ---
