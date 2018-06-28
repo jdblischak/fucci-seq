@@ -223,8 +223,16 @@ div.section {
 <li><a href="#pve-between-intensities-in-all-samples">PVE between intensities in all samples</a></li>
 <li><a href="#pve-of-cell-times-in-all-samples">PVE of cell times in all samples</a></li>
 <li><a href="#pc-scores-of-samples-versus-prediction-error">PC scores of samples versus prediction error</a></li>
-<li><a href="#re-fitting-after-removing-pc-outliers">Re-fitting after removing PC outliers</a></li>
+<li><a href="#re-fitting-after-removing-pc-outliers-remove-outliers-from-the-same-5-folds">Re-fitting after removing PC outliers, remove outliers from the same 5 folds</a></li>
 <li><a href="#pve-of-cell-times-in-all-samples-after-removing-pc-outliers">PVE of cell times in all samples after removing PC outliers</a></li>
+<li><a href="#re-fitting-after-removing-pc-outliers-from-the-same-5-folds-top-50-genes">Re-fitting after removing PC outliers from the same 5 folds, top 50 genes</a></li>
+<li><a href="#re-fitting-after-removing-pc-outliers-from-the-same-5-folds-top-10-genes">Re-fitting after removing PC outliers from the same 5 folds, top 10 genes</a></li>
+<li><a href="#re-fitting-after-removing-pc-outliers-odd-number">Re-fitting after removing PC outliers, odd number</a></li>
+<li><a href="#re-fitting-after-removing-pc-outliers-even-number">Re-fitting after removing PC outliers, even number</a></li>
+<li><a href="#fitting-using-all-samples-top-50-genes">Fitting using all samples, top 50 genes</a></li>
+<li><a href="#fitting-using-all-samples-top-10-genes">Fitting using all samples, top 10 genes</a></li>
+<li><a href="#fitting-using-all-samples-odd-numbered-genes">Fitting using all samples, odd-numbered genes</a></li>
+<li><a href="#fitting-using-all-samples-even-numbered-genes">Fitting using all samples, even-numbered genes</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -233,10 +241,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-06-22</p>
+<p><strong>Last updated:</strong> 2018-06-24</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 1713985</p>
+<p><strong>Code version:</strong> 1f3cd60</p>
 <hr />
 <div id="results" class="section level2">
 <h2>Results</h2>
@@ -293,10 +301,12 @@ plot(y1,
 <p><img src="figure/method-labels.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>pdata$theta_triple &lt;- y2shift
 
-rr &lt;- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
-cor(y1, y2shift)</code></pre>
-<pre><code>[1] 0.6536968</code></pre>
-<pre class="r"><code># select external validation samples
+# rr &lt;- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
+# cor(y1, y2shift)
+
+
+
+# select external validation samples
 log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
 
 set.seed(99)
@@ -379,10 +389,10 @@ rownames(pca_df) &lt;- rownames(pdata)
 
 theta_check &lt;- as.numeric(coord2rad(pca_df))
 theta_check &lt;- 2*pi-theta_check
-plot(theta_check, pdata$theta)
-names(theta_check) &lt;- rownames(pdata)
-
-fits &lt;- vector(&quot;list&quot;, 5)
+plot(theta_check, pdata$theta)</code></pre>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>names(theta_check) &lt;- rownames(pdata)</code></pre>
+<pre class="r"><code>fits &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -409,37 +419,34 @@ for (run in 1:5) {
   fits[[run]] &lt;- list(fit.train=fit.train,
                       fit.test=fit.test,
                       theta_test=theta_test)
-}</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre><code>[1] 1
-[1] 2
-[1] 3
-[1] 4
-[1] 5</code></pre>
-<pre class="r"><code>for (i in 1:5) {
+}
+
+for (i in 1:5) {
   fits[[i]]$theta_est_shift &lt;- rotation(fits[[i]]$theta_test, fits[[i]]$fit.test$cell_times_est)$y2shift
 }
   
 saveRDS(fits, file = &quot;../output/method-labels.Rmd/fits.rds&quot;)</code></pre>
 <pre class="r"><code>fits &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits.rds&quot;)
-source(&quot;../peco/R/cycle.corr.R&quot;)
+source(&quot;../peco/R/utility.R&quot;)
 
-diff_time &lt;- lapply(1:5, function(i) {
+diff_time &lt;- lapply(1:length(fits), function(i) {
   pmin(abs(fits[[i]]$theta_est_shift-fits[[i]]$theta_test),
     abs(fits[[i]]$theta_est_shift-(2*pi-fits[[i]]$theta_test)))
 })
 mean(sapply(diff_time, mean)/2/pi)</code></pre>
 <pre><code>[1] 0.0962017</code></pre>
-<pre class="r"><code>sd(sapply(diff_time, mean)/2/pi)</code></pre>
-<pre><code>[1] 0.006176607</code></pre>
-<pre class="r"><code>cors_fl &lt;- sapply(1:5, function(i) rFLIndTestRand(fits[[i]]$theta_test, 
-                                              fits[[i]]$fit.test$cell_times_est, NR=10000) )
-mean(cors_fl[1,])</code></pre>
-<pre><code>[1] 0.2665678</code></pre>
-<pre class="r"><code>cors_sp &lt;- sapply(1:5, function(i) cor(fits[[i]]$theta_test, 
-                                              fits[[i]]$theta_est_shift, method=&quot;spearman&quot;) )
-mean(cors_sp)</code></pre>
-<pre><code>[1] 0.1490866</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1096017</code></pre>
+<p>explore PCA outliers</p>
 <pre class="r"><code>pca_df_sub &lt;- pca_df[match(names(fits[[2]]$theta_test),rownames(pca_df)),] 
 diff_bins &lt;- cut(diff_time[[2]], 
                  breaks=quantile(diff_time[[2]], prob=seq(0,1,.25)), include.lowest=TRUE)
@@ -463,7 +470,7 @@ plot(pca_df_sub[,1], pca_df_sub[,2],
      main=&quot;PCs based on GFP, RFP&quot;)
 abline(h=0,v=0, lty=3)
 title(main=&quot;blue dots: diff time &gt; 50th percentile&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>par(mfrow=c(1,2))
 dist_to_origin &lt;- sqrt(pca_df_sub[,1]^2+pca_df_sub[,2]^2)
 #which(abs(scale(dist_to_origin))&gt;2)
@@ -482,10 +489,11 @@ plot(pca_df_sub[,1], pca_df_sub[,2],
 abline(h=0,v=0, lty=3)
 
 title(main=&quot;Green points: 1 +/- SD of mean distance to the origin&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
 </div>
-<div id="re-fitting-after-removing-pc-outliers" class="section level2">
-<h2>Re-fitting after removing PC outliers</h2>
+<div id="re-fitting-after-removing-pc-outliers-remove-outliers-from-the-same-5-folds" class="section level2">
+<h2>Re-fitting after removing PC outliers, remove outliers from the same 5 folds</h2>
 <pre class="r"><code># first check the theta in pdata
 pca &lt;- prcomp(cbind(pdata$rfp.median.log10sum.adjust,
                     pdata$gfp.median.log10sum.adjust), scale=TRUE)
@@ -495,7 +503,7 @@ rownames(pca_df) &lt;- rownames(pdata)
 theta_check &lt;- as.numeric(coord2rad(pca_df))
 theta_check &lt;- 2*pi-theta_check
 plot(theta_check, pdata$theta)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>names(theta_check) &lt;- rownames(pdata)
 
 dist_to_origin &lt;- sqrt(pca_df[,1]^2+pca_df[,2]^2)
@@ -507,7 +515,7 @@ plot(pca_df[,1],
      xlab=&quot;PC1&quot;,
      ylab=&quot;PC2&quot;,
      main=&quot;abs(Distance-to-Origin) &gt; +/- 1&quot;)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>fits_sub &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
@@ -549,27 +557,24 @@ for (i in 1:5) {
 
 saveRDS(fits_sub, file = &quot;../output/method-labels.Rmd/fits_sub.rds&quot;)</code></pre>
 <pre class="r"><code>fits_sub &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_sub.rds&quot;)
-source(&quot;../peco/R/cycle.corr.R&quot;)
 
-plot(fits_sub[[1]]$theta_test,
-     fits_sub[[1]]$fit.test$cell_times_est)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>diff_time &lt;- lapply(1:5, function(i) {
+diff_time &lt;- lapply(1:5, function(i) {
   pmin(abs(fits_sub[[i]]$theta_est_shift-fits_sub[[i]]$theta_test),
     abs(fits_sub[[i]]$theta_est_shift-(2*pi-fits_sub[[i]]$theta_test)))
 })
 mean(sapply(diff_time, mean)/2/pi)</code></pre>
 <pre><code>[1] 0.08959582</code></pre>
-<pre class="r"><code>sd(sapply(diff_time, mean)/2/pi)</code></pre>
-<pre><code>[1] 0.005278101</code></pre>
-<pre class="r"><code>cors_fl &lt;- sapply(1:5, function(i) rFLIndTestRand(fits_sub[[i]]$theta_test, 
-                                              fits_sub[[i]]$fit.test$cell_times_est, NR=10000) )
-mean(cors_fl[1,])</code></pre>
-<pre><code>[1] 0.2715864</code></pre>
-<pre class="r"><code>cors_sp &lt;- sapply(1:5, function(i) cor(fits_sub[[i]]$theta_test, 
-                                              fits_sub[[i]]$theta_est_shift, method=&quot;spearman&quot;) )
-mean(cors_sp)</code></pre>
-<pre><code>[1] 0.1235469</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_sub), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_sub[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits_sub[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1610684</code></pre>
 <hr />
 </div>
 <div id="pve-of-cell-times-in-all-samples-after-removing-pc-outliers" class="section level2">
@@ -592,6 +597,510 @@ c(rfp_theta_sub,
      gfp_theta_sub, 
      dapi_theta_sub) </code></pre>
 <pre><code>[1] 0.9343087 0.9233100 0.2767365</code></pre>
+<hr />
+</div>
+<div id="re-fitting-after-removing-pc-outliers-from-the-same-5-folds-top-50-genes" class="section level2">
+<h2>Re-fitting after removing PC outliers from the same 5 folds, top 50 genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:50]),]
+fits_sub_top50 &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train)
+  
+  Y_train_sub &lt;- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub &lt;- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  Y_test_sub &lt;- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub &lt;- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_sub_top50[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_top50[[i]]$theta_est_shift &lt;- rotation(fits_sub_top50[[i]]$theta_test, fits_sub_top50[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_top50, file = &quot;../output/method-labels.Rmd/fits_sub_top50.rds&quot;)</code></pre>
+<pre class="r"><code>fits_sub_top50 &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_sub_top50.rds&quot;)
+
+diff_time &lt;- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_top50[[i]]$theta_est_shift-fits_sub_top50[[i]]$theta_test),
+    abs(fits_sub_top50[[i]]$theta_est_shift-(2*pi-fits_sub_top50[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.08906205</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_sub_top50), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_sub_top50[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_top50[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1712479</code></pre>
+<hr />
+</div>
+<div id="re-fitting-after-removing-pc-outliers-from-the-same-5-folds-top-10-genes" class="section level2">
+<h2>Re-fitting after removing PC outliers from the same 5 folds, top 10 genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:10]),]
+fits_sub_top10 &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train)
+  
+  Y_train_sub &lt;- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub &lt;- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  Y_test_sub &lt;- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub &lt;- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_sub_top10[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_top10[[i]]$theta_est_shift &lt;- rotation(fits_sub_top10[[i]]$theta_test, fits_sub_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_top10, file = &quot;../output/method-labels.Rmd/fits_sub_top10.rds&quot;)</code></pre>
+<pre class="r"><code>fits_sub_top10 &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_sub_top10.rds&quot;)
+
+diff_time &lt;- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_top10[[i]]$theta_est_shift-fits_sub_top10[[i]]$theta_test),
+    abs(fits_sub_top10[[i]]$theta_est_shift-(2*pi-fits_sub_top10[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.08471943</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_sub_top10), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_sub_top10[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_top10[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.2258223</code></pre>
+<hr />
+</div>
+<div id="re-fitting-after-removing-pc-outliers-odd-number" class="section level2">
+<h2>Re-fitting after removing PC outliers, odd number</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(1,nrow(expr.sig),by=2)]),]
+fits_sub_odd &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train)
+  
+  Y_train_sub &lt;- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub &lt;- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  Y_test_sub &lt;- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub &lt;- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_sub_odd[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_odd[[i]]$theta_est_shift &lt;- rotation(fits_sub_odd[[i]]$theta_test, fits_sub_odd[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_odd, file = &quot;../output/method-labels.Rmd/fits_sub_odd.rds&quot;)</code></pre>
+<pre class="r"><code>fits_sub_odd &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_sub_odd.rds&quot;)
+
+diff_time &lt;- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_odd[[i]]$theta_est_shift-fits_sub_odd[[i]]$theta_test),
+    abs(fits_sub_odd[[i]]$theta_est_shift-(2*pi-fits_sub_odd[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.09553247</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_sub_odd), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_sub_odd[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_odd[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.08201038</code></pre>
+<hr />
+</div>
+<div id="re-fitting-after-removing-pc-outliers-even-number" class="section level2">
+<h2>Re-fitting after removing PC outliers, even number</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(2,nrow(expr.sig),by=2)]),]
+fits_sub_even &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train)
+  
+  Y_train_sub &lt;- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub &lt;- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  Y_test_sub &lt;- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub &lt;- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_sub_even[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_even[[i]]$theta_est_shift &lt;- rotation(fits_sub_even[[i]]$theta_test, fits_sub_even[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_even, file = &quot;../output/method-labels.Rmd/fits_sub_even.rds&quot;)</code></pre>
+<pre class="r"><code>fits_sub_even &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_sub_even.rds&quot;)
+
+diff_time &lt;- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_even[[i]]$theta_est_shift-fits_sub_even[[i]]$theta_test),
+    abs(fits_sub_even[[i]]$theta_est_shift-(2*pi-fits_sub_even[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.09370391</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_sub_even), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_sub_even[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_even[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.22471</code></pre>
+<hr />
+</div>
+<div id="fitting-using-all-samples-top-50-genes" class="section level2">
+<h2>Fitting using all samples, top 50 genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:50]),]
+
+fits_top50 &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train) 
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_top50[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50[[i]]$theta_est_shift &lt;- rotation(fits_top50[[i]]$theta_test, fits_top50[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50, file = &quot;../output/method-labels.Rmd/fits_top50.rds&quot;)</code></pre>
+<pre class="r"><code>fits_top50 &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_top50.rds&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+diff_time &lt;- lapply(1:length(fits_top50), function(i) {
+  pmin(abs(fits_top50[[i]]$theta_est_shift-fits_top50[[i]]$theta_test),
+    abs(fits_top50[[i]]$theta_est_shift-(2*pi-fits_top50[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.088139</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_top50), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top50[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1356245</code></pre>
+<hr />
+</div>
+<div id="fitting-using-all-samples-top-10-genes" class="section level2">
+<h2>Fitting using all samples, top 10 genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:10]),]
+
+fits_top10 &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train) 
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_top10[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top10[[i]]$theta_est_shift &lt;- rotation(fits_top10[[i]]$theta_test, fits_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top10, file = &quot;../output/method-labels.Rmd/fits_top10.rds&quot;)</code></pre>
+<pre class="r"><code>fits_top10 &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_top10.rds&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+diff_time &lt;- lapply(1:length(fits_top10), function(i) {
+  pmin(abs(fits_top10[[i]]$theta_est_shift-fits_top10[[i]]$theta_test),
+    abs(fits_top10[[i]]$theta_est_shift-(2*pi-fits_top10[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.08583889</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_top10), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top10[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top10[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1680728</code></pre>
+<hr />
+</div>
+<div id="fitting-using-all-samples-odd-numbered-genes" class="section level2">
+<h2>Fitting using all samples, odd-numbered genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(1,nrow(expr.sig),by=2)]),]
+
+fits_top50_odd &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train) 
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_top50_odd[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50_odd[[i]]$theta_est_shift &lt;- rotation(fits_top50_odd[[i]]$theta_test, fits_top50_odd[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50_odd, file = &quot;../output/method-labels.Rmd/fits_top50_odd.rds&quot;)</code></pre>
+<pre class="r"><code>fits_top50_odd &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_top50_odd.rds&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+diff_time &lt;- lapply(1:length(fits_top50_odd), function(i) {
+  pmin(abs(fits_top50_odd[[i]]$theta_est_shift-fits_top50_odd[[i]]$theta_test),
+    abs(fits_top50_odd[[i]]$theta_est_shift-(2*pi-fits_top50_odd[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.09638676</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_top50_odd), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top50_odd[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50_odd[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.09501819</code></pre>
+<hr />
+</div>
+<div id="fitting-using-all-samples-even-numbered-genes" class="section level2">
+<h2>Fitting using all samples, even-numbered genes</h2>
+<pre class="r"><code>expr_sub &lt;- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(2,nrow(expr.sig),by=2)]),]
+
+fits_top50_even &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr_sub[,part_indices[[run]]$train]
+  theta_train &lt;- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) &lt;- colnames(Y_train) 
+
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr_sub[,part_indices[[run]]$test]
+  theta_test &lt;- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) &lt;- colnames(Y_test) 
+
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=12)
+  
+  fits_top50_even[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50_even[[i]]$theta_est_shift &lt;- rotation(fits_top50_even[[i]]$theta_test, fits_top50_even[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50_even, file = &quot;../output/method-labels.Rmd/fits_top50_even.rds&quot;)</code></pre>
+<pre class="r"><code>fits_top50_even &lt;- readRDS(file = &quot;../output/method-labels.Rmd/fits_top50_even.rds&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+diff_time &lt;- lapply(1:length(fits_top50_even), function(i) {
+  pmin(abs(fits_top50_even[[i]]$theta_est_shift-fits_top50_even[[i]]$theta_test),
+    abs(fits_top50_even[[i]]$theta_est_shift-(2*pi-fits_top50_even[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)</code></pre>
+<pre><code>[1] 0.0941044</code></pre>
+<pre class="r"><code>pve &lt;- lapply(1:length(fits_top50_even), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top50_even[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50_even[[i]]$theta_est_shift)])
+})</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(unlist(pve))</code></pre>
+<pre><code>[1] 0.1702022</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -617,21 +1126,17 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] scales_0.5.0        RColorBrewer_1.1-2  assertthat_0.2.0   
- [4] genlasso_1.3        igraph_1.1.2        Matrix_1.2-14      
- [7] MASS_7.3-50         NPCirc_2.0.1        circular_0.4-93    
-[10] Biobase_2.38.0      BiocGenerics_0.24.0
+[1] scales_0.5.0        RColorBrewer_1.1-2  genlasso_1.3       
+[4] igraph_1.1.2        Matrix_1.2-14       MASS_7.3-50        
+[7] circular_0.4-93     Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.17     plyr_1.8.4       compiler_3.4.3   git2r_0.21.0    
- [5] tools_3.4.3      boot_1.3-20      digest_0.6.15    jsonlite_1.5    
- [9] evaluate_0.10.1  lattice_0.20-35  pkgconfig_2.0.1  shiny_1.0.5     
-[13] crosstalk_1.0.0  yaml_2.1.16      mvtnorm_1.0-7    stringr_1.2.0   
-[17] knitr_1.18       htmlwidgets_1.0  rprojroot_1.3-2  grid_3.4.3      
-[21] R6_2.2.2         plotrix_3.7-2    rmarkdown_1.8    magrittr_1.5    
-[25] backports_1.1.2  htmltools_0.3.6  misc3d_0.8-4     colorspace_1.3-2
-[29] mime_0.5         shape_1.4.3      xtable_1.8-2     httpuv_1.3.5    
-[33] movMF_0.2-2      stringi_1.1.6    munsell_0.4.3    slam_0.1-42     </code></pre>
+ [1] Rcpp_0.12.17     knitr_1.18       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 lattice_0.20-35  plyr_1.8.4       stringr_1.2.0   
+ [9] tools_3.4.3      grid_3.4.3       git2r_0.21.0     htmltools_0.3.6 
+[13] yaml_2.1.16      rprojroot_1.3-2  digest_0.6.15    evaluate_0.10.1 
+[17] rmarkdown_1.8    stringi_1.1.6    compiler_3.4.3   backports_1.1.2 
+[21] boot_1.3-20      mvtnorm_1.0-7    pkgconfig_2.0.1 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

@@ -5,7 +5,8 @@
 \title{Estimate parameters for the cyclial ordering using nonparametric smoothing}
 \usage{
 \method{cycle}{npreg.mstep}(Y, theta, method.trend = c("trendfilter",
-  "npcirc.nw", "npcirc.ll"), polyorder = 3, ncores = 12, ...)
+  "npcirc.nw", "npcirc.ll", "loess", "bspline"), polyorder = 3, ncores = 12,
+  ...)
 }
 \arguments{
 \item{Y}{gene by sample expression matrix (log2CPM).}

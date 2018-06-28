@@ -1,3 +1,5 @@
+library(parallel)
+
 #' @title Initialize grid points for estimation
 #'
 #' @export
@@ -34,33 +36,7 @@ initialize_grids <- function(Y, grids=100,
 }
 
 
-#' #' @title Initialize cell time estimates for the nonparametric approach
-#' #'
-#' #' @description Estimate cell times using PC1 and PC2. If \code{nbins} is specified,
-#' #'   then group the estimated cell times to \code{nbins} groups.
-#' #'
-#' #' @param Y gene by sample matrix
-#' #' @param nbins Y is grouped to nbins between 0 to 2pi.
-#' #'
-#' #' @export
-#' initialize_cell_times <- function(Y,
-#'                                   method.initialize.theta=c("pca", "uniform"), ...) {
-#'   library(circular)
-#'   if (method.initialize.theta=="pca") {
-#'     pc_res <- prcomp(t(Y), scale = TRUE)
-#'     theta <- coord2rad(cbind(pc_res$x[,1], pc_res$x[,2]))
-#'     theta <- as.numeric(theta)
-#'     names(theta) <- colnames(Y)
-#'   }
-#'   if (method.initialize.theta=="uniform") {
-#'     len <- 2*pi/ncol(Y)/2
-#'     theta <- seq(len, 2*pi-len, length.out=nbins)
-#'     names(theta) <- colnames(Y)
-#'     return(theta)
-#'   }
-#'
-#'   return(theta)
-#' }
+
 
 
 #' @title Estimate parameters for the cyclial ordering using nonparametric smoothing
@@ -72,10 +48,11 @@ initialize_grids <- function(Y, grids=100,
 #' @param theta observed cellt times
 cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                                                        "npcirc.nw",
-                                                       "npcirc.ll"),
+                                                       "npcirc.ll",
+                                                       "loess", "bspline"),
                               polyorder=3,
                               ncores=12, ...) {
-      library(NPCirc)
+#      library(NPCirc)
       library(genlasso)
       library(assertthat)
       G <- nrow(Y)
@@ -116,6 +93,20 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                              y=as.numeric(fit_g$trend.yy), rule=2)
           mu_g <- fit_g$trend.yy
         }
+        if (method.trend=="bspline") {
+          fit_g <- fit.bspline(yy=y_g, time = theta_ordered)
+          fun_g <- approxfun(x=as.numeric(theta_ordered),
+                             y=as.numeric(fit_g$pred.yy), rule=2)
+          mu_g <- fit_g$pred.yy
+        }
+
+        if (method.trend=="loess") {
+          fit_g <- fit.loess(yy=y_g, time = theta_ordered)
+          fun_g <- approxfun(x=as.numeric(theta_ordered),
+                             y=as.numeric(fit_g$pred.yy), rule=2)
+          mu_g <- fit_g$pred.yy
+        }
+
         sigma_g <- sqrt(sum((y_g-mu_g)^2)/N)
 
         list(y_g =y_g,
@@ -157,18 +148,24 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
 #' @param sigma_est vector of standard errors for each gene
 #'
 #' @export
-cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
-                               funs_est,
+cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
                                grids=100,
+                               method.type=c("supervised", "unsupervised"),
                                method.grid=c("pca", "uniform"), ...) {
-
 
   N <- ncol(Y)
   G <- nrow(Y)
 
-  theta_choose <- initialize_grids(Y, grids=grids, method.grid=method.grid)
-  loglik_per_cell_by_celltimes <- matrix(0, N, grids)
-
+  if (method.type=="unsupervised") {
+    theta_choose <- initialize_grids(Y, grids=grids, method.grid="pca")
+    loglik_per_cell_by_celltimes <- matrix(0, N, length(theta_choose))
+    prob_per_cell_by_celltimes <- matrix(0, N, length(theta_choose))
+  }
+  if (method.type=="supervised") {
+    theta_choose <- initialize_grids(Y, grids=grids, method.grid="uniform")
+    loglik_per_cell_by_celltimes <- matrix(0, N, grids)
+    prob_per_cell_by_celltimes <- matrix(0, N, grids)
+  }
 
   for (n in 1:N) {
     # for each cell, sum up the loglikelihood for each gene
@@ -182,7 +179,6 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
   }
 
   # use max likelihood to assign samples
-  prob_per_cell_by_celltimes <- matrix(0, N, grids)
   for (n in 1:N) {
     # print(n)
     maxll <- max(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
@@ -221,6 +217,8 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
 
 
 
+
+
 #' @title Estimate cell cycle ordering in the current sample
 #'
 #' @param update T/F to update cell times
@@ -229,7 +227,8 @@ cycle.npreg.loglik <- function(Y, mu_est, sigma_est,
 cycle.npreg.insample <- function(Y, theta,
                                  ncores=12,
                                  polyorder=3,
-                                 method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+                                 method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter",
+                                                "loess", "bspline"),
                                  ...) {
 
   # order data by initial cell times
@@ -262,15 +261,18 @@ cycle.npreg.insample <- function(Y, theta,
 cycle.npreg.outsample <- function(Y_test,
                                   sigma_est,
                                   funs_est,
-                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
+                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter",
+                                                 "loess", "bspline"),
                                   polyorder=3,
                                   method.grid=c("pca", "uniform"),
                                   ncores=12,...) {
+
 
   # compute expected cell time for the test samples
   # under mu and sigma estimated from the training samples
   initial_loglik <- cycle.npreg.loglik(Y = Y_test,
                                        sigma_est = sigma_est,
+                                       method.type="supervised",
                                        method.grid=method.grid,
                                        funs_est=funs_est)
   updated_estimates <- cycle.npreg.mstep(Y = Y_test,
@@ -293,39 +295,4 @@ cycle.npreg.outsample <- function(Y_test,
 
 
 
-#' @title Predict test-sample ordering using training lables (no update)
-#'
-#' @export
-cycle.npreg.unsupervised <- function(Y_test,
-                                  sigma_est,
-                                  funs_est,
-                                  method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter"),
-                                  method.initialize.theta=c("pca", "uniform"),
-                                  ncores=12,
-                                  maxiter=10,
-                                  tol=1, verbose=TRUE,...) {
 
-  # compute expected cell time for the test samples
-  # under mu and sigma estimated from the training samples
-  initial_loglik <- cycle.npreg.loglik(Y = Y_test,
-                                       sigma_est = sigma_est,
-                                       method.initialize.theta=method.initialize.theta,
-                                       funs_est=funs_est, outsample=T)
-  updated_estimates <- cycle.npreg.mstep(Y = Y_test,
-                                         theta = initial_loglik$cell_times_est,
-                                         method.trend = method.trend,
-                                         polyorder=polyorder,
-                                         ncores = ncores)
-  theta_update <- updated_estimates$theta
-  names(theta_update) <- colnames(updated_estimates$Y)
-
-  out <- list(Y_ordered=updated_estimates$Y,
-              cell_times_update=theta_update,
-              loglik_update=initial_loglik$loglik_est,
-              mu_update=updated_estimates$mu_est,
-              sigma_update=updated_estimates$sigma_est,
-              funs_update=updated_estimates$funs,
-              sigma_update=sigma_est,
-              funs_update=funs_est)
-  return(out)
-}
