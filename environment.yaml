@@ -60,7 +60,6 @@ dependencies:
   - r-cluster
   - r-ccremover
   - r-conicfit
-  - r-corshrink
   - r-cowplot
   - r-data.table
   - r-dplyr
@@ -70,6 +69,7 @@ dependencies:
   - r-ggplot2
   - r-gplots
   - r-heatmap3
+  - r-lpsolve
   - r-mclust
   - r-scales
   - r-rcolorbrewer

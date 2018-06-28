@@ -40,15 +40,68 @@ rotation <- function(y1, y2, ...) {
 }
 
 
-#' @title compute Fisher-Lee correlation coefficient
+#' @title Circular-circular rank correlation coefficient
+#'
+#' @references Fisher NJ and Lee AJ (1983). A correlation coefficient for circular data. Biometrika, 70, 327-332.
+#'
+#' @export
+
+rFLRank.CorrCoeff <- function(lcdat1, lcdat2) {
+
+  # convert data to linear ranks
+  n <- length(lcdat1)
+  crank1 <- rank(lcdat1)*2*pi/n
+  crank2 <- rank(lcdat2)*2*pi/n
+
+  A <- sum(cos(crank1)*cos(crank2))
+  B <- sum(sin(crank1)*sin(crank2))
+  C <- sum(cos(crank1)*sin(crank2))
+  D <- sum(sin(crank1)*cos(crank2))
+
+  val <- ((A*B)-(C*D))*(4/(n^2))
+
+  return(val)
+}
+
+
+
+#' @title Significance test for circular rank correlation, permutation-based
 #'
 #' @param lcdat1 length n vector of radians
 #' @param lcdat2 length n vector of radians
+#' @param NR number of permutations
 #'
 #' @references Pewsey et al. Circular statistics in R
 #'
 #' @export
-rFLCorrCoeff <- function(lcdat1, lcdat2) {
+rFLRank.IndTestRand <- function(lcdat1, lcdat2, NR=10000) {
+
+  n <- length(lcdat1)
+  crank1 <- rank(lcdat1)*2*pi/n
+  crank2 <- rank(lcdat2)*2*pi/n
+
+  rFLObs <- rFLRank.CorrCoeff(lcdat1, lcdat2)
+  nxtrm <- 1
+  for (r in 1:NR) {
+    crank1Rand <- sample(crank1)
+    rFLRand <- rFLRank.CorrCoeff(crank1Rand, crank2)
+    if (abs(rFLRand) >= abs(rFLObs)) {nxtrm <- nxtrm + 1} }
+  pval <- nxtrm/(NR+1); return(c(rFLObs,pval))
+}
+
+
+
+#' @title Fisher-Lee correlation coefficient
+#'
+#' @param lcdat1 length n vector of radians
+#' @param lcdat2 length n vector of radians
+#'
+#' @references
+#'    Fisher NJ and Lee AJ (1983). A correlation coefficient for circular data. Biometrika, 70, 327-332.
+#'    Pewsey et al. Circular statistics in R
+#'
+#' @export
+rFL.CorrCoeff <- function(lcdat1, lcdat2) {
   A <- sum(cos(lcdat1)*cos(lcdat2))
   B <- sum(sin(lcdat1)*sin(lcdat2))
   C <- sum(cos(lcdat1)*sin(lcdat2))
@@ -61,15 +114,17 @@ rFLCorrCoeff <- function(lcdat1, lcdat2) {
   return(rFLVal)
 }
 
-#' @title compute statistical significance of Fisher-Lee correlation coefficient
+#' @title statistical significance of Fisher-Lee correlation coefficient, permutation-based
 #' @param lcdat1 length n vector of radians
 #' @param lcdat2 length n vector of radians
 #' @param NR number of permutations
 #'
-#' @references Pewsey et al. Circular statistics in R
+#' @references
+#'    Fisher NJ and Lee AJ (1983). A correlation coefficient for circular data. Biometrika, 70, 327-332.
+#'    Pewsey et al. Circular statistics in R
 #'
 #' @export
-rFLIndTestRand <- function(lcdat1, lcdat2, NR) {
+rFL.IndTestRand <- function(lcdat1, lcdat2, NR=10000) {
   rFLObs <- rFLCorrCoeff(lcdat1, lcdat2)
   nxtrm <- 1
   for (r in 1:NR) {
@@ -78,3 +133,4 @@ rFLIndTestRand <- function(lcdat1, lcdat2, NR) {
     if (abs(rFLRand) >= abs(rFLObs)) {nxtrm <- nxtrm + 1} }
   pval <- nxtrm/(NR+1); return(c(rFLObs,pval))
 }
+

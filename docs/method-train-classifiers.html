@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Training dataset</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Training dataset</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#extract-data-from-the-top-101-genes-identified">Extract data from the top 101 genes identified</a></li>
+<li><a href="#supervised-methods">Supervised methods</a><ul>
+<li><a href="#results">Results</a></li>
+</ul></li>
+<li><a href="#pcs-of-gene-expression">PCs of gene expression</a></li>
+<li><a href="#unsupervsied-methods-fitted-across-then-extract-test-samples">Unsupervsied methods fitted across then extract test samples</a></li>
+<li><a href="#unsupervsied-methods-fitt-for-each-test-sample">Unsupervsied methods fitt for each test sample</a></li>
+<li><a href="#correlation-between-predicted-times">Correlation between predicted times</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-06-24</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 6a336e9</p>
+<hr />
+<div id="extract-data-from-the-top-101-genes-identified" class="section level2">
+<h2>Extract data from the top 101 genes identified</h2>
+<pre class="r"><code>library(Biobase)
+df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+#macosko &lt;- readRDS(&quot;data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+counts &lt;- counts[,order(pdata$theta)]
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+
+# theta.nonvalid &lt;- theta_moved[ii.nonvalid]
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]
+
+
+# get predicted times
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions</code></pre>
+<hr />
+</div>
+<div id="supervised-methods" class="section level2">
+<h2>Supervised methods</h2>
+<p>Fitting</p>
+<pre class="r"><code>source(&quot;../peco/R/fit.cyclical.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../code/utility.R&quot;)</code></pre>
+<pre class="r"><code>fits.nw &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr.sig[,part_indices[[run]]$train]
+  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=15,
+                                    method.trend=&quot;npcirc.nw&quot;)
+  # fitting test data
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.nw&quot;,
+                                    ncores=15)
+  
+  fits.nw[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+saveRDS(fits.nw, file = &quot;../output/method-train-classifiers.Rmd/fits.nw.rds&quot;)
+
+
+fits.trend2 &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr.sig[,part_indices[[run]]$train]
+  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    polyorder=2,
+                                    ncores=15,
+                                    method.trend=&quot;trendfilter&quot;)
+  # fitting test data
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;trendfilter&quot;,
+                                    polyorder=2,
+                                    ncores=15)
+  
+  fits.trend2[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.trend2, file = &quot;../output/method-train-classifiers.Rmd/fits.trend2.rds&quot;)</code></pre>
+<p>load results</p>
+<pre class="r"><code>fits.nw &lt;- readRDS(file = &quot;../output/method-train-classifiers.Rmd/fits.nw.rds&quot;)
+fits.trend2 &lt;- readRDS(file = &quot;../output/method-train-classifiers.Rmd/fits.trend2.rds&quot;)</code></pre>
+<div id="results" class="section level3">
+<h3>Results</h3>
+<p>Compute metrics</p>
+<pre class="r"><code>xy_time &lt;- lapply(1:5, function(run) {
+   xy &lt;- data.frame(
+     ref_time=theta.nonvalid[part_indices[[run]]$test],
+     pred_time_nw=fits.nw[[run]]$fit.test$cell_times_est[
+       match(names(theta.nonvalid[part_indices[[run]]$test]),
+             names(fits.nw[[run]]$fit.test$cell_times_est))],
+     pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+       match(names(theta.nonvalid[part_indices[[run]]$test]),
+             names(fits.trend2[[run]]$fit.test$cell_times_est))],
+    dapi=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]),
+                                                rownames(pdata))])
+   return(xy)
+})
+
+for (i in 1:5) {
+  xy_time[[i]]$diff_time_nw &lt;- pmin(
+    abs(xy_time[[i]]$pred_time_nw-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_nw-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[i]]$diff_time_trend2 &lt;- pmin(
+    abs(xy_time[[i]]$pred_time_trend2-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_trend2-(2*pi-xy_time[[i]]$ref_time)))
+}
+
+mean(sapply(xy_time, function(x) mean(x$diff_time_trend2))/2/pi)</code></pre>
+<pre><code>[1] 0.09360664</code></pre>
+<pre class="r"><code>mean(sapply(xy_time, function(x) mean(x$diff_time_nw))/2/pi)</code></pre>
+<pre><code>[1] 0.09627132</code></pre>
+<p>Circular rank correlation</p>
+<pre class="r"><code># source(&quot;../peco/R/cycle.corr.R&quot;)
+# corrs.rank &lt;- lapply(1:5, function(i) {
+#   data.frame(cbind(nw=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_nw),
+#         trend2=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_trend2)),
+#         nw.trend2=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, xy_time[[i]]$pred_time_trend2))
+# })
+# 
+# mean(sapply(1:5, function(i) corrs.rank[[i]]$trend2[1]))
+# sd(sapply(1:5, function(i) corrs.rank[[i]]$trend2[1]))
+# 
+# mean(sapply(1:5, function(i) corrs.rank[[i]]$nw[1]))
+# sd(sapply(1:5, function(i) corrs.rank[[i]]$nw[1]))
+# 
+# mean(sapply(1:5, function(i) corrs.rank[[i]]$nw.trend2[1]))
+# sd(sapply(1:5, function(i) corrs.rank[[i]]$nw.trend2[1]))</code></pre>
+<p>PVE</p>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+nw &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_nw)])))
+trend2 &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_trend2)])))
+
+save(nw, trend2, 
+     file=&quot;../output/method-train-classifiers.Rmd/pve.methods.rda&quot;)</code></pre>
+<pre class="r"><code>load(file=&quot;../output/method-train-classifiers.Rmd/pve.methods.rda&quot;)
+cbind(mean(trend2),sd(trend2))</code></pre>
+<pre><code>          [,1]       [,2]
+[1,] 0.2848364 0.07619723</code></pre>
+<pre class="r"><code>cbind(mean(nw),sd(nw))</code></pre>
+<pre><code>          [,1]       [,2]
+[1,] 0.2176942 0.08988926</code></pre>
+<p>plots</p>
+<pre class="r"><code>Y_test &lt;- expr.sig[,part_indices[[1]]$test]
+theta_test &lt;- theta.nonvalid[part_indices[[1]]$test]
+
+time_nw &lt;- fits.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.nw[[1]]$fit.test$cell_times_est))]
+time_trend2 &lt;- fits.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.trend2[[1]]$fit.test$cell_times_est))]
+
+par(mfrow=c(1,2))
+plot(theta_test, time_nw,
+     ylab=&quot;estimated time&quot;, 
+     xlab=&quot;training labels&quot;, main = &quot;NPcirc.nw&quot;)
+abline(0,1, col=&quot;blue&quot;)
+plot(theta_test, time_trend2,
+     ylab=&quot;estimated time&quot;, 
+     xlab=&quot;training labels&quot;, main = &quot;trendfilter&quot;)
+abline(0,1, col=&quot;blue&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="pcs-of-gene-expression" class="section level2">
+<h2>PCs of gene expression</h2>
+<pre class="r"><code>library(circular)
+source(&quot;../peco/R/cycle.corr.R&quot;)
+
+for (i in 1:5) {
+  ref_time &lt;- theta.nonvalid[part_indices[[i]]$test]
+  expr_sub &lt;- expr.sig[,part_indices[[i]]$test]
+
+  pc_expr &lt;- prcomp(t(expr_sub), scale=T)
+  pred_time_pc_expr &lt;- as.numeric(coord2rad(cbind(pc_expr$x[,1],pc_expr$x[,2])))
+  #plot(pred_time_pc_expr, ref_time)
+  pred_time_pc_expr_shift &lt;- rotation(ref_time, pred_time_pc_expr)$y2shift
+  names(pred_time_pc_expr_shift) &lt;- colnames(expr_sub)
+  
+  xy_time[[i]]$pred_time_pc &lt;- pred_time_pc_expr_shift
+}
+
+
+for (i in 1:5) {
+  xy_time[[i]]$diff_time_pc &lt;- pmin(
+  abs(xy_time[[i]]$pred_time_pc-xy_time[[i]]$ref_time),
+  abs(xy_time[[i]]$pred_time_pc-(2*pi-xy_time[[i]]$ref_time)))
+}
+
+mean(sapply(xy_time, function(x) mean(x$diff_time_pc)))/2/pi</code></pre>
+<pre><code>[1] 0.1187757</code></pre>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
+pc_pve &lt;- sapply(xy_time, function(x) get.pve(x$dapi[order(x$pred_time_pc)]))</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>mean(pc_pve)</code></pre>
+<pre><code>[1] 0.1208765</code></pre>
+<pre class="r"><code>sd(pc_pve)</code></pre>
+<pre><code>[1] 0.06477794</code></pre>
+<pre class="r"><code>par(mfrow=c(1,1))
+plot(xy_time[[1]]$ref_time,
+     xy_time[[1]]$pred_time_pc,
+     xlab=&quot;training labels&quot;,
+     ylab=&quot;estimated cell times&quot;, main=&quot;PC-based&quot;)
+abline(0,1, col=&quot;blue&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="unsupervsied-methods-fitted-across-then-extract-test-samples" class="section level2">
+<h2>Unsupervsied methods fitted across then extract test samples</h2>
+<p>the average prediction error across the test samples way higher than for all. this suggest that we should fit for each test sample at a time</p>
+<pre class="r"><code># get predicted times
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+source(&quot;../peco/R/fit.cyclical.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+
+# theta.nonvalid &lt;- theta_moved[ii.nonvalid]
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]</code></pre>
+<p>Fitting</p>
+<pre class="r"><code>source(&quot;../peco/R/unsupervised.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/fit.cyclical.R&quot;)
+
+theta_initial=initialize_grids(expr.sig, method.grid=&quot;pca&quot;)
+
+### npcirc.nw
+fit.nw.unsup &lt;- cycle.npreg.unsupervised(Y=expr.sig, theta=theta_initial,
+                         ncores=15,
+                         method.trend=&quot;npcirc.nw&quot;,
+                         maxiter=30, verbose=TRUE, tol=1)
+fit.nw.unsup$ref_time &lt;- theta_true
+fit.nw.unsup$cell_times_est_shift &lt;- with(fit.nw.unsup,
+  rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                    names(ref_time))])$y2shift)
+fit.nw.unsup$diff_time &lt;- with(fit.nw.unsup, pmin(
+    abs(cell_times_est_shift-ref_time),
+    abs(cell_times_est_shift-(2*pi-ref_time))))
+saveRDS(fit.nw.unsup, &quot;../output/method-train-classifiers.Rmd/fit.nw.unsup.rds&quot; )
+
+
+### bspline
+fit.bspline.unsup &lt;- cycle.npreg.unsupervised(Y=expr.sig, theta=theta_initial,
+                         ncores=15,
+                         method.trend=&quot;bspline&quot;,
+                         maxiter=30, verbose=TRUE, tol=1)
+fit.bspline.unsup$ref_time &lt;- theta_true
+fit.bspline.unsup$cell_times_est_shift &lt;- with(fit.bspline.unsup,
+   rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                           names(ref_time))])$y2shift)
+fit.bspline.unsup$diff_time &lt;- with(fit.bspline.unsup,
+          pmin(abs(cell_times_est_shift-ref_time),
+               abs(cell_times_est_shift-(2*pi-ref_time))))
+saveRDS(fit.bspline.unsup, 
+        &quot;../output/method-train-classifiers.Rmd/fit.bspline.unsup.rds&quot; )
+
+### loess
+fit.loess.unsup &lt;- cycle.npreg.unsupervised(Y=expr.sig, theta=theta_initial,
+                         ncores=15,
+                         method.trend=&quot;loess&quot;,
+                         maxiter=30, verbose=TRUE, tol=1)
+fit.loess.unsup$ref_time &lt;- theta_true
+fit.loess.unsup$cell_times_est_shift &lt;- with(fit.loess.unsup,
+   rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                           names(ref_time))])$y2shift)
+fit.loess.unsup$diff_time &lt;- with(fit.loess.unsup,
+          pmin(abs(cell_times_est_shift-ref_time),
+               abs(cell_times_est_shift-(2*pi-ref_time))))
+saveRDS(fit.loess.unsup, 
+        &quot;../output/method-train-classifiers.Rmd/fit.loess.unsup.rds&quot; )
+
+
+### trendfilter
+fit.trend2.unsup &lt;- cycle.npreg.unsupervised(Y=expr.sig, theta=theta_initial,
+                         ncores=15,
+                         method.trend=&quot;trendfilter&quot;,
+                         polyorder=2,
+                         maxiter=30, verbose=TRUE, tol=1)
+fit.trend2.unsup$ref_time &lt;- theta_true
+fit.trend2.unsup$cell_times_est_shift &lt;- with(fit.trend2.unsup,
+   rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                           names(ref_time))])$y2shift)
+fit.trend2.unsup$diff_time &lt;- with(fit.trend2.unsup,
+          pmin(abs(cell_times_est_shift-ref_time),
+               abs(cell_times_est_shift-(2*pi-ref_time))))
+saveRDS(fit.trend2.unsup, &quot;../output/method-train-classifiers.Rmd/fit.trend2.unsup.rds&quot; )</code></pre>
+<pre class="r"><code>fit.nw.unsup &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.nw.unsup.rds&quot;)
+fit.trend2.unsup &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.trend2.unsup.rds&quot;)
+fit.bspline.unsup &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.bspline.unsup.rds&quot;)
+fit.loess.unsup &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.loess.unsup.rds&quot;)
+
+
+xy_time &lt;- lapply(1:5, function(i) {
+  data.frame(ref_time=theta.nonvalid[match(names(theta.nonvalid[part_indices[[i]]$test]),
+                                            colnames(expr.sig))],
+             pred_time_nw=fit.nw.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.nw.unsup$cell_times_est_shift))],
+             pred_time_trend2=fit.trend2.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.trend2.unsup$cell_times_est_shift))],
+             pred_time_bspline=fit.bspline.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.bspline.unsup$cell_times_est_shift))],
+             pred_time_loess=fit.loess.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.loess.unsup$cell_times_est_shift))],
+             diff_time_nw=fit.nw.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.nw.unsup$diff_time))],
+             diff_time_trend2=fit.trend2.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.trend2.unsup$diff_time))],
+             diff_time_bspline=fit.bspline.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.bspline.unsup$diff_time))],
+             diff_time_loess=fit.loess.unsup$cell_times_est_shift[
+                     match(names(theta.nonvalid[part_indices[[i]]$test]),
+                           names(fit.loess.unsup$diff_time))],
+             dapi=pdata$dapi.median.log10sum.adjust[
+                    match(names(theta.nonvalid[part_indices[[i]]$test]),rownames(pdata))]) })
+
+
+mean(sapply(1:5, function(i) mean(xy_time[[i]]$diff_time_nw)))/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 1.109325</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time[[i]]$diff_time_trend2)))/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 0.6886358</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time[[i]]$diff_time_bspline)))/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 1.132689</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time[[i]]$diff_time_loess)))/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 1.116159</code></pre>
+<pre class="r"><code>mean(fit.nw.unsup$diff_time)/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 0.262197</code></pre>
+<pre class="r"><code>mean(fit.trend2.unsup$diff_time)/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 0.3221262</code></pre>
+<pre class="r"><code>mean(fit.bspline.unsup$diff_time)/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 0.2598507</code></pre>
+<pre class="r"><code>mean(fit.loess.unsup$diff_time)/(2*pi)/(pi/(2*pi))</code></pre>
+<pre><code>[1] 0.3217046</code></pre>
+<hr />
+</div>
+<div id="unsupervsied-methods-fitt-for-each-test-sample" class="section level2">
+<h2>Unsupervsied methods fitt for each test sample</h2>
+<pre class="r"><code># get predicted times
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+source(&quot;../peco/R/fit.cyclical.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/utility.R&quot;)
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+
+# theta.nonvalid &lt;- theta_moved[ii.nonvalid]
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]</code></pre>
+<p>Fitting</p>
+<pre class="r"><code>source(&quot;../peco/R/unsupervised.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/fit.cyclical.R&quot;)
+source(&quot;../peco/R/cycle.corr.R&quot;)
+
+
+fit.nw.unsup.split &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  # fitting test data
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_initial &lt;- initialize_grids(Y_test, method.grid=&quot;pca&quot;)
+  names(theta_initial) &lt;- colnames(Y_test)
+  
+  fit.nw.unsup.split[[run]] &lt;- cycle.npreg.unsupervised(Y=Y_test, theta=theta_initial,
+                           ncores=15,
+                           method.trend=&quot;npcirc.nw&quot;,
+                           maxiter=30, verbose=TRUE, tol=1)
+  fit.nw.unsup.split[[run]]$ref_time &lt;- theta_test
+  fit.nw.unsup.split[[run]]$cell_times_est_shift &lt;- with(fit.nw.unsup.split[[run]],
+    rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                      names(ref_time))])$y2shift)
+  fit.nw.unsup.split[[run]]$diff_time &lt;- with(fit.nw.unsup.split[[run]], 
+      pmin(abs(cell_times_est_shift-ref_time), 
+           abs(cell_times_est_shift-(2*pi-ref_time))))
+}
+saveRDS(fit.nw.unsup.split, &quot;../output/method-train-classifiers.Rmd/fit.nw.unsup.split.rds&quot; )
+
+
+### bspline
+fit.bspline.unsup.split &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  # fitting test data
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_initial &lt;- initialize_grids(Y_test, method.grid=&quot;pca&quot;)
+  names(theta_initial) &lt;- colnames(Y_test)
+  
+  fit.bspline.unsup.split[[run]] &lt;- cycle.npreg.unsupervised(Y=Y_test, theta=theta_initial,
+                           ncores=15,
+                           method.trend=&quot;bspline&quot;,
+                           maxiter=30, verbose=TRUE, tol=1)
+  fit.bspline.unsup.split[[run]]$ref_time &lt;- theta_test
+  fit.bspline.unsup.split[[run]]$cell_times_est_shift &lt;- with(fit.bspline.unsup.split[[run]],
+     rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                             names(ref_time))])$y2shift)
+  fit.bspline.unsup.split[[run]]$diff_time &lt;- with(fit.bspline.unsup.split[[run]],
+            pmin(abs(cell_times_est_shift-ref_time),
+                 abs(cell_times_est_shift-(2*pi-ref_time))))
+}
+saveRDS(fit.bspline.unsup.split, 
+        &quot;../output/method-train-classifiers.Rmd/fit.bspline.unsup.split.rds&quot;)
+
+
+### loess
+
+fit.loess.unsup.split &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  # fitting test data
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_initial &lt;- initialize_grids(Y_test, method.grid=&quot;pca&quot;)
+  names(theta_initial) &lt;- colnames(Y_test)
+
+  fit.loess.unsup.split[[run]] &lt;- cycle.npreg.unsupervised(Y=Y_test, theta=theta_initial,
+                           ncores=15,
+                           method.trend=&quot;loess&quot;,
+                           maxiter=30, verbose=TRUE, tol=1)
+  fit.loess.unsup.split[[run]]$ref_time &lt;- theta_test
+  fit.loess.unsup.split[[run]]$cell_times_est_shift &lt;- with(fit.loess.unsup.split[[run]],
+     rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                             names(ref_time))])$y2shift)
+  fit.loess.unsup.split[[run]]$diff_time &lt;- with(fit.loess.unsup.split[[run]],
+            pmin(abs(cell_times_est_shift-ref_time),
+                 abs(cell_times_est_shift-(2*pi-ref_time))))
+}
+saveRDS(fit.loess.unsup.split, 
+        &quot;../output/method-train-classifiers.Rmd/fit.loess.unsup.split.rds&quot;)
+
+
+
+
+
+fit.trend2.unsup.split &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  # fitting test data
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_initial &lt;- initialize_grids(Y_test, method.grid=&quot;pca&quot;)
+  names(theta_initial) &lt;- colnames(Y_test)
+  
+  fit.trend2.unsup.split[[run]] &lt;- cycle.npreg.unsupervised(Y=Y_test, theta=theta_initial,
+                           ncores=15,
+                           method.trend=&quot;trendfilter&quot;,
+                           polyorder=2,
+                           maxiter=30, verbose=TRUE, tol=1)
+  fit.trend2.unsup.split[[run]]$ref_time &lt;- theta_test
+  fit.trend2.unsup.split[[run]]$cell_times_est_shift &lt;- with(fit.trend2.unsup.split[[run]],
+     rotation(ref_time, cell_times_est[match(names(cell_times_est),
+                                             names(ref_time))])$y2shift)
+  fit.trend2.unsup.split[[run]]$diff_time &lt;- with(fit.trend2.unsup.split[[run]],
+            pmin(abs(cell_times_est_shift-ref_time),
+                 abs(cell_times_est_shift-(2*pi-ref_time))))
+}
+saveRDS(fit.trend2.unsup.split, 
+        &quot;../output/method-train-classifiers.Rmd/fit.trend2.unsup.split.rds&quot;)</code></pre>
+<pre class="r"><code>fit.nw.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.nw.unsup.split.rds&quot;)
+fit.trend2.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.trend2.unsup.split.rds&quot;)
+fit.bspline.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.bspline.unsup.split.rds&quot;)
+fit.loess.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers.Rmd/fit.loess.unsup.split.rds&quot;)
+
+
+xy_time_unsup &lt;- lapply(1:5, function(i) {
+  data.frame(ref_time=fit.nw.unsup.split[[i]]$ref_time,
+             pred_time_nw=with(fit.nw.unsup.split[[i]], cell_times_est_shift[
+                     match(names(ref_time),names(cell_times_est_shift))]),
+             pred_time_bspline=with(fit.bspline.unsup.split[[i]], cell_times_est_shift[
+                     match(names(ref_time),names(cell_times_est_shift))]),
+             pred_time_loess=with(fit.loess.unsup.split[[i]], cell_times_est_shift[
+                     match(names(ref_time),names(cell_times_est_shift))]),
+             pred_time_trend2=with(fit.trend2.unsup.split[[i]], cell_times_est_shift[
+                     match(names(ref_time),names(cell_times_est_shift))]),
+             diff_time_nw=with(fit.nw.unsup.split[[i]], diff_time[
+                     match(names(ref_time),names(diff_time))]),
+             diff_time_bspline=with(fit.bspline.unsup.split[[i]], diff_time[
+                     match(names(ref_time),names(diff_time))]),
+             diff_time_loess=with(fit.loess.unsup.split[[i]], diff_time[
+                     match(names(ref_time),names(diff_time))]),
+             diff_time_trend2=with(fit.trend2.unsup.split[[i]], diff_time[
+                     match(names(ref_time),names(diff_time))]),
+             dapi=pdata$dapi.median.log10sum.adjust[
+                    match(names(fit.nw.unsup.split[[i]]$ref_time),rownames(pdata))] ) })
+
+
+mean(sapply(1:5, function(i) mean(xy_time_unsup[[i]]$diff_time_trend2)))/(2*pi)</code></pre>
+<pre><code>[1] 0.1447239</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time_unsup[[i]]$diff_time_nw)))/(2*pi)</code></pre>
+<pre><code>[1] 0.1209679</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time_unsup[[i]]$diff_time_bspline)))/(2*pi)</code></pre>
+<pre><code>[1] 0.1200142</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) mean(xy_time_unsup[[i]]$diff_time_loess)))/(2*pi)</code></pre>
+<pre><code>[1] 0.1536686</code></pre>
+<p>PVE</p>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+pve.split.nw &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
+                                                     dapi[order(pred_time_nw)])))
+pve.split.trend2 &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
+                                                         dapi[order(pred_time_trend2)])))
+pve.split.bspline &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
+                                                          dapi[order(pred_time_bspline)])))
+pve.split.loess &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
+                                                        dapi[order(pred_time_loess)])))
+
+save(pve.split.nw, pve.split.trend2, pve.split.bspline, pve.split.loess,
+     file=&quot;../output/method-train-classifiers.Rmd/pve.methods.unsupervised.split.rda&quot;)</code></pre>
+<pre class="r"><code>load(file=&quot;../output/method-train-classifiers.Rmd/pve.methods.unsupervised.split.rda&quot;)
+c(mean(pve.split.nw),
+  mean(pve.split.trend2),
+  mean(pve.split.bspline),
+  mean(pve.split.loess))</code></pre>
+<pre><code>[1] 0.09505480 0.06449484 0.08605530 0.14442381</code></pre>
+<pre class="r"><code>c(sd(pve.split.nw),
+  sd(pve.split.trend2),
+  sd(pve.split.bspline),
+  sd(pve.split.loess))</code></pre>
+<pre><code>[1] 0.05840516 0.07380083 0.06332662 0.10388520</code></pre>
+<hr />
+</div>
+<div id="correlation-between-predicted-times" class="section level2">
+<h2>Correlation between predicted times</h2>
+<pre class="r"><code>source(&quot;../peco/R/cycle.corr.R&quot;)
+corrs_rank &lt;- lapply(1:5, function(i) {
+  data.frame(cbind(
+        nw=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_nw),
+        trend2=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_trend2),
+        pc=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_pc),
+        nwunsup=rFLRank.IndTestRand(xy_time[[i]]$ref_time, 
+                                    xy_time_unsup[[i]]$pred_time_nw),
+        trend2unsup=rFLRank.IndTestRand(xy_time[[i]]$ref_time,
+                                        xy_time_unsup[[i]]$pred_time_trend2),
+        bsplineunsup=rFLRank.IndTestRand(xy_time[[i]]$ref_time,
+                                         xy_time_unsup[[i]]$pred_time_bspline),
+        loessunsup=rFLRank.IndTestRand(xy_time[[i]]$ref_time,
+                                       xy_time_unsup[[i]]$pred_time_loess),
+        nw.trend2=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                      xy_time[[i]]$pred_time_trend2),
+        nw.pc=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                  xy_time[[i]]$pred_time_pc),
+        nw.nwunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                       xy_time_unsup [[i]]$pred_time_nw),
+        nw.trend2unsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                           xy_time_unsup [[i]]$pred_time_trend2),
+        nw.bsplineunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                            xy_time_unsup [[i]]$pred_time_bspline),
+        nw.loessunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_nw, 
+                                          xy_time_unsup [[i]]$pred_time_loess),
+        trend2.pc=rFLRank.IndTestRand(xy_time[[i]]$pred_time_trend2, 
+                                      xy_time[[i]]$pred_time_pc),
+        trend2.nwunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_trend2, 
+                                       xy_time_unsup[[i]]$pred_time_nw),
+        trend2.trend2unsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_trend2, 
+                                           xy_time_unsup[[i]]$pred_time_trend2),
+        trend2.bsplineunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_trend2, 
+                                            xy_time_unsup[[i]]$pred_time_bspline),
+        trend2.loessunsup=rFLRank.IndTestRand(xy_time[[i]]$pred_time_trend2, 
+                                          xy_time_unsup[[i]]$pred_time_loess) ))
+})
+saveRDS(corrs_rank, &quot;../output/method-train-classifiers.Rmd/corrs_rank.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] genlasso_1.3        igraph_1.1.2        Matrix_1.2-14      
+[4] MASS_7.3-50         circular_0.4-93     Biobase_2.38.0     
+[7] BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17    lattice_0.20-35 mvtnorm_1.0-7   digest_0.6.15  
+ [5] rprojroot_1.3-2 grid_3.4.3      backports_1.1.2 git2r_0.21.0   
+ [9] magrittr_1.5    evaluate_0.10.1 stringi_1.1.6   boot_1.3-20    
+[13] rmarkdown_1.8   tools_3.4.3     stringr_1.2.0   yaml_2.1.16    
+[17] compiler_3.4.3  pkgconfig_2.0.1 htmltools_0.3.6 knitr_1.18     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

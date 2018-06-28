@@ -12,7 +12,7 @@
 <meta name="author" content="Joyce Hsiao" />
 
 
-<title>Model training: number of genes and cyclical function fit</title>
+<title>Training dataset</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -211,7 +211,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Model training: number of genes and cyclical function fit</h1>
+<h1 class="title toc-ignore">Training dataset</h1>
 <h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
@@ -221,8 +221,6 @@ div.section {
 <li><a href="#compare-npcirc.nw-vs-trendfilter">Compare npcirc.nw vs trendfilter</a><ul>
 <li><a href="#results">Results</a></li>
 </ul></li>
-<li><a href="#npcirc.nw-on-top-101-genes">npcirc.nw on top 101 genes</a></li>
-<li><a href="#print-101-genes-reults">print 101 genes reults</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -231,10 +229,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-06-21</p>
+<p><strong>Last updated:</strong> 2018-06-23</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> e1541b2</p>
+<p><strong>Code version:</strong> 635b68f</p>
 <hr />
 <div id="compare-npcirc.nw-vs-trendfilter" class="section level2">
 <h2>Compare npcirc.nw vs trendfilter</h2>
@@ -275,7 +273,6 @@ theta.valid &lt;- theta[ii.valid]
 sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
 expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]
 
-expr.sig &lt;- expr.sig[1:10,]
 
 # get predicted times
 # set training samples
@@ -288,7 +285,8 @@ part_indices &lt;- parts$partitions</code></pre>
 <pre class="r"><code>source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
 source(&quot;../peco/R/cycle.npreg.R&quot;)
 source(&quot;../code/utility.R&quot;)</code></pre>
-<pre class="r"><code>fits.nw &lt;- vector(&quot;list&quot;, 5)
+<pre class="r"><code>expr.sig &lt;- expr.sig[seq(1,nrow(expr.sig), by=2),]
+fits.nw &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -314,6 +312,34 @@ for (run in 1:5) {
 }
 
 saveRDS(fits.nw, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.nw.rds&quot;)
+
+
+fits.ll &lt;- vector(&quot;list&quot;, 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train &lt;- expr.sig[,part_indices[[run]]$train]
+  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
+  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend=&quot;npcirc.ll&quot;)
+  # fitting test data
+  Y_test &lt;- expr.sig[,part_indices[[run]]$test]
+  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
+  
+  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = &quot;uniform&quot;,
+                                    method.trend=&quot;npcirc.ll&quot;,
+                                    ncores=12)
+  
+  fits.ll[[run]] &lt;- list(fit.train=fit.train,
+                      fit.test=fit.test)
+}
+
+saveRDS(fits.ll, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.ll.rds&quot;)
 
 
 fits.trend2 &lt;- vector(&quot;list&quot;, 5)
@@ -375,6 +401,7 @@ for (run in 1:5) {
 saveRDS(fits.trend3, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.trend3.rds&quot;)</code></pre>
 <p>load results</p>
 <pre class="r"><code>fits.nw &lt;- readRDS(file = &quot;../output/method-npreg-prelim-results.Rmd/fits.nw.rds&quot;)
+fits.ll &lt;- readRDS(file = &quot;../output/method-npreg-prelim-results.Rmd/fits.ll.rds&quot;)
 fits.trend2 &lt;- readRDS(file = &quot;../output/method-npreg-prelim-results.Rmd/fits.trend2.rds&quot;)
 fits.trend3 &lt;- readRDS(file = &quot;../output/method-npreg-prelim-results.Rmd/fits.trend3.rds&quot;)</code></pre>
 <div id="results" class="section level3">
@@ -385,13 +412,17 @@ theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
 
 time_nw &lt;- fits.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
                            names(fits.nw[[1]]$fit.test$cell_times_est))]
+time_ll &lt;- fits.ll[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fits.ll[[1]]$fit.test$cell_times_est))]
 time_trend2 &lt;- fits.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
                            names(fits.trend2[[1]]$fit.test$cell_times_est))]
 time_trend3 &lt;- fits.trend3[[1]]$fit.test$cell_times_est[match(names(theta_test),
                            names(fits.trend3[[1]]$fit.test$cell_times_est))]
 
+
 par(mfrow=c(2,2))
 plot(theta_test, time_nw)
+plot(theta_test, time_ll)
 plot(theta_test, time_trend2)
 plot(theta_test, time_trend3)</code></pre>
 <p><img src="figure/method-npreg-prelim-results.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
@@ -402,12 +433,17 @@ plot(theta_test, time_trend3)</code></pre>
      pred_time_nw=fits.nw[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
              names(fits.nw[[run]]$fit.test$cell_times_est))],
-     pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+    pred_time_ll=fits.ll[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.trend2[[run]]$fit.test$cell_times_est))],
-     pred_time_trend3=fits.trend3[[run]]$fit.test$cell_times_est[
-       match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.trend3[[run]]$fit.test$cell_times_est))])
+             names(fits.ll[[run]]$fit.test$cell_times_est))],
+   pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+     match(names(theta.nonvalid[part_indices[[run]]$test]),
+           names(fits.trend2[[run]]$fit.test$cell_times_est))],
+   pred_time_trend3=fits.trend3[[run]]$fit.test$cell_times_est[
+     match(names(theta.nonvalid[part_indices[[run]]$test]),
+           names(fits.trend3[[run]]$fit.test$cell_times_est))],
+    dapi=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]),
+                                                rownames(pdata))])
    return(xy)
 })
 
@@ -415,6 +451,9 @@ for (i in 1:5) {
   xy_time[[i]]$diff_time_nw &lt;- pmin(
     abs(xy_time[[i]]$pred_time_nw-xy_time[[i]]$ref_time),
     abs(xy_time[[i]]$pred_time_nw-(2*pi-xy_time[[i]]$ref_time)))
+  xy_time[[i]]$diff_time_ll &lt;- pmin(
+    abs(xy_time[[i]]$pred_time_ll-xy_time[[i]]$ref_time),
+    abs(xy_time[[i]]$pred_time_ll-(2*pi-xy_time[[i]]$ref_time)))
   xy_time[[i]]$diff_time_trend2 &lt;- pmin(
     abs(xy_time[[i]]$pred_time_trend2-xy_time[[i]]$ref_time),
     abs(xy_time[[i]]$pred_time_trend2-(2*pi-xy_time[[i]]$ref_time)))
@@ -424,274 +463,74 @@ for (i in 1:5) {
 }
 
 mean(sapply(xy_time, function(x) mean(x$diff_time_nw))/2/pi)</code></pre>
-<pre><code>[1] 0.1236166</code></pre>
+<pre><code>[1] 0.1041805</code></pre>
+<pre class="r"><code>mean(sapply(xy_time, function(x) mean(x$diff_time_ll))/2/pi)</code></pre>
+<pre><code>[1] 0.1028109</code></pre>
 <pre class="r"><code>mean(sapply(xy_time, function(x) mean(x$diff_time_trend2))/2/pi)</code></pre>
-<pre><code>[1] 0.1364968</code></pre>
+<pre><code>[1] 0.1077922</code></pre>
 <pre class="r"><code>mean(sapply(xy_time, function(x) mean(x$diff_time_trend3))/2/pi)</code></pre>
-<pre><code>[1] 0.1329185</code></pre>
-<hr />
-</div>
-</div>
-<div id="npcirc.nw-on-top-101-genes" class="section level2">
-<h2>npcirc.nw on top 101 genes</h2>
-<p>Extract data from the top 101 genes identified</p>
-<pre class="r"><code>library(Biobase)
-df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
-pdata &lt;- pData(df)
-fdata &lt;- fData(df)
-
-# select endogeneous genes
-counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
-
-log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
-
-#macosko &lt;- readRDS(&quot;data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
-counts &lt;- counts[,order(pdata$theta)]
-log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
-pdata &lt;- pdata[order(pdata$theta),]
-
-log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
-
-
-# select external validation samples
-set.seed(99)
-nvalid &lt;- round(ncol(log2cpm.quant)*.15)
-ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
-ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
-
-log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
-log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
-theta &lt;- pdata$theta
-names(theta) &lt;- rownames(pdata)
-
-# theta.nonvalid &lt;- theta_moved[ii.nonvalid]
-theta.nonvalid &lt;- theta[ii.nonvalid]
-theta.valid &lt;- theta[ii.valid]
-
-sig.genes.101 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds&quot;)
-expr.sig.101 &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes.101), ]
-
-sig.genes.476 &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds&quot;)
-expr.sig.476 &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes.476), ]
-
-# get Seurat genes
-library(biomaRt)
-ensembl &lt;- useMart(&quot;ensembl&quot;,dataset=&quot;hsapiens_gene_ensembl&quot;)
-symbols &lt;- getBM(attributes=c(&#39;ensembl_gene_id&#39;,&#39;hgnc_symbol&#39;), 
-      filter=&#39;ensembl_gene_id&#39;, 
-      values = rownames(log2cpm.all), mart = ensembl)
-head(symbols)</code></pre>
-<pre><code>  ensembl_gene_id hgnc_symbol
-1 ENSG00000000003      TSPAN6
-2 ENSG00000000419        DPM1
-3 ENSG00000000457       SCYL3
-4 ENSG00000000460    C1orf112
-5 ENSG00000001036       FUCA2
-6 ENSG00000001084        GCLC</code></pre>
-<pre class="r"><code>cc.genes.symbol &lt;- readLines(con = &quot;../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;)
-# s.genes &lt;- cc.genes[1:43]
-# g2m.genes &lt;- cc.genes[44:97]
-cc.genes.ensembl &lt;- symbols$ensembl_gene_id[which(symbols$hgnc_symbol %in% cc.genes.symbol)]
-expr.seurat &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% cc.genes.ensembl, ]
-
-
-# get predicted times
-# set training samples
-source(&quot;../peco/R/primes.R&quot;)
-source(&quot;../peco/R/partitionSamples.R&quot;)
-parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
-                          nsize.each = rep(151,5))
-part_indices &lt;- parts$partitions</code></pre>
-<p>overlap between our top genes and seurat genes</p>
-<pre class="r"><code>library(VennDiagram)
-grid.draw(venn.diagram(list(
-    &quot;peco top 101 genes&quot; = rownames(sig.genes.101),
-    &quot;Seurat 92 genes&quot; = cc.genes.ensembl), filename=NULL))
-
-grid.draw(venn.diagram(list(
-    &quot;peco top 476 genes&quot; = rownames(sig.genes.476),
-    &quot;Seurat 92 genes&quot; = cc.genes.ensembl), filename=NULL))</code></pre>
-<p>Fitting</p>
-<pre class="r"><code>source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
-source(&quot;../peco/R/cycle.npreg.R&quot;)
-source(&quot;../code/utility.R&quot;)</code></pre>
-<pre class="r"><code>fits.101 &lt;- vector(&quot;list&quot;, 5)
-for (run in 1:5) {
-  print(run)
-  # fitting training data
-  Y_train &lt;- expr.sig.101[,part_indices[[run]]$train]
-  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
-  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
-                                    theta = theta_train, 
-                                    ncores=10,
-                                    method.trend=&quot;npcirc.nw&quot;)
-  # fitting test data
-  Y_test &lt;- expr.sig.101[,part_indices[[run]]$test]
-  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
-  
-  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
-                                    sigma_est=fit.train$sigma_est,
-                                    funs_est=fit.train$funs_est,
-                                    method.grid = &quot;uniform&quot;,
-                                    method.trend=&quot;npcirc.nw&quot;,
-                                    ncores=12)
-  
-  fits.101[[run]] &lt;- list(fit.train=fit.train,
-                      fit.test=fit.test)
-}
-
-saveRDS(fits.101, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.101.rds&quot;)
-
-
-fits.476 &lt;- vector(&quot;list&quot;, 5)
-for (run in 1:5) {
-  print(run)
-  # fitting training data
-  Y_train &lt;- expr.sig.476[,part_indices[[run]]$train]
-  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
-  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
-                                    theta = theta_train, 
-                                    ncores=10,
-                                    method.trend=&quot;npcirc.nw&quot;)
-  # fitting test data
-  Y_test &lt;- expr.sig.476[,part_indices[[run]]$test]
-  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
-  
-  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
-                                    sigma_est=fit.train$sigma_est,
-                                    funs_est=fit.train$funs_est,
-                                    method.grid = &quot;uniform&quot;,
-                                    method.trend=&quot;npcirc.nw&quot;,
-                                    ncores=12)
-  
-  fits.476[[run]] &lt;- list(fit.train=fit.train,
-                      fit.test=fit.test)
-}
-
-saveRDS(fits.476, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.476.rds&quot;)
-
-
-fits.seurat &lt;- vector(&quot;list&quot;, 5)
-for (run in 1:5) {
-  print(run)
-  # fitting training data
-  Y_train &lt;- expr.seurat[,part_indices[[run]]$train]
-  theta_train &lt;- theta.nonvalid[part_indices[[run]]$train]
-  fit.train &lt;- cycle.npreg.insample(Y = Y_train, 
-                                    theta = theta_train, 
-                                    ncores=10,
-                                    method.trend=&quot;npcirc.nw&quot;)
-  # fitting test data
-  Y_test &lt;- expr.seurat[,part_indices[[run]]$test]
-  theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
-  
-  fit.test &lt;- cycle.npreg.outsample(Y_test=Y_test,
-                                    sigma_est=fit.train$sigma_est,
-                                    funs_est=fit.train$funs_est,
-                                    method.grid = &quot;uniform&quot;,
-                                    method.trend=&quot;npcirc.nw&quot;,
-                                    ncores=12)
-  
-  fits.seurat[[run]] &lt;- list(fit.train=fit.train,
-                      fit.test=fit.test)
-}
-
-saveRDS(fits.seurat, file = &quot;../output/method-npreg-prelim-results.Rmd/fits.seurat.rds&quot;)</code></pre>
-<p>quick checking on the results</p>
-<pre class="r"><code>fits.101 &lt;- readRDS(&quot;../output/method-npreg-prelim-results.Rmd/fits.101.rds&quot;)
-fits.476 &lt;- readRDS(&quot;../output/method-npreg-prelim-results.Rmd/fits.476.rds&quot;)
-fits.seurat &lt;- readRDS(&quot;../output/method-npreg-prelim-results.Rmd/fits.seurat.rds&quot;)</code></pre>
-<p>average log-likelihood</p>
-<pre class="r"><code>mean(sapply(1:5, function(run) {
-  fits.101[[run]]$fit.test$loglik_est}))</code></pre>
-<pre><code>[1] -20419.98</code></pre>
-<pre class="r"><code>mean(sapply(1:5, function(run) {
-  fits.476[[run]]$fit.test$loglik_est}))</code></pre>
-<pre><code>[1] -99965.46</code></pre>
-<pre class="r"><code>mean(sapply(1:5, function(run) {
-  fits.seurat[[run]]$fit.test$loglik_est}))</code></pre>
-<pre><code>[1] -18824.05</code></pre>
-<pre class="r"><code>run=1
-Y_test.101 &lt;- expr.sig.101[,part_indices[[run]]$test]
-Y_test.476 &lt;- expr.sig.476[,part_indices[[run]]$test]
-Y_test.seurat &lt;- expr.seurat[,part_indices[[run]]$test]
-theta_test &lt;- theta.nonvalid[part_indices[[run]]$test]
-
-all.equal(names(theta_test), names(fits.101[[1]]$fit.test$cell_times_est))</code></pre>
-<pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>all.equal(names(theta_test), names(fits.476[[1]]$fit.test$cell_times_est))</code></pre>
-<pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>all.equal(names(theta_test), names(fits.seurat[[1]]$fit.test$cell_times_est))</code></pre>
-<pre><code>[1] TRUE</code></pre>
-<pre class="r"><code>par(mfrow=c(1,2))
-plot(theta_test, fits.101[[1]]$fit.test$cell_times_est,
-     xlab=&quot;reference cell time (from fucci)&quot;, 
-     ylab=&quot;estimated cell time using training data&quot;,
-     main = &quot;top 101 genes&quot;)
-plot(theta_test, fits.476[[1]]$fit.test$cell_times_est,
-     xlab=&quot;reference cell time (from fucci)&quot;, 
-     ylab=&quot;estimated cell time using training data&quot;,
-     main = &quot;top 476 genes&quot;)</code></pre>
-<p><img src="figure/method-npreg-prelim-results.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>par(mfrow=c(1,1))
-plot(theta_test, fits.seurat[[1]]$fit.test$cell_times_est,
-     xlab=&quot;reference cell time (from fucci)&quot;, 
-     ylab=&quot;estimated cell time using training data&quot;,
-     main = &quot;Seurat 92 genes&quot;)</code></pre>
-<p><img src="figure/method-npreg-prelim-results.Rmd/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
-<p>Compute differences in predicted time.</p>
-<pre class="r"><code>xy_time &lt;- lapply(1:5, function(run) {
-  xy &lt;- data.frame(
-    ref_time=theta.nonvalid[part_indices[[run]]$test],
-    pred_time.101=fits.101[[run]]$fit.test$cell_times_est,
-    pred_time.476=fits.476[[run]]$fit.test$cell_times_est,
-    pred_time.seurat=fits.seurat[[run]]$fit.test$cell_times_est,
-    dapi=pdata$dapi.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))],
-    gfp=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))],
-    rfp=pdata$rfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]), rownames(pdata))])
-  return(xy)
+<pre><code>[1] 0.1082553</code></pre>
+<pre class="r"><code>sd(sapply(xy_time, function(x) mean(x$diff_time_nw))/2/pi)</code></pre>
+<pre><code>[1] 0.00582703</code></pre>
+<pre class="r"><code>sd(sapply(xy_time, function(x) mean(x$diff_time_ll))/2/pi)</code></pre>
+<pre><code>[1] 0.007288811</code></pre>
+<pre class="r"><code>sd(sapply(xy_time, function(x) mean(x$diff_time_trend2))/2/pi)</code></pre>
+<pre><code>[1] 0.007913356</code></pre>
+<pre class="r"><code>sd(sapply(xy_time, function(x) mean(x$diff_time_trend3))/2/pi)</code></pre>
+<pre><code>[1] 0.006872838</code></pre>
+<p>Circular rank correlation</p>
+<pre class="r"><code>source(&quot;../peco/R/cycle.corr.R&quot;)
+corrs.rank &lt;- lapply(1:5, function(i) {
+  data.frame(cbind(nw=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_nw),
+        ll=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_ll),
+        trend2=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_trend2),
+        trend3=rFLRank.IndTestRand(xy_time[[i]]$ref_time, xy_time[[i]]$pred_time_trend3)) )
 })
 
-for (run in 1:5) {
-  xy_time[[run]]$diff_time.101 &lt;- pmin(
-    abs(xy_time[[run]]$pred_time.101-xy_time[[i]]$ref_time),
-    abs(xy_time[[run]]$pred_time.101-(2*pi-xy_time[[i]]$ref_time)))
-  xy_time[[run]]$diff_time.476 &lt;- pmin(
-    abs(xy_time[[run]]$pred_time.476-xy_time[[i]]$ref_time),
-    abs(xy_time[[run]]$pred_time.476-(2*pi-xy_time[[i]]$ref_time)))
-  xy_time[[run]]$diff_time.seurat &lt;- pmin(
-    abs(xy_time[[run]]$pred_time.seurat-xy_time[[i]]$ref_time),
-    abs(xy_time[[run]]$pred_time.seurat-(2*pi-xy_time[[i]]$ref_time)))
-}
-saveRDS(xy_time, file = &quot;../output/method-npreg-prelim-results.Rmd/xy_time.rds&quot;)</code></pre>
-<pre class="r"><code>xy_time &lt;- readRDS(file = &quot;../output/method-npreg-prelim-results.Rmd/xy_time.rds&quot;)
+mean(sapply(1:5, function(i) corrs.rank[[i]]$nw[1]))</code></pre>
+<pre><code>[1] 0.1837925</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) corrs.rank[[i]]$ll[1]))</code></pre>
+<pre><code>[1] 0.1682122</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) corrs.rank[[i]]$trend2[1]))</code></pre>
+<pre><code>[1] 0.1900646</code></pre>
+<pre class="r"><code>mean(sapply(1:5, function(i) corrs.rank[[i]]$trend3[1]))</code></pre>
+<pre><code>[1] 0.1832577</code></pre>
+<pre class="r"><code>sd(sapply(1:5, function(i) corrs.rank[[i]]$nw[1]))</code></pre>
+<pre><code>[1] 0.02875289</code></pre>
+<pre class="r"><code>sd(sapply(1:5, function(i) corrs.rank[[i]]$ll[1]))</code></pre>
+<pre><code>[1] 0.02452356</code></pre>
+<pre class="r"><code>sd(sapply(1:5, function(i) corrs.rank[[i]]$trend2[1]))</code></pre>
+<pre><code>[1] 0.02569556</code></pre>
+<pre class="r"><code>sd(sapply(1:5, function(i) corrs.rank[[i]]$trend3[1]))</code></pre>
+<pre><code>[1] 0.04631589</code></pre>
+<p>PVE</p>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+nw &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_nw)])))
+ll &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_ll)])))
+trend2 &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_trend2)])))
+trend3 &lt;- sapply(1:5, function(i) get.pve(with(xy_time[[i]],dapi[order(pred_time_trend3)])))
 
-cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.101))/2/pi),
-      sd(sapply(xy_time, function(x) mean(x$diff_time.101))/2/pi))</code></pre>
-<pre><code>           [,1]       [,2]
-[1,] 0.09951342 0.01075508</code></pre>
-<pre class="r"><code>cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.476))/2/pi),
-      sd(sapply(xy_time, function(x) mean(x$diff_time.476))/2/pi))</code></pre>
-<pre><code>          [,1]       [,2]
-[1,] 0.1084492 0.01089406</code></pre>
-<pre class="r"><code>cbind(mean(sapply(xy_time, function(x) mean(x$diff_time.seurat))/2/pi),
-      sd(sapply(xy_time, function(x) mean(x$diff_time.seurat))/2/pi))</code></pre>
-<pre><code>          [,1]      [,2]
-[1,] 0.1077114 0.0133964</code></pre>
-</div>
-<div id="print-101-genes-reults" class="section level2">
-<h2>print 101 genes reults</h2>
-<pre class="r"><code>par(mfrow=c(1,2))
-plot(xy_time[[1]]$pred_time.101, xy_time[[1]]$ref_time,
-     ylab=&quot;reference cell time (from fucci)&quot;, 
-     xlab=&quot;estimated cell time&quot;)
-abline(0,1, col=&quot;blue&quot;)
-plot(xy_time[[1]]$pred_time.101, xy_time[[1]]$diff_time.101,
-     xlab=&quot;estimated cell time (from fucci)&quot;, 
-     ylab=&quot;differences in cell times&quot;)
-title(&quot;Top 101 cyclical genes&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-npreg-prelim-results.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+save(nw, ll, trend2, trend3,
+     file=&quot;../output/method-npreg-prelim-results.Rmd/pve.methods.rda&quot;)</code></pre>
+<pre class="r"><code>load(file=&quot;../output/method-npreg-prelim-results.Rmd/pve.methods.rda&quot;)
+mean(nw)</code></pre>
+<pre><code>[1] 0.1209519</code></pre>
+<pre class="r"><code>mean(ll)</code></pre>
+<pre><code>[1] 0.1537196</code></pre>
+<pre class="r"><code>mean(trend2)</code></pre>
+<pre><code>[1] 0.2085997</code></pre>
+<pre class="r"><code>mean(trend3)</code></pre>
+<pre><code>[1] 0.1370636</code></pre>
+<pre class="r"><code>sd(nw)</code></pre>
+<pre><code>[1] 0.1234897</code></pre>
+<pre class="r"><code>sd(ll)</code></pre>
+<pre><code>[1] 0.1032134</code></pre>
+<pre class="r"><code>sd(trend2)</code></pre>
+<pre><code>[1] 0.09199753</code></pre>
+<pre class="r"><code>sd(trend3)</code></pre>
+<pre><code>[1] 0.1128983</code></pre>
 <hr />
+</div>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -716,22 +555,13 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] biomaRt_2.34.2      Biobase_2.38.0      BiocGenerics_0.24.0
+[1] Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.15         AnnotationDbi_1.38.2 knitr_1.18          
- [4] magrittr_1.5         progress_1.1.2       IRanges_2.12.0      
- [7] bit_1.1-12           R6_2.2.2             rlang_0.1.6         
-[10] httr_1.3.1           stringr_1.2.0        blob_1.1.0          
-[13] tools_3.4.3          DBI_0.7              git2r_0.21.0        
-[16] htmltools_0.3.6      assertthat_0.2.0     yaml_2.1.16         
-[19] bit64_0.9-7          rprojroot_1.3-2      digest_0.6.15       
-[22] tibble_1.4.2         S4Vectors_0.16.0     bitops_1.0-6        
-[25] curl_3.1             RCurl_1.95-4.10      memoise_1.1.0       
-[28] evaluate_0.10.1      RSQLite_2.0          rmarkdown_1.8       
-[31] stringi_1.1.6        pillar_1.1.0         compiler_3.4.3      
-[34] prettyunits_1.0.2    backports_1.1.2      stats4_3.4.3        
-[37] XML_3.98-1.9        </code></pre>
+ [1] Rcpp_0.12.17    digest_0.6.15   rprojroot_1.3-2 backports_1.1.2
+ [5] git2r_0.21.0    magrittr_1.5    evaluate_0.10.1 stringi_1.1.6  
+ [9] rmarkdown_1.8   tools_3.4.3     stringr_1.2.0   yaml_2.1.16    
+[13] compiler_3.4.3  htmltools_0.3.6 knitr_1.18     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using

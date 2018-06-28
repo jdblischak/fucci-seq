@@ -90,8 +90,8 @@ plot(y1,
 
 pdata$theta_triple <- y2shift
 
-rr <- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
-cor(y1, y2shift)
+# rr <- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
+# cor(y1, y2shift)
 
 
 
@@ -193,7 +193,9 @@ theta_check <- as.numeric(coord2rad(pca_df))
 theta_check <- 2*pi-theta_check
 plot(theta_check, pdata$theta)
 names(theta_check) <- rownames(pdata)
+```
 
+```{r, eval =F}
 fits <- vector("list", 5)
 for (run in 1:5) {
   print(run)
@@ -233,25 +235,24 @@ saveRDS(fits, file = "../output/method-labels.Rmd/fits.rds")
 
 ```{r}
 fits <- readRDS(file = "../output/method-labels.Rmd/fits.rds")
-source("../peco/R/cycle.corr.R")
+source("../peco/R/utility.R")
 
-diff_time <- lapply(1:5, function(i) {
+diff_time <- lapply(1:length(fits), function(i) {
   pmin(abs(fits[[i]]$theta_est_shift-fits[[i]]$theta_test),
     abs(fits[[i]]$theta_est_shift-(2*pi-fits[[i]]$theta_test)))
 })
 mean(sapply(diff_time, mean)/2/pi)
-sd(sapply(diff_time, mean)/2/pi)
 
+pve <- lapply(1:length(fits), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
 
-cors_fl <- sapply(1:5, function(i) rFLIndTestRand(fits[[i]]$theta_test, 
-                                              fits[[i]]$fit.test$cell_times_est, NR=10000) )
-mean(cors_fl[1,])
+explore PCA outliers
 
-cors_sp <- sapply(1:5, function(i) cor(fits[[i]]$theta_test, 
-                                              fits[[i]]$theta_est_shift, method="spearman") )
-mean(cors_sp)
-
-
+```{r}
 pca_df_sub <- pca_df[match(names(fits[[2]]$theta_test),rownames(pca_df)),] 
 diff_bins <- cut(diff_time[[2]], 
                  breaks=quantile(diff_time[[2]], prob=seq(0,1,.25)), include.lowest=TRUE)
@@ -295,10 +296,9 @@ abline(h=0,v=0, lty=3)
 title(main="Green points: 1 +/- SD of mean distance to the origin", outer=TRUE, line=-1)
 ```
 
+---
 
-
-
-## Re-fitting after removing PC outliers
+## Re-fitting after removing PC outliers, remove outliers from the same 5 folds
 
 
 ```{r}
@@ -371,28 +371,21 @@ saveRDS(fits_sub, file = "../output/method-labels.Rmd/fits_sub.rds")
 
 ```{r}
 fits_sub <- readRDS(file = "../output/method-labels.Rmd/fits_sub.rds")
-source("../peco/R/cycle.corr.R")
-
-plot(fits_sub[[1]]$theta_test,
-     fits_sub[[1]]$fit.test$cell_times_est)
 
 diff_time <- lapply(1:5, function(i) {
   pmin(abs(fits_sub[[i]]$theta_est_shift-fits_sub[[i]]$theta_test),
     abs(fits_sub[[i]]$theta_est_shift-(2*pi-fits_sub[[i]]$theta_test)))
 })
 mean(sapply(diff_time, mean)/2/pi)
-sd(sapply(diff_time, mean)/2/pi)
 
-
-cors_fl <- sapply(1:5, function(i) rFLIndTestRand(fits_sub[[i]]$theta_test, 
-                                              fits_sub[[i]]$fit.test$cell_times_est, NR=10000) )
-mean(cors_fl[1,])
-
-cors_sp <- sapply(1:5, function(i) cor(fits_sub[[i]]$theta_test, 
-                                              fits_sub[[i]]$theta_est_shift, method="spearman") )
-mean(cors_sp)
-
+pve <- lapply(1:length(fits_sub), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits_sub[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
 ```
+
+
 
 ---
 
@@ -420,6 +413,534 @@ load(file="../output/method-labels.Rmd/pve_no_pc_outlier.rda")
 c(rfp_theta_sub,
      gfp_theta_sub, 
      dapi_theta_sub) 
+```
+
+---
+
+## Re-fitting after removing PC outliers from the same 5 folds, top 50 genes
+
+
+```{r, eval=F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:50]),]
+fits_sub_top50 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train)
+  
+  Y_train_sub <- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub <- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train <- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  Y_test_sub <- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub <- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_sub_top50[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_top50[[i]]$theta_est_shift <- rotation(fits_sub_top50[[i]]$theta_test, fits_sub_top50[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_top50, file = "../output/method-labels.Rmd/fits_sub_top50.rds")
+```
+
+
+```{r}
+fits_sub_top50 <- readRDS(file = "../output/method-labels.Rmd/fits_sub_top50.rds")
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_top50[[i]]$theta_est_shift-fits_sub_top50[[i]]$theta_test),
+    abs(fits_sub_top50[[i]]$theta_est_shift-(2*pi-fits_sub_top50[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_sub_top50), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub_top50[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_top50[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+
+---
+
+## Re-fitting after removing PC outliers from the same 5 folds, top 10 genes
+
+
+```{r, eval=F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:10]),]
+fits_sub_top10 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train)
+  
+  Y_train_sub <- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub <- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train <- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  Y_test_sub <- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub <- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_sub_top10[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_top10[[i]]$theta_est_shift <- rotation(fits_sub_top10[[i]]$theta_test, fits_sub_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_top10, file = "../output/method-labels.Rmd/fits_sub_top10.rds")
+```
+
+
+```{r}
+fits_sub_top10 <- readRDS(file = "../output/method-labels.Rmd/fits_sub_top10.rds")
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_top10[[i]]$theta_est_shift-fits_sub_top10[[i]]$theta_test),
+    abs(fits_sub_top10[[i]]$theta_est_shift-(2*pi-fits_sub_top10[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_sub_top10), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub_top10[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_top10[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+
+---
+
+## Re-fitting after removing PC outliers, odd number
+
+
+```{r, eval=F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(1,nrow(expr.sig),by=2)]),]
+fits_sub_odd <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train)
+  
+  Y_train_sub <- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub <- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train <- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  Y_test_sub <- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub <- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_sub_odd[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_odd[[i]]$theta_est_shift <- rotation(fits_sub_odd[[i]]$theta_test, fits_sub_odd[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_odd, file = "../output/method-labels.Rmd/fits_sub_odd.rds")
+```
+
+
+```{r}
+fits_sub_odd <- readRDS(file = "../output/method-labels.Rmd/fits_sub_odd.rds")
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_odd[[i]]$theta_est_shift-fits_sub_odd[[i]]$theta_test),
+    abs(fits_sub_odd[[i]]$theta_est_shift-(2*pi-fits_sub_odd[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_sub_odd), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub_odd[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_odd[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+
+
+---
+
+## Re-fitting after removing PC outliers, even number
+
+
+```{r, eval=F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(2,nrow(expr.sig),by=2)]),]
+fits_sub_even <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train)
+  
+  Y_train_sub <- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub <- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train <- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  Y_test_sub <- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub <- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_sub_even[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_even[[i]]$theta_est_shift <- rotation(fits_sub_even[[i]]$theta_test, fits_sub_even[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_even, file = "../output/method-labels.Rmd/fits_sub_even.rds")
+```
+
+
+```{r}
+fits_sub_even <- readRDS(file = "../output/method-labels.Rmd/fits_sub_even.rds")
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_even[[i]]$theta_est_shift-fits_sub_even[[i]]$theta_test),
+    abs(fits_sub_even[[i]]$theta_est_shift-(2*pi-fits_sub_even[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_sub_even), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub_even[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_sub_even[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+---
+
+## Fitting using all samples, top 50 genes
+
+```{r, eval =F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:50]),]
+
+fits_top50 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_top50[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50[[i]]$theta_est_shift <- rotation(fits_top50[[i]]$theta_test, fits_top50[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50, file = "../output/method-labels.Rmd/fits_top50.rds")
+```
+
+
+```{r}
+fits_top50 <- readRDS(file = "../output/method-labels.Rmd/fits_top50.rds")
+source("../peco/R/utility.R")
+
+diff_time <- lapply(1:length(fits_top50), function(i) {
+  pmin(abs(fits_top50[[i]]$theta_est_shift-fits_top50[[i]]$theta_test),
+    abs(fits_top50[[i]]$theta_est_shift-(2*pi-fits_top50[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_top50), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top50[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+
+---
+
+## Fitting using all samples, top 10 genes
+
+```{r, eval =F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[1:10]),]
+
+fits_top10 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_top10[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top10[[i]]$theta_est_shift <- rotation(fits_top10[[i]]$theta_test, fits_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top10, file = "../output/method-labels.Rmd/fits_top10.rds")
+```
+
+
+```{r}
+fits_top10 <- readRDS(file = "../output/method-labels.Rmd/fits_top10.rds")
+source("../peco/R/utility.R")
+
+diff_time <- lapply(1:length(fits_top10), function(i) {
+  pmin(abs(fits_top10[[i]]$theta_est_shift-fits_top10[[i]]$theta_test),
+    abs(fits_top10[[i]]$theta_est_shift-(2*pi-fits_top10[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_top10), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top10[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top10[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+---
+
+## Fitting using all samples, odd-numbered genes
+
+```{r, eval =F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(1,nrow(expr.sig),by=2)]),]
+
+fits_top50_odd <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_top50_odd[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50_odd[[i]]$theta_est_shift <- rotation(fits_top50_odd[[i]]$theta_test, fits_top50_odd[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50_odd, file = "../output/method-labels.Rmd/fits_top50_odd.rds")
+```
+
+
+```{r}
+fits_top50_odd <- readRDS(file = "../output/method-labels.Rmd/fits_top50_odd.rds")
+source("../peco/R/utility.R")
+
+diff_time <- lapply(1:length(fits_top50_odd), function(i) {
+  pmin(abs(fits_top50_odd[[i]]$theta_est_shift-fits_top50_odd[[i]]$theta_test),
+    abs(fits_top50_odd[[i]]$theta_est_shift-(2*pi-fits_top50_odd[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_top50_odd), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top50_odd[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50_odd[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
+```
+
+
+---
+
+## Fitting using all samples, even-numbered genes
+
+```{r, eval =F}
+expr_sub <- expr.sig[which(rownames(expr.sig) %in% rownames(sig.genes)[seq(2,nrow(expr.sig),by=2)]),]
+
+fits_top50_even <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=10,
+                                    method.trend="npcirc.nw")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="npcirc.nw",
+                                    ncores=12)
+  
+  fits_top50_even[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top50_even[[i]]$theta_est_shift <- rotation(fits_top50_even[[i]]$theta_test, fits_top50_even[[i]]$fit.test$cell_times_est)$y2shift
+}
+  
+saveRDS(fits_top50_even, file = "../output/method-labels.Rmd/fits_top50_even.rds")
+```
+
+
+```{r}
+fits_top50_even <- readRDS(file = "../output/method-labels.Rmd/fits_top50_even.rds")
+source("../peco/R/utility.R")
+
+diff_time <- lapply(1:length(fits_top50_even), function(i) {
+  pmin(abs(fits_top50_even[[i]]$theta_est_shift-fits_top50_even[[i]]$theta_test),
+    abs(fits_top50_even[[i]]$theta_est_shift-(2*pi-fits_top50_even[[i]]$theta_test)))
+})
+mean(sapply(diff_time, mean)/2/pi)
+
+pve <- lapply(1:length(fits_top50_even), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top50_even[[i]]$theta_test),
+                                          rownames(pdata))]
+  get.pve(dap[order(fits_top50_even[[i]]$theta_est_shift)])
+})
+mean(unlist(pve))
 ```
 
 ---

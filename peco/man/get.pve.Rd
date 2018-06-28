@@ -4,5 +4,5 @@
 \alias{get.pve}
 \title{compute proportation of variable explained}
 \usage{
-get.pve(yy, method = "trendfilter")
+get.pve(yy, method = "trendfilter", polyorder = 2)
 }
