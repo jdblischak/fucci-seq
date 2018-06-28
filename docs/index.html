@@ -22,7 +22,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -90,6 +92,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -218,8 +223,8 @@ div.section {
 <ul>
 <li><a href="#overview">Overview</a></li>
 <li><a href="#summary-analysis">Summary analysis</a></li>
-<li><a href="#semi-supervised-model">Semi-supervised model</a></li>
-<li><a href="#unsupservised-model">Unsupservised model</a></li>
+<li><a href="#prediction-results">Prediction results</a></li>
+<li><a href="#model-training">Model training</a></li>
 <li><a href="#explore-aproaches-to-fitting-cyclical-trend">Explore aproaches to fitting cyclical trend</a></li>
 <li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
 <li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
@@ -247,27 +252,31 @@ div.section {
 </ul>
 <hr />
 </div>
-<div id="semi-supervised-model" class="section level2">
-<h2>Semi-supervised model</h2>
+<div id="prediction-results" class="section level2">
+<h2>Prediction results</h2>
 <ul>
-<li>Using <a href="method-npreg.html">trendfilter</a></li>
-<li>Using <a href="method-npreg-npcirc.nw.html">nonparametric circular regression</a></li>
-<li>Model training: <a href="method-npreg-prelim-results.html">number of geness and cyclical function fit</a></li>
+<li>Evaluate the withheld samples <a href="method-eval-withheld.html">on top 101 cyclical genes</a>, and on <a href="method-eval-withheld-top10.html">top 10 cyclial genes</a>
+<ul>
+<li>Explore method performances: <a href="method-eval-withheld-explore.html">compare peco with Seurat</a></li>
+</ul></li>
+<li>Eval Leng et al. data <a href="method-eval-leng.html">on top 101 cyclical genes</a>.</li>
+<li>Eval Bottcher et al. data <a href="method-eval-bottcher.html">on top 101 cyclical genes</a>.</li>
+<li>Eval Buettner et al. data <a href="method-eval-buettner.html">on top 101 cyclical genes</a>.</li>
 </ul>
-<p>Evaluate prediction results in terms of estimation error and compare with Seurat classification * <a href="method-npreg-prelim-results.html">On 101 genes</a></p>
 <hr />
 </div>
-<div id="unsupservised-model" class="section level2">
-<h2>Unsupservised model</h2>
+<div id="model-training" class="section level2">
+<h2>Model training</h2>
 <ul>
-<li>Using <a href="method-npreg.html">trendfilter</a></li>
-<li>Using <a href="method-npreg-npcirc.nw.html">nonparametric circular regression</a></li>
-<li>Model training
+<li><a href="method-npreg.html">Early analysis using trendfilter</a> (to be updated…)</li>
+<li>Investigate the property and quality of <a href="method-labels.html">the cell time labels derived from GFP and RFP</a>: PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.</li>
+<li>Training dataset
 <ul>
-<li><a href="method-npreg-prelim-results.html">methods comparison (trendfilter, npcirc.nw, npcirc.ll) and number of genes</a></li>
-<li><a href="method-npreg-training-pve.html">proportion of variance explained and comparison with Seurat</a></li>
+<li>Prediction results from trendfilter order 2 and order 3 with npcirc.nw <a href="method-npreg-prelim-results.html">on the odd-numbered genes in the top 101 cyclical genes</a></li>
+<li>Prediction results of the various classifers (supervised, PC, unsupervised) <a href="method-train-classifiers.html">on top 101 cyclical genes</a>, and on <a href="method-train-classifiers-top10.html">top 10 cyclial genes</a>.</li>
 </ul></li>
 </ul>
+<p>method-train-classifiers-non101.html</p>
 <hr />
 </div>
 <div id="explore-aproaches-to-fitting-cyclical-trend" class="section level2">
