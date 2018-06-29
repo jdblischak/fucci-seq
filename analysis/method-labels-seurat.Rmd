@@ -1,0 +1,228 @@
+---
+title: "Evaluate the withheld sample"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Goals
+
+1. Compute seurat cell time using seurat S score and G2M score. Take the arctangent transformation of these two scores. 
+
+2. Evaluate the association between Seurat classes and cell times with DAPI, GFP and RFP. 
+
+3. Consider all of the 888 samples included in the analysis. 
+
+---
+
+## Data
+
+```{r}
+library(Biobase)
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+counts <- counts[,order(pdata$theta)]
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+sig.genes <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+#expr.sig <- log2cpm.quant.valid[rownames(log2cpm.quant.valid) %in% rownames(sig.genes), ]
+
+library(biomaRt)
+ensembl <- useMart("ensembl",dataset="hsapiens_gene_ensembl")
+symbols <- getBM(attributes=c('ensembl_gene_id','hgnc_symbol'), 
+      filter='ensembl_gene_id', 
+      values = rownames(log2cpm.all), mart = ensembl)
+head(symbols)
+```
+
+Get seurat genes 
+
+```{r}
+cc.genes <- readLines(con = "../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
+s.genes <- cc.genes[1:43]
+g2m.genes <- cc.genes[44:97]
+```
+
+overlap between seurat genes and top 101 cyclical genes
+
+```{r}
+library(VennDiagram)
+library(grid)
+library(ggplot2)
+
+grid.draw(venn.diagram(
+  list(cyclical=symbols$hgnc_symbol[which(symbols$ensembl_gene_id %in% rownames(sig.genes))],
+       seurat=cc.genes), file=NULL))
+
+df <- rbind(data.frame(pve=c(sig.genes$pve), method="top 100 cyclical"),
+            data.frame(pve=c(sig.genes$pve[rownames(sig.genes) %in% symbols$ensembl_gene_id[which(symbols$hgnc_symbol %in% cc.genes)]]), method="overlap"))
+
+ggplot(df, aes(x=method, y=pve)) +
+  geom_violin() +
+  geom_boxplot(width=.3) +
+  ylab("Proportion of variance explained")
+```
+
+
+---
+
+## Seurat
+
+```{r, eval=F}
+source("../peco/R/run_seurat.R")
+
+Y_mat <- log2cpm.all
+Y_mat <- Y_mat[rownames(Y_mat) %in% symbols$ensembl_gene_id,]
+all.equal(rownames(Y_mat), symbols$ensembl_gene_id)
+rownames(Y_mat) <- symbols$hgnc_symbol
+  
+fit.seurat <- run_seurat(Y=Y_mat, 
+             s.genes=s.genes, 
+             g2m.genes=g2m.genes, 
+             n.bin=25,
+             seed.use=1, random.seed=1)
+  
+table(fit.seurat$assignments)
+
+all.equal(names(theta), rownames(fit.seurat))
+
+seurat.pca <- prcomp(cbind(fit.seurat$G2M, fit.seurat$S), scale=TRUE)
+fit.seurat$pred_time <- as.numeric(coord2rad(cbind(seurat.pca$x[,1],seurat.pca$x[,2])))
+fit.seurat$ref_time <- theta
+fit.seurat$pred_time_shift <- with(fit.seurat, rotation(ref_time, pred_time)$y2shift)
+fit.seurat$diff_time <- with(fit.seurat,
+          pmin(abs(pred_time_shift-ref_time),
+               abs(pred_time_shift-(2*pi-ref_time))))
+
+all.equal(rownames(pdata), rownames(fit.seurat))
+
+fit.seurat$dapi <- pdata$dapi.median.log10sum.adjust
+fit.seurat$gfp <- pdata$gfp.median.log10sum.adjust
+fit.seurat$rfp <- pdata$rfp.median.log10sum.adjust
+
+saveRDS(fit.seurat,
+        file="../output/method-labels-seurat.Rmd/fit.seurat.rds")
+
+source("../peco/R/run_seurat.R")
+source("../peco/R/utility.R")
+seurat.pve <- rbind(
+        data.frame(method="seurat.dapi", 
+                   with(fit.seurat, get.pve(dapi[order(pred_time_shift)]))),
+        data.frame(method="seurat.gfp", 
+                   with(fit.seurat, get.pve(gfp[order(pred_time_shift)]))),
+        data.frame(method="seurat.rfp", 
+                   with(fit.seurat, get.pve(rfp[order(pred_time_shift)]))),
+        data.frame(method="seurat.S", 
+                   with(fit.seurat, get.pve(S[order(pred_time_shift)]))),
+        data.frame(method="seurat.G2M", 
+                   with(fit.seurat, get.pve(G2M[order(pred_time_shift)]))),
+        data.frame(method="ref.S", 
+                   with(fit.seurat, get.pve(S[order(ref_time)]))),
+        data.frame(method="ref.G2M", 
+                   with(fit.seurat, get.pve(G2M[order(ref_time)])) ),
+        data.frame(method="ref.dapi", 
+                   with(fit.seurat, get.pve(dapi[order(ref_time)])) ),
+        data.frame(method="ref.gfp", 
+                   with(fit.seurat, get.pve(gfp[order(ref_time)])) ),
+        data.frame(method="ref.rfp", 
+                   with(fit.seurat, get.pve(rfp[order(ref_time)])) ),
+        data.frame(method="seurat.class.S", 
+                   with(fit.seurat, get.aov(S, assignments))),
+        data.frame(method="seurat.class.G2M", 
+                   with(fit.seurat, get.aov(G2M, assignments))),
+        data.frame(method="seurat.class.dapi", 
+                   with(fit.seurat, get.aov(dapi, assignments))),
+        data.frame(method="seurat.class.gfp", 
+                   with(fit.seurat, get.aov(gfp, assignments))),
+        data.frame(method="seurat.class.rfp", 
+                   with(fit.seurat, get.aov(rfp, assignments))) )
+
+saveRDS(seurat.pve,
+     file="../output/method-labels-seurat.Rmd/seurat.pve.rds")
+```
+
+
+```{r}
+fit.seurat <- readRDS("../output/method-labels-seurat.Rmd/fit.seurat.rds")
+seurat.pve <- readRDS("../output/method-labels-seurat.Rmd/seurat.pve.rds")
+
+
+print(seurat.pve)
+
+library(ggplot2)
+
+cols <- c("orange", "red", "brown")
+
+ggplot(fit.seurat, aes(x=assignments,
+                       y=pred_time_shift)) +
+  geom_violin(aes(fill=assignments), lwd=.7) +
+  geom_boxplot(width=.2) +
+  ylab("Seurat cell time") + xlab("cell-cycle class") +
+  ggtitle("Seurat classification") +
+  scale_fill_manual(values=cols)
+
+ggplot(fit.seurat, aes(x=assignments)) +
+  geom_bar(aes(fill=assignments)) +
+  xlab("cell-cycle class") +
+  ggtitle("Seurat classification") +
+  ylab("Frequency count") +
+  scale_fill_manual(values=cols)
+
+ggplot(fit.seurat, aes(x=S,y=G2M, group=assignments)) +
+  geom_point(aes(col=assignments)) +
+  geom_abline(intercept=0, slope=1, lty=3) +
+  geom_hline(yintercept=0, lty=3) +
+  geom_vline(xintercept=0, lty=3) + 
+  xlab("S score") + ylab("G2M score") +
+  scale_color_manual(values=cols)
+```
+
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
