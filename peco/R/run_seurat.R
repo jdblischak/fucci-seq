@@ -71,13 +71,7 @@ run_seurat <- function(Y, s.genes, g2m.genes, n.bin=25,
   out <- data.frame(genes.scores.use, assignments)
   rownames(out) <- colnames(Y)
 
-  out$assignments <- as.numeric(out$assignments)
-  tmp <- rep(0, nrow(out))
-  tmp[out$assignments==1] <- 1
-  tmp[out$assignments==2] <- 3
-  tmp[out$assignments==3] <- 2
-  out$assignments <- factor(tmp)
-  levels(out$assignments) <- c("G1", "S", "G2M")
+  out$assignments <- factor(out$assignments, levels=c("G1", "S", "G2M"))
 
   return(out)
 }
