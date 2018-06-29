@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Submit batch job running run_methods.eva.Rs
+# Submit batch job running run_methods.train.R
 
 #SBATCH --time=36:00:00
 #SBATCH --mail-type=END,FAIL

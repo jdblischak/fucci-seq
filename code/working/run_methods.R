@@ -91,11 +91,11 @@ run_methods <- function(Y_test, Y_test_normed,
     out[[i]]$ref_time <- theta_test
     out[[i]]$pred_time <- with(out[[i]], cell_times_est[match(names(ref_time),
                                                         names(cell_times_est))])
-    out[[i]]$pred_time_shift <- with(out[[i]], rotation(pred_time, ref_time)$y2shift)
+    out[[i]]$pred_time_shift <- with(out[[i]], rotation(ref_time, pred_time)$y2shift)
     out[[i]]$diff_time <- with(out[[i]], pmin(abs(pred_time_shift - ref_time),
                                               abs(pred_time_shift - (2*pi - ref_time))))
     out[[i]]$ref_time_null <- theta_test_null
-    out[[i]]$pred_time_null_shift <- with(out[[i]], rotation(pred_time, ref_time_null)$y2shift)
+    out[[i]]$pred_time_null_shift <- with(out[[i]], rotation(ref_time_null, pred_time)$y2shift)
     out[[i]]$diff_time_null <- with(out[[i]], pmin(abs(pred_time_null_shift - ref_time_null),
                                               abs(pred_time_null_shift - (2*pi - ref_time_null))))
     out[[i]]$dapi <- pdata_test$dapi.median.log10sum.adjust[

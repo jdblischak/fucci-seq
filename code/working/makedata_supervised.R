@@ -37,9 +37,9 @@ log2cpm.valid <- log2cpm.all[,ii.valid]
 theta.nonvalid <- theta[ii.nonvalid]
 theta.valid <- theta[ii.valid]
 
-sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
 
-log2cpm.quant.valid[rownames(log2cpm.quant.valid) %in% rownames(sig.genes), ]
+#log2cpm.quant.valid[rownames(log2cpm.quant.valid) %in% rownames(sig.genes), ]
 
 ### Scenario: fucci-theta, top 101 genes
 data_training <- list(theta.nonvalid=theta.nonvalid,

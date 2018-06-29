@@ -37,9 +37,10 @@ Y_normed_topX <- data_training$log2cpm.quant.nonvalid[
   rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
 fdata_topX <- data_training$fdata[rownames(data_training$fdata) %in% rownames(sig.genes)[1:ngenes],]
 
+all.equal(rownames(Y_normed_topX), rownames(fdata_topX))
+
 # Y <- data_training$log2cpm.nonvalid[
 #   rownames(data_training$log2cpm.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
-
 
 
 fits <- vector("list", length(fold_indices))
