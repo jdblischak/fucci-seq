@@ -6,7 +6,7 @@
 #' @export
 rotation <- function(y1, y2, ...) {
   theta_grid <- y2
-#  theta_grid <- theta_grid[1:2]
+  #  theta_grid <- theta_grid[1:2]
   diff_time_sum <- c()
   for(which_cutpoint in 1:length(theta_grid)) {
     cutpoint <- theta_grid[which_cutpoint]
@@ -19,7 +19,7 @@ rotation <- function(y1, y2, ...) {
     }
     if (min(y2shift) < 0) {y2shift <- y2shift-min(y2shift)}
     diff_time_sum <- c(diff_time_sum,
-                       sum(pmin(abs(y1-y2shift), abs(y1-(2*pi-y2shift)))^2))
+                       sum((pmin(abs(y1-y2shift), abs(y1-(2*pi-y2shift))))^2))
   }
 
   cutpoint_choose <- theta_grid[which.min(diff_time_sum)]
