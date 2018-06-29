@@ -22,25 +22,31 @@ output:
 
 ---
 
-## Prediction results
+## Model training and prediction results
 
-* Evaluate the withheld samples [on top 101 cyclical genes](method-eval-withheld.html), and on [top 10 cyclial genes](method-eval-withheld-top10.html)
+* [Early analysis using trendfilter](method-npreg.html) (to be updated...)
+
+* Investigate the property and quality of [the cell time labels derived from GFP and RFP](method-labels.html): PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.
+
+* Investigate the property of [Seurat classes and cell time](method-label-seurat.html) 
+
+* Analyze the training datasets
+    * Prediction results from trendfilter order 2 and order 3 with npcirc.nw [on the odd-numbered genes in the top 101 cyclical genes](method-npreg-prelim-results.html)
+    * Prediction results of the various classifers (supervised, PC, unsupervised) [on top 101 cyclical genes](method-train-classifiers.html), and on [top 10 cyclial genes](method-train-classifiers-top10.html).
+    * Finalizing results of all classifiers and the [top X number of genes](method-train-classifiers-all.html). 
+    
+    
+* Analye the withheld samples
+    * Evaluate the withheld samples [on top 101 cyclical genes](method-eval-withheld.html), and on [top 10 cyclial genes](method-eval-withheld-top10.html)
     * Explore method performances: [compare peco with Seurat](method-eval-withheld-explore.html)
 
-* Eval Leng et al. data [on top 101 cyclical genes](method-eval-leng.html).
-* Eval Bottcher et al. data [on top 101 cyclical genes](method-eval-bottcher.html).
-* Eval Buettner et al. data [on top 101 cyclical genes](method-eval-buettner.html).
+* Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html).
 
 ---
 
-## Model training 
+## 
 
-* [Early analysis using trendfilter](method-npreg.html) (to be updated...)
-* Investigate the property and quality of [the cell time labels derived from GFP and RFP](method-labels.html): PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.
-* Training dataset
-    * Prediction results from trendfilter order 2 and order 3 with npcirc.nw [on the odd-numbered genes in the top 101 cyclical genes](method-npreg-prelim-results.html)
-    * Prediction results of the various classifers (supervised, PC, unsupervised) [on top 101 cyclical genes](method-train-classifiers.html), and on [top 10 cyclial genes](method-train-classifiers-top10.html).
-    
+
     
 
 method-train-classifiers-non101.html
