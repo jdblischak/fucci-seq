@@ -36,22 +36,10 @@ output:
     * Finalizing results of all classifiers and the [top X number of genes](method-train-classifiers-all.html). 
     
     
-* Analye the withheld samples
-    * Evaluate the withheld samples [on top 101 cyclical genes](method-eval-withheld.html), and on [top 10 cyclial genes](method-eval-withheld-top10.html)
-    * Explore method performances: [compare peco with Seurat](method-eval-withheld-explore.html)
-
-* Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html).
-
----
-
-## 
-
-
+* Analyze the withheld samples
+    * Evaluate the withheld samples [on the top 101 cyclical genes](method-eval-withheld-explore.html) comparing peco methods with seurat predictions.
     
-
-method-train-classifiers-non101.html
-
-
+* Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html).
 
 ---
 
