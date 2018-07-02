@@ -125,11 +125,11 @@ rFL.CorrCoeff <- function(lcdat1, lcdat2) {
 #'
 #' @export
 rFL.IndTestRand <- function(lcdat1, lcdat2, NR=10000) {
-  rFLObs <- rFLCorrCoeff(lcdat1, lcdat2)
+  rFLObs <- rFL.CorrCoeff(lcdat1, lcdat2)
   nxtrm <- 1
   for (r in 1:NR) {
     lcdat1Rand <- sample(lcdat1)
-    rFLRand <- rFLCorrCoeff(lcdat1Rand, lcdat2)
+    rFLRand <- rFL.CorrCoeff(lcdat1Rand, lcdat2)
     if (abs(rFLRand) >= abs(rFLObs)) {nxtrm <- nxtrm + 1} }
   pval <- nxtrm/(NR+1); return(c(rFLObs,pval))
 }
