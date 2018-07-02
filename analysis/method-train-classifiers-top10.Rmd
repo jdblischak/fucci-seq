@@ -92,12 +92,12 @@ Fitting
 ```{r}
 source("../peco/R/fit.cyclical.R")
 source("../peco/R/cycle.npreg.R")
-source("../code/utility.R")
+source("../peco/R/utility.R")
 ```
 
 
 ```{r, eval = F}
-fits.nw <- vector("list", 5)
+fit.nw <- vector("list", 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -118,13 +118,15 @@ for (run in 1:5) {
                                     method.trend="npcirc.nw",
                                     ncores=15)
   
-  fits.nw[[run]] <- list(fit.train=fit.train,
+  fit.nw[[run]] <- list(fit.train=fit.train,
                       fit.test=fit.test)
 }
-saveRDS(fits.nw, file = "../output/method-train-classifiers-top10.Rmd/fits.nw.rds")
+names(fit.nw) <- paste0("fold.",c(1:5))
+saveRDS(fit.nw, file = "../output/method-train-classifiers-top10.Rmd/fit.nw.rds")
 
 
-fits.trend2 <- vector("list", 5)
+
+fit.trend2 <- vector("list", 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -147,18 +149,18 @@ for (run in 1:5) {
                                     polyorder=2,
                                     ncores=15)
   
-  fits.trend2[[run]] <- list(fit.train=fit.train,
+  fit.trend2[[run]] <- list(fit.train=fit.train,
                       fit.test=fit.test)
 }
-
-saveRDS(fits.trend2, file = "../output/method-train-classifiers-top10.Rmd/fits.trend2.rds")
+names(fit.trend2) <- paste0("fold.",c(1:5))
+saveRDS(fit.trend2, file = "../output/method-train-classifiers-top10.Rmd/fit.trend2.rds")
 ```
 
 load results
 
 ```{r}
-fits.nw <- readRDS(file = "../output/method-train-classifiers-top10.Rmd/fits.nw.rds")
-fits.trend2 <- readRDS(file = "../output/method-train-classifiers-top10.Rmd/fits.trend2.rds")
+fit.nw <- readRDS(file = "../output/method-train-classifiers-top10.Rmd/fit.nw.rds")
+fit.trend2 <- readRDS(file = "../output/method-train-classifiers-top10.Rmd/fit.trend2.rds")
 ```
 
 
@@ -170,12 +172,12 @@ Compute metrics
 xy_time <- lapply(1:5, function(run) {
    xy <- data.frame(
      ref_time=theta.nonvalid[part_indices[[run]]$test],
-     pred_time_nw=fits.nw[[run]]$fit.test$cell_times_est[
+     pred_time_nw=fit.nw[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.nw[[run]]$fit.test$cell_times_est))],
-     pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+             names(fit.nw[[run]]$fit.test$cell_times_est))],
+     pred_time_trend2=fit.trend2[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.trend2[[run]]$fit.test$cell_times_est))],
+             names(fit.trend2[[run]]$fit.test$cell_times_est))],
     dapi=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]),
                                                 rownames(pdata))])
    return(xy)
@@ -237,10 +239,10 @@ plots
 Y_test <- expr.sig[,part_indices[[1]]$test]
 theta_test <- theta.nonvalid[part_indices[[1]]$test]
 
-time_nw <- fits.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
-                           names(fits.nw[[1]]$fit.test$cell_times_est))]
-time_trend2 <- fits.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
-                           names(fits.trend2[[1]]$fit.test$cell_times_est))]
+time_nw <- fit.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fit.nw[[1]]$fit.test$cell_times_est))]
+time_trend2 <- fit.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fit.trend2[[1]]$fit.test$cell_times_est))]
 
 par(mfrow=c(1,2))
 plot(theta_test, time_nw,
@@ -363,6 +365,7 @@ for (run in 1:5) {
       pmin(abs(cell_times_est_shift-ref_time), 
            abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.nw.unsup.split) <- paste0("fold.", c(1:5))
 saveRDS(fit.nw.unsup.split, "../output/method-train-classifiers-top10.Rmd/fit.nw.unsup.split.rds" )
 
 
@@ -389,6 +392,7 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.bspline.unsup.split) <- paste0("fold.", c(1:5))
 saveRDS(fit.bspline.unsup.split, 
         "../output/method-train-classifiers-top10.Rmd/fit.bspline.unsup.split.rds")
 
@@ -417,9 +421,9 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.loess.unsup.split) <- paste0("fold.", c(1:5))
 saveRDS(fit.loess.unsup.split, 
         "../output/method-train-classifiers-top10.Rmd/fit.loess.unsup.split.rds")
-
 
 
 
@@ -447,8 +451,9 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
-saveRDS(fit.trend2.unsup.split, 
-        "../output/method-train-classifiers-top10.Rmd/fit.trend2.unsup.split.rds")
+names(fit.trend2.unsup.split) <- paste0("fold.", c(1:5))
+
+saveRDS(fit.trend2.unsup.split, "../output/method-train-classifiers-top10.Rmd/fit.trend2.unsup.split.rds")
 ```
 
 
@@ -501,7 +506,7 @@ pve.split.bspline <- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
 pve.split.loess <- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
                                                         dapi[order(pred_time_loess)])))
 
-save(pve.split.nw, pve.split.trend2, pve.split.bspline, pve.split.loess,
+save(pve.split.nw, pve.split.trend2, pve.split.bspline, pve.split.loess, a,
      file="../output/method-train-classifiers-top10.Rmd/pve.methods.unsupervised.split.rda")
 ```
 
