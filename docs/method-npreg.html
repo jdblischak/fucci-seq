@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Training model using using trendiflter</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Training model using using trendiflter</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#packages">Packages</a></li>
+<li><a href="#use-the-top-10-genes-identified-to-have-cyclical-expression-patterns-in-one-training-dataset">Use the top 10 genes identified to have cyclical expression patterns, in one training dataset</a></li>
+<li><a href="#consider-the-above-fitting-applying-to-the-test-sample">Consider the above fitting applying to the test sample</a></li>
+<li><a href="#develop-a-classification-performance-measure">Develop a classification performance measure</a></li>
+<li><a href="#running-on-a-larger-dataset">Running on a larger dataset</a></li>
+<li><a href="#running-on-476-genes">Running on 476 genes</a></li>
+<li><a href="#running-on-macosko-genes">Running on Macosko genes</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-07-02</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 07ea531</p>
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<pre class="r"><code>library(Biobase)</code></pre>
+<hr />
+</div>
+<div id="use-the-top-10-genes-identified-to-have-cyclical-expression-patterns-in-one-training-dataset" class="section level2">
+<h2>Use the top 10 genes identified to have cyclical expression patterns, in one training dataset</h2>
+<p>Get data</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+# import previously identifid cell cycle genes
+# cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+# cyclegenes.names &lt;- colnames(cyclegenes)[2:6]
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes), ]
+
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions</code></pre>
+<pre class="r"><code>source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/cycle.corr.R&quot;)
+
+Y_train &lt;- expr.sig[,part_indices[[1]]$train]
+theta_train &lt;- theta.nonvalid[part_indices[[1]]$train]</code></pre>
+<ul>
+<li>The shape of the predicted expression levels is similar between results based on fucci-labels and reuslts based on PCA of the expression levels. Hence, no need to reverse the axis.</li>
+</ul>
+<pre class="r"><code>Y_train &lt;- expr.sig[,part_indices[[1]]$train]
+theta_train &lt;- theta.nonvalid[part_indices[[1]]$train]
+theta_train_pca &lt;- initialize_cell_times(Y_train)</code></pre>
+<pre class="r"><code>fit.train.nobin &lt;- cycle.npreg.insample(Y = Y_train, 
+                                  theta = theta_train, 
+                                  nbins = NULL, ncores=10)
+
+fit.train.pca.nobin &lt;- cycle.npreg.insample(Y = Y_train, 
+                                  theta = theta_train_pca, 
+                                  nbins = NULL, ncores=10)
+
+saveRDS(fit.train.nobin, &quot;../output/method-npreg.Rmd/fit.train.nobin.rds&quot;)
+saveRDS(fit.train.pca.nobin, &quot;../output/method-npreg.Rmd/fit.train.pca.nobin.rds&quot;)</code></pre>
+<pre class="r"><code>fit.train.nobin &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.train.nobin.rds&quot;)
+fit.train.pca.nobin &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.train.pca.nobin.rds&quot;)
+fit.train.nobin$loglik_est</code></pre>
+<pre><code>[1] -7578.007</code></pre>
+<pre class="r"><code>fit.train.pca.nobin$loglik_est</code></pre>
+<pre><code>[1] -6737.267</code></pre>
+<pre class="r"><code>par(mfcol=c(2,5))
+for (g in 1:5) {
+  plot(fit.train.nobin$Y_ordered[g,])
+  points(fit.train.nobin$mu_est[g,], col=&quot;blue&quot;, cex=.6, pch=16)
+  plot(fit.train.pca.nobin$Y_ordered[g,])
+  points(fit.train.pca.nobin$mu_est[g,], col=&quot;blue&quot;, cex=.6, pch=16)
+}</code></pre>
+<p><img src="figure/method-npreg.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Fisher-Lee correlation coefficient for rotational dependence supports a significant rotational dependency between the cell times re-estimated based on FUCCI and the cell times re-estimated based on PCA.</p>
+<pre class="r"><code>par(mfrow=c(1,1))
+plot(fit.train.nobin$cell_times_est, 
+     fit.train.pca.nobin$cell_times_est[match(names(fit.train.nobin$cell_times_est),
+                                        names(fit.train.pca.nobin$cell_times_est))])</code></pre>
+<p><img src="figure/method-npreg.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rtest_pval &lt;- rFL.IndTestRand(fit.train.nobin$cell_times_est,
+                     fit.train.pca.nobin$cell_times_est[match(names(fit.train.nobin$cell_times_est),
+                                                  names(fit.train.pca.nobin$cell_times_est))],
+                     NR=9999)
+# rtest_boot &lt;- rhoFLCIBoot(fit.train.nobin$cell_times_est,
+#                   fit.train.pca.nobin$cell_times_est[match(names(fit.train.nobin$cell_times_est),
+#                                               names(fit.train.pca.nobin$cell_times_est))],
+#                           ConfLevel = 95, B=9999)
+# 
+# rtest_js &lt;- JSTestRand(fit.train.nobin$cell_times_est,
+#               fit.train.pca.nobin$cell_times_est[match(names(fit.train.nobin$cell_times_est),
+#                                                 names(fit.train.pca.nobin$cell_times_est))], 
+#               NR=9999)
+rtest_pval</code></pre>
+<pre><code>[1] -0.24333  0.00010</code></pre>
+<p>Fisher-Lee correlation coefficient for rotational dependence supports a significant rotational dependency between the FUCCI cell times and cell times re-estimated based on FUCCI.</p>
+<pre class="r"><code>par(mfrow=c(1,1))
+plot(fit.train.nobin$cell_times_est, 
+     theta_train[match(names(fit.train.nobin$cell_times_est),
+                                        names(theta_train))])</code></pre>
+<p><img src="figure/method-npreg.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>rtest_pval &lt;- rFL.IndTestRand(fit.train.nobin$cell_times_est,
+                             theta_train[match(names(fit.train.nobin$cell_times_est),
+                                        names(theta_train))],
+                             NR=9999)
+
+# rtest_boot &lt;- rhoFLCIBoot(fit.train.nobin$cell_times_est,
+#                           theta_train[match(names(fit.train.nobin$cell_times_est),
+#                                       names(theta_train))],
+#                           ConfLevel = 95, B=9999)
+# # a version in the circular package
+# rtest_js &lt;- JSTestRand(fit.train.nobin$cell_times_est,
+#                        theta_train[match(names(fit.train.nobin$cell_times_est),
+#                                     names(theta_train))], NR=9999)
+
+rtest_pval</code></pre>
+<pre><code>[1] 0.07064764 0.00010000</code></pre>
+<pre class="r"><code># rtest_boot
+# rtest_js</code></pre>
+<hr />
+</div>
+<div id="consider-the-above-fitting-applying-to-the-test-sample" class="section level2">
+<h2>Consider the above fitting applying to the test sample</h2>
+<p>Compare for test samples, the ablity to predict cell times 1) using cyclical patterns for each gene predicted from the training samples initialized by fucci-labels, 2) using cyclical patterns from each gene predicted from training samples initialized by PCA, 3) using the cyclial patterns for each gene in the test samples initialized by fucc-labels, 4) using the cyclial patterns for each gene in the test samples initialized by PCA.</p>
+<pre class="r"><code>Y_test &lt;- expr.sig[,part_indices[[1]]$test]
+theta_test &lt;- theta.nonvalid[part_indices[[1]]$test]
+#theta_test_pca &lt;- initialize_cell_times(Y_test)</code></pre>
+<pre class="r"><code>fit.test.bytrain.fucci.bin &lt;- vector(&quot;list&quot;, 5)
+for (i in 1:5) {
+  fit.test.bytrain.fucci.bin[[i]] &lt;- cycle.npreg.outsample(Y_test,
+                                  theta_est=fit.train.bin$cell_times_est,
+                                  mu_est=fit.train.bin$mu_est, 
+                                  sigma_est=fit.train.bin$sigma_est)
+}
+
+saveRDS(fit.test.bytrain.fucci.bin,
+        &quot;../output/method-npreg.Rmd/fit.test.bytrain.fucci.bin.rds&quot;)</code></pre>
+<pre class="r"><code>## not specifying bins when predicting
+fit.test.bytrain.fucci.nobin &lt;- cycle.npreg.outsample(Y_test,
+                                  theta_est=fit.train.nobin$cell_times_est,
+                                  mu_est=fit.train.nobin$mu_est, 
+                                  sigma_est=fit.train.nobin$sigma_est)
+saveRDS(fit.test.bytrain.fucci,
+        &quot;../output/method-npreg.Rmd/fit.test.bytrain.fucci.nobin.rds&quot;)
+
+fit.test.insample.fucci.nobin &lt;- cycle.npreg.insample(Y = Y_test, 
+                                                theta = theta_test, 
+                                                nbins = NULL, ncores=10)
+saveRDS(fit.test.insample.fucci.nobin, 
+        &quot;../output/method-npreg.Rmd/fit.test.insample.fucci.nobin.rds&quot;)
+
+
+fit.test.insample.fucci.bin &lt;- cycle.npreg.insample(Y = Y_test, 
+                                                theta = theta_test, 
+                                                nbins = 100, ncores=10)
+saveRDS(fit.test.insample.fucci.bin, 
+        &quot;../output/method-npreg.Rmd/fit.test.insample.fucci.bin.rds&quot;)
+
+
+fit.train.bin &lt;- cycle.npreg.insample(Y = Y_train, 
+                                  theta = theta_train, 
+                                  nbins = 100, ncores=10)
+
+saveRDS(fit.train.bin, &quot;../output/method-npreg.Rmd/fit.train.bin.rds&quot;)
+
+fit.test.bytrain.fucci.bin &lt;- cycle.npreg.outsample(Y_test,
+                                  theta_est=fit.train.bin$cell_times_est,
+                                  mu_est=fit.train.bin$mu_est, 
+                                  sigma_est=fit.train.bin$sigma_est)
+saveRDS(fit.test.bytrain.fucci.bin,
+        &quot;../output/method-npreg.Rmd/fit.test.bytrain.fucci.bin.rds&quot;)</code></pre>
+<pre class="r"><code>fit.test.bytrain.fucci.nobin &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.test.bytrain.fucci.nobin.rds&quot;)
+fit.test.bytrain.fucci.bin &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.test.bytrain.fucci.bin.rds&quot;)
+fit.test.insample.fucci &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.test.insample.fucci.rds&quot;)
+fit.test.insample.fucci.bin &lt;- readRDS(&quot;../output/method-npreg.Rmd/fit.test.insample.fucci.bin.rds&quot;)
+
+par(mfcol=c(2,5))
+for (i in 1:10) {
+  plot(fit.test.bytrain.fucci.nobin$Y[i,])
+  points(fit.test.bytrain.fucci.nobin$mu_est[i,], col = &quot;blue&quot;, cex=.6, pch=16)
+}</code></pre>
+<p><img src="figure/method-npreg.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfcol=c(2,5))
+for (i in 1:10) {
+  plot(fit.test.insample.fucci$Y[i,])
+  points(fit.test.insample.fucci$mu_est[i,], col = &quot;blue&quot;, cex=.6, pch=16)
+}</code></pre>
+<p><img src="figure/method-npreg.Rmd/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fit.test.insample.fucci.bin$loglik_est</code></pre>
+<pre><code>[1] -1819.002</code></pre>
+<pre class="r"><code>fit.test.bytrain.fucci.bin$loglik_est</code></pre>
+<pre><code>[1] -1749.787</code></pre>
+<p>Correlation between cell time label: use grid points to estimate gene means in the training sample</p>
+<pre class="r"><code># JSTestRand(fit.test.bytrain.fucci.nobin$cell_times_est,
+#            theta_test[match(names(fit.test.bytrain.fucci.nobin$cell_times_est),
+#                             names(theta_test))], NR=9999)
+
+# JSTestRand(fit.test.insample.fucci.nobin$cell_times_est,
+           # theta_test[match(names(fit.test.insample.fucci.nobin$cell_times_est),
+                            # names(theta_test))], NR=9999)</code></pre>
+<p>Correlation between cell time labels: not use grid points to estimate gene means in the training sample</p>
+<pre class="r"><code># JSTestRand(fit.test.bytrain.fucci.bin$cell_times_est,
+#            theta_test[match(names(fit.test.bytrain.fucci.bin$cell_times_est),
+#                             names(theta_test))], NR=9999)
+
+# JSTestRand(fit.test.insample.fucci.bin$cell_times_est,
+#            theta_test[match(names(fit.test.insample.fucci.bin$cell_times_est),
+#                             names(theta_test))], NR=9999)</code></pre>
+<hr />
+</div>
+<div id="develop-a-classification-performance-measure" class="section level2">
+<h2>Develop a classification performance measure</h2>
+<ol style="list-style-type: decimal">
+<li><p>For every sample i in the reference label, identify the nearst k labels at a neighborhood symmetric with respect to the sample i, such that they are at [i-k, i+k]</p></li>
+<li><p>Then, for every sample i in the set for testing, consider also the k nearest neighbors as above.</p></li>
+<li><p>Compute for every sample i the fraction of samples in the neighborhood that are in the reference neighborhood, and the fraction of samples that are not in the neighborhood that are in the reference neighborhood. The ratio of these two gives the fold enrichment of the neighborhood samples that are in the reference neighborhood.</p></li>
+</ol>
+<pre class="r"><code>circ.dist.neighbors &lt;- function(labels, k) {
+  mat_neighbors &lt;- matrix(0, ncol=length(labels), nrow=length(labels))  
+  colnames(mat_neighbors) &lt;- labels
+  rownames(mat_neighbors) &lt;- labels
+  N &lt;- length(labels)
+  band &lt;- round(k/2)
+  
+  for (i in 1:ncol(mat_neighbors)) {
+    if (i == 1) {
+    neighbors &lt;- c(labels[c((N-band+i):N)], labels[c((i+1):(i+band))])
+    mat_neighbors[,i] &lt;- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i &gt; 1 &amp; i &lt;= band) {
+    neighbors &lt;- c(labels[c(1:(i-1), c((N-band+i):N))], labels[c((i+1):(i+band))])
+    mat_neighbors[,i] &lt;- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i &gt; band &amp; i &lt;= (N-band)) {
+    neighbors &lt;- c(labels[c((i-band):(i-1))], labels[c((i+1):(i+band))])
+    mat_neighbors[,i] &lt;- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i &gt; (N-band)) {
+    neighbors &lt;- c(labels[c((i-band):(i-1))], labels[c((i+1):N, (band -(N-i)):1)])
+    mat_neighbors[,i] &lt;- rownames(mat_neighbors) %in% neighbors
+    }
+    if (i == N) {
+    neighbors &lt;- c(labels[c((N-band):(N-1))], labels[c(1:band)])
+    mat_neighbors[,i] &lt;- rownames(mat_neighbors) %in% neighbors
+    }
+
+  }
+  return(mat_neighbors)
+}
+
+
+## test the code
+labels_to_test &lt;- names(theta_test)
+labels_ref &lt;- names(theta_test)
+dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+
+dist_enrich &lt;- sapply(1:N, function(i) {
+  lab_self &lt;- rownames(dist_mat_ref)[i]
+  labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+  labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+  labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+  prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+  prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+  return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+})
+names(dist_enrich) &lt;- rownames(dist_mat_ref)
+summary(dist_enrich)
+
+
+## try on some data
+labels_to_test &lt;- names(fit.test.bytrain.fucci.nobin$cell_times_est)
+labels_ref &lt;- names(theta_test)
+dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+
+dist_enrich &lt;- sapply(1:N, function(i) {
+  lab_self &lt;- rownames(dist_mat_ref)[i]
+  labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+  labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+  labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+  prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+  prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+  return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+})
+names(dist_enrich) &lt;- rownames(dist_mat_ref)
+summary(dist_enrich)
+
+
+
+# compare with predictions obtained from training sample (binned)
+labels_to_test &lt;- names(fit.test.bytrain.fucci.bin$cell_times_est)
+labels_ref &lt;- names(theta_test)
+dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+
+dist_enrich &lt;- sapply(1:N, function(i) {
+  lab_self &lt;- rownames(dist_mat_ref)[i]
+  labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+  labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+  labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+  prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+  prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+  return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+})
+names(dist_enrich) &lt;- rownames(dist_mat_ref)
+summary(dist_enrich)
+
+
+# compare with predictions obtained from training sample (binned)
+labels_to_test &lt;- names(fit.test.insample.fucci.nobin$cell_times_est)
+labels_ref &lt;- names(theta_test)
+dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+
+dist_enrich &lt;- sapply(1:N, function(i) {
+  lab_self &lt;- rownames(dist_mat_ref)[i]
+  labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+  labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+  labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+  prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+  prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+  return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+})
+names(dist_enrich) &lt;- rownames(dist_mat_ref)
+summary(dist_enrich)
+
+# compare with predictions obtained from in-sample prediction (binned)
+labels_to_test &lt;- names(fit.test.insample.fucci.bin$cell_times_est)
+labels_ref &lt;- names(theta_test)
+dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+
+dist_enrich &lt;- sapply(1:N, function(i) {
+  lab_self &lt;- rownames(dist_mat_ref)[i]
+  labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+  labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+  labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+  prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+  prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+  return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+})
+names(dist_enrich) &lt;- rownames(dist_mat_ref)
+summary(dist_enrich)</code></pre>
+<hr />
+</div>
+<div id="running-on-a-larger-dataset" class="section level2">
+<h2>Running on a larger dataset</h2>
+<p>Will run the job on cluster. See code in <code>code/method-npreg.Rmd</code>.</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+# import previously identifid cell cycle genes
+# cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+# cyclegenes.names &lt;- colnames(cyclegenes)[2:6]
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+
+sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions</code></pre>
+<pre class="r"><code>fold.train &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.train.fold.&quot;,fold,&quot;.rds&quot;)) })
+fold.test.bytrain.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.bytrain.fucci.fold.&quot;, fold, &quot;.rds&quot;))})
+fold.test.insample.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.insample.fucci.fold.&quot;,fold,&quot;.rds&quot;))}) 
+
+do.call(rbind, lapply(1:5, function(f) {
+  data.frame(train.fucci=fold.train[[f]]$loglik_est/4,
+             test.bytrain.fucci=fold.test.bytrain.fucci[[f]]$loglik_est,
+             test.insample.fucci=fold.test.insample.fucci[[f]]$loglik_est)
+}))</code></pre>
+<pre><code>  train.fucci test.bytrain.fucci test.insample.fucci
+1   -20409.85          -19779.37           -20199.67
+2   -20320.87          -19981.03           -20236.37
+3   -20304.71          -20033.21           -20459.61
+4   -20380.62          -20011.64           -20362.36
+5   -20257.38          -20077.28           -20775.22</code></pre>
+<p>compute two measures to evaluate the results:</p>
+<ol style="list-style-type: decimal">
+<li><p>correlation between labels</p></li>
+<li><p>fold enrichment of neighborhood samples defined in the reference label</p></li>
+</ol>
+<pre class="r"><code>source(&quot;../code/utility.R&quot;)
+eval_cor &lt;- vector(&quot;list&quot;, 5)
+eval_neighbor &lt;- vector(&quot;list&quot;, 5)
+
+for (f in 1:5) {
+  eval_cor[[f]] &lt;- JSTestRand(theta.nonvalid[part_indices[[f]]$test],
+                        fold.test.bytrain.fucci[[f]]$cell_times_est, NR=9999)
+}
+eval_cor &lt;- do.call(rbind, eval_cor)
+colnames(eval_cor) &lt;- c(&quot;rho&quot;, &quot;pval&quot;)
+
+
+for (f in 1:5) {
+  labels_ref &lt;- names(theta.nonvalid[part_indices[[f]]$test])
+  labels_to_test &lt;- names(fold.test.bytrain.fucci[[f]]$cell_times_est)
+  dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+  dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+  ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+  dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+  N &lt;- length(labels_ref)
+  
+  dist_enrich &lt;- sapply(1:N, function(i) {
+      lab_self &lt;- rownames(dist_mat_ref)[i]
+      labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+      labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+#      labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+      #prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+      #prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+#      return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+      TP &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==1)
+      FP &lt;- sum(dist_mat_ref[i,]==0 &amp; dist_mat_to_test[i,]==1)
+      FN &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==0)
+      precision &lt;- TP/(TP+FP)
+      recall &lt;- TP/(TP+FN)
+      if ((precision+recall)==0) {
+        F1score &lt;- 0
+      } else {
+        F1score &lt;- 2*precision*recall/(precision+recall)
+      }
+      return(F1score)
+    })
+  names(dist_enrich) &lt;- rownames(dist_mat_ref)
+  
+  eval_neighbor[[f]] &lt;- dist_enrich
+}
+saveRDS(eval_cor, &quot;../output/method-npreg.Rmd/eval_cor.rds&quot;)
+saveRDS(eval_neighbor, &quot;../output/method-npreg.Rmd/eval_neighbor.rds&quot;)</code></pre>
+<pre class="r"><code>eval_cor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_cor.rds&quot;)
+eval_neighbor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_neighbor.rds&quot;)
+
+eval_cor</code></pre>
+<pre><code>            rho   pval
+[1,]  0.6143964 0.0001
+[2,] -0.2054608 0.0111
+[3,] -0.3310730 0.0001
+[4,] -0.4243352 0.0001
+[5,] -0.2633038 0.0008</code></pre>
+<pre class="r"><code>lapply(eval_neighbor, function(x) table(x))</code></pre>
+<pre><code>[[1]]
+x
+  0 0.1 0.2 0.3 0.4 0.5 
+ 59  47  27  14   3   1 
+
+[[2]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 64  37  38  11   1 
+
+[[3]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 62  49  34   5   1 
+
+[[4]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 53  55  30  11   2 
+
+[[5]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 44  57  29  17   4 </code></pre>
+<pre class="r"><code>eval_neighbor_table &lt;- matrix(0, nrow=5, ncol=8)
+for (i in 1:5 ) {
+  eval_neighbor_table[i,1:length(table(eval_neighbor[[i]]))] &lt;- as.numeric(table(eval_neighbor[[i]]))
+}
+colnames(eval_neighbor_table) &lt;- c(&quot;0&quot;, &quot;0.1&quot;, &quot;0.2&quot;, &quot;0.3&quot;, &quot;0.4&quot;, &quot;0.5&quot;, &quot;mean&quot;, &quot;sd&quot;)
+#eval_neighbor_table &lt;- do.call(rbind, lapply(eval_neighbor, function(x) table(x)))
+eval_neighbor_table[,7] &lt;- sapply(eval_neighbor, function(x) round(mean(x), digits=2))
+eval_neighbor_table[,8] &lt;- sapply(eval_neighbor, function(x) round(sd(x), digits=2))
+eval_neighbor_table</code></pre>
+<pre><code>      0 0.1 0.2 0.3 0.4 0.5 mean   sd
+[1,] 59  47  27  14   3   1 0.11 0.11
+[2,] 64  37  38  11   1   0 0.10 0.10
+[3,] 62  49  34   5   1   0 0.09 0.09
+[4,] 53  55  30  11   2   0 0.10 0.10
+[5,] 44  57  29  17   4   0 0.12 0.11</code></pre>
+<hr />
+</div>
+<div id="running-on-476-genes" class="section level2">
+<h2>Running on 476 genes</h2>
+<p>Will run the job on cluster. See code in <code>code/method-npreg.Rmd</code>.</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+# import previously identifid cell cycle genes
+# cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+# cyclegenes.names &lt;- colnames(cyclegenes)[2:6]
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+
+# sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+# expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions</code></pre>
+<pre class="r"><code>fold.train &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.train.fold.&quot;,fold,&quot;.all.rds&quot;)) })
+fold.test.bytrain.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.bytrain.fucci.fold.&quot;, fold, &quot;.all.rds&quot;))})
+fold.test.insample.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.insample.fucci.fold.&quot;,fold,&quot;.all.rds&quot;))}) 
+
+do.call(rbind, lapply(1:5, function(f) {
+  data.frame(train.fucci=fold.train[[f]]$loglik_est/4,
+             test.bytrain.fucci=fold.test.bytrain.fucci[[f]]$loglik_est,
+             test.insample.fucci=fold.test.insample.fucci[[f]]$loglik_est)
+}))</code></pre>
+<pre><code>  train.fucci test.bytrain.fucci test.insample.fucci
+1  -100377.87          -98241.85           -99559.33
+2  -100484.07          -98575.41           -99255.19
+3   -99993.06         -100156.22          -100518.49
+4  -100207.10          -99117.05          -100321.46
+5  -100016.10         -100284.54          -101743.31</code></pre>
+<p>compute two measures to evaluate the results:</p>
+<ol style="list-style-type: decimal">
+<li><p>correlation between labels</p></li>
+<li><p>fold enrichment of neighborhood samples defined in the reference label</p></li>
+</ol>
+<pre class="r"><code>source(&quot;../code/utility.R&quot;)
+eval_cor &lt;- vector(&quot;list&quot;, 5)
+eval_neighbor &lt;- vector(&quot;list&quot;, 5)
+
+for (f in 1:5) {
+  eval_cor[[f]] &lt;- JSTestRand(theta.nonvalid[part_indices[[f]]$test],
+                        fold.test.bytrain.fucci[[f]]$cell_times_est, NR=9999)
+}
+eval_cor &lt;- do.call(rbind, eval_cor)
+colnames(eval_cor) &lt;- c(&quot;rho&quot;, &quot;pval&quot;)
+
+
+for (f in 1:5) {
+  labels_ref &lt;- names(theta.nonvalid[part_indices[[f]]$test])
+  labels_to_test &lt;- names(fold.test.bytrain.fucci[[f]]$cell_times_est)
+  dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+  dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+  ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+  dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+  N &lt;- length(labels_ref)
+  
+  dist_enrich &lt;- sapply(1:N, function(i) {
+      lab_self &lt;- rownames(dist_mat_ref)[i]
+      labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+      labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+#      labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+      #prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+      #prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+#      return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+      TP &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==1)
+      FP &lt;- sum(dist_mat_ref[i,]==0 &amp; dist_mat_to_test[i,]==1)
+      FN &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==0)
+      precision &lt;- TP/(TP+FP)
+      recall &lt;- TP/(TP+FN)
+      if ((precision+recall)==0) {
+        F1score &lt;- 0
+      } else {
+        F1score &lt;- 2*precision*recall/(precision+recall)
+      }
+      return(F1score)
+    })
+  names(dist_enrich) &lt;- rownames(dist_mat_ref)
+  
+  eval_neighbor[[f]] &lt;- dist_enrich
+}
+
+saveRDS(eval_cor, &quot;../output/method-npreg.Rmd/eval_cor.all.rds&quot;)
+saveRDS(eval_neighbor, &quot;../output/method-npreg.Rmd/eval_neighbor.all.rds&quot;)</code></pre>
+<pre class="r"><code>eval_cor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_cor.all.rds&quot;)
+eval_neighbor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_neighbor.all.rds&quot;)
+
+eval_cor</code></pre>
+<pre><code>            rho  pval
+[1,]  0.6289235 1e-04
+[2,] -0.2695323 8e-04
+[3,] -0.3471673 2e-04
+[4,] -0.3806333 1e-04
+[5,] -0.2256917 6e-03</code></pre>
+<pre class="r"><code>sapply(eval_neighbor, function(x) table(x))</code></pre>
+<pre><code>[[1]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 65  50  27   6   3 
+
+[[2]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 69  56  18   6   2 
+
+[[3]]
+x
+  0 0.1 0.2 0.3 
+ 58  53  31   9 
+
+[[4]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 57  46  37  10   1 
+
+[[5]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 51  60  31   8   1 </code></pre>
+<pre class="r"><code>eval_neighbor_table &lt;- matrix(0, nrow=5, ncol=7)
+for (i in 1:5 ) {
+  eval_neighbor_table[i,1:length(table(eval_neighbor[[i]]))] &lt;- as.numeric(table(eval_neighbor[[i]]))
+}
+colnames(eval_neighbor_table) &lt;- c(&quot;0&quot;, &quot;0.1&quot;, &quot;0.2&quot;, &quot;0.3&quot;, &quot;0.4&quot;, &quot;mean&quot;, &quot;sd&quot;)
+#eval_neighbor_table &lt;- do.call(rbind, lapply(eval_neighbor, function(x) table(x)))
+eval_neighbor_table[,6] &lt;- sapply(eval_neighbor, function(x) round(mean(x), digits=2))
+eval_neighbor_table[,7] &lt;- sapply(eval_neighbor, function(x) round(sd(x), digits=2))
+eval_neighbor_table</code></pre>
+<pre><code>      0 0.1 0.2 0.3 0.4 mean   sd
+[1,] 65  50  27   6   3 0.09 0.10
+[2,] 69  56  18   6   2 0.08 0.09
+[3,] 58  53  31   9   0 0.09 0.09
+[4,] 57  46  37  10   1 0.10 0.10
+[5,] 51  60  31   8   1 0.10 0.09</code></pre>
+<hr />
+</div>
+<div id="running-on-macosko-genes" class="section level2">
+<h2>Running on Macosko genes</h2>
+<p>Will run the job on cluster. See code in <code>code/method-npreg.Rmd</code>.</p>
+<pre class="r"><code>df &lt;- readRDS(file=&quot;../data/eset-final.rds&quot;)
+pdata &lt;- pData(df)
+fdata &lt;- fData(df)
+
+# select endogeneous genes
+counts &lt;- exprs(df)[grep(&quot;ENSG&quot;, rownames(df)), ]
+
+log2cpm.all &lt;- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+macosko &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+
+log2cpm.all &lt;- log2cpm.all[,order(pdata$theta)]
+pdata &lt;- pdata[order(pdata$theta),]
+
+log2cpm.quant &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds&quot;)
+# import previously identifid cell cycle genes
+# cyclegenes &lt;- readRDS(&quot;../output/npreg-methods.Rmd/cyclegenes.rds&quot;)
+# cyclegenes.names &lt;- colnames(cyclegenes)[2:6]
+
+# select external validation samples
+set.seed(99)
+nvalid &lt;- round(ncol(log2cpm.quant)*.15)
+ii.valid &lt;- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
+ii.nonvalid &lt;- setdiff(1:ncol(log2cpm.quant), ii.valid)
+
+log2cpm.quant.nonvalid &lt;- log2cpm.quant[,ii.nonvalid]
+log2cpm.quant.valid &lt;- log2cpm.quant[,ii.valid]
+theta &lt;- pdata$theta
+names(theta) &lt;- rownames(pdata)
+theta.nonvalid &lt;- theta[ii.nonvalid]
+theta.valid &lt;- theta[ii.valid]
+
+
+# sig.genes &lt;- readRDS(&quot;../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.rds&quot;)
+# expr.sig &lt;- log2cpm.quant.nonvalid[rownames(log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+# set training samples
+source(&quot;../peco/R/primes.R&quot;)
+source(&quot;../peco/R/partitionSamples.R&quot;)
+parts &lt;- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+                          nsize.each = rep(151,5))
+part_indices &lt;- parts$partitions</code></pre>
+<pre class="r"><code>fold.train &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.train.fold.&quot;,fold,&quot;.macosko.rds&quot;)) })
+fold.test.bytrain.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.bytrain.fucci.fold.&quot;, fold, &quot;.macosko.rds&quot;))})
+fold.test.insample.fucci &lt;- lapply(1:5, function(fold) {
+  readRDS(paste0(&quot;../output/method-npreg.Rmd/fold.test.insample.fucci.fold.&quot;,fold,&quot;.macosko.rds&quot;))}) 
+
+do.call(rbind, lapply(1:5, function(f) {
+  data.frame(train.fucci=fold.train[[f]]$loglik_est/4,
+             test.bytrain.fucci=fold.test.bytrain.fucci[[f]]$loglik_est,
+             test.insample.fucci=fold.test.insample.fucci[[f]]$loglik_est)
+}))</code></pre>
+<pre><code>  train.fucci test.bytrain.fucci test.insample.fucci
+1   -110269.8          -109393.6           -109433.6
+2   -110321.7          -109331.5           -109517.5
+3   -110183.5          -110036.1           -110050.9
+4   -110178.0          -109770.8           -109750.4
+5   -110116.6          -110038.4           -110172.7</code></pre>
+<p>compute two measures to evaluate the results:</p>
+<ol style="list-style-type: decimal">
+<li><p>correlation between labels</p></li>
+<li><p>fold enrichment of neighborhood samples defined in the reference label</p></li>
+</ol>
+<pre class="r"><code>source(&quot;../code/utility.R&quot;)
+eval_cor &lt;- vector(&quot;list&quot;, 5)
+eval_neighbor &lt;- vector(&quot;list&quot;, 5)
+
+for (f in 1:5) {
+  eval_cor[[f]] &lt;- JSTestRand(theta.nonvalid[part_indices[[f]]$test],
+                        fold.test.bytrain.fucci[[f]]$cell_times_est, NR=9999)
+}
+eval_cor &lt;- do.call(rbind, eval_cor)
+colnames(eval_cor) &lt;- c(&quot;rho&quot;, &quot;pval&quot;)
+
+
+for (f in 1:5) {
+  labels_ref &lt;- names(theta.nonvalid[part_indices[[f]]$test])
+  labels_to_test &lt;- names(fold.test.bytrain.fucci[[f]]$cell_times_est)
+  dist_mat_ref &lt;- circ.dist.neighbors(labels_ref, k=10)
+  dist_mat_to_test &lt;- circ.dist.neighbors(labels_to_test, k=10)
+  ii.match &lt;- match(colnames(dist_mat_ref), colnames(dist_mat_to_test))
+  dist_mat_to_test &lt;- dist_mat_to_test[ii.match, ii.match]
+  N &lt;- length(labels_ref)
+  
+  dist_enrich &lt;- sapply(1:N, function(i) {
+      lab_self &lt;- rownames(dist_mat_ref)[i]
+      labs_ref &lt;- rownames(dist_mat_ref)[which(dist_mat_ref[i,]==1)]
+      labs_to_test &lt;- rownames(dist_mat_to_test)[which(dist_mat_to_test[i,]==1)]
+#      labs_to_test_nonneighbors &lt;- setdiff(rownames(dist_mat_to_test), c(labs_to_test, lab_self))
+      #prop_neighbors_in_ref &lt;- sum(labs_to_test %in% labs_ref)/length(labs_to_test)
+      #prop_nonneighbors_in_ref &lt;- sum(labs_to_test_nonneighbors %in% labs_ref)/length(labs_to_test_nonneighbors)
+#      return(prop_neighbors_in_ref/prop_nonneighbors_in_ref)
+      TP &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==1)
+      FP &lt;- sum(dist_mat_ref[i,]==0 &amp; dist_mat_to_test[i,]==1)
+      FN &lt;- sum(dist_mat_ref[i,]==1 &amp; dist_mat_to_test[i,]==0)
+      precision &lt;- TP/(TP+FP)
+      recall &lt;- TP/(TP+FN)
+      if ((precision+recall)==0) {
+        F1score &lt;- 0
+      } else {
+        F1score &lt;- 2*precision*recall/(precision+recall)
+      }
+      return(F1score)
+    })
+  names(dist_enrich) &lt;- rownames(dist_mat_ref)
+  
+  eval_neighbor[[f]] &lt;- dist_enrich
+}
+
+saveRDS(eval_cor, &quot;../output/method-npreg.Rmd/eval_cor.macosko.rds&quot;)
+saveRDS(eval_neighbor, &quot;../output/method-npreg.Rmd/eval_neighbor.macosko.rds&quot;)</code></pre>
+<pre class="r"><code>eval_cor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_cor.macosko.rds&quot;)
+eval_neighbor &lt;- readRDS(&quot;../output/method-npreg.Rmd/eval_neighbor.macosko.rds&quot;)
+
+eval_cor</code></pre>
+<pre><code>            rho   pval
+[1,]  0.5968372 0.0001
+[2,] -0.1700843 0.0385
+[3,] -0.3336919 0.0002
+[4,] -0.3536661 0.0001
+[5,] -0.2281700 0.0057</code></pre>
+<pre class="r"><code>lapply(eval_neighbor, function(x) summary(x))</code></pre>
+<pre><code>[[1]]
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.00000 0.05033 0.10000 0.30000 
+
+[[2]]
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.10000 0.07152 0.10000 0.30000 
+
+[[3]]
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.10000 0.07815 0.10000 0.40000 
+
+[[4]]
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.10000 0.08079 0.10000 0.40000 
+
+[[5]]
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+0.00000 0.00000 0.10000 0.07682 0.10000 0.30000 </code></pre>
+<pre class="r"><code>lapply(eval_neighbor, function(x) table(x))</code></pre>
+<pre><code>[[1]]
+x
+  0 0.1 0.2 0.3 
+ 90  48  11   2 
+
+[[2]]
+x
+  0 0.1 0.2 0.3 
+ 67  63  18   3 
+
+[[3]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 70  55  16   9   1 
+
+[[4]]
+x
+  0 0.1 0.2 0.3 0.4 
+ 62  64  18   6   1 
+
+[[5]]
+x
+  0 0.1 0.2 0.3 
+ 67  54  28   2 </code></pre>
+<pre class="r"><code>eval_neighbor_table &lt;- matrix(0, nrow=5, ncol=7)
+for (i in 1:5 ) {
+  eval_neighbor_table[i,1:length(table(eval_neighbor[[i]]))] &lt;- as.numeric(table(eval_neighbor[[i]]))
+}
+colnames(eval_neighbor_table) &lt;- c(&quot;0&quot;, &quot;0.1&quot;, &quot;0.2&quot;, &quot;0.3&quot;, &quot;0.4&quot;, &quot;mean&quot;, &quot;sd&quot;)
+#eval_neighbor_table &lt;- do.call(rbind, lapply(eval_neighbor, function(x) table(x)))
+eval_neighbor_table[,6] &lt;- sapply(eval_neighbor, function(x) round(mean(x),digits=2))
+eval_neighbor_table[,7] &lt;- sapply(eval_neighbor, function(x) round(sd(x),digits=2))
+eval_neighbor_table</code></pre>
+<pre><code>      0 0.1 0.2 0.3 0.4 mean   sd
+[1,] 90  48  11   2   0 0.05 0.07
+[2,] 67  63  18   3   0 0.07 0.08
+[3,] 70  55  16   9   1 0.08 0.09
+[4,] 62  64  18   6   1 0.08 0.08
+[5,] 67  54  28   2   0 0.08 0.08</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] Biobase_2.38.0      BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17    digest_0.6.15   rprojroot_1.3-2 backports_1.1.2
+ [5] git2r_0.21.0    magrittr_1.5    evaluate_0.10.1 stringi_1.1.6  
+ [9] rmarkdown_1.10  tools_3.4.3     stringr_1.2.0   yaml_2.1.16    
+[13] compiler_3.4.3  htmltools_0.3.6 knitr_1.20     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
