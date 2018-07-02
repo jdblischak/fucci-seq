@@ -23,7 +23,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -91,6 +93,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -233,10 +238,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-06-24</p>
+<p><strong>Last updated:</strong> 2018-07-02</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> afe6aa6</p>
+<p><strong>Code version:</strong> 6d50efe</p>
 <hr />
 <div id="extract-data-from-the-top-101-genes-identified" class="section level2">
 <h2>Extract data from the top 101 genes identified</h2>
@@ -292,8 +297,8 @@ part_indices &lt;- parts$partitions</code></pre>
 <p>Fitting</p>
 <pre class="r"><code>source(&quot;../peco/R/fit.cyclical.R&quot;)
 source(&quot;../peco/R/cycle.npreg.R&quot;)
-source(&quot;../code/utility.R&quot;)</code></pre>
-<pre class="r"><code>fits.nw &lt;- vector(&quot;list&quot;, 5)
+source(&quot;../peco/R/utility.R&quot;)</code></pre>
+<pre class="r"><code>fit.nw &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -314,13 +319,15 @@ for (run in 1:5) {
                                     method.trend=&quot;npcirc.nw&quot;,
                                     ncores=15)
   
-  fits.nw[[run]] &lt;- list(fit.train=fit.train,
+  fit.nw[[run]] &lt;- list(fit.train=fit.train,
                       fit.test=fit.test)
 }
-saveRDS(fits.nw, file = &quot;../output/method-train-classifiers-top10.Rmd/fits.nw.rds&quot;)
+names(fit.nw) &lt;- paste0(&quot;fold.&quot;,c(1:5))
+saveRDS(fit.nw, file = &quot;../output/method-train-classifiers-top10.Rmd/fit.nw.rds&quot;)
 
 
-fits.trend2 &lt;- vector(&quot;list&quot;, 5)
+
+fit.trend2 &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
   # fitting training data
@@ -343,26 +350,26 @@ for (run in 1:5) {
                                     polyorder=2,
                                     ncores=15)
   
-  fits.trend2[[run]] &lt;- list(fit.train=fit.train,
+  fit.trend2[[run]] &lt;- list(fit.train=fit.train,
                       fit.test=fit.test)
 }
-
-saveRDS(fits.trend2, file = &quot;../output/method-train-classifiers-top10.Rmd/fits.trend2.rds&quot;)</code></pre>
+names(fit.trend2) &lt;- paste0(&quot;fold.&quot;,c(1:5))
+saveRDS(fit.trend2, file = &quot;../output/method-train-classifiers-top10.Rmd/fit.trend2.rds&quot;)</code></pre>
 <p>load results</p>
-<pre class="r"><code>fits.nw &lt;- readRDS(file = &quot;../output/method-train-classifiers-top10.Rmd/fits.nw.rds&quot;)
-fits.trend2 &lt;- readRDS(file = &quot;../output/method-train-classifiers-top10.Rmd/fits.trend2.rds&quot;)</code></pre>
+<pre class="r"><code>fit.nw &lt;- readRDS(file = &quot;../output/method-train-classifiers-top10.Rmd/fit.nw.rds&quot;)
+fit.trend2 &lt;- readRDS(file = &quot;../output/method-train-classifiers-top10.Rmd/fit.trend2.rds&quot;)</code></pre>
 <div id="results" class="section level3">
 <h3>Results</h3>
 <p>Compute metrics</p>
 <pre class="r"><code>xy_time &lt;- lapply(1:5, function(run) {
    xy &lt;- data.frame(
      ref_time=theta.nonvalid[part_indices[[run]]$test],
-     pred_time_nw=fits.nw[[run]]$fit.test$cell_times_est[
+     pred_time_nw=fit.nw[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.nw[[run]]$fit.test$cell_times_est))],
-     pred_time_trend2=fits.trend2[[run]]$fit.test$cell_times_est[
+             names(fit.nw[[run]]$fit.test$cell_times_est))],
+     pred_time_trend2=fit.trend2[[run]]$fit.test$cell_times_est[
        match(names(theta.nonvalid[part_indices[[run]]$test]),
-             names(fits.trend2[[run]]$fit.test$cell_times_est))],
+             names(fit.trend2[[run]]$fit.test$cell_times_est))],
     dapi=pdata$gfp.median.log10sum.adjust[match(names(theta.nonvalid[part_indices[[run]]$test]),
                                                 rownames(pdata))])
    return(xy)
@@ -406,19 +413,19 @@ save(nw, trend2,
      file=&quot;../output/method-train-classifiers-top10.Rmd/pve.methods.rda&quot;)</code></pre>
 <pre class="r"><code>load(file=&quot;../output/method-train-classifiers-top10.Rmd/pve.methods.rda&quot;)
 cbind(mean(trend2),sd(trend2))</code></pre>
-<pre><code>          [,1]       [,2]
-[1,] 0.2979458 0.09333073</code></pre>
+<pre><code>     [,1]      [,2]
+[1,]   NA 0.1392071</code></pre>
 <pre class="r"><code>cbind(mean(nw),sd(nw))</code></pre>
-<pre><code>          [,1]       [,2]
-[1,] 0.3073049 0.05656022</code></pre>
+<pre><code>     [,1]      [,2]
+[1,]   NA 0.1575345</code></pre>
 <p>plots</p>
 <pre class="r"><code>Y_test &lt;- expr.sig[,part_indices[[1]]$test]
 theta_test &lt;- theta.nonvalid[part_indices[[1]]$test]
 
-time_nw &lt;- fits.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
-                           names(fits.nw[[1]]$fit.test$cell_times_est))]
-time_trend2 &lt;- fits.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
-                           names(fits.trend2[[1]]$fit.test$cell_times_est))]
+time_nw &lt;- fit.nw[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fit.nw[[1]]$fit.test$cell_times_est))]
+time_trend2 &lt;- fit.trend2[[1]]$fit.test$cell_times_est[match(names(theta_test),
+                           names(fit.trend2[[1]]$fit.test$cell_times_est))]
 
 par(mfrow=c(1,2))
 plot(theta_test, time_nw,
@@ -469,9 +476,9 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(pc_pve)</code></pre>
-<pre><code>[1] 0.3004975</code></pre>
+<pre><code>[1] NA</code></pre>
 <pre class="r"><code>sd(pc_pve)</code></pre>
-<pre><code>[1] 0.03044726</code></pre>
+<pre><code>[1] 0.1617653</code></pre>
 <pre class="r"><code>par(mfrow=c(1,1))
 plot(xy_time[[1]]$ref_time,
      xy_time[[1]]$pred_time_pc,
@@ -537,6 +544,7 @@ for (run in 1:5) {
       pmin(abs(cell_times_est_shift-ref_time), 
            abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.nw.unsup.split) &lt;- paste0(&quot;fold.&quot;, c(1:5))
 saveRDS(fit.nw.unsup.split, &quot;../output/method-train-classifiers-top10.Rmd/fit.nw.unsup.split.rds&quot; )
 
 
@@ -563,6 +571,7 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.bspline.unsup.split) &lt;- paste0(&quot;fold.&quot;, c(1:5))
 saveRDS(fit.bspline.unsup.split, 
         &quot;../output/method-train-classifiers-top10.Rmd/fit.bspline.unsup.split.rds&quot;)
 
@@ -591,9 +600,9 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
+names(fit.loess.unsup.split) &lt;- paste0(&quot;fold.&quot;, c(1:5))
 saveRDS(fit.loess.unsup.split, 
         &quot;../output/method-train-classifiers-top10.Rmd/fit.loess.unsup.split.rds&quot;)
-
 
 
 
@@ -621,8 +630,9 @@ for (run in 1:5) {
             pmin(abs(cell_times_est_shift-ref_time),
                  abs(cell_times_est_shift-(2*pi-ref_time))))
 }
-saveRDS(fit.trend2.unsup.split, 
-        &quot;../output/method-train-classifiers-top10.Rmd/fit.trend2.unsup.split.rds&quot;)</code></pre>
+names(fit.trend2.unsup.split) &lt;- paste0(&quot;fold.&quot;, c(1:5))
+
+saveRDS(fit.trend2.unsup.split, &quot;../output/method-train-classifiers-top10.Rmd/fit.trend2.unsup.split.rds&quot;)</code></pre>
 <pre class="r"><code>fit.nw.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers-top10.Rmd/fit.nw.unsup.split.rds&quot;)
 fit.trend2.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers-top10.Rmd/fit.trend2.unsup.split.rds&quot;)
 fit.bspline.unsup.split &lt;- readRDS(&quot;../output/method-train-classifiers-top10.Rmd/fit.bspline.unsup.split.rds&quot;)
@@ -670,7 +680,7 @@ pve.split.bspline &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
 pve.split.loess &lt;- sapply(1:5, function(i) get.pve(with(xy_time_unsup[[i]],
                                                         dapi[order(pred_time_loess)])))
 
-save(pve.split.nw, pve.split.trend2, pve.split.bspline, pve.split.loess,
+save(pve.split.nw, pve.split.trend2, pve.split.bspline, pve.split.loess, a,
      file=&quot;../output/method-train-classifiers-top10.Rmd/pve.methods.unsupervised.split.rda&quot;)</code></pre>
 <pre class="r"><code>load(file=&quot;../output/method-train-classifiers-top10.Rmd/pve.methods.unsupervised.split.rda&quot;)
 c(mean(pve.split.nw),
@@ -755,11 +765,11 @@ other attached packages:
 [7] BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.17    lattice_0.20-35 mvtnorm_1.0-7   digest_0.6.15  
+ [1] Rcpp_0.12.17    lattice_0.20-35 mvtnorm_1.0-8   digest_0.6.15  
  [5] rprojroot_1.3-2 grid_3.4.3      backports_1.1.2 git2r_0.21.0   
  [9] magrittr_1.5    evaluate_0.10.1 stringi_1.1.6   boot_1.3-20    
-[13] rmarkdown_1.8   tools_3.4.3     stringr_1.2.0   yaml_2.1.16    
-[17] compiler_3.4.3  pkgconfig_2.0.1 htmltools_0.3.6 knitr_1.18     </code></pre>
+[13] rmarkdown_1.10  tools_3.4.3     stringr_1.2.0   yaml_2.1.16    
+[17] compiler_3.4.3  pkgconfig_2.0.1 htmltools_0.3.6 knitr_1.20     </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
