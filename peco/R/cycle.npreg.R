@@ -52,7 +52,7 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                                                        "loess", "bspline"),
                               polyorder=3,
                               ncores=12, ...) {
-      library(NPCirc)
+#      library(NPCirc)
       library(genlasso)
       library(assertthat)
 
