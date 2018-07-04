@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Evaluate the withheld sample on top X cyclical</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Evaluate the withheld sample on top X cyclical</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#load-previously-computed-results">Load previously computed results</a></li>
+<li><a href="#before-removing-moisy-labels-on-top-10-cyclical-genes">Before removing moisy labels, on top 10 cyclical genes</a><ul>
+<li><a href="#seurat-scores-vs-cell-time-predictions">Seurat scores vs cell time predictions</a></li>
+<li><a href="#seurat-cell-class-vs-unsupervsied-predicted-time">Seurat cell class vs unsupervsied predicted time</a></li>
+<li><a href="#seurat-clases-vs-supervsied-cell-times">Seurat clases vs supervsied cell times</a></li>
+</ul></li>
+<li><a href="#before-removing-moisy-labels-on-top-101-cyclical-genes">Before removing moisy labels, on top 101 cyclical genes</a><ul>
+<li><a href="#seurat-scores-vs-cell-time-predictions-1">Seurat scores vs cell time predictions</a></li>
+<li><a href="#seurat-cell-class-vs-unsupervsied-predicted-time-1">Seurat cell class vs unsupervsied predicted time</a></li>
+<li><a href="#seurat-clases-vs-supervsied-cell-times-1">Seurat clases vs supervsied cell times</a></li>
+</ul></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-07-04</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 2498ce4</p>
+<hr />
+<div id="load-previously-computed-results" class="section level2">
+<h2>Load previously computed results</h2>
+<pre class="r"><code>results_eval_top101 &lt;- readRDS(&quot;../data/results/results_eval_top101.rds&quot;)
+results_eval_top10 &lt;- readRDS(&quot;../data/results/results_eval_top10.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="before-removing-moisy-labels-on-top-10-cyclical-genes" class="section level2">
+<h2>Before removing moisy labels, on top 10 cyclical genes</h2>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
+source(&quot;../peco/R/run_seurat.R&quot;)
+
+mean(results_eval_top10$fit.supervised$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.1024371</code></pre>
+<pre class="r"><code>mean(results_eval_top10$fit.trend2.unsup$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.1027337</code></pre>
+<pre class="r"><code>mean(results_eval_top10$fit.seurat$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.1450893</code></pre>
+<pre class="r"><code>pve.wrapper &lt;- function(results_list, methods_list) {
+  res &lt;- lapply(1:length(results_list), 
+       function(i) {
+          obj &lt;- results_list[[i]]
+          out &lt;- data.frame(
+            dapi=with(obj, get.pve(dapi[order(pred_time_shift)])$pve),
+            gfp=with(obj, get.pve(gfp[order(pred_time_shift)])$pve),
+            rfp=with(obj, get.pve(rfp[order(pred_time_shift)])$pve) )
+  })
+  names(res) &lt;- methods_list
+  return(res)
+}
+
+
+results_list &lt;- results_eval_top10
+methods_list &lt;- sapply(names(results_list), function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
+
+pve_eval_top10 &lt;- do.call(rbind, pve.wrapper(results_list=results_eval_top10, 
+                               methods_list=methods_list))</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>pve_eval_top10$genes_used &lt;- &quot;top10&quot;
+pve_eval_top10$methods &lt;- methods_list
+saveRDS(pve_eval_top10,
+        &quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top10.rds&quot;)</code></pre>
+<pre class="r"><code>pve_eval_top10 &lt;- readRDS(&quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top10.rds&quot;)
+print(pve_eval_top10)</code></pre>
+<pre><code>                  dapi          gfp       rfp genes_used    methods
+supervised 0.125585308 0.0148850520 0.3092444      top10 supervised
+trend2     0.113966791 0.0884220119 0.2200606      top10     trend2
+bspline    0.101424270 0.1342596991 0.2563613      top10    bspline
+loess      0.133801337 0.1079941543 0.2980371      top10      loess
+seurat     0.007779095 0.0005450732 0.1126729      top10     seurat</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$dapi,
+        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.06984216
+
+$pval
+[1] 0.01161179</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$gfp,
+        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.0538643
+
+$pval
+[1] 0.03134803</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$rfp,
+        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.1285371
+
+$pval
+[1] 0.0003419435</code></pre>
+<div id="seurat-scores-vs-cell-time-predictions" class="section level3">
+<h3>Seurat scores vs cell time predictions</h3>
+<pre class="r"><code>seurat.S.sup &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.supervised$pred_time_shift)]))
+seurat.S.unsup &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.trend2.unsup$pred_time_shift)]))
+seurat.G2M.sup &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.supervised$pred_time_shift)]))
+seurat.G2M.unsup &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.trend2.unsup$pred_time_shift)]))
+
+seurat.S.owntime &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.seurat$cell_times_est)]))
+seurat.G2M.owntime &lt;- with(results_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.seurat$cell_times_est)]))
+
+save(seurat.S.sup, seurat.S.unsup,
+     seurat.G2M.sup, seurat.G2M.unsup,
+     seurat.S.owntime, seurat.G2M.owntime,
+     file = &quot;../output/method-eval-withheld-explore.Rmd/seurat.time.top10.rda&quot;)</code></pre>
+<pre class="r"><code>load(file=&quot;../output/method-eval-withheld-explore.Rmd/seurat.time.top10.rda&quot;)
+
+c(seurat.S.sup$pve, seurat.G2M.sup$pve)</code></pre>
+<pre><code>[1] 0.3896577 0.5287918</code></pre>
+<pre class="r"><code>c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)</code></pre>
+<pre><code>[1] 0.2623815 0.5239003</code></pre>
+<pre class="r"><code>c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)</code></pre>
+<pre><code>[1] 0.8272036 0.8565118</code></pre>
+<pre class="r"><code>with(results_eval_top10,
+  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))</code></pre>
+<pre><code>$pve
+[1] 0.6777578
+
+$pval
+[1] 1.471869e-15</code></pre>
+<pre class="r"><code>with(results_eval_top10,
+  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
+<pre><code>$pve
+[1] 0.5747001
+
+$pval
+[1] 9.6592e-14</code></pre>
+</div>
+<div id="seurat-cell-class-vs-unsupervsied-predicted-time" class="section level3">
+<h3>Seurat cell class vs unsupervsied predicted time</h3>
+<pre class="r"><code>cols &lt;- c(&quot;orange&quot;, &quot;red&quot;, &quot;brown&quot;)
+par(mfrow=c(1,3))
+with(results_eval_top10, 
+     hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;G1&quot;],
+     nclass=5, col=cols[1], main = &quot;G1, 10 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top10, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;S&quot;],
+     nclass=10, col=cols[2],
+     main = &quot;S, 66 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top10, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;G2M&quot;],
+     nclass=10, col=cols[3],
+     main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+title(&quot;Unsupervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
+<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="seurat-clases-vs-supervsied-cell-times" class="section level3">
+<h3>Seurat clases vs supervsied cell times</h3>
+<pre class="r"><code>cols &lt;- c(&quot;orange&quot;, &quot;red&quot;, &quot;brown&quot;)
+par(mfrow=c(1,3))
+with(results_eval_top10, 
+     hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;G1&quot;],
+     nclass=5, col=cols[1], main = &quot;G1, 10 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top10, hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;S&quot;],
+     nclass=10, col=cols[2],
+     main = &quot;S, 66 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top10, hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;G2M&quot;],
+     nclass=10, col=cols[3],
+     main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+title(&quot;Supervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
+<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="before-removing-moisy-labels-on-top-101-cyclical-genes" class="section level2">
+<h2>Before removing moisy labels, on top 101 cyclical genes</h2>
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
+source(&quot;../peco/R/run_seurat.R&quot;)
+
+mean(results_eval_top101$fit.supervised$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.09062966</code></pre>
+<pre class="r"><code>mean(results_eval_top101$fit.trend2.unsup$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.1160692</code></pre>
+<pre class="r"><code>mean(results_eval_top101$fit.seurat$diff_time)/2/pi</code></pre>
+<pre><code>[1] 0.1450893</code></pre>
+<pre class="r"><code>pve.wrapper &lt;- function(results_list, methods_list) {
+  res &lt;- lapply(1:length(results_list), 
+       function(i) {
+          obj &lt;- results_list[[i]]
+          out &lt;- data.frame(
+            dapi=with(obj, get.pve(dapi[order(pred_time_shift)])$pve),
+            gfp=with(obj, get.pve(gfp[order(pred_time_shift)])$pve),
+            rfp=with(obj, get.pve(rfp[order(pred_time_shift)])$pve) )
+  })
+  names(res) &lt;- methods_list
+  return(res)
+}
+
+
+results_list &lt;- results_eval_top101
+methods_list &lt;- sapply(names(results_list), function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
+
+pve_eval_top101 &lt;- do.call(rbind, pve.wrapper(results_list=results_eval_top101, 
+                               methods_list=methods_list))</code></pre>
+<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
+Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
+<pre class="r"><code>pve_eval_top101$genes_used &lt;- &quot;top101&quot;
+pve_eval_top101$methods &lt;- methods_list
+saveRDS(pve_eval_top101,
+        &quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top101.rds&quot;)</code></pre>
+<pre class="r"><code>pve_eval_top101 &lt;- readRDS(&quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top101.rds&quot;)
+print(pve_eval_top101)</code></pre>
+<pre><code>                  dapi          gfp       rfp genes_used    methods
+supervised 0.099929197 0.1208146060 0.2861203     top101 supervised
+trend2     0.147145939 0.0948834158 0.1423536     top101     trend2
+bspline    0.183418205 0.0020355877 0.3354409     top101    bspline
+loess      0.004744912 0.0649387956 0.1642361     top101      loess
+seurat     0.007779095 0.0005450732 0.1126729     top101     seurat</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$dapi,
+        xx=results_eval_top101$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.06984216
+
+$pval
+[1] 0.01161179</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$gfp,
+        xx=results_eval_top101$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.0538643
+
+$pval
+[1] 0.03134803</code></pre>
+<pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$rfp,
+        xx=results_eval_top101$fit.seurat$assignments)</code></pre>
+<pre><code>$pve
+[1] 0.1285371
+
+$pval
+[1] 0.0003419435</code></pre>
+<div id="seurat-scores-vs-cell-time-predictions-1" class="section level3">
+<h3>Seurat scores vs cell time predictions</h3>
+<pre class="r"><code>seurat.S.sup &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.supervised$pred_time_shift)]))
+seurat.S.unsup &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.trend2.unsup$pred_time_shift)]))
+seurat.G2M.sup &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.supervised$pred_time_shift)]))
+seurat.G2M.unsup &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.trend2.unsup$pred_time_shift)]))
+
+seurat.S.owntime &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.seurat$cell_times_est)]))
+seurat.G2M.owntime &lt;- with(results_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.seurat$cell_times_est)]))
+
+save(seurat.S.sup, seurat.S.unsup,
+     seurat.G2M.sup, seurat.G2M.unsup,
+     seurat.S.owntime, seurat.G2M.owntime,
+     file = &quot;../output/method-eval-withheld-explore.Rmd/seurat.time.top101.rda&quot;)</code></pre>
+<pre class="r"><code>load(file=&quot;../output/method-eval-withheld-explore.Rmd/seurat.time.top101.rda&quot;)
+
+c(seurat.S.sup$pve, seurat.G2M.sup$pve)</code></pre>
+<pre><code>[1] 0.4832478 0.6548333</code></pre>
+<pre class="r"><code>c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)</code></pre>
+<pre><code>[1] 0.5051351 0.5050090</code></pre>
+<pre class="r"><code>c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)</code></pre>
+<pre><code>[1] 0.8272036 0.8565118</code></pre>
+<pre class="r"><code>with(results_eval_top101,
+  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))</code></pre>
+<pre><code>$pve
+[1] 0.6777578
+
+$pval
+[1] 1.471869e-15</code></pre>
+<pre class="r"><code>with(results_eval_top101,
+  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
+<pre><code>$pve
+[1] 0.5747001
+
+$pval
+[1] 9.6592e-14</code></pre>
+</div>
+<div id="seurat-cell-class-vs-unsupervsied-predicted-time-1" class="section level3">
+<h3>Seurat cell class vs unsupervsied predicted time</h3>
+<pre class="r"><code>cols &lt;- c(&quot;orange&quot;, &quot;red&quot;, &quot;brown&quot;)
+par(mfrow=c(1,3))
+with(results_eval_top101, 
+     hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;G1&quot;],
+     nclass=5, col=cols[1], main = &quot;G1, 10 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top101, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;S&quot;],
+     nclass=10, col=cols[2],
+     main = &quot;S, 66 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top101, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assignments==&quot;G2M&quot;],
+     nclass=10, col=cols[3],
+     main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+title(&quot;Unsupervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
+<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="seurat-clases-vs-supervsied-cell-times-1" class="section level3">
+<h3>Seurat clases vs supervsied cell times</h3>
+<pre class="r"><code>cols &lt;- c(&quot;orange&quot;, &quot;red&quot;, &quot;brown&quot;)
+par(mfrow=c(1,3))
+with(results_eval_top101, 
+     hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;G1&quot;],
+     nclass=5, col=cols[1], main = &quot;G1, 10 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top101, hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;S&quot;],
+     nclass=10, col=cols[2],
+     main = &quot;S, 66 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+with(results_eval_top101, hist(fit.supervised$pred_time_shift[fit.seurat$assignments==&quot;G2M&quot;],
+     nclass=10, col=cols[3],
+     main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
+     xlab=&quot;Predicted cell time&quot;))
+title(&quot;Supervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
+<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] genlasso_1.3  igraph_1.2.1  Matrix_1.2-14 MASS_7.3-50  
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17    lattice_0.20-35 digest_0.6.15   rprojroot_1.3-2
+ [5] grid_3.4.3      backports_1.1.2 git2r_0.21.0    magrittr_1.5   
+ [9] evaluate_0.10.1 stringi_1.2.3   rmarkdown_1.10  tools_3.4.3    
+[13] stringr_1.3.1   yaml_2.1.19     compiler_3.4.3  pkgconfig_2.0.1
+[17] htmltools_0.3.6 knitr_1.20     </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
