@@ -55,7 +55,7 @@ run_methods <- function(Y_test, Y_test_normed,
                                                polyorder=2,
                                                maxiter=maxiter, verbose=TRUE, tol=1)
 
-  message("Begin Seurate...")
+  message("Begin Seurat...")
   # replace Y_test rownames with symbols
   symbols <- fdata$name[match(rownames(Y_test), rownames(fdata))]
   Y_test_seurat <- Y_test

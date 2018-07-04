@@ -35,12 +35,9 @@ fold_indices <- readRDS(file=file.path(dir, "data/results/fold_indices.rds"))
 
 Y_normed_topX <- data_training$log2cpm.quant.nonvalid[
   rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
-fdata_topX <- data_training$fdata[rownames(data_training$fdata) %in% rownames(sig.genes)[1:ngenes],]
+#fdata_topX <- data_training$fdata[rownames(data_training$fdata) %in% rownames(sig.genes)[1:ngenes],]
 
-all.equal(rownames(Y_normed_topX), rownames(fdata_topX))
-
-# Y <- data_training$log2cpm.nonvalid[
-#   rownames(data_training$log2cpm.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
+# all.equal(rownames(Y_normed_topX), rownames(fdata_topX))
 
 
 fits <- vector("list", length(fold_indices))
@@ -66,7 +63,7 @@ for (run in 1:length(fold_indices)) {
                              training_model=fit.train,
                              seurat.genes=seurat.genes,
                              pdata_test=pdata_test_fold,
-                             fdata=fdata_topX,
+                             fdata=fdata,
                              ncores=ncores, maxiter=30)
 }
 names(fits) <- paste0("fold.", 1:length(fold_indices))

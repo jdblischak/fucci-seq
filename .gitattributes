@@ -35,6 +35,8 @@ output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-labels-seurat.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-eval-withheld-explore.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/method-train-labels.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/method-train-labels-equalfold.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 # finalized results
 data/results/* filter=lfs diff=lfs merge=lfs -text

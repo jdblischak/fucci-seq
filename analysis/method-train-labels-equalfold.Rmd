@@ -1,0 +1,324 @@
+---
+title: "Evaluate results with/without noisy training labels, equal-sized folds"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Summary
+
+1. Here I remove the noisy labels before partitioning samples. 
+
+2. Compared to results when partitioning the sample before removing the noisy labels, we have a better improvement in prediction margin of error and in DAPI PVE. See those results [here](docs/method-training-labels.html). 
+
+
+
+
+---
+
+## Define PC outliers
+
+```{r}
+library(Biobase)
+source("../peco/R/cycle.corr.R")
+source("../peco/R/cycle.npreg.R")
+
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+# select external validation samples
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+
+# first check the theta in pdata
+pca <- prcomp(cbind(pdata$rfp.median.log10sum.adjust,
+                    pdata$gfp.median.log10sum.adjust), scale=TRUE)
+pca_df <- cbind(pca$x[,1],pca$x[,2])
+rownames(pca_df) <- rownames(pdata)
+
+library(circular)
+theta_check <- as.numeric(coord2rad(pca_df))
+theta_check <- 2*pi-theta_check
+#plot(theta_check, pdata$theta)
+names(theta_check) <- rownames(pdata)
+
+dist_to_origin <- sqrt(pca_df[,1]^2+pca_df[,2]^2)
+which_out <- rownames(pdata)[which(scale(dist_to_origin) < -1)]
+
+
+log2cpm.quant.filt <- log2cpm.quant[, !(colnames(log2cpm.quant) %in% which_out)]
+
+#intersect(colnames(log2cpm.quant.filt), which_out)
+
+set.seed(99)
+nvalid <- round(ncol(log2cpm.quant.filt)*.15)
+ii.valid <- sample(1:ncol(log2cpm.quant.filt), nvalid, replace = F)
+ii.nonvalid <- setdiff(1:ncol(log2cpm.quant.filt), ii.valid)
+
+log2cpm.quant.filt.nonvalid <- log2cpm.quant.filt[,ii.nonvalid]
+log2cpm.quant.filt.valid <- log2cpm.quant.filt[,ii.valid]
+
+sig.genes <- readRDS("../output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.101.rds")
+
+# get predicted times
+# set training samples
+source("../peco/R/primes.R")
+source("../peco/R/partitionSamples.R")
+parts <- partitionSamples(1:ncol(log2cpm.quant.filt.nonvalid), runs=5,
+                          nsize.each = rep(133,5))
+part_indices <- parts$partitions
+```
+
+
+---
+
+## Fitting excluding PC outliers 
+
+Top 101 genes
+
+```{r, eval=F}
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/cycle.npreg.R")
+source("../peco/R/utility.R")
+
+expr_sub <- log2cpm.quant.filt.nonvalid[rownames(log2cpm.quant.filt.nonvalid) %in% rownames(sig.genes), ]
+
+fits_top101 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+  
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=12,
+                                    polyorder=2,
+                                    method.trend="trendfilter")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="trendfilter",
+                                    ncores=12)
+  
+  fits_top101[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top101[[i]]$theta_est_shift <- rotation(fits_top101[[i]]$theta_test, fits_top101[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_top101, file = "../output/method-train-labels-equalfold.Rmd/fits_top101.rds")
+
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_top101[[i]]$theta_est_shift-fits_top101[[i]]$theta_test),
+    abs(fits_top101[[i]]$theta_est_shift-(2*pi-fits_top101[[i]]$theta_test)))
+})
+
+pve <- lapply(1:length(fits_top101), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits_top101[[i]]$theta_est_shift)])
+})
+
+save(diff_time, pve, 
+     file = "../output/method-train-labels-equalfold.Rmd/modelresults_top101.rda")
+# ```
+# 
+# 
+# 
+# Top 10 genes
+# 
+# ```{r, eval=F}
+expr_sub <- log2cpm.quant.filt.nonvalid[rownames(log2cpm.quant.filt.nonvalid) %in% rownames(sig.genes)[1:10], ]
+
+fits_top10 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr_sub[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+  
+  fit.train <- cycle.npreg.insample(Y = Y_train, 
+                                    theta = theta_train, 
+                                    ncores=12,
+                                    polyorder=2,
+                                    method.trend="trendfilter")
+  # fitting test data
+  Y_test <- expr_sub[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="trendfilter",
+                                    ncores=12)
+  
+  fits_top10[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test)
+}
+
+for (i in 1:5) {
+  fits_top10[[i]]$theta_est_shift <- rotation(fits_top10[[i]]$theta_test, fits_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_top10, file = "../output/method-train-labels-equalfold.Rmd/fits_top10.rds")
+
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_top10[[i]]$theta_est_shift-fits_top10[[i]]$theta_test),
+    abs(fits_top10[[i]]$theta_est_shift-(2*pi-fits_top10[[i]]$theta_test)))
+})
+
+pve <- lapply(1:length(fits_top10), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_top10[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits_top10[[i]]$theta_est_shift)])
+})
+
+save(diff_time, pve, 
+     file = "../output/method-train-labels-equalfold.Rmd/modelresults_top10.rda")
+```
+
+---
+
+## Results
+
+
+```{r}
+load(file = "../output/method-train-labels-equalfold.Rmd/modelresults_top101.rda")
+mean(sapply(diff_time, mean)/2/pi)
+mean(unlist(pve))
+
+load(file = "../output/method-train-labels-equalfold.Rmd/modelresults_top10.rda")
+mean(sapply(diff_time, mean)/2/pi)
+mean(unlist(pve))
+```
+
+---
+
+## fitting top 10 genes without PC outliers
+
+```{r, eval=F}
+fits_sub_top10 <- vector("list", 5)
+for (run in 1:5) {
+  print(run)
+  # fitting training data
+  Y_train <- expr.sig[,part_indices[[run]]$train]
+  theta_train <- theta_check[match(colnames(Y_train), rownames(pdata))]
+  names(theta_train) <- colnames(Y_train) 
+  
+  Y_train_sub <- Y_train[,which(!(colnames(Y_train) %in% which_out))]
+  theta_train_sub <- theta_train[which(!(names(theta_train) %in% which_out))]
+
+  fit.train <- cycle.npreg.insample(Y = Y_train_sub, 
+                                    theta = theta_train_sub, 
+                                    ncores=12,
+                                    polyorder=2,
+                                    method.trend="trendfilter")
+  # fitting test data
+  Y_test <- expr.sig[,part_indices[[run]]$test]
+  theta_test <- theta_check[match(colnames(Y_test), rownames(pdata))]
+  names(theta_test) <- colnames(Y_test) 
+
+  Y_test_sub <- Y_test[,which(!(colnames(Y_test) %in% which_out))]
+  theta_test_sub <- theta_test[which(!(names(theta_test) %in% which_out))]
+
+  fit.test <- cycle.npreg.outsample(Y_test=Y_test_sub,
+                                    sigma_est=fit.train$sigma_est,
+                                    funs_est=fit.train$funs_est,
+                                    method.grid = "uniform",
+                                    method.trend="trendfilter",
+                                    ncores=12)
+  
+  fits_sub_top10[[run]] <- list(fit.train=fit.train,
+                      fit.test=fit.test,
+                      theta_test=theta_test_sub)
+}
+
+for (i in 1:5) {
+  fits_sub_top10[[i]]$theta_est_shift <- rotation(fits_sub_top10[[i]]$theta_test, fits_sub_top10[[i]]$fit.test$cell_times_est)$y2shift
+}
+
+saveRDS(fits_sub_top10, file = "../output/method-train-labels.Rmd/fits_sub_top10.rds")
+
+
+diff_time <- lapply(1:5, function(i) {
+  pmin(abs(fits_sub_top10[[i]]$theta_est_shift-fits_sub_top10[[i]]$theta_test),
+    abs(fits_sub_top10[[i]]$theta_est_shift-(2*pi-fits_sub_top10[[i]]$theta_test)))
+})
+
+pve <- lapply(1:length(fits_sub), function(i) {
+  dap <- pdata$dapi.median.log10sum[match(names(fits_sub_top10[[i]]$theta_test),rownames(pdata))]
+  get.pve(dap[order(fits_sub_top10[[i]]$theta_est_shift)])
+})
+
+save(diff_time, pve,
+     file="../output/method-train-labels.Rmd/modelresults_excludeoutlier_top10.rda")
+```
+
+
+```{r}
+load(file="../output/method-train-labels.Rmd/modelresults_excludeoutlier_top10.rda")
+mean(sapply(diff_time, mean)/2/pi)
+mean(unlist(pve))
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
+
