@@ -73,7 +73,7 @@ dependencies:
 - future=0.16.0=py36_0
 - gettext=0.19.7=1
 - git=2.14.2=3
-- git-lfs=2.3.3=0
+- git-lfs=2.4.2=0
 - glib=2.55.0=0
 - gmp=6.1.2=0
 - google-auth=1.2.1=py_0
