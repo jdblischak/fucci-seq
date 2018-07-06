@@ -36,24 +36,24 @@ run_methods <- function(Y_test, Y_test_normed,
   theta_initial <- initialize_grids(Y_test_normed.cycle, method.grid="pca")
   names(theta_initial) <- colnames(Y_test_normed.cycle)
 
-  message("Begin unsupervised bspline...")
-  fit.bspline.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
-                                                ncores=ncores,
-                                                method.trend="bspline",
-                                                maxiter=maxiter, verbose=TRUE, tol=1)
+  # message("Begin unsupervised bspline...")
+  # fit.bspline.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
+  #                                               ncores=ncores,
+  #                                               method.trend="bspline",
+  #                                               maxiter=maxiter, verbose=TRUE, tol=1)
+  #
+  # message("Begin unsupervised loess...")
+  # fit.loess.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
+  #                                             ncores=ncores,
+  #                                             method.trend="loess",
+  #                                             maxiter=maxiter, verbose=TRUE, tol=1)
 
-  message("Begin unsupervised loess...")
-  fit.loess.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
-                                              ncores=ncores,
-                                              method.trend="loess",
-                                              maxiter=maxiter, verbose=TRUE, tol=1)
-
-  message("Begin unsupervised trendfilter...")
-  fit.trend2.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
-                                               ncores=ncores,
-                                               method.trend="trendfilter",
-                                               polyorder=2,
-                                               maxiter=maxiter, verbose=TRUE, tol=1)
+  # message("Begin unsupervised trendfilter...")
+  # fit.trend2.unsup <- cycle.npreg.unsupervised(Y=Y_test_normed.cycle, theta=theta_initial,
+  #                                              ncores=ncores,
+  #                                              method.trend="trendfilter",
+  #                                              polyorder=2,
+  #                                              maxiter=maxiter, verbose=TRUE, tol=1)
 
   message("Begin Seurat...")
   # replace Y_test rownames with symbols
@@ -78,9 +78,9 @@ run_methods <- function(Y_test, Y_test_normed,
   message("Tidying up results...")
 
   out <- list(fit.supervised=fit.supervised,
-              fit.trend2.unsup=fit.trend2.unsup,
-              fit.bspline.unsup=fit.bspline.unsup,
-              fit.loess.unsup=fit.loess.unsup,
+              #fit.trend2.unsup=fit.trend2.unsup,
+              #fit.bspline.unsup=fit.bspline.unsup,
+              #fit.loess.unsup=fit.loess.unsup,
               fit.seurat=fit.seurat)
 
   set.seed(111)
@@ -91,13 +91,12 @@ run_methods <- function(Y_test, Y_test_normed,
     out[[i]]$ref_time <- theta_test
     out[[i]]$pred_time <- with(out[[i]], cell_times_est[match(names(ref_time),
                                                         names(cell_times_est))])
-    out[[i]]$pred_time_shift <- with(out[[i]], rotation(ref_time, pred_time)$y2shift)
-    out[[i]]$diff_time <- with(out[[i]], pmin(abs(pred_time_shift - ref_time),
-                                              abs(pred_time_shift - (2*pi - ref_time))))
-    out[[i]]$ref_time_null <- theta_test_null
-    out[[i]]$pred_time_null_shift <- with(out[[i]], rotation(ref_time_null, pred_time)$y2shift)
-    out[[i]]$diff_time_null <- with(out[[i]], pmin(abs(pred_time_null_shift - ref_time_null),
-                                              abs(pred_time_null_shift - (2*pi - ref_time_null))))
+    out[[i]]$pred_time_shift <- with(out[[i]], rotation(ref_time, pred_time))
+    out[[i]]$diff_time <- with(out[[i]], circ_dist(pred_time_shift, ref_time))
+    # out[[i]]$ref_time_null <- theta_test_null
+    # out[[i]]$pred_time_null_shift <- with(out[[i]], rotation(ref_time_null, pred_time)$y2shift)
+    # out[[i]]$diff_time_null <- with(out[[i]], pmin(abs(pred_time_null_shift - ref_time_null),
+    #                                           abs(pred_time_null_shift - (2*pi - retgoof_time_null))))
     out[[i]]$dapi <- pdata_test$dapi.median.log10sum.adjust[
       match(names(theta_test), rownames(pdata_test))]
     out[[i]]$gfp <- pdata_test$gfp.median.log10sum.adjust[
