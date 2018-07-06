@@ -1,43 +1,74 @@
-#' @title Compute correlations between rank orders of the cell times
+#' @title pairwise distance between two circular variables
 #'
-#' @param y1 numeric vector of length N with values betwen 0 to 2pi
-#' @param y2 numeric vector of length N with values betwen 0 to 2pi
+circ_dist <- function(y1,y2){
+  pmin(abs(y2-y1), abs(2*pi-(abs(y2-y1))))
+}
+
+
+#' @title rotate circular variable y2 to minimize distance between y1 and y2
 #'
 #' @export
-rotation <- function(y1, y2, ...) {
-  theta_grid <- y2
-  #  theta_grid <- theta_grid[1:2]
-  diff_time_sum <- c()
-  for(which_cutpoint in 1:length(theta_grid)) {
-    cutpoint <- theta_grid[which_cutpoint]
-    y2shift <- rep(0, length(y2))
-    for (c in 1:length(y2)) {
-      if (y2[c] >= cutpoint) {y2shift[c] <- y2[c]-2*pi}
-      else {
-        y2shift[c] <- y2[c]
-      }
-    }
-    if (min(y2shift) < 0) {y2shift <- y2shift-min(y2shift)}
-    diff_time_sum <- c(diff_time_sum,
-                       sum((pmin(abs(y1-y2shift), abs(y1-(2*pi-y2shift))))^2))
-  }
+rotation <- function(ref_var,shift_var){
 
-  cutpoint_choose <- theta_grid[which.min(diff_time_sum)]
-  y2shift <- rep(0, length(y2))
-  for (c in 1:length(y2)) {
-    if (y2[c] >= cutpoint_choose) {y2shift[c] <- y2[c]-2*pi}
-    else {
-      y2shift[c] <- y2[c]
-    }
-  }
-  if (min(y2shift) < 0) {y2shift <- y2shift-min(y2shift)}
-  names(y2shift) <- names(y2)
+  df <- data.frame(flip=rep(c(1,-1), each=length(shift_var)),
+                   shift = rep(shift_var, 2))
 
-  return(list(y1=y1,
-              y2=y2,
-              y2shift=y2shift,
-              cutpoint_choose=cutpoint_choose))
+  for (i in 1:nrow(df)) {
+    shift_var_tmp <- df$flip[i]*((shift_var+df$shift[i])%%(2*pi))
+    df$dis[i] <- mean(circ_dist(ref_var, shift_var_tmp))
+  }
+  which_cutoff <- which.min(df$dis)
+
+  shift_var_new <- df$flip[which_cutoff]*((shift_var+df$shift[which_cutoff])%%(2*pi))
+
+  return(shift_var_new)
 }
+
+
+
+#' #' @title Circular data rotation
+#' #'
+#' #' @description For any pair of circular data (y1,y2), shift y2 until
+#' #'   the distance between y1 and y2 is minimized
+#' #'
+#' #' @param y1 numeric vector of length N with values betwen 0 to 2pi
+#' #' @param y2 numeric vector of length N with values betwen 0 to 2pi
+#' #'
+#' #' @export
+#' rotation <- function(y1, y2, ...) {
+#'   theta_grid <- y2
+#'   #  theta_grid <- theta_grid[1:2]
+#'   diff_time_sum <- c()
+#'   for(which_cutpoint in 1:length(theta_grid)) {
+#'     cutpoint <- theta_grid[which_cutpoint]
+#'     y2shift <- rep(0, length(y2))
+#'     for (c in 1:length(y2)) {
+#'       if (y2[c] >= cutpoint) {y2shift[c] <- y2[c]-2*pi}
+#'       else {
+#'         y2shift[c] <- y2[c]
+#'       }
+#'     }
+#'     if (min(y2shift) < 0) {y2shift <- y2shift-min(y2shift)}
+#'     diff_time_sum <- c(diff_time_sum,
+#'                        sum((pmin(abs(y1-y2shift), abs(y1-(2*pi-y2shift))))^2))
+#'   }
+#'
+#'   cutpoint_choose <- theta_grid[which.min(diff_time_sum)]
+#'   y2shift <- rep(0, length(y2))
+#'   for (c in 1:length(y2)) {
+#'     if (y2[c] >= cutpoint_choose) {y2shift[c] <- y2[c]-2*pi}
+#'     else {
+#'       y2shift[c] <- y2[c]
+#'     }
+#'   }
+#'   if (min(y2shift) < 0) {y2shift <- y2shift-min(y2shift)}
+#'   names(y2shift) <- names(y2)
+#'
+#'   return(list(y1=y1,
+#'               y2=y2,
+#'               y2shift=y2shift,
+#'               cutpoint_choose=cutpoint_choose))
+#' }
 
 
 #' @title Circular-circular rank correlation coefficient
