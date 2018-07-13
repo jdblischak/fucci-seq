@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Finalizing the classifer results</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Finalizing the classifer results</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#pipeline">Pipeline</a></li>
+<li><a href="#top-cyclical-genes">Top cyclical genes</a><ul>
+<li><a href="#cyclical-genes-overlaps-in-the-training-set">Cyclical genes overlaps in the training set</a></li>
+<li><a href="#given-permuted-labels-cyclical-genes-overlaps-in-the-training-set">Given permuted labels, Cyclical genes overlaps in the training set</a></li>
+<li><a href="#intersetions-across-training-sets">Intersetions across training sets</a></li>
+</ul></li>
+<li><a href="#prediction-error-by-top-x-cyclical-genes">Prediction error by top X cyclical genes</a><ul>
+<li><a href="#fucci-time-labels">fucci time labels</a></li>
+<li><a href="#random-cyclical-on-random-time">random cyclical on random time</a></li>
+<li><a href="#random-cyclical-on-fucci-time">random cyclical on fucci time</a></li>
+<li><a href="#fucci-on-random-cyclical">fucci on random cyclical</a></li>
+</ul></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-07-12</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> a6b5299</p>
+<hr />
+<div id="pipeline" class="section level2">
+<h2>Pipeline</h2>
+<ol style="list-style-type: decimal">
+<li><p>Split data to validation samples and training samples.</p>
+<ul>
+<li>The split samples are saved as <code>data/withheld.rds</code> and <code>data/training.rds</code>.<br />
+</li>
+<li>The code used to generated teh split samples is saved in <code>code/working/makedata_supervised.R</code>.</li>
+</ul></li>
+<li><p>In the training sample, repeat the following 5 times. Each time, take 4/5 of the samples, fit trendfilter and identified the top X cyclical genes, and the compute the prediction error margin as a function of the top X cyclical genes.</p>
+<ul>
+<li><code>code/run_methods.R</code>: runs all methods, including supervised, unsupervised trendfilter, unsupervised bspline, unsupervised lowess, seurat) and compute prediction error margin.<br />
+</li>
+<li><code>code/working/job_run_methods.train.R</code> calls <code>code/run_methods.R</code></li>
+<li><code>code/working/job_run_methods.train.sbatch</code> submits jobs one fold at a time.</li>
+</ul></li>
+<li><p>Based on the training sample results, select the top best X genes and fit to the validation sample. Compute and compare the methods’ performance on the validation sample.</p></li>
+</ol>
+<hr />
+</div>
+<div id="top-cyclical-genes" class="section level2">
+<h2>Top cyclical genes</h2>
+<div id="cyclical-genes-overlaps-in-the-training-set" class="section level3">
+<h3>Cyclical genes overlaps in the training set</h3>
+<pre class="r"><code>data_training_cyclical_genes.fold.1 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.1.rds&quot;)
+data_training_cyclical_genes.fold.2 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.2.rds&quot;)
+data_training_cyclical_genes.fold.3 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.3.rds&quot;)
+data_training_cyclical_genes.fold.4 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.4.rds&quot;)
+data_training_cyclical_genes.fold.5 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.5.rds&quot;)
+data_cyclical_list &lt;- list(data_training_cyclical_genes.fold.1,
+                           data_training_cyclical_genes.fold.2,
+                           data_training_cyclical_genes.fold.3,
+                           data_training_cyclical_genes.fold.4,
+                           data_training_cyclical_genes.fold.5)
+
+
+library(gplots)
+
+top100 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:100]]
+})
+venn( top100 )
+
+top50 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:50]]
+})
+venn( top50)
+
+top10 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:10]]
+})
+venn( top10)
+
+top5 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:5]]
+})
+venn( top5)
+
+
+top260 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:260]]
+})
+venn(top260)
+
+library(gplots)
+ngenes &lt;- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+genes_list &lt;- lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  tmp &lt;- lapply(1:5, function(fold) {
+    rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+                                                        decreasing = T)[1:ngene]]
+  })
+  parts &lt;- venn(tmp, show.plot = F)
+  unlist(attr(parts, &quot;intersections&quot;)$`A:B:C:D:E`)
+})
+names(genes_list) &lt;- ngenes
+
+saveRDS(genes_list, 
+        file = &quot;../data/results/results_topgenes.rds&quot;)</code></pre>
+</div>
+<div id="given-permuted-labels-cyclical-genes-overlaps-in-the-training-set" class="section level3">
+<h3>Given permuted labels, Cyclical genes overlaps in the training set</h3>
+<pre class="r"><code>data_training_cyclical_genes.fold.1 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes_permute.fold.1.rds&quot;)
+data_training_cyclical_genes.fold.2 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes_permute.fold.2.rds&quot;)
+data_training_cyclical_genes.fold.3 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes_permute.fold.3.rds&quot;)
+data_training_cyclical_genes.fold.4 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes_permute.fold.4.rds&quot;)
+data_training_cyclical_genes.fold.5 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes_permute.fold.5.rds&quot;)
+data_cyclical_list &lt;- list(data_training_cyclical_genes.fold.1,
+                           data_training_cyclical_genes.fold.2,
+                           data_training_cyclical_genes.fold.3,
+                           data_training_cyclical_genes.fold.4,
+                           data_training_cyclical_genes.fold.5)
+
+library(gplots)
+
+top100 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:100]]
+})
+venn( top100 )
+
+top50 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:50]]
+})
+venn( top50)
+
+top10 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:10]]
+})
+venn( top10)
+
+top5 &lt;- lapply(1:5, function(i) {
+  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:5]]
+})
+venn( top5)
+
+library(gplots)
+ngenes &lt;- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+genes_list &lt;- lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  tmp &lt;- lapply(1:5, function(fold) {
+    rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+                                                        decreasing = T)[1:ngene]]
+  })
+  parts &lt;- venn(tmp, show.plot = F)
+  unlist(attr(parts, &quot;intersections&quot;)$`A:B:C:D:E`)
+})
+names(genes_list) &lt;- ngenes
+
+#sapply(genes_list, function(x) length(x))
+saveRDS(genes_list, 
+        file = &quot;../data/results/results_topgenes_permute.rds&quot;)</code></pre>
+</div>
+<div id="intersetions-across-training-sets" class="section level3">
+<h3>Intersetions across training sets</h3>
+<pre class="r"><code>genes_list &lt;- readRDS(file = &quot;../data/results/results_topgenes.rds&quot;)
+genes_list_permute &lt;- readRDS(file = &quot;../data/results/results_topgenes_permute.rds&quot;)</code></pre>
+<pre class="r"><code>ngenes &lt;- as.numeric(names(genes_list))
+plot(x=ngenes[1:41], 
+     y=sapply(genes_list, function(x) length(x))[1:41],
+     xlab=&quot;Top X cyclical genes in training set&quot;, 
+     ylab=&quot;Number of shared cyclical genes&quot;,
+     main = &quot;Shared cyclical genes across the five training sets&quot;,
+     xlim=c(0,410), pch=16, cex=.7, col=&quot;gray50&quot;)
+abline(v=260, col=&quot;gray50&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ngenes &lt;- as.numeric(names(genes_list))
+plot(x=ngenes, 
+     y=sapply(genes_list, function(x) length(x)),
+     xlab=&quot;Top X cyclical genes in training set&quot;, 
+     ylab=&quot;Number of shared cyclical genes&quot;,
+     main = &quot;Shared cyclical genes across the five training sets&quot;,
+     xlim=c(0,11100), pch=16, cex=.7, col=&quot;gray50&quot;)
+points(x=ngenes,
+       y=sapply(genes_list_permute, function(x) length(x)),
+       pch=16, cex=.7, col=&quot;blue&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># ngenes &lt;- as.numeric(names(genes_list))
+# plot(x=ngenes, 
+#      y=sapply(genes_list, function(x) length(x)),
+#      xlab=&quot;Top X cyclical genes in training set&quot;, 
+#      ylab=&quot;Number of shared cyclical genes&quot;,
+#      main = &quot;Shared cyclical genes in top 1000&quot;,
+#      xlim=c(0,1000), pch=16, cex=.7, col=&quot;gray50&quot;, ylim=c(1,250))
+# points(x=ngenes,
+#        y=sapply(genes_list_permute, function(x) length(x)),
+#        pch=16, cex=.7, col=&quot;blue&quot;)
+
+
+ngenes &lt;- as.numeric(names(genes_list))
+plot(x=ngenes, 
+     y=sapply(genes_list, function(x) length(x)),
+     xlab=&quot;Top X cyclical genes in training set&quot;, 
+     ylab=&quot;Number of shared cyclical genes&quot;,
+     main = &quot;Shared genes in top 400 cyclical&quot;,
+     xlim=c(0,400), pch=16, cex=.7, col=&quot;gray50&quot;, ylim=c(1,110))
+points(x=ngenes,
+       y=sapply(genes_list_permute, function(x) length(x)),
+       pch=16, cex=.7, col=&quot;blue&quot;)
+abline(v=260, col=&quot;gray50&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fdr &lt;- sapply(1:length(genes_list), function(i) {
+  a &lt;- unlist(genes_list[i])
+  b &lt;- unlist(genes_list_permute[i])
+  ll &lt;- length(intersect(b,a))
+  ll/length(a)
+})
+names(fdr) &lt;- names(genes_list)
+
+saveRDS(fdr, file = &quot;../output/method-train-classifiers-all.Rmd/fdr.rds&quot;)</code></pre>
+<pre class="r"><code>fdr &lt;- readRDS(file = &quot;../output/method-train-classifiers-all.Rmd/fdr.rds&quot;)
+plot(as.numeric(names(fdr)), fdr,
+     xlab=&quot;Top X cyclical genes&quot;,
+     ylab=&quot;Fraction of permuted in observed&quot;,
+     main=&quot;False discovery rate (fraction of permuted in observed&quot;,
+     pch=16, cex=.7)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(as.numeric(names(fdr))[1:1000], fdr[1:1000],
+     xlab=&quot;Top X cyclical genes&quot;,
+     ylab=&quot;Fraction of permuted in observed&quot;,
+     main=&quot;False discovery rate in top 1000&quot;,
+     pch=16, cex=.7,
+     xlim=c(1,1000), ylim=c(0,.05))</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(as.numeric(names(fdr))[1:400], fdr[1:400],
+     xlab=&quot;Top X cyclical genes&quot;,
+     ylab=&quot;Fraction of permuted in observed&quot;,
+     main=&quot;False discovery rate in top 400&quot;,
+     pch=16, cex=.7,
+     xlim=c(1,400), ylim=c(0,.06))
+abline(v=260, col=&quot;gray50&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="prediction-error-by-top-x-cyclical-genes" class="section level2">
+<h2>Prediction error by top X cyclical genes</h2>
+<p>code for summarize results</p>
+<pre class="r"><code>diff_time_wrapper &lt;- function(results_list) {
+  
+  methods_list &lt;- sapply(names(results_list),
+                         function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
+  
+  diff_time_list &lt;- do.call(rbind, lapply(1:length(results_list), function(i) {
+    diff_time &lt;- results_list[[i]]$diff_time
+    diff_mean &lt;- mean(diff_time/2/pi)
+#    diff_se &lt;- sd(diff_time/2/pi)/sqrt(ncol(results_list[[1]]$Y))
+
+    return(data.frame(diff_mean=diff_mean,
+#                      diff_se=diff_se,
+                      methods=methods_list[i]))
+  }) )
+  return(diff_time_list)  
+}</code></pre>
+<p>summarize results</p>
+<pre class="r"><code># ngenes &lt;- c(5, seq(10,400, by=10))
+# train_top &lt;- lapply(1:length(ngenes), function(i) {
+#   ngene &lt;- ngenes[i]
+#   train_topX &lt;- unlist(lapply(1:5, function(fold) {
+#     fl_name &lt;- list.files(&quot;../data/results&quot;,
+#                    pattern=paste0(&quot;results_train.fold.&quot;,fold,&quot;.top&quot;,ngene,&quot;.rds&quot;),
+#                    full.names = TRUE)
+#     return(fl_name)
+#   }) )
+#   return(train_topX)
+# })
+
+ngenes &lt;- c(5, seq(10,400, by=10))
+train_top &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train.fold.&quot;,fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top, file = &quot;../output/method-train-classifiers-all.Rmd/diff_time_all.rds&quot;)
+
+
+
+ngenes &lt;- c(5, seq(10,200, by=10))
+train_top_permute &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train_permute.fold.&quot;,
+                      fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top_permute, 
+        file = &quot;../output/method-train-classifiers-all.Rmd/diff_time_all_permute.rds&quot;)
+
+
+
+ngenes &lt;- c(5, seq(10,200, by=10))
+train_top_permute &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train_permute_onrandom.fold.&quot;,
+                      fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top_permute, 
+        file = &quot;../output/method-train-classifiers-all.Rmd/diff_time_rando_on_fucci.rds&quot;)
+
+
+ngenes &lt;- c(5, seq(10,200, by=10))
+train_top_permute &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train_permute_oncyclical.fold.&quot;,
+                      fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top_permute, 
+        file = &quot;../output/method-train-classifiers-all.Rmd/diff_time_fucci_on_rando.rds&quot;)</code></pre>
+<div id="fucci-time-labels" class="section level3">
+<h3>fucci time labels</h3>
+<pre class="r"><code>train_top &lt;- readRDS(&quot;../output/method-train-classifiers-all.Rmd/diff_time_all.rds&quot;)
+
+library(ggplot2)
+
+ggplot(train_top,  
+       aes(x=ngenes, y=diff_mean, color=methods)) +
+  geom_errorbar(subset(train_top, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se)) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/fucci-label-results-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(train_top, methods == &quot;supervised&quot;), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_errorbar(subset(train_top, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se),
+                color=&quot;blue&quot;) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/fucci-label-results-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Check between 5 genes and 100 genes</p>
+<pre class="r"><code>#ngenes &lt;- c(5, seq(10,400, by=10))
+ngenes &lt;- c(5, 10, 20, 100)
+train_top &lt;- lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train.fold.&quot;,fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+    }) )
+  train_topX$ngenes &lt;- ngene
+  return(data.frame(train_topX))
+})
+
+tmp &lt;- do.call(cbind, train_top)
+tmp &lt;- tmp[tmp$methods== &quot;supervised&quot;,]
+tmp &lt;- tmp[,c(3,1,5, 9, 13)]
+colnames(tmp) &lt;- c(&quot;fold&quot;, paste0(&quot;top&quot;,c(5, 10, 20, 100)))</code></pre>
+</div>
+<div id="random-cyclical-on-random-time" class="section level3">
+<h3>random cyclical on random time</h3>
+<pre class="r"><code>train_top_permute &lt;- readRDS(&quot;../output/method-train-classifiers-all.Rmd/diff_time_all_permute.rds&quot;)
+
+library(ggplot2)
+
+ggplot(train_top_permute,  
+       aes(x=ngenes, y=diff_mean, color=methods)) +
+  geom_errorbar(subset(train_top_permute, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se)) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(train_top_permute, methods == &quot;supervised&quot;), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_errorbar(subset(train_top_permute, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se),
+                color=&quot;blue&quot;) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="random-cyclical-on-fucci-time" class="section level3">
+<h3>random cyclical on fucci time</h3>
+<pre class="r"><code>train_rando_on_fucci &lt;- readRDS(&quot;../output/method-train-classifiers-all.Rmd/diff_time_rando_on_fucci.rds&quot;)
+
+library(ggplot2)
+
+ggplot(subset(train_rando_on_fucci, methods == &quot;supervised&quot;), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_errorbar(subset(train_rando_on_fucci, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se),
+                color=&quot;blue&quot;) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Random cyclical genes predicting fucci times&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="fucci-on-random-cyclical" class="section level3">
+<h3>fucci on random cyclical</h3>
+<pre class="r"><code>train_fucci_on_rando &lt;- readRDS(&quot;../output/method-train-classifiers-all.Rmd/diff_time_fucci_on_rando.rds&quot;)
+
+ggplot(subset(train_fucci_on_rando, methods == &quot;supervised&quot;), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_errorbar(subset(train_fucci_on_rando, methods == &quot;supervised&quot;),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se),
+                color=&quot;blue&quot;) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;fucci cyclical genes predicting random times&quot;)</code></pre>
+<p><img src="figure/method-train-classifiers-all.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_2.2.1
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17     digest_0.6.15    rprojroot_1.3-2  plyr_1.8.4      
+ [5] grid_3.4.3       gtable_0.2.0     backports_1.1.2  git2r_0.21.0    
+ [9] magrittr_1.5     scales_0.5.0     evaluate_0.10.1  pillar_1.1.0    
+[13] rlang_0.1.6      stringi_1.1.6    lazyeval_0.2.1   rmarkdown_1.10  
+[17] labeling_0.3     tools_3.4.3      stringr_1.2.0    munsell_0.4.3   
+[21] yaml_2.1.16      compiler_3.4.3   colorspace_1.3-2 htmltools_0.3.6 
+[25] knitr_1.20       tibble_1.4.2    </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
