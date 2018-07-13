@@ -221,10 +221,9 @@ div.section {
 
 <div id="TOC">
 <ul>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#summary-analysis">Summary analysis</a></li>
+<li><a href="#summary-and-overview">Summary and overview</a></li>
 <li><a href="#model-training-and-prediction-results">Model training and prediction results</a></li>
-<li><a href="#explore-aproaches-to-fitting-cyclical-trend">Explore aproaches to fitting cyclical trend</a></li>
+<li><a href="#approaches-to-fitting-cyclical-trend-in-gene-expression-data">Approaches to fitting cyclical trend in gene expression data</a></li>
 <li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
 <li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
 <li><a href="#microscopy-image-analysis">Microscopy image analysis</a></li>
@@ -233,16 +232,10 @@ div.section {
 </div>
 
 <hr />
-<div id="overview" class="section level2">
-<h2>Overview</h2>
+<div id="summary-and-overview" class="section level2">
+<h2>Summary and overview</h2>
 <ul>
 <li><a href="data-overview.html">Data description</a></li>
-</ul>
-<hr />
-</div>
-<div id="summary-analysis" class="section level2">
-<h2>Summary analysis</h2>
-<ul>
 <li><a href="talk-20180416.html">Seminar talk 2018-04-16</a></li>
 <li>Some code for generating plots for the paper
 <ul>
@@ -254,25 +247,42 @@ div.section {
 <div id="model-training-and-prediction-results" class="section level2">
 <h2>Model training and prediction results</h2>
 <ul>
-<li><p><a href="method-npreg.html">Early analysis using trendfilter</a> (to be updated…)</p></li>
+<li><p>Early analysis <a href="method-npreg.html">using trendfilter and evaluating model performance</a></p></li>
 <li><p>Investigate the property and quality of <a href="method-labels.html">the cell time labels derived from GFP and RFP</a>: PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.</p></li>
 <li><p>Investigate the property of <a href="method-label-seurat.html">Seurat classes and cell time</a></p></li>
+<li>Noisy label analysis
+<ul>
+<li>PVE in DAPI, GFP, and RFP <a href="method-labels-noisy.html">before vs after removing noisy labels</a></li>
+<li>Comparing results excluding/including noisy training labels on top 10 and top 101 cyclical genes, when <a href="method-train-labels.html">excluding noisy labels from each fold validation, hence unequal sample numbers per fold</a> as opposed to <a href="method-train-labels-equalfold.html">excluding noisy labels before making fold valdiation, hence equal nubmer per fold</a></li>
+</ul></li>
 <li>Analyze the training datasets
 <ul>
-<li>Prediction results from trendfilter order 2 and order 3 with npcirc.nw <a href="method-npreg-prelim-results.html">on the odd-numbered genes in the top 101 cyclical genes</a></li>
-<li>Prediction results of the various classifers (supervised, PC, unsupervised) <a href="method-train-classifiers.html">on top 101 cyclical genes</a>, and on <a href="method-train-classifiers-top10.html">top 10 cyclial genes</a>.</li>
-<li>Finalizing results of all classifiers and the <a href="method-train-classifiers-all.html">top X number of genes</a>.</li>
+<li>Comparing trendfilter order 2 and order 3 with npcirc.nw <a href="method-npreg-prelim-results.html">on the odd-numbered genes in the top 101 cyclical genes</a></li>
+<li>Comparing resuls of the various classifers (supervised, PC, unsupervised) <a href="method-train-classifiers.html">on top 101 cyclical genes</a>, and on <a href="method-train-classifiers-top10.html">top 10 cyclial genes</a>.</li>
 </ul></li>
 <li>Analyze the withheld samples
 <ul>
-<li>Evaluate the withheld samples <a href="method-eval-withheld-explore.html">on the top 101 cyclical genes</a> comparing peco methods with seurat predictions.</li>
+<li>Evaluate the withheld sample <a href="method-eval-withheld-explore.html">including noisy labels</a> on the top 10 and top 101 cyclical genes] and comparing peco methods with seurat predictions.</li>
+<li>Evaluate the withheld samples <a href="method-eval-withheld-explore-removenoisy.html">removing noisy labels</a> on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.</li>
 </ul></li>
-<li><p>Analyze the public datasets, including <a href="method-eval-leng.html">Leng et al.</a>, <a href="method-eval-bottcher.html">Bottcher et al.</a>, and <a href="method-eval-buettner.html">Buettner et al.</a>.</p></li>
+<li>Finializing results for when validation sample consists of random cells
+<ul>
+<li><a href="method-train-classifiers-all.html">Selecting the top X cyclical genes in the training sample</a></li>
+<li><a href="method-train-classifiers-genes.html">Learning gene annotations</a></li>
+<li><a href="method-eval.html">Validation sample</a></li>
+</ul></li>
+<li>Finializing results for when validation sample consists of a random individual
+<ul>
+<li><a href="method-train-ind.html">Selecting the top X cyclical genes in the training sample</a></li>
+<li><a href="method-train-ind-genes.html">Learning gene annotations</a></li>
+<li><a href="method-eval-ind.html">Validation sample</a></li>
+</ul></li>
 </ul>
+<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
 <hr />
 </div>
-<div id="explore-aproaches-to-fitting-cyclical-trend" class="section level2">
-<h2>Explore aproaches to fitting cyclical trend</h2>
+<div id="approaches-to-fitting-cyclical-trend-in-gene-expression-data" class="section level2">
+<h2>Approaches to fitting cyclical trend in gene expression data</h2>
 <ul>
 <li>Apply spherically projected multivariate linear model
 <ul>
