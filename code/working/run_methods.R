@@ -23,6 +23,16 @@ run_methods <- function(Y_test, Y_test_normed,
   Y_test.cycle <- Y_test[which(rownames(Y_test) %in% cycle.genes),]
 
   ### supervised methods
+  message("Begin PCA method...")
+  library(circular)
+  prcomp_raw <- prcomp(t(Y_test.cycle), scale.=TRUE)
+  coord_raw <- coord2rad(prcomp_raw$x[,1:2])
+  # prcomp_normed <- prcomp(t(Y_test_normed.cycle), scale.=TRUE)
+  # coord_normed <- coord2rad(prcomp_normed$x[,1:2])
+  fit.pca <- list(cell_times_est=as.numeric(coord_raw))
+  names(fit.pca$cell_times_est) <- colnames(Y_test.cycle)
+
+  ### supervised methods
   message("Begin supervised method...")
   fit.supervised <- cycle.npreg.outsample(Y_test=Y_test_normed.cycle,
                                           sigma_est=training_model$sigma_est,
@@ -79,12 +89,13 @@ run_methods <- function(Y_test, Y_test_normed,
 
   out <- list(fit.supervised=fit.supervised,
               #fit.trend2.unsup=fit.trend2.unsup,
+              fit.pca=fit.pca,
               #fit.bspline.unsup=fit.bspline.unsup,
               #fit.loess.unsup=fit.loess.unsup,
               fit.seurat=fit.seurat)
 
-  set.seed(111)
-  theta_test_null <- sample(theta_test)
+  # set.seed(111)
+  # theta_test_null <- sample(theta_test)
 
   for (i in 1:length(out)) {
     print(i)
@@ -93,10 +104,6 @@ run_methods <- function(Y_test, Y_test_normed,
                                                         names(cell_times_est))])
     out[[i]]$pred_time_shift <- with(out[[i]], rotation(ref_time, pred_time))
     out[[i]]$diff_time <- with(out[[i]], circ_dist(pred_time_shift, ref_time))
-    # out[[i]]$ref_time_null <- theta_test_null
-    # out[[i]]$pred_time_null_shift <- with(out[[i]], rotation(ref_time_null, pred_time)$y2shift)
-    # out[[i]]$diff_time_null <- with(out[[i]], pmin(abs(pred_time_null_shift - ref_time_null),
-    #                                           abs(pred_time_null_shift - (2*pi - retgoof_time_null))))
     out[[i]]$dapi <- pdata_test$dapi.median.log10sum.adjust[
       match(names(theta_test), rownames(pdata_test))]
     out[[i]]$gfp <- pdata_test$gfp.median.log10sum.adjust[

@@ -18,15 +18,15 @@ nlist <- as.numeric(args[2])
 dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"code/working/run_methods.R"))
 
-data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
-data_withheld <-readRDS(file=file.path(dir, "data/results/data_withheld.rds"))
+data_training <- readRDS(file=file.path(dir, "data/results/data_permute_training.rds"))
+data_withheld <-readRDS(file=file.path(dir, "data/results/data_permute_withheld.rds"))
 
 sig.genes <- readRDS(file=file.path(dir,
     "data/results/results_topgenes.rds"))
 
 sig.genes_top <- sig.genes[[nlist]]
 
-num_genes <- names(sig.genes)[nlist]
+num_genes <- length(sig.genes_top)
 
 # make prediction parameters
 Y_train_topX <- data_training$log2cpm.quant.nonvalid[
@@ -60,5 +60,5 @@ results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
 
 saveRDS(results_eval_topX,
         file=file.path(dir,
-                       paste0("data/results/results_eval.top",num_genes,".rds")))
+                       paste0("data/results/results_eval_permute.top",num_genes,".rds")))
 

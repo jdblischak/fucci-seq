@@ -19,6 +19,7 @@ dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"code/working/run_methods.R"))
 source(file.path(dir,"peco/R/fit.trendfilter.generic.R"))
 
+data_permute_training <- readRDS(file=file.path(dir, "data/results/data_permute_training.rds"))
 data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
 
 seurat.genes <- readLines(con = file.path(dir,
@@ -27,7 +28,7 @@ seurat.genes <- list(s.genes=seurat.genes[1:43],
                      g2m.genes=seurat.genes[44:97])
 
 cyclical_genes <- readRDS(file=file.path(dir, paste0(
-                           "data/results/data_training_cyclical_genes.fold.",fold,".rds")))
+                    "data/results/data_training_cyclical_genes.fold.",fold,".rds")))
 
 which_genes <- rownames(cyclical_genes)[order(cyclical_genes$pve,
                                               decreasing = T)[1:ngenes]]
@@ -47,12 +48,12 @@ fit.train <- cycle.npreg.insample(Y = Y_train_normed_fold_topX,
                                   ncores=ncores,
                                   method.trend="trendfilter")
 
-Y_test_normed_fold_topX <- data_training$log2cpm.quant.nonvalid[
+Y_test_normed_fold_topX <- data_permute_training$log2cpm.quant.nonvalid[
   which(rownames(data_training$log2cpm.quant.nonvalid) %in% which_genes),
   fold_indices[[fold]]$test]
-Y_test_fold <- data_training$log2cpm.nonvalid[,fold_indices[[fold]]$test]
-theta_test_fold <- data_training$theta.nonvalid[fold_indices[[fold]]$test]
-pdata_test_fold <- data_training$pdata.nonvalid[fold_indices[[fold]]$test,]
+Y_test_fold <- data_permute_training$log2cpm.nonvalid[,fold_indices[[fold]]$test]
+theta_test_fold <- data_permute_training$theta.nonvalid[fold_indices[[fold]]$test]
+pdata_test_fold <- data_permute_training$pdata.nonvalid[fold_indices[[fold]]$test,]
 
 fit.test <- run_methods(Y_test=Y_test_fold,
                      Y_test_normed=Y_test_normed_fold_topX,
@@ -68,7 +69,7 @@ out <- list(fit.train=fit.train,
 #}
 #names(fits) <- paste0("fold.", 1:length(fold_indices))
 saveRDS(out,
-        file=file.path(dir, paste0("data/results/results_train.fold.",fold,".top",ngenes,".rds")))
+        file=file.path(dir, paste0("data/results/results_train_permute_oncyclical.fold.",fold,".top",ngenes,".rds")))
 
 
 

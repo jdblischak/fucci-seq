@@ -19,7 +19,7 @@ dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"code/working/run_methods.R"))
 source(file.path(dir,"peco/R/fit.trendfilter.generic.R"))
 
-data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
+data_training <- readRDS(file=file.path(dir, "data/results/data_permute_training.rds"))
 
 seurat.genes <- readLines(con = file.path(dir,
                   "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
@@ -27,7 +27,7 @@ seurat.genes <- list(s.genes=seurat.genes[1:43],
                      g2m.genes=seurat.genes[44:97])
 
 cyclical_genes <- readRDS(file=file.path(dir, paste0(
-                           "data/results/data_training_cyclical_genes.fold.",fold,".rds")))
+                           "data/results/data_training_cyclical_genes_permute.fold.",fold,".rds")))
 
 which_genes <- rownames(cyclical_genes)[order(cyclical_genes$pve,
                                               decreasing = T)[1:ngenes]]
@@ -68,7 +68,7 @@ out <- list(fit.train=fit.train,
 #}
 #names(fits) <- paste0("fold.", 1:length(fold_indices))
 saveRDS(out,
-        file=file.path(dir, paste0("data/results/results_train.fold.",fold,".top",ngenes,".rds")))
+        file=file.path(dir, paste0("data/results/results_train_permute.fold.",fold,".top",ngenes,".rds")))
 
 
 

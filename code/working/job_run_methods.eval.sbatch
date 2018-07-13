@@ -8,14 +8,14 @@
 #SBATCH --partition=broadwl
 #SBATCH --account=pi-mstephens
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=15
 #SBATCH --mem-per-cpu=2GB
 
 set -e
 
 ncores=$1
-ngenes=$2
+nlist=$2
 
 source activate fucci-seq
 
-Rscript job_run_methods.eval.R ${ncores} ${ngenes}
+Rscript job_run_methods.eval.R ${ncores} ${nlist}

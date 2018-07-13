@@ -21,16 +21,23 @@ source(file.path(dir,"code/working/run_methods.R"))
 data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
 data_withheld <-readRDS(file=file.path(dir, "data/results/data_withheld.rds"))
 
-sig.genes <- readRDS(file=file.path(dir,
-    "data/results/results_topgenes.rds"))
+# sig.genes <- readRDS(file=file.path(dir,
+#     "data/results/results_topgenes.rds"))
+#
+# sig.genes_top <- sig.genes[[nlist]]
 
-sig.genes_top <- sig.genes[[nlist]]
+#num_genes <- names(sig.genes)[nlist]
 
-num_genes <- names(sig.genes)[nlist]
+seurat.genes <- readLines(con = file.path(dir,
+                                          "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+seurat.ensg <- rownames(data_training$fdata)[which(data_training$fdata$name %in% unlist(seurat.genes))]
 
 # make prediction parameters
 Y_train_topX <- data_training$log2cpm.quant.nonvalid[
-  rownames(data_training$log2cpm.quant.nonvalid) %in% sig.genes_top, ]
+  rownames(data_training$log2cpm.quant.nonvalid) %in% seurat.ensg, ]
 training_topX <- cycle.npreg.insample(Y = Y_train_topX,
                                         theta = data_training$theta.nonvalid,
                                         polyorder=2,
@@ -44,10 +51,6 @@ training_topX <- cycle.npreg.insample(Y = Y_train_topX,
 #                                       polyorder=2,
 #                                       ncores=15,
 #                                       method.trend="trendfilter")
-seurat.genes <- readLines(con = file.path(dir,
-                                          "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
-seurat.genes <- list(s.genes=seurat.genes[1:43],
-                     g2m.genes=seurat.genes[44:97])
 
 results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
                  Y_test_normed=data_withheld$log2cpm.quant.valid,
@@ -60,5 +63,5 @@ results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
 
 saveRDS(results_eval_topX,
         file=file.path(dir,
-                       paste0("data/results/results_eval.top",num_genes,".rds")))
+                       paste0("data/results/results_eval.seuratgenes.rds")))
 

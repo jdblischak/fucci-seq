@@ -18,4 +18,4 @@ fold=$2
 
 source activate fucci-seq
 
-Rscript job_run_methods.cyclical.R ${ncores} ${fold}
+Rscript job_run_methods.triple.cyclical.R ${ncores} ${fold}

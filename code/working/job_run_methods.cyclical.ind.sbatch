@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Submit batch job running run_methods.cyclical.R
+# Submit batch job running run_methods.cyclical.ind.R
 
 #SBATCH --time=36:00:00
 #SBATCH --mail-type=END,FAIL
@@ -15,7 +15,8 @@ set -e
 
 ncores=$1
 fold=$2
+ind=$3
 
 source activate fucci-seq
 
-Rscript job_run_methods.cyclical.R ${ncores} ${fold}
+Rscript job_run_methods.cyclical.ind.R ${ncores} ${fold} ${ind}

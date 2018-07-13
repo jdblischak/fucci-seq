@@ -12,38 +12,31 @@ for (i in seq_along(args)) {
 
 
 ncores <- as.numeric(args[1])
-nlist <- as.numeric(args[2])
+ngenes <- as.numeric(args[2])
 
 
 dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"code/working/run_methods.R"))
 
-data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
-data_withheld <-readRDS(file=file.path(dir, "data/results/data_withheld.rds"))
+
+data_training <- readRDS(file=file.path(dir, "data/results/data_filt_training.rds"))
+data_withheld <-readRDS(file=file.path(dir, "data/results/data_filt_withheld.rds"))
 
 sig.genes <- readRDS(file=file.path(dir,
-    "data/results/results_topgenes.rds"))
+    "output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds"))
 
-sig.genes_top <- sig.genes[[nlist]]
-
-num_genes <- names(sig.genes)[nlist]
 
 # make prediction parameters
 Y_train_topX <- data_training$log2cpm.quant.nonvalid[
-  rownames(data_training$log2cpm.quant.nonvalid) %in% sig.genes_top, ]
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
+
 training_topX <- cycle.npreg.insample(Y = Y_train_topX,
                                         theta = data_training$theta.nonvalid,
                                         polyorder=2,
                                         ncores=15,
                                         method.trend="trendfilter")
 
-# Y_train_seurat <- data_training$log2cpm.quant.nonvalid[
-#   rownames(data_training$log2cpm.quant.nonvalid) %in% seurat.genes, ]
-# training_seurat <- cycle.npreg.insample(Y = Y_train_topX,
-#                                       theta = data_training$theta.nonvalid,
-#                                       polyorder=2,
-#                                       ncores=15,
-#                                       method.trend="trendfilter")
+
 seurat.genes <- readLines(con = file.path(dir,
                                           "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
 seurat.genes <- list(s.genes=seurat.genes[1:43],
@@ -59,6 +52,5 @@ results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
                  ncores=ncores, maxiter=30)
 
 saveRDS(results_eval_topX,
-        file=file.path(dir,
-                       paste0("data/results/results_eval.top",num_genes,".rds")))
+        file=file.path(dir, paste0("data/results/results_filt_eval_top",ngenes,".rds")))
 
