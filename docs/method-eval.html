@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Prediction results for a random subset of cells</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Prediction results for a random subset of cells</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#retrieve-and-combine-results">Retrieve and combine results</a></li>
+<li><a href="#compare-seurat-with-peco">Compare seurat with peco</a></li>
+<li><a href="#confidence-on-the-estimates">Confidence on the estimates</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-07-12</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> ef7ae30</p>
+<hr />
+<div id="retrieve-and-combine-results" class="section level2">
+<h2>Retrieve and combine results</h2>
+<p>Code for summarizing results</p>
+<pre class="r"><code>diff_time_wrapper &lt;- function(results_list) {
+  
+  methods_list &lt;- sapply(names(results_list),
+                         function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
+  
+  diff_time_list &lt;- do.call(rbind, lapply(1:length(results_list), function(i) {
+    diff_time &lt;- results_list[[i]]$diff_time
+    diff_mean &lt;- mean(diff_time/2/pi)
+#    diff_se &lt;- sd(diff_time/2/pi)/sqrt(ncol(results_list[[1]]$Y))
+
+    return(data.frame(diff_mean=diff_mean,
+#                      diff_se=diff_se,
+                      methods=methods_list[i]))
+  }) )
+  return(diff_time_list)  
+}</code></pre>
+<p>Summarizing results</p>
+<pre class="r"><code>ngenes &lt;- c(5, seq(10,200, by=10))
+genes_list &lt;- readRDS(&quot;../data/results/results_topgenes.rds&quot;)
+ll &lt;- sapply(genes_list, length)[1:41]
+
+eval_res &lt;- do.call(rbind, lapply(1:length(ll), function(i) {
+  ngene &lt;- ll[i]
+#  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+  fl_name &lt;- list.files(&quot;../data/results&quot;, 
+                 pattern=paste0(&quot;results_eval.top&quot;,ngene,&quot;.rds&quot;),
+                 full.names = TRUE)
+  df &lt;- readRDS(fl_name)
+  out &lt;- diff_time_wrapper(df)
+  out$ngenes &lt;- ngene
+  
+  return(out)
+}) )
+
+eval_res$train &lt;- &quot;fucci_genes&quot;
+saveRDS(eval_res, file = &quot;../output/method-eval.Rmd/diff_time.rds&quot;)
+
+
+#ngenes &lt;- c(5, seq(10,200, by=10))
+genes_list &lt;- readRDS(&quot;../data/results/results_topgenes.rds&quot;)
+ll &lt;- sapply(genes_list, length)[1:41]
+train_top_permute &lt;- do.call(rbind, lapply(1:length(ll), function(i) {
+  ngene &lt;- ll[i]
+  fl_name &lt;- list.files(&quot;../data/results&quot;,
+                 pattern=paste0(&quot;results_eval_permute_oncyclical.top&quot;,ngene,&quot;.rds&quot;),
+                 full.names = TRUE)
+  df &lt;- readRDS(fl_name)
+  out &lt;- diff_time_wrapper(df)
+  out$ngenes &lt;- ngene
+  
+  return(out)
+}) )
+
+saveRDS(train_top_permute,
+  file = &quot;../output/method-eval.Rmd/diff_time_permute_oncyclical.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="compare-seurat-with-peco" class="section level2">
+<h2>Compare seurat with peco</h2>
+<p>fucci predict random cell times</p>
+<pre class="r"><code>df &lt;- readRDS(&quot;../output/method-eval.Rmd/diff_time_permute_oncyclical.rds&quot;)
+
+library(ggplot2)
+#eval_res &lt;- readRDS(&quot;../output/method-eval.Rmd/diff_time.rds&quot;)
+ggplot(df,  
+       aes(x=as.numeric(ngenes), y=diff_mean, color=methods)) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Number of cyclical genes&quot;) +
+  ggtitle(&quot;Predict random cell times in the validation sample&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>view all results</p>
+<pre class="r"><code>eval_res &lt;- readRDS(&quot;../output/method-eval.Rmd/diff_time.rds&quot;)
+df &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+eval_seuratgenes &lt;- diff_time_wrapper(df)
+eval_seuratgenes$ngenes &lt;- 97
+eval_seuratgenes$train &lt;- &quot;seurat_genes&quot;
+
+
+eval_sub &lt;- subset(eval_res, methods != &quot;seurat&quot;)
+eval_combo &lt;- rbind(eval_sub, eval_seuratgenes)
+eval_combo$methods_combo &lt;- paste0(eval_combo$methods,&quot; using &quot;, eval_combo$train)
+
+library(ggplot2)
+#eval_res &lt;- readRDS(&quot;../output/method-eval.Rmd/diff_time.rds&quot;)
+ggplot(eval_combo,  
+       aes(x=as.numeric(ngenes), y=diff_mean, color=methods_combo)) +
+  # geom_errorbar(subset(eval_res, methods == &quot;supervised&quot;),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se)) +
+  geom_point() + geom_line(lty=3) +
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Number of cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the validation sample&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>distribution of circular distance</p>
+<pre class="r"><code># df &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+# ggplot(data.frame(time=df$fit.supervised$pred_time_shift),
+#        aes(x=time)) +
+#   geom_histogram(binwidth=.15) +
+#   xlab(&quot;predicted time&quot;) +
+#   ggtitle(&quot;Peco prediction using Seurat genes&quot;)
+df2 &lt;- readRDS(&quot;../data/results/results_eval.top20.rds&quot;)
+ggplot(data.frame(time=df2$fit.supervised$pred_time_shift),
+       aes(x=time)) +
+  geom_histogram(binwidth=.28) +
+  xlab(&quot;predicted time&quot;) +
+  ggtitle(&quot;Peco prediction using 20 genes&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>distribution of different time</p>
+<pre class="r"><code>df &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+
+plot(x=df$fit.supervised$ref_time,
+     y=df$fit.supervised$diff_time,
+     col=&quot;royalblue&quot;, pch=16, cex=.7, ylim=c(0,pi),
+     xlab=&quot;Fucci time&quot;, ylab=&quot;Circular distance&quot;)
+points(x=df$fit.supervised$ref_time,
+       y=df$fit.seurat$diff_time,
+       col=&quot;forestgreen&quot;, pch=1, cex=.7)
+legend(&quot;topright&quot;, legend=c(&quot;Peco&quot;, &quot;Seurat&quot;), 
+       col=c(&quot;royalblue&quot;, &quot;forestgreen&quot;), pch=c(16,1))</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Seurat time vs Seurat classes</p>
+<pre class="r"><code>tmp &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+cols &lt;- c(&quot;yellow&quot;, &quot;orange&quot;, &quot;red&quot;)
+ggplot(data.frame(tmp$fit.seurat), aes(x=assignments,
+                           y=pred_time_shift,
+                           fill=assignments)) +
+  geom_violin(color=&quot;gray50&quot;) + geom_boxplot(width=.2, color=&quot;gray50&quot;) +
+  scale_fill_manual(values=cols) +
+  ylab(&quot;Seurat time&quot;) + xlab(&quot;Seurt assignment&quot;) +
+  ggtitle(&quot;Seurat time by Seurat classes&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>peco time vs peco classes</p>
+<ul>
+<li>based on BIC, should be 3 clusters</li>
+</ul>
+<pre class="r"><code>tmp &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)</code></pre>
+<p>cluster peco times</p>
+<pre class="r"><code>library(movMF)
+set.seed(21)
+mov_res &lt;- lapply(2:7, function(cl) {
+  movMF(cbind(cos(tmp$fit.supervised$cell_times_est),
+                sin(tmp$fit.supervised$cell_times_est)),
+                k=cl,  nruns=20, kappa = list(common = TRUE))
+})
+
+saveRDS(mov_res, &quot;../output/method-eval.Rmd/mov_res.rds&quot;)</code></pre>
+<pre class="r"><code>library(movMF)
+
+mov_res &lt;- readRDS(&quot;../output/method-eval.Rmd/mov_res.rds&quot;)
+sapply(mov_res, function(x) BIC(x))</code></pre>
+<pre><code>[1] -43.32924 -69.94688 -60.16618 -64.13797 -65.95380 -68.47631</code></pre>
+<pre class="r"><code>clusts &lt;- predict(mov_res[[2]])
+
+#table(predict(mov_res[[3]]))
+table(clusts)</code></pre>
+<pre><code>clusts
+ 1  2  3 
+68 18 47 </code></pre>
+<pre class="r"><code>cols &lt;- c(&quot;yellow&quot;, &quot;orange&quot;, &quot;red&quot;)
+ggplot(data.frame(class=factor(clusts),
+                  pred_time_shift=tmp$fit.supervised$pred_time_shift), 
+                  aes(x=class, y=pred_time_shift,
+                      fill=class)) +
+  geom_violin(color=&quot;gray50&quot;) + geom_boxplot(width=.2, color=&quot;gray50&quot;) +
+  scale_fill_manual(values=cols) +
+  ylab(&quot;peco time&quot;) + xlab(&quot;peco assignment&quot;) +
+  ggtitle(&quot;Peco time by Peco classes&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>table(tmp$fit.seurat$assignments, clusts)</code></pre>
+<pre><code>     clusts
+       1  2  3
+  G1   4  2  1
+  S   59  4  5
+  G2M  5 12 41</code></pre>
+<p>Peco cell times by Seurat classes</p>
+<pre class="r"><code>ggplot(data.frame(class=tmp$fit.seurat$assignments,
+                  pred_time_shift=tmp$fit.supervised$pred_time_shift), 
+                  aes(x=pred_time_shift,
+                      group=class)) +
+  geom_histogram(aes(fill=class)) +
+  facet_wrap(~class) +
+  scale_fill_manual(values=cols) +
+  xlab(&quot;Peco time&quot;) +
+  ggtitle(&quot;Peco time by Seurat classes&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(data.frame(class=factor(clusts),
+                  pred_time_shift=tmp$fit.supervised$pred_time_shift), 
+                  aes(x=pred_time_shift,
+                      group=class)) +
+  geom_histogram(aes(fill=class)) +
+  facet_wrap(~class) +
+  scale_fill_manual(values=cols) +
+  xlab(&quot;Peco time&quot;) +
+  ggtitle(&quot;Peco time by Peco classes&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># eval_res &lt;- readRDS(&quot;../output/method-eval.Rmd/diff_time.rds&quot;)
+# 
+# ggplot(subset(eval_res, methods == &quot;supervised&quot;), 
+#        aes(x=ngenes, y=diff_mean)) +
+#   # geom_errorbar(subset(eval_res, methods == &quot;supervised&quot;),
+#   #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se),
+#   #               color=&quot;blue&quot;) +
+#   geom_point() + geom_line(lty=3) +
+#   ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Number of cyclical genes&quot;) +
+#   ggtitle(&quot;Prediction error in validation set&quot;)</code></pre>
+<hr />
+</div>
+<div id="confidence-on-the-estimates" class="section level2">
+<h2>Confidence on the estimates</h2>
+<pre class="r"><code>eval_res &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+obj &lt;- eval_res$fit.supervised
+
+#grids &lt;- as.numeric(colnames(obj$prob_per_cell_by_celltimes))
+#ncells &lt;- ncol(obj$Y)
+#dd &lt;- rep(NULL, ncells)
+  #print(j)
+post_prob_vector &lt;- obj$prob_per_cell_by_celltimes[1,]
+  
+credible_interval &lt;- function(post_prob_vector, alpha=.05, verbose=F) {
+  which_max &lt;- which.max(post_prob_vector)
+  if (which_max==length(post_prob_vector)) {
+    forward_grid_prob &lt;- post_prob_vector[1:(which_max-1)]
+    reverse_grid_prob &lt;- post_prob_vector[rev(1:(which_max-1))]
+  } else if (which_max==1) {
+    forward_grid_prob &lt;- post_prob_vector[2:length(post_prob_vector)]
+    reverse_grid_prob &lt;- post_prob_vector[rev(2:length(post_prob_vector))]
+  } else {
+    forward_grid_prob &lt;- post_prob_vector[c(c((which_max+1):length(post_prob_vector)),
+                                            c(1:(which_max-1)))]
+    reverse_grid_prob &lt;- post_prob_vector[c(rev(1:(which_max-1)),
+                                            rev((which_max+1):length(post_prob_vector)))]
+  }
+
+  sum_post_prob_initial &lt;- post_prob_vector[which_max]
+  i=1
+
+  while(i&lt;length(forward_grid_prob)) {
+    #print(i)
+    sum_post_prob_initial &lt;- sum_post_prob_initial + forward_grid_prob[i] + reverse_grid_prob[i]
+    sum_post_prob_update &lt;- sum_post_prob_initial
+
+    if (verbose) message(&quot;cum. prob:&quot;, sum_post_prob_update)
+    grid &lt;- i
+
+    if (sum_post_prob_update &gt; (1-alpha)) break
+    i=i+1
+    sum_post_prob_initial &lt;- sum_post_prob_update
+
+    }
+
+    return(list(iter=i,
+                sum_post_prob=sum_post_prob_update,
+                forward_boundary=as.numeric(names(forward_grid_prob[grid])),
+                reverse_boundary=as.numeric(names(reverse_grid_prob[grid]))))
+}
+
+
+eval_res &lt;- readRDS(&quot;../data/results/results_eval.seuratgenes.rds&quot;)
+obj &lt;- eval_res$fit.supervised
+
+grids &lt;- as.numeric(colnames(obj$prob_per_cell_by_celltimes))
+ncells &lt;- ncol(obj$Y)
+dd &lt;- rep(NULL, ncells)
+for (j in 1:ncells) {
+  #print(j)
+  post_prob_vector &lt;- obj$prob_per_cell_by_celltimes[j,]
+  rr=credible_interval(post_prob_vector, verbose=F)
+  which_max &lt;- which.max(post_prob_vector)
+  
+  if (rr$forward_boundary &lt; rr$reverse_boundary) {
+    dd[j] &lt;- !((obj$ref_time[j] &gt;= rr$forward_boundary &amp;
+      obj$ref_time[j] &lt;= rr$reverse_boundary))
+  }
+  if (rr$forward_boundary &gt; rr$reverse_boundary) {
+    dd[j] &lt;- (obj$ref_time[j] &gt;= rr$reverse_boundary &amp;
+      obj$ref_time[j] &lt;= rr$forward_boundary)
+  }
+  dd[j]
+}
+
+source(&quot;../peco/R/cycle.corr.R&quot;)
+
+par(mfrow=c(1,1))
+plot(obj$ref_time,
+     obj$diff_time/2/pi,
+     col=c(&quot;red&quot;, &quot;gray50&quot;)[dd+1], 
+     pch=c(16,1)[dd+1],
+     xlab=&quot;fucci time&quot;,
+     ylab=&quot;Prediction error&quot;, 
+     main = &quot;Credible interval and predictions&quot;)
+abline(h=.15, lty=3, col=&quot;black&quot;)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow=c(3,4))
+for (j in 1:sum(dd==F)) {
+  cell_ind &lt;- which(dd==F)[j]
+  post_prob_vector &lt;- obj$prob_per_cell_by_celltimes[cell_ind,]
+  rr=credible_interval(post_prob_vector, verbose=F)
+  which_max &lt;- which.max(post_prob_vector)
+  forward_grids &lt;- c(c((which_max+1):length(post_prob_vector)),
+                     c(1:(which_max-1)))
+  reverse_grids &lt;- c(rev(1:(which_max-1)),
+                     rev((which_max+1):length(post_prob_vector)))
+  cols &lt;- rep(&quot;gray80&quot;, 100)
+  cols[c(reverse_grids[1:rr$iter])] &lt;- &quot;lightblue&quot;
+  cols[c(forward_grids[1:rr$iter])] &lt;- &quot;lightblue&quot;
+  cols[which_max] &lt;- &quot;lightblue&quot;
+  # grids_outside &lt;- grids[which(cols==&quot;gray80&quot;)]
+  # if (theta_test[cell_ind] &gt;= min(grids_outside) &amp;
+  #     theta_test[cell_ind] &lt;= max(grids_outside))
+  plot(obj$prob_per_cell_by_celltimes[cell_ind,], type=&quot;h&quot;,
+       xaxt=&quot;n&quot;, ylab=&quot;Posterior prob&quot;, col=cols, axes=F,
+       xlab=&quot;Grid points&quot;, lwd=3)
+  axis(1, at=c(1,seq(20, 100, by=20)),
+       labels=round(grids[c(1,seq(20, 100, by=20))],3))
+  axis(2)
+  abline(v=which.max(obj$prob_per_cell_by_celltimes[cell_ind,]),
+         col=&quot;darkblue&quot;, lty=1, lwd=3)
+  abline(v=which.min(circ_dist(grids, obj$ref_time[cell_ind])),
+         col=&quot;red&quot;, lty=1, lwd=3)
+  title(paste(round(obj$diff_time[cell_ind]/2/pi,2)))
+}</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>print for visual examination</p>
+<pre class="r"><code>pdf(&quot;../output/method-eval.Rmd/uncertainties.pdf&quot;)
+par(mfrow=c(4,5))
+for (cell_ind in 1:133) {
+  print(cell_ind)
+  #cell_ind &lt;- which(dd==F &amp; obj$diff_time/2/pi &lt; .15)[j]
+  post_prob_vector &lt;- obj$prob_per_cell_by_celltimes[cell_ind,]
+  rr=credible_interval(post_prob_vector, verbose=F)
+  which_max &lt;- which.max(post_prob_vector)
+  forward_grids &lt;- c(c((which_max+1):length(post_prob_vector)),
+                     c(1:(which_max-1)))
+  reverse_grids &lt;- c(rev(1:(which_max-1)),
+                     rev((which_max+1):length(post_prob_vector)))
+  cols &lt;- rep(&quot;gray80&quot;, 100)
+  cols[c(reverse_grids[1:rr$iter])] &lt;- &quot;lightblue&quot;
+  cols[c(forward_grids[1:rr$iter])] &lt;- &quot;lightblue&quot;
+  cols[which_max] &lt;- &quot;lightblue&quot;
+  # grids_outside &lt;- grids[which(cols==&quot;gray80&quot;)]
+  # if (theta_test[cell_ind] &gt;= min(grids_outside) &amp;
+  #     theta_test[cell_ind] &lt;= max(grids_outside))
+  plot(obj$prob_per_cell_by_celltimes[cell_ind,], type=&quot;h&quot;,
+       xaxt=&quot;n&quot;, ylab=&quot;Posterior prob&quot;, col=cols, axes=F,
+       xlab=&quot;Grid points&quot;, lwd=3)
+  axis(1, at=c(1,seq(20, 100, by=20)),
+       labels=round(grids[c(1,seq(20, 100, by=20))],3))
+  axis(2)
+  abline(v=which.max(obj$prob_per_cell_by_celltimes[cell_ind,]),
+         col=&quot;darkblue&quot;, lty=1, lwd=3)
+  abline(v=which.min(circ_dist(grids, obj$ref_time[cell_ind])),
+         col=&quot;red&quot;, lty=1, lwd=3)
+  title(paste(round(obj$diff_time[cell_ind]/2/pi,2)))
+}
+dev.off()</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] movMF_0.2-2   ggplot2_2.2.1
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.17     knitr_1.20       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 rlang_0.1.6      stringr_1.2.0    plyr_1.8.4      
+ [9] tools_3.4.3      grid_3.4.3       gtable_0.2.0     git2r_0.21.0    
+[13] htmltools_0.3.6  yaml_2.1.16      lazyeval_0.2.1   rprojroot_1.3-2 
+[17] digest_0.6.15    tibble_1.4.2     slam_0.1-42      evaluate_0.10.1 
+[21] rmarkdown_1.10   labeling_0.3     stringi_1.1.6    compiler_3.4.3  
+[25] pillar_1.1.0     scales_0.5.0     backports_1.1.2 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
