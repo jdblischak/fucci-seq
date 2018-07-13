@@ -23,7 +23,9 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -91,6 +93,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -241,10 +246,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-06-24</p>
+<p><strong>Last updated:</strong> 2018-07-12</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 1f3cd60</p>
+<p><strong>Code version:</strong> d8d86ab</p>
 <hr />
 <div id="results" class="section level2">
 <h2>Results</h2>
@@ -287,21 +292,61 @@ pdata$theta_triple &lt;- as.numeric(pdata$theta_triple)
 
 y1=pdata$theta
 y2=pdata$theta_triple
-y2shift &lt;- rotation(y1, y2)$y2shift
+y2shift &lt;- rotation(y1, y2)
 
-par(mfrow=c(1,2))
-plot(pdata$theta,
-     pdata$theta_triple, main=&quot;pre rotation&quot;,
-     xlab=&quot;based on GFP, RFP&quot;,
-     ylab=&quot;based on DAPI, GFP, RFP&quot;)
+pdata$theta_triple &lt;- y2shift
+
+par(mfrow=c(1,1))
 plot(y1,
      y2shift, main = &quot;post rotation&quot;,
      xlab=&quot;based on GFP, RFP&quot;,
      ylab=&quot;based on DAPI, GFP, RFP&quot;)</code></pre>
 <p><img src="figure/method-labels.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>pdata$theta_triple &lt;- y2shift
-
-# rr &lt;- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
+<p>fucci time distribution</p>
+<pre class="r"><code>hist(pdata$theta, breaks=40,
+     xlim=c(0,6.5), xlab=&quot;fucci time&quot;,
+     main = &quot;fucci time distribution&quot;)</code></pre>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>intensity time distribution</p>
+<pre class="r"><code>hist(pdata$theta_triple, breaks=40,
+     xlim=c(0,6.5), xlab=&quot;intensity time&quot;,
+     main = &quot;intensity time distribution&quot;)</code></pre>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>intensities by fucci time</p>
+<pre class="r"><code>library(scales)
+plot(pdata$theta,
+     pdata$dapi.median.log10sum.adjust,
+     col=alpha(&quot;blue&quot;, .5), cex=.7, pch=16,
+     ylim=range(c(pdata$rfp.median.log10sum.adjust,
+                  pdata$gfp.median.log10sum.adjust,
+                  pdata$dapi.median.log10sum.adjust)),
+     xlab=&quot;fucci time&quot;,
+     ylab=&quot;batch-adjusted log intensites&quot;,
+     main =&quot;Intensities by fucci time&quot;)
+points(pdata$theta,
+     pdata$gfp.median.log10sum.adjust,
+     col=alpha(&quot;forestgreen&quot;, .5), cex=.7, pch=16)
+points(pdata$theta,
+     pdata$rfp.median.log10sum.adjust,
+     col=alpha(&quot;red&quot;, .5), cex=.7, pch=16)</code></pre>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot(pdata$theta_triple,
+     pdata$dapi.median.log10sum.adjust,
+     col=alpha(&quot;blue&quot;, .5), cex=.7, pch=16,
+     ylim=range(c(pdata$rfp.median.log10sum.adjust,
+                  pdata$gfp.median.log10sum.adjust,
+                  pdata$dapi.median.log10sum.adjust)),
+     xlab=&quot;intensity time (fucci + daip)&quot;,
+     ylab=&quot;batch-adjusted log intensites&quot;,
+     main =&quot;Intensities by intensity time&quot;)
+points(pdata$theta,
+     pdata$gfp.median.log10sum.adjust,
+     col=alpha(&quot;forestgreen&quot;, .5), cex=.7, pch=16)
+points(pdata$theta,
+     pdata$rfp.median.log10sum.adjust,
+     col=alpha(&quot;red&quot;, .5), cex=.7, pch=16)</code></pre>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># rr &lt;- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
 # cor(y1, y2shift)
 
 
@@ -352,7 +397,7 @@ with(pdata, summary(lm(dapi.median.log10sum.adjust~rfp.median.log10sum.adjust))$
      xlab=&quot;GFP log10 intensities&quot;,
      ylab=&quot;RFP log10 intensities&quot;,
      main = &quot;RFP vs. GFP&quot;)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="pve-of-cell-times-in-all-samples" class="section level2">
@@ -375,7 +420,41 @@ save(rfp_theta, rfp_theta_triple,
 c(rfp_theta, rfp_theta_triple,
      gfp_theta, gfp_theta_triple,
      dapi_theta, dapi_theta_triple)</code></pre>
-<pre><code>[1] 0.8652412 0.8585310 0.7651058 0.6466199 0.2696816 0.5925586</code></pre>
+<pre><code>$pve
+[1] 0.8694718
+
+$pval
+[1] 0
+
+$pve
+[1] 0.8507935
+
+$pval
+[1] 0
+
+$pve
+[1] 0.6988123
+
+$pval
+[1] 0
+
+$pve
+[1] 0.4916319
+
+$pval
+[1] 0
+
+$pve
+[1] 0.2274918
+
+$pval
+[1] 0.0001244292
+
+$pve
+[1] 0.5651224
+
+$pval
+[1] 0</code></pre>
 <hr />
 </div>
 <div id="pc-scores-of-samples-versus-prediction-error" class="section level2">
@@ -390,7 +469,7 @@ rownames(pca_df) &lt;- rownames(pdata)
 theta_check &lt;- as.numeric(coord2rad(pca_df))
 theta_check &lt;- 2*pi-theta_check
 plot(theta_check, pdata$theta)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>names(theta_check) &lt;- rownames(pdata)</code></pre>
 <pre class="r"><code>fits &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
@@ -445,7 +524,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1096017</code></pre>
+<pre><code>[1] 0.2882943</code></pre>
 <p>explore PCA outliers</p>
 <pre class="r"><code>pca_df_sub &lt;- pca_df[match(names(fits[[2]]$theta_test),rownames(pca_df)),] 
 diff_bins &lt;- cut(diff_time[[2]], 
@@ -470,7 +549,7 @@ plot(pca_df_sub[,1], pca_df_sub[,2],
      main=&quot;PCs based on GFP, RFP&quot;)
 abline(h=0,v=0, lty=3)
 title(main=&quot;blue dots: diff time &gt; 50th percentile&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>par(mfrow=c(1,2))
 dist_to_origin &lt;- sqrt(pca_df_sub[,1]^2+pca_df_sub[,2]^2)
 #which(abs(scale(dist_to_origin))&gt;2)
@@ -489,7 +568,7 @@ plot(pca_df_sub[,1], pca_df_sub[,2],
 abline(h=0,v=0, lty=3)
 
 title(main=&quot;Green points: 1 +/- SD of mean distance to the origin&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-11-2.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="re-fitting-after-removing-pc-outliers-remove-outliers-from-the-same-5-folds" class="section level2">
@@ -503,7 +582,7 @@ rownames(pca_df) &lt;- rownames(pdata)
 theta_check &lt;- as.numeric(coord2rad(pca_df))
 theta_check &lt;- 2*pi-theta_check
 plot(theta_check, pdata$theta)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>names(theta_check) &lt;- rownames(pdata)
 
 dist_to_origin &lt;- sqrt(pca_df[,1]^2+pca_df[,2]^2)
@@ -515,7 +594,7 @@ plot(pca_df[,1],
      xlab=&quot;PC1&quot;,
      ylab=&quot;PC2&quot;,
      main=&quot;abs(Distance-to-Origin) &gt; +/- 1&quot;)</code></pre>
-<p><img src="figure/method-labels.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-labels.Rmd/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>fits_sub &lt;- vector(&quot;list&quot;, 5)
 for (run in 1:5) {
   print(run)
@@ -574,7 +653,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1610684</code></pre>
+<pre><code>[1] 0.2626262</code></pre>
 <hr />
 </div>
 <div id="pve-of-cell-times-in-all-samples-after-removing-pc-outliers" class="section level2">
@@ -661,7 +740,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1712479</code></pre>
+<pre><code>[1] 0.229435</code></pre>
 <hr />
 </div>
 <div id="re-fitting-after-removing-pc-outliers-from-the-same-5-folds-top-10-genes" class="section level2">
@@ -726,7 +805,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.2258223</code></pre>
+<pre><code>[1] 0.2076981</code></pre>
 <hr />
 </div>
 <div id="re-fitting-after-removing-pc-outliers-odd-number" class="section level2">
@@ -791,7 +870,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.08201038</code></pre>
+<pre><code>[1] 0.3175056</code></pre>
 <hr />
 </div>
 <div id="re-fitting-after-removing-pc-outliers-even-number" class="section level2">
@@ -856,7 +935,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.22471</code></pre>
+<pre><code>[1] 0.2096063</code></pre>
 <hr />
 </div>
 <div id="fitting-using-all-samples-top-50-genes" class="section level2">
@@ -917,7 +996,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1356245</code></pre>
+<pre><code>[1] 0.2634709</code></pre>
 <hr />
 </div>
 <div id="fitting-using-all-samples-top-10-genes" class="section level2">
@@ -978,7 +1057,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1680728</code></pre>
+<pre><code>[1] 0.2304316</code></pre>
 <hr />
 </div>
 <div id="fitting-using-all-samples-odd-numbered-genes" class="section level2">
@@ -1039,7 +1118,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.09501819</code></pre>
+<pre><code>[1] 0.3207139</code></pre>
 <hr />
 </div>
 <div id="fitting-using-all-samples-even-numbered-genes" class="section level2">
@@ -1100,7 +1179,7 @@ Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ...
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
 Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.1702022</code></pre>
+<pre><code>[1] 0.2501111</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
@@ -1126,17 +1205,17 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] scales_0.5.0        RColorBrewer_1.1-2  genlasso_1.3       
-[4] igraph_1.1.2        Matrix_1.2-14       MASS_7.3-50        
+[1] RColorBrewer_1.1-2  genlasso_1.3        igraph_1.1.2       
+[4] Matrix_1.2-14       MASS_7.3-50         scales_0.5.0       
 [7] circular_0.4-93     Biobase_2.38.0      BiocGenerics_0.24.0
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.17     knitr_1.18       magrittr_1.5     munsell_0.4.3   
- [5] colorspace_1.3-2 lattice_0.20-35  plyr_1.8.4       stringr_1.2.0   
+ [1] Rcpp_0.12.17     knitr_1.20       magrittr_1.5     munsell_0.4.3   
+ [5] colorspace_1.3-2 lattice_0.20-35  stringr_1.2.0    plyr_1.8.4      
  [9] tools_3.4.3      grid_3.4.3       git2r_0.21.0     htmltools_0.3.6 
 [13] yaml_2.1.16      rprojroot_1.3-2  digest_0.6.15    evaluate_0.10.1 
-[17] rmarkdown_1.8    stringi_1.1.6    compiler_3.4.3   backports_1.1.2 
-[21] boot_1.3-20      mvtnorm_1.0-7    pkgconfig_2.0.1 </code></pre>
+[17] rmarkdown_1.10   stringi_1.1.6    compiler_3.4.3   backports_1.1.2 
+[21] boot_1.3-20      mvtnorm_1.0-8    pkgconfig_2.0.1 </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
