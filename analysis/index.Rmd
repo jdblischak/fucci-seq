@@ -8,14 +8,9 @@ output:
 
 ---
 
-## Overview
+## Summary and overview
 
 * [Data description](data-overview.html)
-
----
-
-## Summary analysis
-
 * [Seminar talk 2018-04-16](talk-20180416.html)
 * Some code for generating plots for the paper
     * `code/paper.plot.images.R`
@@ -24,26 +19,40 @@ output:
 
 ## Model training and prediction results
 
-* [Early analysis using trendfilter](method-npreg.html) (to be updated...)
+* Early analysis [using trendfilter and evaluating model performance](method-npreg.html)
 
 * Investigate the property and quality of [the cell time labels derived from GFP and RFP](method-labels.html): PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.
 
 * Investigate the property of [Seurat classes and cell time](method-label-seurat.html) 
 
+* Noisy label analysis
+    * PVE in DAPI, GFP, and RFP [before vs after removing noisy labels](method-labels-noisy.html)
+    * Comparing results excluding/including noisy training labels on top 10 and top 101 cyclical genes, when [excluding noisy labels from each fold validation, hence unequal sample numbers per fold](method-train-labels.html) as opposed to [excluding noisy labels before making fold valdiation, hence equal nubmer per fold](method-train-labels-equalfold.html)
+
 * Analyze the training datasets
-    * Prediction results from trendfilter order 2 and order 3 with npcirc.nw [on the odd-numbered genes in the top 101 cyclical genes](method-npreg-prelim-results.html)
-    * Prediction results of the various classifers (supervised, PC, unsupervised) [on top 101 cyclical genes](method-train-classifiers.html), and on [top 10 cyclial genes](method-train-classifiers-top10.html).
-    * Finalizing results of all classifiers and the [top X number of genes](method-train-classifiers-all.html). 
-    
-    
+    * Comparing trendfilter order 2 and order 3 with npcirc.nw [on the odd-numbered genes in the top 101 cyclical genes](method-npreg-prelim-results.html)
+    * Comparing resuls of the various classifers (supervised, PC, unsupervised) [on top 101 cyclical genes](method-train-classifiers.html), and on [top 10 cyclial genes](method-train-classifiers-top10.html).
+
 * Analyze the withheld samples
-    * Evaluate the withheld samples [on the top 101 cyclical genes](method-eval-withheld-explore.html) comparing peco methods with seurat predictions.
+    * Evaluate the withheld sample [including noisy labels](method-eval-withheld-explore.html) on the top 10 and top 101 cyclical genes] and comparing peco methods with seurat predictions.
+    * Evaluate the withheld samples [removing noisy labels](method-eval-withheld-explore-removenoisy.html) on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.
     
-* Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html).
+* Finializing results for when validation sample consists of random cells
+    * [Selecting the top X cyclical genes in the training sample](method-train-classifiers-all.html)
+    * [Learning gene annotations](method-train-classifiers-genes.html)
+    * [Validation sample](method-eval.html)
+
+* Finializing results for when validation sample consists of a random individual
+    * [Selecting the top X cyclical genes in the training sample](method-train-ind.html)
+    * [Learning gene annotations](method-train-ind-genes.html)
+    * [Validation sample](method-eval-ind.html)
+
+
+<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
 
 ---
 
-## Explore aproaches to fitting cyclical trend
+## Approaches to fitting cyclical trend in gene expression data
 
 * Apply spherically projected multivariate linear model
     * [First trying out spml package](model-spml.pilot.html)
@@ -129,7 +138,6 @@ We evaluated and pre-processed the results of image analysis as follows:
 4. We investigated the cell time estimates based on FUCCI intensities.
     * Consider the mean-adjusted FUCCI intensities, what's the relationship between cell time [estimates and DAPI and sample molecule count](images-time-eval.html)? 
     * Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What's the differences between cell time estimates from [the two normalization approaches](images-time-compare-normalize.html)?
-
 
 
 ---
