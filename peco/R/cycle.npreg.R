@@ -161,11 +161,15 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
     theta_choose <- initialize_grids(Y, grids=grids, method.grid="pca")
     loglik_per_cell_by_celltimes <- matrix(0, N, length(theta_choose))
     prob_per_cell_by_celltimes <- matrix(0, N, length(theta_choose))
+    colnames(loglik_per_cell_by_celltimes) <- theta_choose
+    colnames(prob_per_cell_by_celltimes) <- theta_choose
   }
   if (method.type=="supervised") {
     theta_choose <- initialize_grids(Y, grids=grids, method.grid="uniform")
     loglik_per_cell_by_celltimes <- matrix(0, N, grids)
     prob_per_cell_by_celltimes <- matrix(0, N, grids)
+    colnames(loglik_per_cell_by_celltimes) <- theta_choose
+    colnames(prob_per_cell_by_celltimes) <- theta_choose
   }
 
   for (n in 1:N) {
@@ -182,11 +186,11 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
   # use max likelihood to assign samples
   for (n in 1:N) {
     # print(n)
-    maxll <- max(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
-    if (maxll == 0) {
+    sumll <- sum(exp(loglik_per_cell_by_celltimes)[n,], na.rm=T)
+    if (sumll == 0) {
       prob_per_cell_by_celltimes[n,] <- rep(0, grids)
     } else {
-      prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/maxll
+      prob_per_cell_by_celltimes[n,] <- exp(loglik_per_cell_by_celltimes)[n,]/sumll
     }
   }
   cell_times_samp_ind <- sapply(1:N, function(n) {
@@ -209,7 +213,9 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
   loglik_est <- sum(loglik_max_per_cell)
 
   return(list(loglik_est=loglik_est,
-              cell_times_est=cell_times_est))
+              cell_times_est=cell_times_est,
+              #loglik_per_cell_by_celltimes=loglik_per_cell_by_celltimes,
+              prob_per_cell_by_celltimes=prob_per_cell_by_celltimes))
 }
 
 
@@ -289,7 +295,9 @@ cycle.npreg.outsample <- function(Y_test,
               cell_times_reordered=updated_estimates$theta,
               mu_reordered=updated_estimates$mu_est,
               sigma_reordered=updated_estimates$sigma_est,
-              funs_reordered=updated_estimates$funs)
+              funs_reordered=updated_estimates$funs,
+              #loglik_per_cell_by_celltimes=initial_loglik$loglik_per_cell_by_celltimes,
+              prob_per_cell_by_celltimes=initial_loglik$prob_per_cell_by_celltimes)
   return(out)
 }
 
