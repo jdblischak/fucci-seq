@@ -76,19 +76,71 @@ pdata$theta_triple <- as.numeric(pdata$theta_triple)
 
 y1=pdata$theta
 y2=pdata$theta_triple
-y2shift <- rotation(y1, y2)$y2shift
+y2shift <- rotation(y1, y2)
 
-par(mfrow=c(1,2))
-plot(pdata$theta,
-     pdata$theta_triple, main="pre rotation",
-     xlab="based on GFP, RFP",
-     ylab="based on DAPI, GFP, RFP")
+pdata$theta_triple <- y2shift
+
+par(mfrow=c(1,1))
 plot(y1,
      y2shift, main = "post rotation",
      xlab="based on GFP, RFP",
      ylab="based on DAPI, GFP, RFP")
+```
 
-pdata$theta_triple <- y2shift
+fucci time distribution
+
+```{r}
+hist(pdata$theta, breaks=40,
+     xlim=c(0,6.5), xlab="fucci time",
+     main = "fucci time distribution")
+```
+
+intensity time distribution
+
+```{r}
+hist(pdata$theta_triple, breaks=40,
+     xlim=c(0,6.5), xlab="intensity time",
+     main = "intensity time distribution")
+```
+
+
+intensities by fucci time
+
+```{r}
+library(scales)
+plot(pdata$theta,
+     pdata$dapi.median.log10sum.adjust,
+     col=alpha("blue", .5), cex=.7, pch=16,
+     ylim=range(c(pdata$rfp.median.log10sum.adjust,
+                  pdata$gfp.median.log10sum.adjust,
+                  pdata$dapi.median.log10sum.adjust)),
+     xlab="fucci time",
+     ylab="batch-adjusted log intensites",
+     main ="Intensities by fucci time")
+points(pdata$theta,
+     pdata$gfp.median.log10sum.adjust,
+     col=alpha("forestgreen", .5), cex=.7, pch=16)
+points(pdata$theta,
+     pdata$rfp.median.log10sum.adjust,
+     col=alpha("red", .5), cex=.7, pch=16)
+
+
+
+plot(pdata$theta_triple,
+     pdata$dapi.median.log10sum.adjust,
+     col=alpha("blue", .5), cex=.7, pch=16,
+     ylim=range(c(pdata$rfp.median.log10sum.adjust,
+                  pdata$gfp.median.log10sum.adjust,
+                  pdata$dapi.median.log10sum.adjust)),
+     xlab="intensity time (fucci + daip)",
+     ylab="batch-adjusted log intensites",
+     main ="Intensities by intensity time")
+points(pdata$theta,
+     pdata$gfp.median.log10sum.adjust,
+     col=alpha("forestgreen", .5), cex=.7, pch=16)
+points(pdata$theta,
+     pdata$rfp.median.log10sum.adjust,
+     col=alpha("red", .5), cex=.7, pch=16)
 
 # rr <- rFLIndTestRand(pdata$theta, pdata$theta_triple, NR=10000)
 # cor(y1, y2shift)
