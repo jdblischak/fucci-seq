@@ -1,0 +1,136 @@
+---
+title: "Finalizing the classifer results"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+
+## Gene lists
+
+```{r, eval=F}
+genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
+all_genes <- genes_list[length(genes_list)][[1]]
+
+library(biomaRt)
+ensembl <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+symbols <- getBM(attributes = c("hgnc_symbol",'ensembl_gene_id'), 
+      filters = c('ensembl_gene_id'),
+      values = all_genes, 
+      mart = ensembl)
+
+
+genes_list_symbols <- lapply(1:length(genes_list), function(i) {
+  ll <- genes_list[i][[1]]
+  #symbols[match(ll,symbols$ensembl_gene_id),]
+  symbs <- symbols[which(symbols$ensembl_gene_id %in% ll),]
+  non_symbs <- ll[which(!(ll %in% symbols$ensembl_gene_id))]
+  df_non_symbs <- data.frame(hgnc_symbol=NA,
+                             ensembl_gene_id=non_symbs)  
+  out <- rbind(symbs, df_non_symbs)
+  out <- out[match(ll,out$ensembl_gene_id),]
+  return(out)
+})
+names(genes_list_symbols) <- names(genes_list)
+
+saveRDS(genes_list_symbols, 
+        "../output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds")
+```
+
+
+```{r}
+genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
+genes_list_symbols <- readRDS("../output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds")
+
+seurat.genes <- readLines(
+  con = "../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+
+tmp  <- sapply(genes_list_symbols, function(x) sum(x$hgnc_symbol %in% unlist(seurat.genes)))
+
+# par(mfrow=c(1,2))
+# plot(x=sapply(genes_list, length),
+#      tmp, 
+#      xlab="Number of cyclical genes",
+#      ylab="Number of Seurate genes (total 97)",
+#      main = "Seurat genes in our data")
+# plot(x=sapply(genes_list, length),
+#      tmp/as.numeric(names(genes_list)), 
+#      xlab="Number of cyclical genes",
+#      ylab="Proportion of Seurate genes",
+#      main = "Seurat genes in our data")
+
+
+par(mfrow=c(1,2))
+plot(x=sapply(genes_list, length)[1:27],
+     tmp[1:27], 
+     xlab="Number of cyclical genes",
+     ylab="Number of Seurate genes (total 97)",
+     main = "Seurat genes in top 260")
+plot(x=sapply(genes_list, length)[1:27],
+     (tmp/as.numeric(names(genes_list)))[1:27], 
+     xlab="Number of cyclical genes",
+     ylab="Proportion of Seurate genes",
+     main = "Seurat genes in top 260")
+
+library(gplots)
+venn(list(seurat=unlist(seurat.genes),
+          peco=genes_list_symbols[[27]]$hgnc_symbol))
+```
+
+
+save to output table
+
+```{r, eval=F}
+write.table(genes_list_symbols[[27]]$hgnc_symbol,
+            file = "../output/method-train-classifiers-genes.Rmd/topgenes.txt",
+            row.names=F,
+            col.names=F, quote=F)
+
+
+write.table(genes_list_symbols[[length(genes_list_symbols)]][,1],
+            file = "../output/method-train-classifiers-genes.Rmd/allgenes.txt",
+            row.names=F,
+            col.names=F, quote=F)
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
