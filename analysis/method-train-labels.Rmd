@@ -417,6 +417,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top101, file = "../output/method-train-labels.Rmd/fits_top101.rds")
+#fits_top101 <- readRDS(file = "../output/method-train-labels.Rmd/fits_top101.rds")
 
 
 diff_time <- lapply(1:5, function(i) {
@@ -424,8 +425,8 @@ diff_time <- lapply(1:5, function(i) {
     abs(fits_top101[[i]]$theta_est_shift-(2*pi-fits_top101[[i]]$theta_test)))
 })
 
-pve <- lapply(1:length(fits_sub), function(i) {
-  dap <- pdata$dapi.median.log10sum[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
+pve <- lapply(1:length(fits_top101), function(i) {
+  dap <- pdata$dapi.median.log10sum.adjust[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
   get.pve(dap[order(fits_top101[[i]]$theta_est_shift)])
 })
 
@@ -437,7 +438,7 @@ save(diff_time, pve,
 ```{r}
 load(file = "../output/method-train-labels.Rmd/modelresults_top101.rda")
 mean(sapply(diff_time, mean)/2/pi)
-mean(unlist(pve))
+mean(sapply(pve, "[[", 1))
 ```
 
 
