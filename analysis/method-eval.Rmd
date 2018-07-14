@@ -403,6 +403,53 @@ for (j in 1:sum(dd==F)) {
          col="red", lty=1, lwd=3)
   title(paste(round(obj$diff_time[cell_ind]/2/pi,2)))
 }
+
+out_cells <- colnames(obj$Y)[dd==FALSE]
+```
+
+Get outlier info.
+
+```{r}
+data_withheld <- readRDS("../data/results/data_withheld.rds")
+
+plot(obj$gfp, 
+     obj$rfp,
+     col=c("red", "gray50")[dd+1])
+abline(h=0, v=0, lty=3)
+
+all.equal(colnames(obj$Y), rownames(data_withheld$pdata.valid))
+
+pd <- data_withheld$pdata.valid[which(rownames(data_withheld$pdata.valid) %in% out_cells),]
+
+cbind(pd$image_individual, pd$image_label)
+pchs <- rep("0", length(obj$gfp))
+pchs[colnames(obj$Y) == out_cells[1]] <- "1"
+pchs[colnames(obj$Y) == out_cells[2]] <- "2"
+pchs[colnames(obj$Y) == out_cells[3]] <- "3"
+pchs[colnames(obj$Y) == out_cells[4]] <- "4"
+
+plot(obj$gfp, 
+     obj$rfp,
+     col=c("red", "gray50")[dd+1])
+abline(h=0, v=0, lty=3)
+
+ii <- abs(data_withheld$pdata.valid$gfp.median.log10sum.adjust) < .1 & abs(data_withheld$pdata.valid$rfp.median.log10sum.adjust) < .1 & dd == FALSE
+
+colnames(obj$Y)[ii==T]
+
+plot(obj$ref_time, 
+     obj$dapi,
+     col=c("red", "gray50")[dd+1])
+abline(h=0, lty=3)
+
+pca_res <- prcomp(t(data_withheld$log2cpm.valid), scale=T)
+
+sapply(1:5, function(i) summary(lm(pca_res$x[,i]~dd))$adj.r.squared)
+
+plot(obj$ref_time,
+     obj$diff_time,
+     col=c("red", "gray50")[dd+1])
+
 ```
 
 
