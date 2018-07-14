@@ -237,10 +237,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-03</p>
+<p><strong>Last updated:</strong> 2018-07-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2acec0f</p>
+<p><strong>Code version:</strong> a282d43</p>
 <hr />
 <div id="extract-data-from-the-top-10-genes-identified" class="section level2">
 <h2>Extract data from the top 10 genes identified</h2>
@@ -608,6 +608,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top101, file = &quot;../output/method-train-labels.Rmd/fits_top101.rds&quot;)
+#fits_top101 &lt;- readRDS(file = &quot;../output/method-train-labels.Rmd/fits_top101.rds&quot;)
 
 
 diff_time &lt;- lapply(1:5, function(i) {
@@ -615,8 +616,8 @@ diff_time &lt;- lapply(1:5, function(i) {
     abs(fits_top101[[i]]$theta_est_shift-(2*pi-fits_top101[[i]]$theta_test)))
 })
 
-pve &lt;- lapply(1:length(fits_sub), function(i) {
-  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
+pve &lt;- lapply(1:length(fits_top101), function(i) {
+  dap &lt;- pdata$dapi.median.log10sum.adjust[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
   get.pve(dap[order(fits_top101[[i]]$theta_est_shift)])
 })
 
@@ -624,9 +625,9 @@ save(diff_time, pve,
      file = &quot;../output/method-train-labels.Rmd/modelresults_top101.rda&quot;)</code></pre>
 <pre class="r"><code>load(file = &quot;../output/method-train-labels.Rmd/modelresults_top101.rda&quot;)
 mean(sapply(diff_time, mean)/2/pi)</code></pre>
-<pre><code>[1] 0.09344773</code></pre>
-<pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.2703996</code></pre>
+<pre><code>[1] 0.08756486</code></pre>
+<pre class="r"><code>mean(sapply(pve, &quot;[[&quot;, 1))</code></pre>
+<pre><code>[1] 0.1411442</code></pre>
 <hr />
 </div>
 <div id="session-information" class="section level2">
