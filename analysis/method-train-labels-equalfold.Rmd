@@ -151,7 +151,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top101, file = "../output/method-train-labels-equalfold.Rmd/fits_top101.rds")
-
+#fits_top101 <- readRDS("../output/method-train-labels-equalfold.Rmd/fits_top101.rds")
 
 diff_time <- lapply(1:5, function(i) {
   pmin(abs(fits_top101[[i]]$theta_est_shift-fits_top101[[i]]$theta_test),
@@ -159,7 +159,8 @@ diff_time <- lapply(1:5, function(i) {
 })
 
 pve <- lapply(1:length(fits_top101), function(i) {
-  dap <- pdata$dapi.median.log10sum[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
+  dap <- pdata$dapi.median.log10sum.adjust[match(names(fits_top101[[i]]$theta_test),
+                                                 rownames(pdata))]
   get.pve(dap[order(fits_top101[[i]]$theta_est_shift)])
 })
 
@@ -209,6 +210,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top10, file = "../output/method-train-labels-equalfold.Rmd/fits_top10.rds")
+#fits_top10 <- readRDS("../output/method-train-labels-equalfold.Rmd/fits_top10.rds")
 
 
 diff_time <- lapply(1:5, function(i) {
@@ -217,7 +219,8 @@ diff_time <- lapply(1:5, function(i) {
 })
 
 pve <- lapply(1:length(fits_top10), function(i) {
-  dap <- pdata$dapi.median.log10sum[match(names(fits_top10[[i]]$theta_test),rownames(pdata))]
+  dap <- pdata$dapi.median.log10sum.adjust[match(names(fits_top10[[i]]$theta_test),
+                                                 rownames(pdata))]
   get.pve(dap[order(fits_top10[[i]]$theta_est_shift)])
 })
 
@@ -233,7 +236,7 @@ save(diff_time, pve,
 ```{r}
 load(file = "../output/method-train-labels-equalfold.Rmd/modelresults_top101.rda")
 mean(sapply(diff_time, mean)/2/pi)
-mean(unlist(pve))
+mean(sapply(pve, "[[", 1))
 
 load(file = "../output/method-train-labels-equalfold.Rmd/modelresults_top10.rda")
 mean(sapply(diff_time, mean)/2/pi)
