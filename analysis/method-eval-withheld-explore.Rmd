@@ -32,9 +32,80 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 ---
 
+## Run on supervised model
+
+test cluster code
+
+```{r, eval=F}
+ngenes=101
+
+dir <-"/project2/gilad/joycehsiao/fucci-seq"
+source(file.path(dir,"code/working/run_methods.R"))
+
+data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
+data_withheld <-readRDS(file=file.path(dir, "data/results/data_withheld.rds"))
+
+sig.genes <- readRDS(file=file.path(dir,
+    "output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds"))
+
+# make prediction parameters
+Y_train_topX <- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
+
+training_topX <- cycle.npreg.insample(Y = Y_train_topX,
+                                        theta = data_training$theta.nonvalid,
+                                        polyorder=2,
+                                        ncores=15,
+                                        method.trend="trendfilter")
+
+
+seurat.genes <- readLines(
+  con = file.path(dir,                                    "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+training_model <- training_topX
+Y_test_normed <- data_withheld$log2cpm.quant.valid
+  
+cycle.genes <- rownames(training_model$Y)
+Y_test_normed.cycle <- Y_test_normed[which(rownames(Y_test_normed) %in% cycle.genes),]
+#Y_test.cycle <- Y_test[which(rownames(Y_test) %in% cycle.genes),]
+
+### supervised methods
+message("Begin supervised method...")
+fit.supervised <- cycle.npreg.outsample(Y_test=Y_test_normed.cycle,
+                                        sigma_est=training_model$sigma_est,
+                                        funs_est=training_model$funs_est,
+                                        method.grid = "uniform",
+                                        method.trend="trendfilter",
+                                        polyorder=2,
+                                        ncores=ncores)
+  
+pred_time <- fit.supervised$cell_times_est
+pred_time_shift <- with(fit.supervised, rotation(data_withheld$theta.valid,
+                                                 cell_times_est)$y2shift)
+#plot(pred_time, pred_time_shift)
+source("../peco/R/utility.R")
+pv <- get.pve(data_withheld$pdata.valid$gfp.median.log10sum.adjust[order(pred_time_shift)])
+
+
+bb <- readRDS("../data/results/results_train_top101.rds")
+
+bb1.pve <- get.pve(bb$fold.1$fit.supervised$dapi[order(bb$fold.1$fit.supervised$pred_time_shift)])
+bb2.pve <- get.pve(bb$fold.2$fit.supervised$dapi[order(bb$fold.2$fit.supervised$pred_time_shift)])
+bb3.pve <- get.pve(bb$fold.3$fit.supervised$dapi[order(bb$fold.3$fit.supervised$pred_time_shift)])
+bb4.pve <- get.pve(bb$fold.4$fit.supervised$dapi[order(bb$fold.4$fit.supervised$pred_time_shift)])
+bb5.pve <- get.pve(bb$fold.5$fit.supervised$dapi[order(bb$fold.5$fit.supervised$pred_time_shift)])
+
+
+mean(c(bb1.pve$pve, bb2.pve$pve, bb3.pve$pve, bb4.pve$pve, bb5.pve$pve))
+```
+
+---
+
 ## Load previously computed results
 
-```{r}
+```{r, eval=F}
 results_eval_top101 <- readRDS("../data/results/results_eval_top101.rds")
 results_eval_top10 <- readRDS("../data/results/results_eval_top10.rds")
 ```
@@ -43,7 +114,7 @@ results_eval_top10 <- readRDS("../data/results/results_eval_top10.rds")
 
 ## Before removing moisy labels, on top 10 cyclical genes
 
-```{r}
+```{r, eval=F}
 source("../peco/R/utility.R")
 source("../peco/R/fit.trendfilter.generic.R")
 source("../peco/R/run_seurat.R")
@@ -85,6 +156,10 @@ print(pve_eval_top10)
 ```
 
 ```{r}
+source("../peco/R/utility.R")
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/run_seurat.R")
+
 get.aov(yy=results_eval_top10$fit.seurat$dapi,
         xx=results_eval_top10$fit.seurat$assignments)
 
@@ -127,17 +202,17 @@ c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)
 c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)
 
 
-with(results_eval_top10,
-  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
-
-with(results_eval_top10,
-  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
+# with(results_eval_top10,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+# 
+# with(results_eval_top10,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
 ```
 
 
 ### Seurat cell class vs unsupervsied predicted time
 
-```{r}
+```{r, eval=F}
 cols <- c("orange", "red", "brown")
 par(mfrow=c(1,3))
 with(results_eval_top10, 
@@ -158,7 +233,7 @@ title("Unsupervised cell time and Seurat classes", outer=TRUE, line=-1)
 
 ### Seurat clases vs supervsied cell times
 
-```{r}
+```{r, eval=F}
 cols <- c("orange", "red", "brown")
 par(mfrow=c(1,3))
 with(results_eval_top10, 
@@ -183,7 +258,7 @@ title("Supervised cell time and Seurat classes", outer=TRUE, line=-1)
 
 ## Before removing moisy labels, on top 101 cyclical genes
 
-```{r}
+```{r, eval=F}
 source("../peco/R/utility.R")
 source("../peco/R/fit.trendfilter.generic.R")
 source("../peco/R/run_seurat.R")
@@ -224,7 +299,7 @@ pve_eval_top101 <- readRDS("../output/method-eval-withheld-explore.Rmd/pve_eval_
 print(pve_eval_top101)
 ```
 
-```{r}
+```{r, eval=F}
 get.aov(yy=results_eval_top101$fit.seurat$dapi,
         xx=results_eval_top101$fit.seurat$assignments)
 
@@ -267,17 +342,17 @@ c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)
 c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)
 
 
-with(results_eval_top101,
-  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+# with(results_eval_top101,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+# with(results_eval_top101,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
 
-with(results_eval_top101,
-  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
 ```
 
 
 ### Seurat cell class vs unsupervsied predicted time
 
-```{r}
+```{r, eval=F}
 cols <- c("orange", "red", "brown")
 par(mfrow=c(1,3))
 with(results_eval_top101, 
@@ -298,7 +373,7 @@ title("Unsupervised cell time and Seurat classes", outer=TRUE, line=-1)
 
 ### Seurat clases vs supervsied cell times
 
-```{r}
+```{r, eval=F}
 cols <- c("orange", "red", "brown")
 par(mfrow=c(1,3))
 with(results_eval_top101, 
