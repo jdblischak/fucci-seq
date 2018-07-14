@@ -223,6 +223,7 @@ div.section {
 
 <div id="TOC">
 <ul>
+<li><a href="#run-on-supervised-model">Run on supervised model</a></li>
 <li><a href="#load-previously-computed-results">Load previously computed results</a></li>
 <li><a href="#before-removing-moisy-labels-on-top-10-cyclical-genes">Before removing moisy labels, on top 10 cyclical genes</a><ul>
 <li><a href="#seurat-scores-vs-cell-time-predictions">Seurat scores vs cell time predictions</a></li>
@@ -242,11 +243,78 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-04</p>
+<p><strong>Last updated:</strong> 2018-07-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 2498ce4</p>
+<p><strong>Code version:</strong> c115f90</p>
 <hr />
+<div id="run-on-supervised-model" class="section level2">
+<h2>Run on supervised model</h2>
+<p>test cluster code</p>
+<pre class="r"><code>ngenes=101
+
+dir &lt;-&quot;/project2/gilad/joycehsiao/fucci-seq&quot;
+source(file.path(dir,&quot;code/working/run_methods.R&quot;))
+
+data_training &lt;- readRDS(file=file.path(dir, &quot;data/results/data_training.rds&quot;))
+data_withheld &lt;-readRDS(file=file.path(dir, &quot;data/results/data_withheld.rds&quot;))
+
+sig.genes &lt;- readRDS(file=file.path(dir,
+    &quot;output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds&quot;))
+
+# make prediction parameters
+Y_train_topX &lt;- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(sig.genes)[1:ngenes], ]
+
+training_topX &lt;- cycle.npreg.insample(Y = Y_train_topX,
+                                        theta = data_training$theta.nonvalid,
+                                        polyorder=2,
+                                        ncores=15,
+                                        method.trend=&quot;trendfilter&quot;)
+
+
+seurat.genes &lt;- readLines(
+  con = file.path(dir,                                    &quot;data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;))
+seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+training_model &lt;- training_topX
+Y_test_normed &lt;- data_withheld$log2cpm.quant.valid
+  
+cycle.genes &lt;- rownames(training_model$Y)
+Y_test_normed.cycle &lt;- Y_test_normed[which(rownames(Y_test_normed) %in% cycle.genes),]
+#Y_test.cycle &lt;- Y_test[which(rownames(Y_test) %in% cycle.genes),]
+
+### supervised methods
+message(&quot;Begin supervised method...&quot;)
+fit.supervised &lt;- cycle.npreg.outsample(Y_test=Y_test_normed.cycle,
+                                        sigma_est=training_model$sigma_est,
+                                        funs_est=training_model$funs_est,
+                                        method.grid = &quot;uniform&quot;,
+                                        method.trend=&quot;trendfilter&quot;,
+                                        polyorder=2,
+                                        ncores=ncores)
+  
+pred_time &lt;- fit.supervised$cell_times_est
+pred_time_shift &lt;- with(fit.supervised, rotation(data_withheld$theta.valid,
+                                                 cell_times_est)$y2shift)
+#plot(pred_time, pred_time_shift)
+source(&quot;../peco/R/utility.R&quot;)
+pv &lt;- get.pve(data_withheld$pdata.valid$gfp.median.log10sum.adjust[order(pred_time_shift)])
+
+
+bb &lt;- readRDS(&quot;../data/results/results_train_top101.rds&quot;)
+
+bb1.pve &lt;- get.pve(bb$fold.1$fit.supervised$dapi[order(bb$fold.1$fit.supervised$pred_time_shift)])
+bb2.pve &lt;- get.pve(bb$fold.2$fit.supervised$dapi[order(bb$fold.2$fit.supervised$pred_time_shift)])
+bb3.pve &lt;- get.pve(bb$fold.3$fit.supervised$dapi[order(bb$fold.3$fit.supervised$pred_time_shift)])
+bb4.pve &lt;- get.pve(bb$fold.4$fit.supervised$dapi[order(bb$fold.4$fit.supervised$pred_time_shift)])
+bb5.pve &lt;- get.pve(bb$fold.5$fit.supervised$dapi[order(bb$fold.5$fit.supervised$pred_time_shift)])
+
+
+mean(c(bb1.pve$pve, bb2.pve$pve, bb3.pve$pve, bb4.pve$pve, bb5.pve$pve))</code></pre>
+<hr />
+</div>
 <div id="load-previously-computed-results" class="section level2">
 <h2>Load previously computed results</h2>
 <pre class="r"><code>results_eval_top101 &lt;- readRDS(&quot;../data/results/results_eval_top101.rds&quot;)
@@ -259,13 +327,12 @@ results_eval_top10 &lt;- readRDS(&quot;../data/results/results_eval_top10.rds&qu
 source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
 source(&quot;../peco/R/run_seurat.R&quot;)
 
-mean(results_eval_top10$fit.supervised$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.1024371</code></pre>
-<pre class="r"><code>mean(results_eval_top10$fit.trend2.unsup$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.1027337</code></pre>
-<pre class="r"><code>mean(results_eval_top10$fit.seurat$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.1450893</code></pre>
-<pre class="r"><code>pve.wrapper &lt;- function(results_list, methods_list) {
+mean(results_eval_top10$fit.supervised$diff_time)/2/pi
+mean(results_eval_top10$fit.trend2.unsup$diff_time)/2/pi
+mean(results_eval_top10$fit.seurat$diff_time)/2/pi
+
+
+pve.wrapper &lt;- function(results_list, methods_list) {
   res &lt;- lapply(1:length(results_list), 
        function(i) {
           obj &lt;- results_list[[i]]
@@ -283,23 +350,8 @@ results_list &lt;- results_eval_top10
 methods_list &lt;- sapply(names(results_list), function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
 
 pve_eval_top10 &lt;- do.call(rbind, pve.wrapper(results_list=results_eval_top10, 
-                               methods_list=methods_list))</code></pre>
-<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
-<pre class="r"><code>pve_eval_top10$genes_used &lt;- &quot;top10&quot;
+                               methods_list=methods_list))
+pve_eval_top10$genes_used &lt;- &quot;top10&quot;
 pve_eval_top10$methods &lt;- methods_list
 saveRDS(pve_eval_top10,
         &quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top10.rds&quot;)</code></pre>
@@ -311,27 +363,18 @@ trend2     0.113966791 0.0884220119 0.2200606      top10     trend2
 bspline    0.101424270 0.1342596991 0.2563613      top10    bspline
 loess      0.133801337 0.1079941543 0.2980371      top10      loess
 seurat     0.007779095 0.0005450732 0.1126729      top10     seurat</code></pre>
-<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$dapi,
-        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.06984216
+<pre class="r"><code>source(&quot;../peco/R/utility.R&quot;)
+source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
+source(&quot;../peco/R/run_seurat.R&quot;)
 
-$pval
-[1] 0.01161179</code></pre>
-<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$gfp,
-        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.0538643
+get.aov(yy=results_eval_top10$fit.seurat$dapi,
+        xx=results_eval_top10$fit.seurat$assignments)
 
-$pval
-[1] 0.03134803</code></pre>
-<pre class="r"><code>get.aov(yy=results_eval_top10$fit.seurat$rfp,
-        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.1285371
+get.aov(yy=results_eval_top10$fit.seurat$gfp,
+        xx=results_eval_top10$fit.seurat$assignments)
 
-$pval
-[1] 0.0003419435</code></pre>
+get.aov(yy=results_eval_top10$fit.seurat$rfp,
+        xx=results_eval_top10$fit.seurat$assignments)</code></pre>
 <div id="seurat-scores-vs-cell-time-predictions" class="section level3">
 <h3>Seurat scores vs cell time predictions</h3>
 <pre class="r"><code>seurat.S.sup &lt;- with(results_eval_top10,
@@ -360,20 +403,11 @@ c(seurat.S.sup$pve, seurat.G2M.sup$pve)</code></pre>
 <pre><code>[1] 0.2623815 0.5239003</code></pre>
 <pre class="r"><code>c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)</code></pre>
 <pre><code>[1] 0.8272036 0.8565118</code></pre>
-<pre class="r"><code>with(results_eval_top10,
-  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))</code></pre>
-<pre><code>$pve
-[1] 0.6777578
-
-$pval
-[1] 1.471869e-15</code></pre>
-<pre class="r"><code>with(results_eval_top10,
-  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
-<pre><code>$pve
-[1] 0.5747001
-
-$pval
-[1] 9.6592e-14</code></pre>
+<pre class="r"><code># with(results_eval_top10,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+# 
+# with(results_eval_top10,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
 </div>
 <div id="seurat-cell-class-vs-unsupervsied-predicted-time" class="section level3">
 <h3>Seurat cell class vs unsupervsied predicted time</h3>
@@ -392,7 +426,6 @@ with(results_eval_top10, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assign
      main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
      xlab=&quot;Predicted cell time&quot;))
 title(&quot;Unsupervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="seurat-clases-vs-supervsied-cell-times" class="section level3">
 <h3>Seurat clases vs supervsied cell times</h3>
@@ -411,7 +444,6 @@ with(results_eval_top10, hist(fit.supervised$pred_time_shift[fit.seurat$assignme
      main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
      xlab=&quot;Predicted cell time&quot;))
 title(&quot;Supervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
@@ -421,13 +453,12 @@ title(&quot;Supervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)<
 source(&quot;../peco/R/fit.trendfilter.generic.R&quot;)
 source(&quot;../peco/R/run_seurat.R&quot;)
 
-mean(results_eval_top101$fit.supervised$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.09062966</code></pre>
-<pre class="r"><code>mean(results_eval_top101$fit.trend2.unsup$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.1160692</code></pre>
-<pre class="r"><code>mean(results_eval_top101$fit.seurat$diff_time)/2/pi</code></pre>
-<pre><code>[1] 0.1450893</code></pre>
-<pre class="r"><code>pve.wrapper &lt;- function(results_list, methods_list) {
+mean(results_eval_top101$fit.supervised$diff_time)/2/pi
+mean(results_eval_top101$fit.trend2.unsup$diff_time)/2/pi
+mean(results_eval_top101$fit.seurat$diff_time)/2/pi
+
+
+pve.wrapper &lt;- function(results_list, methods_list) {
   res &lt;- lapply(1:length(results_list), 
        function(i) {
           obj &lt;- results_list[[i]]
@@ -445,23 +476,8 @@ results_list &lt;- results_eval_top101
 methods_list &lt;- sapply(names(results_list), function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
 
 pve_eval_top101 &lt;- do.call(rbind, pve.wrapper(results_list=results_eval_top101, 
-                               methods_list=methods_list))</code></pre>
-<pre><code>Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... 
-Fold 1 ... Fold 2 ... Fold 3 ... Fold 4 ... Fold 5 ... </code></pre>
-<pre class="r"><code>pve_eval_top101$genes_used &lt;- &quot;top101&quot;
+                               methods_list=methods_list))
+pve_eval_top101$genes_used &lt;- &quot;top101&quot;
 pve_eval_top101$methods &lt;- methods_list
 saveRDS(pve_eval_top101,
         &quot;../output/method-eval-withheld-explore.Rmd/pve_eval_top101.rds&quot;)</code></pre>
@@ -474,26 +490,13 @@ bspline    0.183418205 0.0020355877 0.3354409     top101    bspline
 loess      0.004744912 0.0649387956 0.1642361     top101      loess
 seurat     0.007779095 0.0005450732 0.1126729     top101     seurat</code></pre>
 <pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$dapi,
-        xx=results_eval_top101$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.06984216
+        xx=results_eval_top101$fit.seurat$assignments)
 
-$pval
-[1] 0.01161179</code></pre>
-<pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$gfp,
-        xx=results_eval_top101$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.0538643
+get.aov(yy=results_eval_top101$fit.seurat$gfp,
+        xx=results_eval_top101$fit.seurat$assignments)
 
-$pval
-[1] 0.03134803</code></pre>
-<pre class="r"><code>get.aov(yy=results_eval_top101$fit.seurat$rfp,
+get.aov(yy=results_eval_top101$fit.seurat$rfp,
         xx=results_eval_top101$fit.seurat$assignments)</code></pre>
-<pre><code>$pve
-[1] 0.1285371
-
-$pval
-[1] 0.0003419435</code></pre>
 <div id="seurat-scores-vs-cell-time-predictions-1" class="section level3">
 <h3>Seurat scores vs cell time predictions</h3>
 <pre class="r"><code>seurat.S.sup &lt;- with(results_eval_top101,
@@ -522,20 +525,10 @@ c(seurat.S.sup$pve, seurat.G2M.sup$pve)</code></pre>
 <pre><code>[1] 0.5051351 0.5050090</code></pre>
 <pre class="r"><code>c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)</code></pre>
 <pre><code>[1] 0.8272036 0.8565118</code></pre>
-<pre class="r"><code>with(results_eval_top101,
-  get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))</code></pre>
-<pre><code>$pve
-[1] 0.6777578
-
-$pval
-[1] 1.471869e-15</code></pre>
-<pre class="r"><code>with(results_eval_top101,
-  get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
-<pre><code>$pve
-[1] 0.5747001
-
-$pval
-[1] 9.6592e-14</code></pre>
+<pre class="r"><code># with(results_eval_top101,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+# with(results_eval_top101,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))</code></pre>
 </div>
 <div id="seurat-cell-class-vs-unsupervsied-predicted-time-1" class="section level3">
 <h3>Seurat cell class vs unsupervsied predicted time</h3>
@@ -554,7 +547,6 @@ with(results_eval_top101, hist(fit.trend2.unsup$pred_time_shift[fit.seurat$assig
      main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
      xlab=&quot;Predicted cell time&quot;))
 title(&quot;Unsupervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="seurat-clases-vs-supervsied-cell-times-1" class="section level3">
 <h3>Seurat clases vs supervsied cell times</h3>
@@ -573,7 +565,6 @@ with(results_eval_top101, hist(fit.supervised$pred_time_shift[fit.seurat$assignm
      main = &quot;G2M, 57 cells&quot;, xlim=c(0,2*pi), ylim=c(0,30),
      xlab=&quot;Predicted cell time&quot;))
 title(&quot;Supervised cell time and Seurat classes&quot;, outer=TRUE, line=-1)</code></pre>
-<p><img src="figure/method-eval-withheld-explore.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 </div>
@@ -598,15 +589,11 @@ locale:
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
-other attached packages:
-[1] genlasso_1.3  igraph_1.2.1  Matrix_1.2-14 MASS_7.3-50  
-
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.17    lattice_0.20-35 digest_0.6.15   rprojroot_1.3-2
- [5] grid_3.4.3      backports_1.1.2 git2r_0.21.0    magrittr_1.5   
- [9] evaluate_0.10.1 stringi_1.2.3   rmarkdown_1.10  tools_3.4.3    
-[13] stringr_1.3.1   yaml_2.1.19     compiler_3.4.3  pkgconfig_2.0.1
-[17] htmltools_0.3.6 knitr_1.20     </code></pre>
+ [1] compiler_3.4.3  backports_1.1.2 magrittr_1.5    rprojroot_1.3-2
+ [5] tools_3.4.3     htmltools_0.3.6 yaml_2.1.16     Rcpp_0.12.17   
+ [9] stringi_1.1.6   rmarkdown_1.10  knitr_1.20      git2r_0.21.0   
+[13] stringr_1.2.0   digest_0.6.15   evaluate_0.10.1</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
