@@ -20,7 +20,7 @@ source(file.path(dir,"peco/R/fit.trendfilter.generic.R"))
 
 
 data_training <- readRDS(file=file.path(dir,
-                         paste0("data/results/ind_",ind,"_data_permute_training.rds")))
+                         paste0("data/results/triple_ind_",ind,"_data_permute_training.rds")))
 
 fold_indices <- readRDS(file=file.path(dir,
                          paste0("data/results/ind_", ind, "_fold_indices.rds")))
@@ -39,7 +39,7 @@ cyclical_genes <- get.cyclical(Y=Y_train_normed_fold,
 
 saveRDS(cyclical_genes,
         file=file.path(dir,
-             paste0("data/results/ind_",ind,"_data_training_cyclical_genes_permute.fold.",fold,".rds")))
+             paste0("data/results/triple_ind_",ind,"_data_training_cyclical_genes_permute.fold.",fold,".rds")))
 
 
 

@@ -13,19 +13,15 @@ for (i in seq_along(args)) {
 
 ncores <- as.numeric(args[1])
 fold <- as.numeric(args[2])
-ind <- as.character(args[3])
+
 
 dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"peco/R/fit.trendfilter.generic.R"))
 
 
-data_training <- readRDS(file=file.path(dir,
-                         paste0("data/results/ind_",ind,"_data_permute_training.rds")))
+data_training <- readRDS(file=file.path(dir, "data/results/triple_data_permute_training.rds"))
 
-fold_indices <- readRDS(file=file.path(dir,
-                         paste0("data/results/ind_", ind, "_fold_indices.rds")))
-
-print(ind)
+fold_indices <- readRDS(file=file.path(dir, "data/results/fold_indices.rds"))
 
 print(fold)
 
@@ -36,10 +32,9 @@ cyclical_genes <- get.cyclical(Y=Y_train_normed_fold,
                                theta=theta_train_fold,
                                polyorder=2, ncores=ncores)
 
-
 saveRDS(cyclical_genes,
         file=file.path(dir,
-             paste0("data/results/ind_",ind,"_data_training_cyclical_genes_permute.fold.",fold,".rds")))
+             paste0("data/results/data_training_cyclical_genes_triple_permute.fold.",fold,".rds")))
 
 
 
