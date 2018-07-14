@@ -236,10 +236,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-03</p>
+<p><strong>Last updated:</strong> 2018-07-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 44c056b</p>
+<p><strong>Code version:</strong> a88bbf9</p>
 <hr />
 <div id="summary" class="section level2">
 <h2>Summary</h2>
@@ -351,7 +351,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top101, file = &quot;../output/method-train-labels-equalfold.Rmd/fits_top101.rds&quot;)
-
+#fits_top101 &lt;- readRDS(&quot;../output/method-train-labels-equalfold.Rmd/fits_top101.rds&quot;)
 
 diff_time &lt;- lapply(1:5, function(i) {
   pmin(abs(fits_top101[[i]]$theta_est_shift-fits_top101[[i]]$theta_test),
@@ -359,7 +359,8 @@ diff_time &lt;- lapply(1:5, function(i) {
 })
 
 pve &lt;- lapply(1:length(fits_top101), function(i) {
-  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top101[[i]]$theta_test),rownames(pdata))]
+  dap &lt;- pdata$dapi.median.log10sum.adjust[match(names(fits_top101[[i]]$theta_test),
+                                                 rownames(pdata))]
   get.pve(dap[order(fits_top101[[i]]$theta_est_shift)])
 })
 
@@ -409,6 +410,7 @@ for (i in 1:5) {
 }
 
 saveRDS(fits_top10, file = &quot;../output/method-train-labels-equalfold.Rmd/fits_top10.rds&quot;)
+#fits_top10 &lt;- readRDS(&quot;../output/method-train-labels-equalfold.Rmd/fits_top10.rds&quot;)
 
 
 diff_time &lt;- lapply(1:5, function(i) {
@@ -417,7 +419,8 @@ diff_time &lt;- lapply(1:5, function(i) {
 })
 
 pve &lt;- lapply(1:length(fits_top10), function(i) {
-  dap &lt;- pdata$dapi.median.log10sum[match(names(fits_top10[[i]]$theta_test),rownames(pdata))]
+  dap &lt;- pdata$dapi.median.log10sum.adjust[match(names(fits_top10[[i]]$theta_test),
+                                                 rownames(pdata))]
   get.pve(dap[order(fits_top10[[i]]$theta_est_shift)])
 })
 
@@ -430,13 +433,13 @@ save(diff_time, pve,
 <pre class="r"><code>load(file = &quot;../output/method-train-labels-equalfold.Rmd/modelresults_top101.rda&quot;)
 mean(sapply(diff_time, mean)/2/pi)</code></pre>
 <pre><code>[1] 0.08477327</code></pre>
-<pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.4173759</code></pre>
+<pre class="r"><code>mean(sapply(pve, &quot;[[&quot;, 1))</code></pre>
+<pre><code>[1] 0.03925777</code></pre>
 <pre class="r"><code>load(file = &quot;../output/method-train-labels-equalfold.Rmd/modelresults_top10.rda&quot;)
 mean(sapply(diff_time, mean)/2/pi)</code></pre>
 <pre><code>[1] 0.08482704</code></pre>
 <pre class="r"><code>mean(unlist(pve))</code></pre>
-<pre><code>[1] 0.4332086</code></pre>
+<pre><code>[1] 0.426531</code></pre>
 <hr />
 </div>
 <div id="fitting-top-10-genes-without-pc-outliers" class="section level2">
