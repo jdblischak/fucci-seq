@@ -1,0 +1,290 @@
+---
+title: "Evaluate the withheld sample on top X cyclical after removing noisy labels"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Load previously computed results
+
+```{r, eval=F}
+results_filt_eval_top10 <- readRDS("../data/results/results_filt_eval_top10.rds")
+results_filt_eval_top101 <- readRDS("../data/results/results_filt_eval_top101.rds")
+```
+
+---
+
+## After removing noisy labels, on top 10 cyclical genes
+
+```{r, eval=F}
+source("../peco/R/utility.R")
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/run_seurat.R")
+
+mean(results_filt_eval_top10$fit.supervised$diff_time)/2/pi
+mean(results_filt_eval_top10$fit.trend2.unsup$diff_time)/2/pi
+mean(results_filt_eval_top10$fit.seurat$diff_time)/2/pi
+
+
+pve.wrapper <- function(results_list, methods_list) {
+  res <- lapply(1:length(results_list), 
+       function(i) {
+          obj <- results_list[[i]]
+          out <- data.frame(
+            dapi=with(obj, get.pve(dapi[order(pred_time_shift)])$pve),
+            gfp=with(obj, get.pve(gfp[order(pred_time_shift)])$pve),
+            rfp=with(obj, get.pve(rfp[order(pred_time_shift)])$pve) )
+  })
+  names(res) <- methods_list
+  return(res)
+}
+
+
+results_list <- results_filt_eval_top10
+methods_list <- sapply(names(results_list), function(x) strsplit(x, split=".", fixed=TRUE)[[1]][2])
+
+pve_eval_top10 <- do.call(rbind, pve.wrapper(results_list=results_filt_eval_top10, 
+                               methods_list=methods_list))
+pve_eval_top10$genes_used <- "top10"
+pve_eval_top10$methods <- methods_list
+saveRDS(pve_eval_top10,
+        "../output/method-eval-withheld-explore-removenoisy.Rmd/pve_eval_top10.rds")
+```
+
+
+```{r}
+pve_eval_top10 <- readRDS("../output/method-eval-withheld-explore-removenoisy.Rmd/pve_eval_top10.rds")
+print(pve_eval_top10)
+```
+
+```{r, eval=F}
+get.aov(yy=results_filt_eval_top10$fit.seurat$dapi,
+        xx=results_filt_eval_top10$fit.seurat$assignments)
+
+get.aov(yy=results_filt_eval_top10$fit.seurat$gfp,
+        xx=results_filt_eval_top10$fit.seurat$assignments)
+
+get.aov(yy=results_filt_eval_top10$fit.seurat$rfp,
+        xx=results_filt_eval_top10$fit.seurat$assignments)
+```
+
+### Seurat scores vs cell time predictions
+
+```{r, eval=F}
+seurat.S.sup <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.supervised$pred_time_shift)]))
+seurat.S.unsup <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.trend2.unsup$pred_time_shift)]))
+seurat.G2M.sup <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.supervised$pred_time_shift)]))
+seurat.G2M.unsup <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.trend2.unsup$pred_time_shift)]))
+
+seurat.S.owntime <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$S[order(fit.seurat$cell_times_est)]))
+seurat.G2M.owntime <- with(results_filt_eval_top10,
+                     get.pve(fit.seurat$G2M[order(fit.seurat$cell_times_est)]))
+
+save(seurat.S.sup, seurat.S.unsup,
+     seurat.G2M.sup, seurat.G2M.unsup,
+     seurat.S.owntime, seurat.G2M.owntime,
+     file = "../output/method-eval-withheld-explore-removenoisy.Rmd/seurat.time.top10.rda")
+```
+
+
+```{r}
+load(file="../output/method-eval-withheld-explore-removenoisy.Rmd/seurat.time.top10.rda")
+
+c(seurat.S.sup$pve, seurat.G2M.sup$pve)
+c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)
+c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)
+
+
+# with(results_filt_eval_top10,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+
+# with(results_filt_eval_top10,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
+
+```
+
+
+### Seurat clases vs supervsied cell times
+
+```{r, eval=F}
+cols <- c("orange", "red", "brown")
+par(mfrow=c(1,3))
+with(results_filt_eval_top10, 
+     hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="G1"],
+     nclass=5, col=cols[1], main = "G1, 9 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+with(results_filt_eval_top10, hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="S"],
+     nclass=10, col=cols[2],
+     main = "S, 53 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+with(results_filt_eval_top10, hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="G2M"],
+     nclass=10, col=cols[3],
+     main = "G2M, 55 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+title("Supervised cell time and Seurat classes", outer=TRUE, line=-1)
+```
+
+
+---
+
+
+
+## After removing moisy labels, on top 101 cyclical genes
+
+```{r, eval=F}
+source("../peco/R/utility.R")
+source("../peco/R/fit.trendfilter.generic.R")
+source("../peco/R/run_seurat.R")
+
+mean(results_filt_eval_top101$fit.supervised$diff_time)/2/pi
+mean(results_filt_eval_top101$fit.trend2.unsup$diff_time)/2/pi
+mean(results_filt_eval_top101$fit.seurat$diff_time)/2/pi
+
+
+pve.wrapper <- function(results_list, methods_list) {
+  res <- lapply(1:length(results_list), 
+       function(i) {
+          obj <- results_list[[i]]
+          out <- data.frame(
+            dapi=with(obj, get.pve(dapi[order(pred_time_shift)])$pve),
+            gfp=with(obj, get.pve(gfp[order(pred_time_shift)])$pve),
+            rfp=with(obj, get.pve(rfp[order(pred_time_shift)])$pve) )
+  })
+  names(res) <- methods_list
+  return(res)
+}
+
+
+results_list <- results_filt_eval_top101
+methods_list <- sapply(names(results_list), function(x) strsplit(x, split=".", fixed=TRUE)[[1]][2])
+
+pve_eval_top101 <- do.call(rbind, pve.wrapper(results_list=results_filt_eval_top101, 
+                               methods_list=methods_list))
+pve_eval_top101$genes_used <- "top101"
+pve_eval_top101$methods <- methods_list
+saveRDS(pve_eval_top101,
+        "../output/method-eval-withheld-explore-removenoisy.Rmd/pve_eval_top101.rds")
+```
+
+
+```{r}
+pve_eval_top101 <- readRDS("../output/method-eval-withheld-explore-removenoisy.Rmd/pve_eval_top101.rds")
+print(pve_eval_top101)
+```
+
+```{r, eval=F}
+get.aov(yy=results_filt_eval_top101$fit.seurat$dapi,
+        xx=results_filt_eval_top101$fit.seurat$assignments)
+
+get.aov(yy=results_filt_eval_top101$fit.seurat$gfp,
+        xx=results_filt_eval_top101$fit.seurat$assignments)
+
+get.aov(yy=results_filt_eval_top101$fit.seurat$rfp,
+        xx=results_filt_eval_top101$fit.seurat$assignments)
+```
+
+### Seurat scores vs cell time predictions
+
+```{r, eval=F}
+seurat.S.sup <- with(results_filt_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.supervised$pred_time_shift)]))
+seurat.S.unsup <- with(results_filt_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.trend2.unsup$pred_time_shift)]))
+seurat.G2M.sup <- with(results_filt_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.supervised$pred_time_shift)]))
+seurat.G2M.unsup <- with(results_filt_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.trend2.unsup$pred_time_shift)]))
+
+seurat.S.owntime <- with(results_filt_eval_top101,
+                     get.pve(fit.seurat$S[order(fit.seurat$cell_times_est)]))
+seurat.G2M.owntime <- with(results_eval_top101,
+                     get.pve(fit.seurat$G2M[order(fit.seurat$cell_times_est)]))
+
+save(seurat.S.sup, seurat.S.unsup,
+     seurat.G2M.sup, seurat.G2M.unsup,
+     seurat.S.owntime, seurat.G2M.owntime,
+     file = "../output/method-eval-withheld-explore-removenoisy.Rmd/seurat.time.top101.rda")
+```
+
+
+```{r}
+load(file="../output/method-eval-withheld-explore.Rmd/seurat.time.top101.rda")
+
+c(seurat.S.sup$pve, seurat.G2M.sup$pve)
+c(seurat.S.unsup$pve, seurat.G2M.unsup$pve)
+c(seurat.S.owntime$pve, seurat.G2M.owntime$pve)
+
+
+# with(results_filt_eval_top101,
+#   get.aov(yy=fit.seurat$G2M,xx=fit.seurat$assignments))
+
+# with(results_filt_eval_top101,
+#   get.aov(yy=fit.seurat$S,xx=fit.seurat$assignments))
+
+```
+
+
+### Seurat clases vs supervsied cell times
+
+```{r, eval=F}
+
+cols <- c("orange", "red", "brown")
+par(mfrow=c(1,3))
+with(results_eval_top101, 
+     hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="G1"],
+     nclass=5, col=cols[1], main = "G1, 9 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+with(results_eval_top101, hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="S"],
+     nclass=10, col=cols[2],
+     main = "S, 53 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+with(results_eval_top101, hist(fit.supervised$pred_time_shift[fit.seurat$assignments=="G2M"],
+     nclass=10, col=cols[3],
+     main = "G2M, 55 cells", xlim=c(0,2*pi), ylim=c(0,30),
+     xlab="Predicted cell time"))
+title("Supervised cell time and Seurat classes", outer=TRUE, line=-1)
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
