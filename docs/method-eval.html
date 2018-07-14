@@ -234,10 +234,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-12</p>
+<p><strong>Last updated:</strong> 2018-07-14</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> ef7ae30</p>
+<p><strong>Code version:</strong> b19387a</p>
 <hr />
 <div id="retrieve-and-combine-results" class="section level2">
 <h2>Retrieve and combine results</h2>
@@ -563,6 +563,61 @@ for (j in 1:sum(dd==F)) {
   title(paste(round(obj$diff_time[cell_ind]/2/pi,2)))
 }</code></pre>
 <p><img src="figure/method-eval.Rmd/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>out_cells &lt;- colnames(obj$Y)[dd==FALSE]</code></pre>
+<p>Get outlier info.</p>
+<pre class="r"><code>data_withheld &lt;- readRDS(&quot;../data/results/data_withheld.rds&quot;)
+
+plot(obj$gfp, 
+     obj$rfp,
+     col=c(&quot;red&quot;, &quot;gray50&quot;)[dd+1])
+abline(h=0, v=0, lty=3)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>all.equal(colnames(obj$Y), rownames(data_withheld$pdata.valid))</code></pre>
+<pre><code>[1] TRUE</code></pre>
+<pre class="r"><code>pd &lt;- data_withheld$pdata.valid[which(rownames(data_withheld$pdata.valid) %in% out_cells),]
+
+cbind(pd$image_individual, pd$image_label)</code></pre>
+<pre><code>      [,1]          [,2]
+ [1,] &quot;19098_18870&quot; &quot;25&quot;
+ [2,] &quot;18870_19101&quot; &quot;82&quot;
+ [3,] &quot;18870_19160&quot; &quot;69&quot;
+ [4,] &quot;18870_18511&quot; &quot;45&quot;
+ [5,] &quot;18855_19101&quot; &quot;34&quot;
+ [6,] &quot;19101_19160&quot; &quot;52&quot;
+ [7,] &quot;19160_18511&quot; &quot;54&quot;
+ [8,] &quot;18870_19160&quot; &quot;77&quot;
+ [9,] &quot;19098_18870&quot; &quot;55&quot;
+[10,] &quot;18855_19160&quot; &quot;44&quot;
+[11,] &quot;19098_19160&quot; &quot;22&quot;
+[12,] &quot;18870_19160&quot; &quot;8&quot; </code></pre>
+<pre class="r"><code>pchs &lt;- rep(&quot;0&quot;, length(obj$gfp))
+pchs[colnames(obj$Y) == out_cells[1]] &lt;- &quot;1&quot;
+pchs[colnames(obj$Y) == out_cells[2]] &lt;- &quot;2&quot;
+pchs[colnames(obj$Y) == out_cells[3]] &lt;- &quot;3&quot;
+pchs[colnames(obj$Y) == out_cells[4]] &lt;- &quot;4&quot;
+
+plot(obj$gfp, 
+     obj$rfp,
+     col=c(&quot;red&quot;, &quot;gray50&quot;)[dd+1])
+abline(h=0, v=0, lty=3)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-14-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ii &lt;- abs(data_withheld$pdata.valid$gfp.median.log10sum.adjust) &lt; .1 &amp; abs(data_withheld$pdata.valid$rfp.median.log10sum.adjust) &lt; .1 &amp; dd == FALSE
+
+colnames(obj$Y)[ii==T]</code></pre>
+<pre><code>[1] &quot;20170920-A12&quot; &quot;20170912-B04&quot;</code></pre>
+<pre class="r"><code>plot(obj$ref_time, 
+     obj$dapi,
+     col=c(&quot;red&quot;, &quot;gray50&quot;)[dd+1])
+abline(h=0, lty=3)</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-14-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pca_res &lt;- prcomp(t(data_withheld$log2cpm.valid), scale=T)
+
+sapply(1:5, function(i) summary(lm(pca_res$x[,i]~dd))$adj.r.squared)</code></pre>
+<pre><code>[1]  0.067868292  0.015484770 -0.002950017 -0.007614391 -0.003504711</code></pre>
+<pre class="r"><code>plot(obj$ref_time,
+     obj$diff_time,
+     col=c(&quot;red&quot;, &quot;gray50&quot;)[dd+1])</code></pre>
+<p><img src="figure/method-eval.Rmd/unnamed-chunk-14-4.png" width="672" style="display: block; margin: auto;" /></p>
 <p>print for visual examination</p>
 <pre class="r"><code>pdf(&quot;../output/method-eval.Rmd/uncertainties.pdf&quot;)
 par(mfrow=c(4,5))
