@@ -225,6 +225,7 @@ div.section {
 <ul>
 <li><a href="#goals">Goals</a></li>
 <li><a href="#retrieve-gene-lists">Retrieve gene lists</a></li>
+<li><a href="#overlap-with-each-other">Overlap with each other</a></li>
 <li><a href="#overlap-with-seurat-genes">Overlap with Seurat genes</a></li>
 <li><a href="#save-top-100-genes-symbols-to-output-table">Save top 100 genes symbols to output table</a></li>
 <li><a href="#session-information">Session information</a></li>
@@ -235,14 +236,20 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-15</p>
+<p><strong>Last updated:</strong> 2018-07-16</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> f831983</p>
+<p><strong>Code version:</strong> fbc37a9</p>
 <hr />
 <div id="goals" class="section level2">
 <h2>Goals</h2>
 <p>Consider top X cyclical genes, check GO categories.</p>
+<ol style="list-style-type: decimal">
+<li><p>Examine number of genes selected at top X cut-offs: Across cut-offs, more selected when cyclical trend is based on fucci time instead of fucci + dapi time.</p></li>
+<li><p>Compare the prediction error patterns between these two scenarios. While both are higher than when the expression data is used to predict random cell time lables, the effect of adding more genes is quite different on prediction error. When the cyclical genes are learned from fucci times, there appears to be roughly an increase of .01 between top 5 and top 100 genes prediction. On the contrary, when the cyclical genes are learned from fucci-times, there appears to be roughly a decrease of .01 between top 5 and top 100 gene prediction.</p></li>
+<li><p>It is possible that the cell times based on fucci and dapi does not reflect the cell time ordering accurately. The PCs based on FUCCI and DAPI form an ellipse rather than a circle. Hence I am re-running the analysis using a different data transformation that account for the fact that the PC1 and PC2 form an ellipse rather than a circle.</p></li>
+<li><p>In terms of GO annotation, there’s not much difference between the two. Both have 37 genes found to be related to the Cell Cycle GO term (0007049).</p></li>
+</ol>
 <hr />
 </div>
 <div id="retrieve-gene-lists" class="section level2">
@@ -298,6 +305,40 @@ saveRDS(genes_list_symbols_triple,
         &quot;../output/method-train-genes-fucci-vs-triple.Rmd/genes_list_symbols_triple.rds&quot;)</code></pre>
 <hr />
 </div>
+<div id="overlap-with-each-other" class="section level2">
+<h2>Overlap with each other</h2>
+<pre class="r"><code>genes_list &lt;- readRDS(file = &quot;../data/results/results_topgenes.rds&quot;)
+genes_list_triple &lt;- readRDS(file = &quot;../data/results/triple_results_topgenes.rds&quot;)
+
+both_overlap &lt;- sapply(1:length(genes_list), function(i) {
+  overlap_genes &lt;- intersect(genes_list[[i]],genes_list_triple[[i]])
+  length(overlap_genes)  
+})
+
+par(mfrow=c(1,2))
+plot(x=names(genes_list)[1:21],
+     y=both_overlap[1:21], ylim=c(0,100),
+     xlab=&quot;Top X cyclical genes&quot;,
+     ylab=&quot;Number of selected genes&quot;)
+points(x=names(genes_list)[1:21],
+       y=sapply(genes_list, length)[1:21], col=&quot;blue&quot;, pch=16, cex=.7)
+points(x=names(genes_list_triple)[1:21],
+       y=sapply(genes_list_triple, length)[1:21], col=&quot;forestgreen&quot;, pch=16, cex=.7)
+legend(&quot;topleft&quot;, legend=c(&quot;both&quot;, &quot;fucci&quot;, &quot;triple&quot;),
+       col=c(&quot;black&quot;, &quot;blue&quot;, &quot;forestgreen&quot;), pch=1)
+
+plot(x=names(genes_list)[1:11],
+     y=both_overlap[1:11], ylim=c(0,60),
+     xlab=&quot;Top X cyclical genes&quot;,
+     ylab=&quot;Number of selected genes&quot;)
+points(x=names(genes_list)[1:11],
+       y=sapply(genes_list, length)[1:11], col=&quot;blue&quot;, pch=16, cex=.7)
+points(x=names(genes_list_triple)[1:11],
+       y=sapply(genes_list_triple, length)[1:11], col=&quot;forestgreen&quot;, pch=16, cex=.7)
+title(&quot;Overlap between selected genes&quot;, outer=TRUE, line=-1)</code></pre>
+<p><img src="figure/method-train-genes-fucci-vs-triple.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
 <div id="overlap-with-seurat-genes" class="section level2">
 <h2>Overlap with Seurat genes</h2>
 <pre class="r"><code>genes_list &lt;- readRDS(file = &quot;../data/results/results_topgenes.rds&quot;)
@@ -331,7 +372,7 @@ plot(x=names(genes_list)[1:11],
      main = &quot;Up to to 100&quot;, ylim=c(0, 65))
 points(x=names(genes_list_triple)[1:11],
           sapply(genes_list_triple, length)[1:11], col=&quot;blue&quot;, pch=1)</code></pre>
-<p><img src="figure/method-train-genes-fucci-vs-triple.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-train-genes-fucci-vs-triple.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>par(mfrow=c(1,2))
 plot(x=names(genes_list)[1:40],
      double_overlap[1:40], 
@@ -350,7 +391,7 @@ plot(x=names(genes_list)[1:11],
      main = &quot;Up to top 100&quot;, ylim=c(0,30))
 points(x=names(genes_list_triple)[1:11],
           triple_overlap[1:11], col=&quot;blue&quot;, pch=1)</code></pre>
-<p><img src="figure/method-train-genes-fucci-vs-triple.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/method-train-genes-fucci-vs-triple.Rmd/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
 <hr />
 </div>
 <div id="save-top-100-genes-symbols-to-output-table" class="section level2">
