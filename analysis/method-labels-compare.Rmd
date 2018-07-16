@@ -1,0 +1,167 @@
+---
+title: "Compares gene annotations between two different cell time types"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Goal
+
+1. Compare cell time estimates derived from algebraic methods versus from trignometric transformation. 
+
+2. Do same for cell times based on FUCCI and cell times based on FUCCI and DAPI.
+
+
+---
+
+## Getting data
+
+```{r}
+library(Biobase)
+df <- readRDS(file="../data/eset-final.rds")
+pdata <- pData(df)
+fdata <- fData(df)
+
+# select endogeneous genes
+counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+
+log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+
+#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+counts <- counts[,order(pdata$theta)]
+log2cpm.all <- log2cpm.all[,order(pdata$theta)]
+pdata <- pdata[order(pdata$theta),]
+
+log2cpm.quant <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+
+pca_double <- prcomp(cbind(pdata$gfp.median.log10sum.adjust,
+                           pdata$rfp.median.log10sum.adjust), scale. = T)
+pca_triple <- prcomp(cbind(pdata$gfp.median.log10sum.adjust,
+                           pdata$rfp.median.log10sum.adjust,
+                           pdata$dapi.median.log10sum.adjust), scale. = T)
+
+library(circular)
+theta_triple <- as.numeric(coord2rad(pca_triple$x[,1:2]))
+theta_double <- as.numeric(coord2rad(pca_double$x[,1:2]))
+names(theta_triple) <- rownames(pdata)
+names(theta_double) <- rownames(pdata)
+```
+
+---
+
+## Cell times based on FUCCI only
+
+```{r}
+source("../peco/R/intensity2circle.R")
+library(conicfit)
+par(mfrow=c(1,1))
+df <- cbind(pdata$gfp.median.log10sum.adjust,
+            pdata$rfp.median.log10sum.adjust)
+ang <- intensity2circle(df, plot.it = TRUE)
+
+par(mfrow=c(1,1))
+source("../peco/R/cycle.corr.R")
+ang_shift <- rotation(theta_double, ang)
+par(mfrow=c(2,2))
+plot(x=theta_double[order(theta_double)],
+     y=pdata$gfp.median.log10sum.adjust[order(theta_double)], col="forestgreen",
+     ylab="log intensity", xlab="Cell time estimates",
+     main = "trignometry", ylim=c(-1, 1))
+points(x=theta_double[order(theta_double)],
+       y=pdata$rfp.median.log10sum.adjust[order(theta_double)], col="red")
+points(x=theta_double[order(theta_double)],
+       y=pdata$dapi.median.log10sum.adjust[order(theta_double)], col="blue")
+
+plot(x=ang_shift[order(ang_shift)],
+     y=pdata$gfp.median.log10sum.adjust[order(ang_shift)], col="forestgreen",
+     main = "algebra", ylim=c(-1, 1))     
+points(x=ang_shift[order(ang_shift)],
+     y=pdata$rfp.median.log10sum.adjust[order(ang_shift)], col="red")
+points(x=ang_shift[order(ang_shift)],
+       y=pdata$dapi.median.log10sum.adjust[order(ang_shift)], col="blue")
+
+plot(ang_shift, theta_double,
+     xlab="trigometry-based",
+     ylab="algebra-based", main="Compar angles"); abline(0,1, col="blue")
+```
+
+
+---
+
+## Cell times based on FUCCI and DAPI only
+
+```{r}
+# algebraic methods
+source("../peco/R/intensity2circle.R")
+library(conicfit)
+par(mfrow=c(1,1))
+df <- cbind(pdata$gfp.median.log10sum.adjust,
+                           pdata$rfp.median.log10sum.adjust,
+                           pdata$dapi.median.log10sum.adjust)
+ang <- intensity2circle(df, plot.it = TRUE)
+
+par(mfrow=c(2,2))
+source("../peco/R/cycle.corr.R")
+ang_shift <- rotation(theta_triple, ang)
+ang_shift <- ang_shift%%(2*pi)
+plot(x=theta_triple[order(theta_triple)],
+     y=pdata$gfp.median.log10sum.adjust[order(theta_triple)], col="forestgreen",
+     ylab="log intensity", xlab="Cell time estimates",
+     main = "trignometry", ylim=c(-1, 1))
+points(x=theta_triple[order(theta_triple)],
+       y=pdata$rfp.median.log10sum.adjust[order(theta_triple)], col="red")
+points(x=theta_triple[order(theta_triple)],
+       y=pdata$dapi.median.log10sum.adjust[order(theta_triple)], col="blue")
+
+plot(x=ang_shift[order(ang_shift)],
+     y=pdata$gfp.median.log10sum.adjust[order(ang_shift)], col="forestgreen",
+     main = "algebra", ylim=c(-1, 1))     
+points(x=ang_shift[order(ang_shift)],
+     y=pdata$rfp.median.log10sum.adjust[order(ang_shift)], col="red")
+points(x=ang_shift[order(ang_shift)],
+       y=pdata$dapi.median.log10sum.adjust[order(ang_shift)], col="blue")
+
+plot(ang_shift, theta_triple,
+     xlab="trigometry-based",
+     ylab="algebra-based", main="Compar angles"); abline(0,1, col="blue")
+```
+
+
+
+---
+
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
