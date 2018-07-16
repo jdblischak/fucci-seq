@@ -12,7 +12,7 @@
 <meta name="author" content="Joyce Hsiao" />
 
 
-<title>Finalizing the classifer results</title>
+<title>Check gene annotation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -216,14 +216,17 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Finalizing the classifer results</h1>
+<h1 class="title toc-ignore">Check gene annotation</h1>
 <h4 class="author"><em>Joyce Hsiao</em></h4>
 
 </div>
 
 <div id="TOC">
 <ul>
-<li><a href="#gene-lists">Gene lists</a></li>
+<li><a href="#goals">Goals</a></li>
+<li><a href="#retrieve-gene-lists">Retrieve gene lists</a></li>
+<li><a href="#overlap-with-seurat-genes">Overlap with Seurat genes</a></li>
+<li><a href="#save-to-output-table">save to output table</a></li>
 <li><a href="#session-information">Session information</a></li>
 </ul>
 </div>
@@ -232,13 +235,18 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-12</p>
+<p><strong>Last updated:</strong> 2018-07-15</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> fb90641</p>
+<p><strong>Code version:</strong> 0915285</p>
 <hr />
-<div id="gene-lists" class="section level2">
-<h2>Gene lists</h2>
+<div id="goals" class="section level2">
+<h2>Goals</h2>
+<p>Consider top X cyclical genes, check GO categories.</p>
+<hr />
+</div>
+<div id="retrieve-gene-lists" class="section level2">
+<h2>Retrieve gene lists</h2>
 <pre class="r"><code>genes_list &lt;- readRDS(file = &quot;../data/results/results_topgenes.rds&quot;)
 all_genes &lt;- genes_list[length(genes_list)][[1]]
 
@@ -248,7 +256,6 @@ symbols &lt;- getBM(attributes = c(&quot;hgnc_symbol&quot;,&#39;ensembl_gene_id&
       filters = c(&#39;ensembl_gene_id&#39;),
       values = all_genes, 
       mart = ensembl)
-
 
 genes_list_symbols &lt;- lapply(1:length(genes_list), function(i) {
   ll &lt;- genes_list[i][[1]]
@@ -265,6 +272,10 @@ names(genes_list_symbols) &lt;- names(genes_list)
 
 saveRDS(genes_list_symbols, 
         &quot;../output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="overlap-with-seurat-genes" class="section level2">
+<h2>Overlap with Seurat genes</h2>
 <pre class="r"><code>genes_list &lt;- readRDS(file = &quot;../data/results/results_topgenes.rds&quot;)
 genes_list_symbols &lt;- readRDS(&quot;../output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds&quot;)
 
@@ -273,39 +284,37 @@ seurat.genes &lt;- readLines(
 seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
                      g2m.genes=seurat.genes[44:97])
 
-
 tmp  &lt;- sapply(genes_list_symbols, function(x) sum(x$hgnc_symbol %in% unlist(seurat.genes)))
 
-# par(mfrow=c(1,2))
-# plot(x=sapply(genes_list, length),
-#      tmp, 
-#      xlab=&quot;Number of cyclical genes&quot;,
-#      ylab=&quot;Number of Seurate genes (total 97)&quot;,
-#      main = &quot;Seurat genes in our data&quot;)
-# plot(x=sapply(genes_list, length),
-#      tmp/as.numeric(names(genes_list)), 
-#      xlab=&quot;Number of cyclical genes&quot;,
-#      ylab=&quot;Proportion of Seurate genes&quot;,
-#      main = &quot;Seurat genes in our data&quot;)
-
-
-par(mfrow=c(1,2))
-plot(x=sapply(genes_list, length)[1:27],
-     tmp[1:27], 
-     xlab=&quot;Number of cyclical genes&quot;,
+par(mfrow=c(2,2))
+plot(x=names(genes_list)[1:41],
+     tmp[1:41], 
+     xlab=&quot;Top X cyclical genes&quot;,
      ylab=&quot;Number of Seurate genes (total 97)&quot;,
-     main = &quot;Seurat genes in top 260&quot;)
-plot(x=sapply(genes_list, length)[1:27],
-     (tmp/as.numeric(names(genes_list)))[1:27], 
-     xlab=&quot;Number of cyclical genes&quot;,
+     main = &quot;Seurat genes in top 400&quot;)
+plot(x=names(genes_list)[1:41],
+     (tmp/as.numeric(names(genes_list)))[1:41], 
+     xlab=&quot;Top X cyclical genes&quot;,
      ylab=&quot;Proportion of Seurate genes&quot;,
-     main = &quot;Seurat genes in top 260&quot;)</code></pre>
+     main = &quot;Seurat genes in top 400&quot;)
+barplot(tmp[1:21],
+        ylim=c(0,36),
+        xlab=&quot;Top X cyclical genes&quot;,
+        ylab=&quot;Number of selected genes&quot;)
+
+print(tmp[1:21])</code></pre>
+<pre><code>  5  10  20  30  40  50  60  70  80  90 100 110 120 130 140 150 160 170 
+  3   3  11  12  15  16  21  24  27  27  28  29  29  29  31  32  32  32 
+180 190 200 
+ 32  33  34 </code></pre>
+<pre class="r"><code># library(gplots)
+# venn(list(seurat=unlist(seurat.genes),
+#           peco=genes_list_symbols[[27]]$hgnc_symbol))</code></pre>
 <p><img src="figure/method-train-classifiers-genes.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>library(gplots)
-venn(list(seurat=unlist(seurat.genes),
-          peco=genes_list_symbols[[27]]$hgnc_symbol))</code></pre>
-<p><img src="figure/method-train-classifiers-genes.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
-<p>save to output table</p>
+<hr />
+</div>
+<div id="save-to-output-table" class="section level2">
+<h2>save to output table</h2>
 <pre class="r"><code>write.table(genes_list_symbols[[27]]$hgnc_symbol,
             file = &quot;../output/method-train-classifiers-genes.Rmd/topgenes.txt&quot;,
             row.names=F,
@@ -339,17 +348,11 @@ locale:
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
-other attached packages:
-[1] gplots_3.0.1
-
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.17       gtools_3.5.0       digest_0.6.15     
- [4] rprojroot_1.3-2    bitops_1.0-6       backports_1.1.2   
- [7] git2r_0.21.0       magrittr_1.5       evaluate_0.10.1   
-[10] KernSmooth_2.23-15 stringi_1.1.6      gdata_2.18.0      
-[13] rmarkdown_1.10     tools_3.4.3        stringr_1.2.0     
-[16] yaml_2.1.16        compiler_3.4.3     caTools_1.17.1    
-[19] htmltools_0.3.6    knitr_1.20        </code></pre>
+ [1] compiler_3.4.3  backports_1.1.2 magrittr_1.5    rprojroot_1.3-2
+ [5] tools_3.4.3     htmltools_0.3.6 yaml_2.1.16     Rcpp_0.12.17   
+ [9] stringi_1.1.6   rmarkdown_1.10  knitr_1.20      git2r_0.21.0   
+[13] stringr_1.2.0   digest_0.6.15   evaluate_0.10.1</code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
