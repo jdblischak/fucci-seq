@@ -36,6 +36,14 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 Consider top X cyclical genes, check GO categories. 
 
+1. Examine number of genes selected at top X cut-offs: Across cut-offs, more selected when cyclical trend is based on fucci time instead of fucci + dapi time. 
+
+2. Compare the prediction error patterns between these two scenarios. While both are higher than when the expression data is used to predict random cell time lables, the effect of adding more genes is quite different on prediction error. When the cyclical genes are learned from fucci times, there appears to be roughly an increase of .01 between top 5 and top 100 genes prediction. On the contrary, when the cyclical genes are learned from fucci-times, there appears to be roughly a decrease of .01 between top 5 and top 100 gene prediction. 
+
+3. It is possible that the cell times based on fucci and dapi does not reflect the cell time ordering accurately. The PCs based on FUCCI and DAPI form an ellipse rather than a circle. Hence I am re-running the analysis using a different data transformation that account for the fact that the PC1 and PC2 form an ellipse rather than a circle.
+        
+4. In terms of GO annotation, there's not much difference between the two. Both have 37 genes found to be related to the Cell Cycle GO term (0007049).
+
 ---
 
 ## Retrieve gene lists
@@ -90,6 +98,43 @@ saveRDS(genes_list_symbols,
         "../output/method-train-genes-fucci-vs-triple.Rmd/genes_list_symbols.rds")
 saveRDS(genes_list_symbols_triple, 
         "../output/method-train-genes-fucci-vs-triple.Rmd/genes_list_symbols_triple.rds")
+```
+
+---
+
+## Overlap with each other
+
+```{r}
+genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
+genes_list_triple <- readRDS(file = "../data/results/triple_results_topgenes.rds")
+
+both_overlap <- sapply(1:length(genes_list), function(i) {
+  overlap_genes <- intersect(genes_list[[i]],genes_list_triple[[i]])
+  length(overlap_genes)  
+})
+
+par(mfrow=c(1,2))
+plot(x=names(genes_list)[1:21],
+     y=both_overlap[1:21], ylim=c(0,100),
+     xlab="Top X cyclical genes",
+     ylab="Number of selected genes")
+points(x=names(genes_list)[1:21],
+       y=sapply(genes_list, length)[1:21], col="blue", pch=16, cex=.7)
+points(x=names(genes_list_triple)[1:21],
+       y=sapply(genes_list_triple, length)[1:21], col="forestgreen", pch=16, cex=.7)
+legend("topleft", legend=c("both", "fucci", "triple"),
+       col=c("black", "blue", "forestgreen"), pch=1)
+
+plot(x=names(genes_list)[1:11],
+     y=both_overlap[1:11], ylim=c(0,60),
+     xlab="Top X cyclical genes",
+     ylab="Number of selected genes")
+points(x=names(genes_list)[1:11],
+       y=sapply(genes_list, length)[1:11], col="blue", pch=16, cex=.7)
+points(x=names(genes_list_triple)[1:11],
+       y=sapply(genes_list_triple, length)[1:11], col="forestgreen", pch=16, cex=.7)
+title("Overlap between selected genes", outer=TRUE, line=-1)
+
 ```
 
 
