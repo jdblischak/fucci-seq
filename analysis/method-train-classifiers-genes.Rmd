@@ -1,5 +1,5 @@
 ---
-title: "Finalizing the classifer results"
+title: "Check gene annotation"
 author: "Joyce Hsiao"
 output: 
   html_document:
@@ -32,8 +32,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 ---
 
+## Goals
 
-## Gene lists
+Consider top X cyclical genes, check GO categories. 
+
+---
+
+## Retrieve gene lists
 
 ```{r, eval=F}
 genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
@@ -45,7 +50,6 @@ symbols <- getBM(attributes = c("hgnc_symbol",'ensembl_gene_id'),
       filters = c('ensembl_gene_id'),
       values = all_genes, 
       mart = ensembl)
-
 
 genes_list_symbols <- lapply(1:length(genes_list), function(i) {
   ll <- genes_list[i][[1]]
@@ -65,6 +69,10 @@ saveRDS(genes_list_symbols,
 ```
 
 
+---
+
+## Overlap with Seurat genes
+
 ```{r}
 genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
 genes_list_symbols <- readRDS("../output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds")
@@ -74,41 +82,35 @@ seurat.genes <- readLines(
 seurat.genes <- list(s.genes=seurat.genes[1:43],
                      g2m.genes=seurat.genes[44:97])
 
-
 tmp  <- sapply(genes_list_symbols, function(x) sum(x$hgnc_symbol %in% unlist(seurat.genes)))
 
-# par(mfrow=c(1,2))
-# plot(x=sapply(genes_list, length),
-#      tmp, 
-#      xlab="Number of cyclical genes",
-#      ylab="Number of Seurate genes (total 97)",
-#      main = "Seurat genes in our data")
-# plot(x=sapply(genes_list, length),
-#      tmp/as.numeric(names(genes_list)), 
-#      xlab="Number of cyclical genes",
-#      ylab="Proportion of Seurate genes",
-#      main = "Seurat genes in our data")
-
-
-par(mfrow=c(1,2))
-plot(x=sapply(genes_list, length)[1:27],
-     tmp[1:27], 
-     xlab="Number of cyclical genes",
+par(mfrow=c(2,2))
+plot(x=names(genes_list)[1:41],
+     tmp[1:41], 
+     xlab="Top X cyclical genes",
      ylab="Number of Seurate genes (total 97)",
-     main = "Seurat genes in top 260")
-plot(x=sapply(genes_list, length)[1:27],
-     (tmp/as.numeric(names(genes_list)))[1:27], 
-     xlab="Number of cyclical genes",
+     main = "Seurat genes in top 400")
+plot(x=names(genes_list)[1:41],
+     (tmp/as.numeric(names(genes_list)))[1:41], 
+     xlab="Top X cyclical genes",
      ylab="Proportion of Seurate genes",
-     main = "Seurat genes in top 260")
+     main = "Seurat genes in top 400")
+barplot(tmp[1:21],
+        ylim=c(0,36),
+        xlab="Top X cyclical genes",
+        ylab="Number of selected genes")
 
-library(gplots)
-venn(list(seurat=unlist(seurat.genes),
-          peco=genes_list_symbols[[27]]$hgnc_symbol))
+print(tmp[1:21])
+# library(gplots)
+# venn(list(seurat=unlist(seurat.genes),
+#           peco=genes_list_symbols[[27]]$hgnc_symbol))
+
 ```
 
 
-save to output table
+---
+
+## save to output table
 
 ```{r, eval=F}
 write.table(genes_list_symbols[[27]]$hgnc_symbol,

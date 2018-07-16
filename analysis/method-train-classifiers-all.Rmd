@@ -37,9 +37,9 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 1. Split data to validation samples and training samples. 
 
     * The split samples are saved as `data/withheld.rds` and `data/training.rds`.    
-    * The code used to generated teh split samples is saved in `code/working/makedata_supervised.R`.
+    * The code used to generated the split samples is saved in `code/working/makedata_supervised.R`.
 
-2. In the training sample, repeat the following 5 times. Each time, take 4/5 of the samples, fit trendfilter and identified the top X cyclical genes, and the compute the prediction error margin as a function of the top X cyclical genes. 
+2. In the training sample, repeat the following 5 times. Each time, take 4/5 of the samples selected at random, fit trendfilter and identified the top X cyclical genes, and the compute the prediction error margin as a function of the top X cyclical genes. 
 
     * `code/run_methods.R`: runs all methods, including supervised, unsupervised trendfilter, unsupervised bspline, unsupervised lowess, seurat) and compute prediction error margin.    
     * `code/working/job_run_methods.train.R` calls `code/run_methods.R`
@@ -47,13 +47,14 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
 
 3. Based on the training sample results, select the top best X genes and fit to the validation sample. Compute and compare the methods' performance on the validation sample. 
 
+4. About the prediction error margin under the null or when predicting random cells, I permuted the cell labels in the training samples. Then, in each training set, I use cyclical gene expression patterns learned from the fucci time to predict the random cell time labels. The margin of error at randomis about 25%, that is, 50% of the half arc length. In our analysis, I found it to be slower lower than 25%; an possible explanation is that before computing the prediction margin, we shift and flip the estimated cell time so that the prediction margin is minimized. 
+
 
 ---
 
-## Top cyclical genes
+## Explore top cyclical genes
 
-### Cyclical genes overlaps in the training set
-
+Choose across the 5 folds (training sets), the genes that appear among the top X cyclical genes in at least 4 training sets.
 
 ```{r, eval=F}
 data_training_cyclical_genes.fold.1 <- readRDS("../data/results/data_training_cyclical_genes.fold.1.rds")
@@ -69,48 +70,32 @@ data_cyclical_list <- list(data_training_cyclical_genes.fold.1,
 
 
 library(gplots)
-
 top100 <- lapply(1:5, function(i) {
   rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
                                                       decreasing = T)[1:100]]
 })
 venn( top100 )
 
-top50 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:50]]
-})
-venn( top50)
+top100_list <- do.call(cbind, lapply(1:5, function(i) {
+  top_list <- rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
+                                                      decreasing = T)[1:100]]
+  rownames(data_cyclical_list[[i]]) %in% top_list
+}) )
+rownames(top100_list) <- rownames(data_cyclical_list[[1]])
+which_100 <- rownames(top100_list)[which(rowSums(top100_list)>=4)]
 
-top10 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:10]]
-})
-venn( top10)
-
-top5 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:5]]
-})
-venn( top5)
-
-
-top260 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:260]]
-})
-venn(top260)
 
 library(gplots)
 ngenes <- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
 genes_list <- lapply(1:length(ngenes), function(i) {
   ngene <- ngenes[i]
-  tmp <- lapply(1:5, function(fold) {
-    rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+  tmp <- do.call(cbind, lapply(1:5, function(fold) {
+    top_list <- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
                                                         decreasing = T)[1:ngene]]
-  })
-  parts <- venn(tmp, show.plot = F)
-  unlist(attr(parts, "intersections")$`A:B:C:D:E`)
+    rownames(data_cyclical_list[[fold]]) %in% top_list
+  }) )
+  rownames(tmp) <- rownames(data_cyclical_list[[fold]])
+  return(rownames(tmp)[rowSums(tmp)>=4])
 })
 names(genes_list) <- ngenes
 
@@ -118,9 +103,24 @@ saveRDS(genes_list,
         file = "../data/results/results_topgenes.rds")
 ```
 
+```{r}
+genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
 
-### Given permuted labels, Cyclical genes overlaps in the training set
+par(mfrow=c(1,2))
+plot(names(genes_list)[1:40],
+     sapply(genes_list, length)[1:40],
+     main = "Number of genes selected at each cutoff (<=400)",
+     xlab = "Top X cyclical genes",
+     ylab = "Number of genes selected (appear in 4 or more training sets)")
+plot(names(genes_list)[1:10],
+     sapply(genes_list, length)[1:10],
+     main = "Number of genes selected at each cutoff (<=90)",
+     xlab = "Top X cyclical genes",
+     ylab = "Number of genes selected (appear in 4 or more training sets)")
+```
 
+
+Repeat for when cyclical genes are detected under the scenario where the cell times are random. This givens random cyclical gene expression patterns that we later use to predict fucci-cell time or random cell times. 
 
 ```{r, eval=F}
 data_training_cyclical_genes.fold.1 <- readRDS("../data/results/data_training_cyclical_genes_permute.fold.1.rds")
@@ -135,103 +135,35 @@ data_cyclical_list <- list(data_training_cyclical_genes.fold.1,
                            data_training_cyclical_genes.fold.5)
 
 library(gplots)
-
-top100 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:100]]
-})
-venn( top100 )
-
-top50 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:50]]
-})
-venn( top50)
-
-top10 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:10]]
-})
-venn( top10)
-
-top5 <- lapply(1:5, function(i) {
-  rownames(data_cyclical_list[[i]])[order(data_cyclical_list[[i]]$pve,
-                                                      decreasing = T)[1:5]]
-})
-venn( top5)
-
-library(gplots)
 ngenes <- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
 genes_list <- lapply(1:length(ngenes), function(i) {
   ngene <- ngenes[i]
-  tmp <- lapply(1:5, function(fold) {
-    rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+  tmp <- do.call(cbind, lapply(1:5, function(fold) {
+    top_list <- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
                                                         decreasing = T)[1:ngene]]
-  })
-  parts <- venn(tmp, show.plot = F)
-  unlist(attr(parts, "intersections")$`A:B:C:D:E`)
+    rownames(data_cyclical_list[[fold]]) %in% top_list
+  }) )
+  rownames(tmp) <- rownames(data_cyclical_list[[fold]])
+  return(rownames(tmp)[rowSums(tmp)>=4])
 })
 names(genes_list) <- ngenes
 
-#sapply(genes_list, function(x) length(x))
 saveRDS(genes_list, 
         file = "../data/results/results_topgenes_permute.rds")
 ```
 
 
-### Intersetions across training sets
+Intersetions across training sets
 
 ```{r}
 genes_list <- readRDS(file = "../data/results/results_topgenes.rds")
 genes_list_permute <- readRDS(file = "../data/results/results_topgenes_permute.rds")
 ```
 
-```{r}
-ngenes <- as.numeric(names(genes_list))
-plot(x=ngenes[1:41], 
-     y=sapply(genes_list, function(x) length(x))[1:41],
-     xlab="Top X cyclical genes in training set", 
-     ylab="Number of shared cyclical genes",
-     main = "Shared cyclical genes across the five training sets",
-     xlim=c(0,410), pch=16, cex=.7, col="gray50")
-abline(v=260, col="gray50")
+At top X cutoff, how many of the fucci cyclical genes also appear in the random cyclical genes list? The proportion below says that at top 190 cyclical genes, we start to detect some random cyclical genes. 
 
-ngenes <- as.numeric(names(genes_list))
-plot(x=ngenes, 
-     y=sapply(genes_list, function(x) length(x)),
-     xlab="Top X cyclical genes in training set", 
-     ylab="Number of shared cyclical genes",
-     main = "Shared cyclical genes across the five training sets",
-     xlim=c(0,11100), pch=16, cex=.7, col="gray50")
-points(x=ngenes,
-       y=sapply(genes_list_permute, function(x) length(x)),
-       pch=16, cex=.7, col="blue")
+*Comment: note that this can't be used as the sole selection criteria. The random cyclical genes may change between different random cell time list. In the current project, we have labels that we can used to estimate prediction margin and select the top X cyclical genes accordingly.*
 
-
-# ngenes <- as.numeric(names(genes_list))
-# plot(x=ngenes, 
-#      y=sapply(genes_list, function(x) length(x)),
-#      xlab="Top X cyclical genes in training set", 
-#      ylab="Number of shared cyclical genes",
-#      main = "Shared cyclical genes in top 1000",
-#      xlim=c(0,1000), pch=16, cex=.7, col="gray50", ylim=c(1,250))
-# points(x=ngenes,
-#        y=sapply(genes_list_permute, function(x) length(x)),
-#        pch=16, cex=.7, col="blue")
-
-
-ngenes <- as.numeric(names(genes_list))
-plot(x=ngenes, 
-     y=sapply(genes_list, function(x) length(x)),
-     xlab="Top X cyclical genes in training set", 
-     ylab="Number of shared cyclical genes",
-     main = "Shared genes in top 400 cyclical",
-     xlim=c(0,400), pch=16, cex=.7, col="gray50", ylim=c(1,110))
-points(x=ngenes,
-       y=sapply(genes_list_permute, function(x) length(x)),
-       pch=16, cex=.7, col="blue")
-abline(v=260, col="gray50")
-```
 
 ```{r, eval=F}
 fdr <- sapply(1:length(genes_list), function(i) {
@@ -245,29 +177,29 @@ names(fdr) <- names(genes_list)
 saveRDS(fdr, file = "../output/method-train-classifiers-all.Rmd/fdr.rds")
 ```
 
+
 ```{r}
 fdr <- readRDS(file = "../output/method-train-classifiers-all.Rmd/fdr.rds")
-plot(as.numeric(names(fdr)), fdr,
-     xlab="Top X cyclical genes",
-     ylab="Fraction of permuted in observed",
-     main="False discovery rate (fraction of permuted in observed",
-     pch=16, cex=.7)
-
-plot(as.numeric(names(fdr))[1:1000], fdr[1:1000],
-     xlab="Top X cyclical genes",
-     ylab="Fraction of permuted in observed",
-     main="False discovery rate in top 1000",
-     pch=16, cex=.7,
-     xlim=c(1,1000), ylim=c(0,.05))
-
-
-plot(as.numeric(names(fdr))[1:400], fdr[1:400],
+par(mfrow=c(1,2))
+plot(as.numeric(names(fdr))[1:41], fdr[1:41],
      xlab="Top X cyclical genes",
      ylab="Fraction of permuted in observed",
      main="False discovery rate in top 400",
      pch=16, cex=.7,
      xlim=c(1,400), ylim=c(0,.06))
-abline(v=260, col="gray50")
+abline(v=180, col="gray50")
+
+ngenes <- as.numeric(names(genes_list))
+plot(x=ngenes, 
+     y=sapply(genes_list, function(x) length(x)),
+     xlab="Top X cyclical genes in training set", 
+     ylab="Number of shared cyclical genes",
+     main = "Shared genes in top 400 cyclical",
+     xlim=c(0,400), pch=16, cex=.7, col="gray50", ylim=c(1,110))
+points(x=ngenes,
+       y=sapply(genes_list_permute, function(x) length(x)),
+       pch=16, cex=.7, col="blue")
+abline(v=180, col="gray50")
 ```
 
 ---
@@ -275,6 +207,7 @@ abline(v=260, col="gray50")
 ## Prediction error by top X cyclical genes
 
 code for summarize results
+
 ```{r}
 diff_time_wrapper <- function(results_list) {
   
@@ -284,7 +217,6 @@ diff_time_wrapper <- function(results_list) {
   diff_time_list <- do.call(rbind, lapply(1:length(results_list), function(i) {
     diff_time <- results_list[[i]]$diff_time
     diff_mean <- mean(diff_time/2/pi)
-#    diff_se <- sd(diff_time/2/pi)/sqrt(ncol(results_list[[1]]$Y))
 
     return(data.frame(diff_mean=diff_mean,
 #                      diff_se=diff_se,
@@ -296,19 +228,17 @@ diff_time_wrapper <- function(results_list) {
 
 summarize results
 
-```{r, eval=F}
-# ngenes <- c(5, seq(10,400, by=10))
-# train_top <- lapply(1:length(ngenes), function(i) {
-#   ngene <- ngenes[i]
-#   train_topX <- unlist(lapply(1:5, function(fold) {
-#     fl_name <- list.files("../data/results",
-#                    pattern=paste0("results_train.fold.",fold,".top",ngene,".rds"),
-#                    full.names = TRUE)
-#     return(fl_name)
-#   }) )
-#   return(train_topX)
-# })
+1. fucci cyclical expression predicting cell time
 
+2. Random cyclical expression patterns predicting random cell times
+
+3. Random cyclical expression patterns predicting fucci cell times
+
+4. fucci cyclical expression patterns predicting random cell times
+
+*Comment: we later use 4 to compute prediction error margin under non-fucci cell time or random cell time.*
+
+```{r, eval=F}
 ngenes <- c(5, seq(10,400, by=10))
 train_top <- do.call(rbind, lapply(1:length(ngenes), function(i) {
   ngene <- ngenes[i]
@@ -334,7 +264,6 @@ train_top <- do.call(rbind, lapply(1:length(ngenes), function(i) {
 }) )
 
 saveRDS(train_top, file = "../output/method-train-classifiers-all.Rmd/diff_time_all.rds")
-
 
 
 ngenes <- c(5, seq(10,200, by=10))
@@ -427,7 +356,7 @@ saveRDS(train_top_permute,
 ```
 
 
-### fucci time labels
+## Results: fucci expression predicting fucci time labels
 
 ```{r fucci-label-results}
 train_top <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_all.rds")
@@ -454,7 +383,7 @@ ggplot(subset(train_top, methods == "supervised"),
 ```
 
 
-Check between 5 genes and 100 genes
+Check between 5 genes and 100 genes. See very small difference between 5 genes and 100 genes in prediction error margin.
 
 ```{r}
 #ngenes <- c(5, seq(10,400, by=10))
@@ -476,11 +405,12 @@ tmp <- do.call(cbind, train_top)
 tmp <- tmp[tmp$methods== "supervised",]
 tmp <- tmp[,c(3,1,5, 9, 13)]
 colnames(tmp) <- c("fold", paste0("top",c(5, 10, 20, 100)))
+print(tmp)
 ```
 
+---
 
-
-### random cyclical on random time
+## Results: random cyclical expression predicting random time
 
 ```{r}
 train_top_permute <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_all_permute.rds")
@@ -495,7 +425,6 @@ ggplot(train_top_permute,
   ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
   ggtitle("Prediction error in the training set")
 
-
 ggplot(subset(train_top_permute, methods == "supervised"), 
        aes(x=ngenes, y=diff_mean)) +
   geom_errorbar(subset(train_top_permute, methods == "supervised"),
@@ -506,8 +435,9 @@ ggplot(subset(train_top_permute, methods == "supervised"),
   ggtitle("Prediction error in the training set")
 ```
 
+---
 
-### random cyclical on fucci time
+## Results: random cyclical expression predicting fucci time labels
 
 ```{r}
 train_rando_on_fucci <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_rando_on_fucci.rds")
@@ -524,8 +454,9 @@ ggplot(subset(train_rando_on_fucci, methods == "supervised"),
   ggtitle("Random cyclical genes predicting fucci times")
 ```
 
+---
 
-### fucci on random cyclical
+## Results: fucci experssion patterns predicting fucci time labels
 
 ```{r}
 train_fucci_on_rando <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_fucci_on_rando.rds")
@@ -540,6 +471,32 @@ ggplot(subset(train_fucci_on_rando, methods == "supervised"),
   ggtitle("fucci cyclical genes predicting random times")
 ```
 
+---
+
+## Result: combine fucci expression predicting fucci labels with fucci experssion predicting random cell time labels
+
+
+```{r}
+train_fucci_on_rando <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_fucci_on_rando.rds")
+train_top <- readRDS("../output/method-train-classifiers-all.Rmd/diff_time_all.rds")
+
+library(ggplot2)
+
+df <- rbind(data.frame(subset(train_top, methods == "supervised"),
+                       type="obs_time"),
+            data.frame(subset(train_fucci_on_rando, methods == "supervised"),
+                       type="rando_time"))
+
+ggplot(df, 
+       aes(x=ngenes, y=diff_mean, group=type)) +
+  geom_errorbar(df,
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se,
+                            color=type)) +
+  geom_point(aes(color=type)) + geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25) 
+```
 
 
 
