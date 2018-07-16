@@ -1,5 +1,4 @@
-##################
-#
+################################################
 # Description:
 #   Partition samples to training and validation
 ################################################
@@ -53,42 +52,49 @@ for (ind in unique(pdata$chip_id)) {
   pdata.nonvalid <- pdata[ii.nonvalid,]
   pdata.valid <- pdata[ii.valid,]
 
-  log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
-  log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
-  theta <- pdata$theta
-  names(theta) <- rownames(pdata)
+  # log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
+  # log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+  # theta <- pdata$theta
+  # names(theta) <- rownames(pdata)
 
-  log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
-  log2cpm.valid <- log2cpm.all[,ii.valid]
+  # log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
+  # log2cpm.valid <- log2cpm.all[,ii.valid]
+  #
+  # theta.nonvalid <- theta[ii.nonvalid]
+  # theta.valid <- theta[ii.valid]
 
-  theta.nonvalid <- theta[ii.nonvalid]
-  theta.valid <- theta[ii.valid]
-
-  #sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
-  data_training <- list(theta.nonvalid=theta.nonvalid,
-                        log2cpm.quant.nonvalid=log2cpm.quant.nonvalid,
-                        log2cpm.nonvalid=log2cpm.nonvalid,
-                        pdata.nonvalid=pdata.nonvalid,
-                        fdata=fdata)
-
-  data_withheld <- list(theta.valid=theta.valid,
-                        log2cpm.quant.valid=log2cpm.quant.valid,
-                        log2cpm.valid=log2cpm.valid,
-                        pdata.valid=pdata.valid,
-                        fdata=fdata)
-
-  saveRDS(data_training, file=paste0("data/results/ind_",ind,"_data_training.rds"))
-  saveRDS(data_withheld, file=paste0("data/results/ind_",ind,"_data_withheld.rds"))
+  # #sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
+  # data_training <- list(theta.nonvalid=theta.nonvalid,
+  #                       log2cpm.quant.nonvalid=log2cpm.quant.nonvalid,
+  #                       log2cpm.nonvalid=log2cpm.nonvalid,
+  #                       pdata.nonvalid=pdata.nonvalid,
+  #                       fdata=fdata)
+  #
+  # data_withheld <- list(theta.valid=theta.valid,
+  #                       log2cpm.quant.valid=log2cpm.quant.valid,
+  #                       log2cpm.valid=log2cpm.valid,
+  #                       pdata.valid=pdata.valid,
+  #                       fdata=fdata)
+  #
+  # saveRDS(data_training, file=paste0("data/results/ind_",ind,"_data_training.rds"))
+  # saveRDS(data_withheld, file=paste0("data/results/ind_",ind,"_data_withheld.rds"))
 
   ############# <- get training partitions
-  # get predicted times
-  # set training samples
-  source("peco/R/primes.R")
-  source("peco/R/partitionSamples.R")
-  folds <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
-                            nsize.each = c(rep(round(ncol(log2cpm.quant.nonvalid)/5),4),
-                                           ncol(log2cpm.quant.nonvalid)-sum(rep(round(ncol(log2cpm.quant.nonvalid)/5),4))))
-  fold_indices <- folds$partitions
+  # split by individaul
+  # # get predicted times
+  # # set training samples
+  # source("peco/R/primes.R")
+  # source("peco/R/partitionSamples.R")
+  # folds <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+  #                           nsize.each = c(rep(round(ncol(log2cpm.quant.nonvalid)/5),4),
+  #                                          ncol(log2cpm.quant.nonvalid)-sum(rep(round(ncol(log2cpm.quant.nonvalid)/5),4))))
+  fold_indices <- lapply(1:length(unique(pdata.nonvalid$chip_id)), function(i) {
+    ind_test <- unique(pdata.nonvalid$chip_id)[i]
+    test <- which(pdata.nonvalid$chip_id==ind_test)
+    train <- which(pdata.nonvalid$chip_id!=ind_test)
+    return(list(test=test, train=train))
+  })
+#  folds$partitions
 
   saveRDS(fold_indices, file=paste0("data/results/ind_",ind,"_fold_indices.rds"))
 }

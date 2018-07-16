@@ -54,17 +54,17 @@ for (ind in unique(pdata$chip_id)) {
   saveRDS(data_training, file=paste0("data/results/ind_",ind,"_data_training.rds"))
   saveRDS(data_withheld, file=paste0("data/results/ind_",ind,"_data_withheld.rds"))
 
-  ############# <- get training partitions
-  # get predicted times
-  # set training samples
-  source("peco/R/primes.R")
-  source("peco/R/partitionSamples.R")
-  folds <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
-              nsize.each = c(rep(round(ncol(log2cpm.quant.nonvalid)/5),4),
-                             ncol(log2cpm.quant.nonvalid)-sum(rep(round(ncol(log2cpm.quant.nonvalid)/5),4))))
-  fold_indices <- folds$partitions
-
-  saveRDS(fold_indices, file=paste0("data/results/ind_",ind,"_fold_indices.rds"))
+  # ############# <- get training partitions
+  # # get predicted times
+  # # set training samples
+  # source("peco/R/primes.R")
+  # source("peco/R/partitionSamples.R")
+  # folds <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
+  #             nsize.each = c(rep(round(ncol(log2cpm.quant.nonvalid)/5),4),
+  #                            ncol(log2cpm.quant.nonvalid)-sum(rep(round(ncol(log2cpm.quant.nonvalid)/5),4))))
+  # fold_indices <- folds$partitions
+  #
+  # saveRDS(fold_indices, file=paste0("data/results/ind_",ind,"_fold_indices.rds"))
 }
 
 
