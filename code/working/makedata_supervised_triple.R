@@ -1,4 +1,5 @@
-###### <- Data when the validation sample consists of a random individual
+########################################################################
+######  Data when the validation sample consists of a random individual
 library(Biobase)
 df <- readRDS(file="data/eset-final.rds")
 pdata <- pData(df)
@@ -76,9 +77,8 @@ for (ind in unique(pdata$chip_id)) {
 
 
 
-
+########################################################################
 ###### <- Data when the validation sample consists of random cells
-################------------ validation samples from random cells
 library(Biobase)
 df <- readRDS(file="data/eset-final.rds")
 pdata <- pData(df)
@@ -95,7 +95,6 @@ log2cpm.all <- log2cpm.all[,order(pdata$theta)]
 pdata <- pdata[order(pdata$theta),]
 
 log2cpm.quant <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
-
 
 # select external validation samples
 set.seed(99)
