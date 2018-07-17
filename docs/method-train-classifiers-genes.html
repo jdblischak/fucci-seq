@@ -235,10 +235,10 @@ div.section {
 shared across the workflowr files. -->
 <!-- Update knitr chunk options -->
 <!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-07-15</p>
+<p><strong>Last updated:</strong> 2018-07-16</p>
 <!-- Insert the code version (Git commit SHA1) if Git repository exists and R
  package git2r is installed -->
-<p><strong>Code version:</strong> 0915285</p>
+<p><strong>Code version:</strong> 0234538</p>
 <hr />
 <div id="goals" class="section level2">
 <h2>Goals</h2>
@@ -315,11 +315,10 @@ print(tmp[1:21])</code></pre>
 </div>
 <div id="save-to-output-table" class="section level2">
 <h2>save to output table</h2>
-<pre class="r"><code>write.table(genes_list_symbols[[27]]$hgnc_symbol,
+<pre class="r"><code>write.table(genes_list_symbols[[11]]$hgnc_symbol,
             file = &quot;../output/method-train-classifiers-genes.Rmd/topgenes.txt&quot;,
             row.names=F,
             col.names=F, quote=F)
-
 
 write.table(genes_list_symbols[[length(genes_list_symbols)]][,1],
             file = &quot;../output/method-train-classifiers-genes.Rmd/allgenes.txt&quot;,
