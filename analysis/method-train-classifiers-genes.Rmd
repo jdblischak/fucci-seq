@@ -113,11 +113,10 @@ print(tmp[1:21])
 ## save to output table
 
 ```{r, eval=F}
-write.table(genes_list_symbols[[27]]$hgnc_symbol,
+write.table(genes_list_symbols[[11]]$hgnc_symbol,
             file = "../output/method-train-classifiers-genes.Rmd/topgenes.txt",
             row.names=F,
             col.names=F, quote=F)
-
 
 write.table(genes_list_symbols[[length(genes_list_symbols)]][,1],
             file = "../output/method-train-classifiers-genes.Rmd/allgenes.txt",
