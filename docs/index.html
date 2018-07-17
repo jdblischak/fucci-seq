@@ -265,19 +265,31 @@ div.section {
 <li>Evaluate the withheld sample <a href="method-eval-withheld-explore.html">including noisy labels</a> on the top 10 and top 101 cyclical genes] and comparing peco methods with seurat predictions.</li>
 <li>Evaluate the withheld samples <a href="method-eval-withheld-explore-removenoisy.html">removing noisy labels</a> on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.</li>
 </ul></li>
-<li>Finializing results for when validation sample consists of random cells
+<li>Finalizing training for predicting cell times for cells from individuals
 <ul>
-<li><a href="method-train-classifiers-all.html">Selecting the top X cyclical genes in the training sample</a></li>
-<li><a href="method-train-classifiers-genes.html">Learning gene annotations</a></li>
-<li><a href="method-eval.html">Validation sample</a></li>
+<li><a href="method-labels-compare.html">Compute and compare cell time estimates</a> derived under two different assumptions: assuming equal variance in PC1 and PC2 (circle) vs. unequal variances in PC1 and PC2.</li>
+<li>Results assuming equal variance, considering when
+<ul>
+<li>Cell times derived from fucci only: <a href="method-train-classifiers-all.html">cyclical genes selected</a>, and <a href="method-train-classifiers-genes.html">gene annotations</a></li>
+<li>Cell times derived from fucci and dapi: <a href="method-train-triple.html">cyclical genes selected</a></li>
+<li><a href="method-train-genes-fucci-vs-triple.html">Comparisons</a>: Prediction error smaller when based on fucci time only than based on fucci and dapi time, though only a very small difference. However, the genes selected in these two are similar, both found to have 37 genes enriched for the Cell Cycle GO (0007049).</li>
 </ul></li>
-<li>Finializing results for when validation sample consists of a random individual
+</ul></li>
+<li>Finalizing training for predicting cell times for one individual
 <ul>
-<li><a href="method-train-ind.html">Selecting the top X cyclical genes in the training sample</a></li>
-<li><a href="method-train-ind-genes.html">Learning gene annotations</a></li>
-<li><a href="method-eval-ind.html">Validation sample</a></li>
+<li>Results assuming equal variance, considering when
+<ul>
+<li>Cell times derived from fucci only: <a href="method-train-ind.html">cyclical genes selected</a>, and <a href="method-train-ind-genes.html">gene annotations</a></li>
+</ul></li>
 </ul></li>
 </ul>
+<!-- * Finalizing gene selection -->
+<!--     * [methods-train-genes.html] -->
+<!--     * [Validation sample](method-eval.html) (to be removed...) -->
+<!-- * Predicting individual X using expression from random individuals -->
+<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
+<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
+<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
 <!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
 <hr />
 </div>
