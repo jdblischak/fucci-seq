@@ -1,0 +1,123 @@
+---
+title: "Predicting cell times for individuals: gene annotations"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+
+## Getting annotations
+
+```{r, eval=F}
+topgenes_double <- readRDS(file="../data/results/ind_results_topgenes.rds")
+topgenes_triple <- readRDS(file="../data/results/ind_results_topgenes_triple.rds")
+
+all_genes <- topgenes_double[length(topgenes_double)][[1]]
+
+library(biomaRt)
+ensembl <- useMart(biomart = "ensembl", dataset = "hsapiens_gene_ensembl")
+symbols <- getBM(attributes = c("hgnc_symbol",'ensembl_gene_id'), 
+      filters = c('ensembl_gene_id'),
+      values = all_genes, 
+      mart = ensembl)
+
+
+genes_symbols_double <- lapply(1:length(topgenes_double), function(i) {
+  ll <- topgenes_double[i][[1]]
+  #symbols[match(ll,symbols$ensembl_gene_id),]
+  symbs <- symbols[which(symbols$ensembl_gene_id %in% ll),]
+  non_symbs <- ll[which(!(ll %in% symbols$ensembl_gene_id))]
+  df_non_symbs <- data.frame(hgnc_symbol=NA,
+                             ensembl_gene_id=non_symbs)  
+  out <- rbind(symbs, df_non_symbs)
+  out <- out[match(ll,out$ensembl_gene_id),]
+  return(out)
+})
+names(genes_symbols_double) <- names(topgenes_double)
+saveRDS(genes_symbols_double, 
+        "../output/method-train-ind-genes.Rmd/genes_symbols_double.rds")
+
+
+genes_symbols_triple <- lapply(1:length(topgenes_triple), function(i) {
+#  print(i)
+  ll <- topgenes_triple[i][[1]]
+  #symbols[match(ll,symbols$ensembl_gene_id),]
+  symbs <- symbols[which(symbols$ensembl_gene_id %in% ll),]
+  non_symbs <- ll[which(!(ll %in% symbols$ensembl_gene_id))]
+  if (length(non_symbs)==0) {
+    out <- symbs
+    out <- out[match(ll,out$ensembl_gene_id),]
+    return(out)    
+  }
+  if (length(non_symbs)>0) {
+    df_non_symbs <- data.frame(hgnc_symbol=NA,
+                               ensembl_gene_id=non_symbs)  
+    out <- rbind(symbs, df_non_symbs)
+    out <- out[match(ll,out$ensembl_gene_id),]
+    return(out)
+  }
+})
+names(genes_symbols_triple) <- names(topgenes_triple)
+saveRDS(genes_symbols_triple, 
+        "../output/method-train-ind-genes.Rmd/genes_symbols_triple.rds")
+```
+
+Save out output to table.
+
+```{r}
+topgenes_double <- readRDS(file="../data/results/ind_results_topgenes.rds")
+topgenes_triple <- readRDS(file="../data/results/ind_results_topgenes_triple.rds")
+symbols_double <- readRDS("../output/method-train-ind-genes.Rmd/genes_symbols_double.rds")
+symbols_triple <- readRDS("../output/method-train-ind-genes.Rmd/genes_symbols_triple.rds")
+
+
+write.table(symbols_double[[11]]$hgnc_symbol,
+            file = "../output/method-train-ind-genes.Rmd/topgenes100_double.txt",
+            row.names=F,
+            col.names=F, quote=F)
+
+write.table(symbols_triple[[11]]$hgnc_symbol,
+            file = "../output/method-train-ind-genes.Rmd/topgenes100_triple.txt",
+            row.names=F,
+            col.names=F, quote=F)
+
+```
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
