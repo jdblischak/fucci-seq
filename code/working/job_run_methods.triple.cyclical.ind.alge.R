@@ -17,6 +17,7 @@ ind <- as.character(args[3])
 
 dir <-"/project2/gilad/joycehsiao/fucci-seq"
 source(file.path(dir,"peco/R/fit.trendfilter.generic.R"))
+source(file.path(dir,"peco/R/get.cyclical.R"))
 
 
 data_training <- readRDS(file=file.path(dir,
