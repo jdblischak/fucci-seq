@@ -29,6 +29,7 @@ output/images-time-eval.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-npreg.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-npreg-prelim-results.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-labels.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/method-train-alge.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers-top10.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
