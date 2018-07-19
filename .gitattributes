@@ -36,7 +36,7 @@ output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-genes-fucci-vs-triple.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-ind.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-ind-genes.Rmd/* filter=lfs diff=lfs merge=lfs -text
-
+output/method-train-summary.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-triple.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 output/method-labels-noisy.Rmd/* filter=lfs diff=lfs merge=lfs -text
