@@ -1,0 +1,297 @@
+---
+title: "Predicting cell times derived under unequal PC variances"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Goals
+
+1. Use cell times derived from fucci and dapi to predict cyclical gene expression patterns
+
+2. Here we consider that the PC1 and PC2 of fucci and dapi are not of equal variance. We fit
+ an ellipse to the PC1 and PC2 space and project the PC1 and PC2 of each cell to the ellipse. 
+ 
+3. Results showed that the prediction error is higher than when we predicting cyclical expression patterns just using fucci. However, the top detected cyclical genes are also enriched with cell cycle processes, similarly as the top detected cyclical genes based on cell times derived from fucci only. 
+
+4. These results will be included in the supplemental information. 
+
+---
+
+## Top X cyclical genese
+
+```{r, eval=F}
+library(gplots)
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+ngenes <- c(1:9, seq(10, 11040, 10))
+gene_names <- rownames(readRDS("../data/results/alge_data_training_cyclical_genes.fold.1.rds"))
+genes_list <- lapply(1:length(ngenes), function(i) {
+  ngene <- ngenes[i]
+  tmp <- do.call(cbind, lapply(1:5, function(fold) {
+      fl_name <- paste0("../data/results/alge_data_training_cyclical_genes.fold.",
+                   fold,".rds")
+      df <- readRDS(fl_name)
+      top_list <- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+      rownames(df) %in% top_list
+  }) )
+  rownames(tmp) <- gene_names
+  return(rownames(tmp)[rowSums(tmp)>=4])
+})
+names(genes_list) <- ngenes
+saveRDS(genes_list, 
+        file = paste0("../data/results/alge_results_topgenes.rds"))
+
+
+# mixed individuals
+library(gplots)
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+ngenes <- c(1:9, seq(10, 11040, 10))
+for (j in 1:length(inds)) {
+  ind <- inds[j]
+  gene_names <- rownames(readRDS(paste0("../data/results/alge_ind_",ind,"_data_training_cyclical_genes.fold.", 1,".rds")))
+  genes_list <- lapply(1:length(ngenes), function(i) {
+    ngene <- ngenes[i]
+    tmp <- do.call(cbind, lapply(1:5, function(fold) {
+      fl_name <- paste0("../data/results/alge_ind_",ind,"_data_training_cyclical_genes.fold.",
+                   fold,".rds")
+      df <- readRDS(fl_name)
+      top_list <- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+      rownames(df) %in% top_list
+    }) )
+    rownames(tmp) <- gene_names
+    return(rownames(tmp)[rowSums(tmp)>=4])
+  })
+  names(genes_list) <- ngenes
+  saveRDS(genes_list, 
+          file = paste0("../data/results/alge_ind_",ind,"_results_topgenes.rds"))
+}
+
+
+ind_NA19098_topgenes <- readRDS("../data/results/alge_ind_NA19098_results_topgenes.rds")
+ind_NA18511_topgenes <- readRDS("../data/results/alge_ind_NA18511_results_topgenes.rds")
+ind_NA18870_topgenes <- readRDS("../data/results/alge_ind_NA18870_results_topgenes.rds")
+ind_NA19101_topgenes <- readRDS("../data/results/alge_ind_NA19101_results_topgenes.rds")
+ind_NA18855_topgenes <- readRDS("../data/results/alge_ind_NA18855_results_topgenes.rds")
+ind_NA19160_topgenes <- readRDS("../data/results/alge_ind_NA19160_results_topgenes.rds")
+
+topgenes_list <- list(ind_NA19098_topgenes, ind_NA18511_topgenes, ind_NA18870_topgenes,
+                      ind_NA19101_topgenes, ind_NA18855_topgenes, ind_NA19160_topgenes)
+library(dplyr)
+topgenes_combined <- lapply(1:length(ind_NA19160_topgenes), function(i) {
+  ll <- lapply(topgenes_list, "[[", i)
+  ll <- unlist(ll)  
+  tab <- table(ll)
+  names(tab)[which(tab>=4)]
+})
+names(topgenes_combined) <- names(ind_NA19160_topgenes)
+
+saveRDS(topgenes_combined, file="../data/results/alge_ind_results_topgenes.rds")
+```
+
+
+---
+
+## Prediction error
+
+summarize results
+
+```{r}
+diff_time_wrapper <- function(results_list) {
+  
+  methods_list <- sapply(names(results_list),
+                         function(x) strsplit(x, split=".", fixed=TRUE)[[1]][2])
+  
+  diff_time_list <- do.call(rbind, lapply(1:length(results_list), function(i) {
+    diff_time <- results_list[[i]]$diff_time
+    diff_mean <- mean(diff_time/2/pi)
+#    diff_se <- sd(diff_time/2/pi)/sqrt(ncol(results_list[[1]]$Y))
+
+    return(data.frame(diff_mean=diff_mean,
+#                      diff_se=diff_se,
+                      methods=methods_list[i]))
+  }) )
+  return(diff_time_list)  
+}
+
+
+
+
+library(gplots)
+ngenes <- c(2:9, seq(10,200, by=10))
+train_randos <- do.call(rbind, lapply(1:length(ngenes), function(i) {
+    ngene <- ngenes[i]
+    train_topX <- do.call(rbind, lapply(1:5, function(fold) {
+    # print(ind)
+    print(ngene)
+    print(fold)
+    fl_name <- paste0("../data/results/triple_alge_results_train.fold.",fold,
+                      ".top",ngene,".rds")
+    df <- readRDS(fl_name)
+    out <- diff_time_wrapper(df$fit.test)
+    out$fold <- fold
+    return(out)
+    }) )
+    train_topX$ngenes <- ngene
+    #return(train_topX)  
+    agg_mn <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=mean)
+    agg_sd <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=sd)
+  
+    obj <- data.frame(methods=agg_mn$methods, 
+                      diff_mean=agg_mn$diff_mean,
+                      diff_se=agg_sd$diff_mean/sqrt(5))
+    obj$ngenes <- ngene
+    return(obj)
+  }) )
+saveRDS(train_randos, file = "../output/method-train-alge.Rmd/diff_time_all.rds")
+
+
+
+
+# prediction for one individual
+ngenes <- c(2:9, seq(10,200, by=10))
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+train_top <- lapply(1:length(inds), function(j) {
+  ind <- inds[j]
+  out <- do.call(rbind, lapply(1:length(ngenes), function(i) {
+    ngene <- ngenes[i]
+    train_topX <- do.call(rbind, lapply(1:5, function(fold) {
+      print(ind)
+      print(ngene)
+      print(fold)
+      fl_name <- paste0("../data/results/triple_alge_ind_",ind,"_results_train.fold.",fold,
+                        ".top",ngene,".rds")
+      df <- readRDS(fl_name)
+      out <- diff_time_wrapper(df$fit.test)
+      out$fold <- fold
+      return(out)
+    }) )
+    train_topX$ngenes <- ngene
+    #return(train_topX)  
+    agg_mn <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=mean)
+    agg_sd <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=sd)
+  
+    obj <- data.frame(methods=agg_mn$methods, 
+                      diff_mean=agg_mn$diff_mean,
+                      diff_se=agg_sd$diff_mean/sqrt(5))
+    obj$ngenes <- ngene
+    return(obj)
+  }) )
+  out$ind <- ind
+  return(out)
+})
+names(train_top) <- inds
+saveRDS(train_top, file = "../output/method-train-alge.Rmd/diff_time_all_indprediction.rds")
+```
+
+
+print results
+
+```{r}
+train_randos <- readRDS("../output/method-train-alge.Rmd/diff_time_all.rds")
+train_randos$methods <- as.character(train_randos$methods)
+train_randos <- subset(train_randos, methods=="supervised")
+
+train_ind <- readRDS("../output/method-train-alge.Rmd/diff_time_all_indprediction.rds")
+train_ind <- do.call(rbind, train_ind)
+train_ind$methods <- as.character(train_ind$methods)
+train_ind <- subset(train_ind, methods=="supervised")
+train_ind$ind <- as.factor(train_ind$ind)
+
+
+# head(a$fit.test$fit.supervised$cell_times_est)
+# head(b$fit.test$fit.supervised$cell_times_est)
+# 
+# a=readRDS("../data/results/triple_alge_ind_NA18511_data_training_cyclical_genes.fold.1.rds")
+# b=readRDS("../data/results/triple_ind_NA18511_data_training_cyclical_genes.fold.1.rds")
+# 
+# head(a$pve)
+# head(b$pve)
+# 
+# plot(a$pve,b$pve)
+# 
+# a <- readRDS("../data/results/triple_data_training_alge.rds")
+# b <- readRDS("../data/results/triple_data_training.rds")
+# plot(a$theta.nonvalid,
+#      b$theta.nonvalid)
+```
+
+
+
+```{r}
+library(ggplot2)
+ggplot(train_randos, 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_errorbar(train_randos,
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se)) +
+  geom_point() + geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Predict cell times from mixed individuals") 
+
+ggplot(train_ind, 
+       aes(x=ngenes, y=diff_mean, col=ind)) +
+  geom_errorbar(train_ind,
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se,
+                            col=ind)) +
+  geom_point() + geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Predict cell times for one individual") 
+```
+
+---
+
+## Output genes
+
+```{r, eval=F}
+topgenes_randos <- readRDS("../data/results/alge_results_topgenes.rds")
+topgenes_ind <- readRDS("../data/results/alge_ind_results_topgenes.rds")
+
+write.table(topgenes_randos[[21]], 
+            file = "../output/method-train-alge.Rmd/gene_list.txt",
+            row.names = F, quote=F, col.names = F)
+
+write.table(topgenes_ind[[21]], 
+            file = "../output/method-train-alge.Rmd/gene_list_ind.txt",
+            row.names = F, quote=F, col.names = F)
+```
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
+
