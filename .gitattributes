@@ -40,6 +40,7 @@ output/method-train-summary.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-summary-output.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 output/method-train-triple.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/method-validation.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 output/method-labels-noisy.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-labels-seurat.Rmd/* filter=lfs diff=lfs merge=lfs -text
