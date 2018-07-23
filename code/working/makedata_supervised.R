@@ -1,131 +1,110 @@
-########## <- Data when the validation sample consists of a random individual
-library(Biobase)
-df <- readRDS(file="data/eset-final.rds")
-pdata <- pData(df)
-fdata <- fData(df)
 
-# select endogeneous genes
-counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+#' @param eset eset objected of final, filtered data containing counts
+#' @param log2cpm_normed log2cpm expression data, normalized and procesed to take care of zeros
+#'
+#' @export
+eset <- readRDS(file="data/eset-final.rds")
+expr_normed <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
 
-log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
+makedata_supervised <- function(eset, log2cpm_normed,
+                                theta,
+                                type=c("individual_mixed",
+                                       "individual_heldout")) {
 
-#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
-counts <- counts[,order(pdata$theta)]
-log2cpm.all <- log2cpm.all[,order(pdata$theta)]
-pdata <- pdata[order(pdata$theta),]
+  library(Biobase)
+  pdata <- pData(eset)
+  fdata <- fData(eset)
 
-log2cpm.quant <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+  # select endogeneous genes
+  counts <- exprs(df)[grep("ENSG", rownames(eset)), ]
 
+  log2cpm <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
 
-# select external validation samples
-for (ind in unique(pdata$chip_id)) {
+  # counts <- counts[,order(pdata$theta)]
+  # log2cpm <- log2cpm[,order(pdata$theta)]
+  # pdata <- pdata[order(pdata$theta),]
+
+  # select external validation samples
   set.seed(99)
-#  nvalid <- round(ncol(log2cpm.quant)*.15)
-  ii.valid <- c(1:nrow(pdata))[which(pdata$chip_id == ind)]
-  ii.nonvalid <- c(1:nrow(pdata))[which(pdata$chip_id != ind)]
+  nvalid <- round(ncol(log2cpm_normed)*.15)
+  ii.valid <- sample(1:ncol(log2cpm_normed), nvalid, replace = F)
+  ii.nonvalid <- setdiff(1:ncol(log2cpm_normed), ii.valid)
 
   pdata.nonvalid <- pdata[ii.nonvalid,]
   pdata.valid <- pdata[ii.valid,]
 
-  log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
-  log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+  #all.equal(rownames(pdata.valid), colnames(log2cpm.quant.valid))
+  log2cpm_normed.nonvalid <- log2cpm_normed[,ii.nonvalid]
+  log2cpm_normed.valid <- log2cpm_normed[,ii.valid]
+
   theta <- pdata$theta
   names(theta) <- rownames(pdata)
 
-  log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
-  log2cpm.valid <- log2cpm.all[,ii.valid]
+  log2cpm.nonvalid <- log2cpm[,ii.nonvalid]
+  log2cpm.valid <- log2cpm[,ii.valid]
 
   theta.nonvalid <- theta[ii.nonvalid]
   theta.valid <- theta[ii.valid]
 
-  #sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
   data_training <- list(theta.nonvalid=theta.nonvalid,
-                        log2cpm.quant.nonvalid=log2cpm.quant.nonvalid,
+                        log2cpm.quant.nonvalid=log2cpm_normed.nonvalid,
                         log2cpm.nonvalid=log2cpm.nonvalid,
                         pdata.nonvalid=pdata.nonvalid,
                         fdata=fdata)
 
   data_withheld <- list(theta.valid=theta.valid,
-                        log2cpm.quant.valid=log2cpm.quant.valid,
+                        log2cpm.quant.valid=log2cpm_normed.valid,
                         log2cpm.valid=log2cpm.valid,
                         pdata.valid=pdata.valid,
                         fdata=fdata)
 
-  saveRDS(data_training, file=paste0("data/results/ind_",ind,"_data_training.rds"))
-  saveRDS(data_withheld, file=paste0("data/results/ind_",ind,"_data_withheld.rds"))
+  return(list(data_training=data_training,
+              data_withheld=data_withheld))
+  # saveRDS(data_training, file="data/results/data_training.rds")
+  # saveRDS(data_withheld, file="data/results/data_withheld.rds")
 
-  # ############# <- get training partitions
-  # # get predicted times
-  # # set training samples
-  # source("peco/R/primes.R")
-  # source("peco/R/partitionSamples.R")
-  # folds <- partitionSamples(1:ncol(log2cpm.quant.nonvalid), runs=5,
-  #             nsize.each = c(rep(round(ncol(log2cpm.quant.nonvalid)/5),4),
-  #                            ncol(log2cpm.quant.nonvalid)-sum(rep(round(ncol(log2cpm.quant.nonvalid)/5),4))))
-  # fold_indices <- folds$partitions
-  #
-  # saveRDS(fold_indices, file=paste0("data/results/ind_",ind,"_fold_indices.rds"))
+  if (type=="individual_heldout") {
+    # select external validation samples
+    for (ind in unique(pdata$chip_id)) {
+      set.seed(99)
+      #  nvalid <- round(ncol(log2cpm.quant)*.15)
+      ii.valid <- c(1:nrow(pdata))[which(pdata$chip_id == ind)]
+      ii.nonvalid <- c(1:nrow(pdata))[which(pdata$chip_id != ind)]
+
+      pdata.nonvalid <- pdata[ii.nonvalid,]
+      pdata.valid <- pdata[ii.valid,]
+
+      log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
+      log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
+      theta <- pdata$theta
+      names(theta) <- rownames(pdata)
+
+      log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
+      log2cpm.valid <- log2cpm.all[,ii.valid]
+
+      theta.nonvalid <- theta[ii.nonvalid]
+      theta.valid <- theta[ii.valid]
+
+      #sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
+      data_training <- list(theta.nonvalid=theta.nonvalid,
+                            log2cpm.quant.nonvalid=log2cpm.quant.nonvalid,
+                            log2cpm.nonvalid=log2cpm.nonvalid,
+                            pdata.nonvalid=pdata.nonvalid,
+                            fdata=fdata)
+
+      data_withheld <- list(theta.valid=theta.valid,
+                            log2cpm.quant.valid=log2cpm.quant.valid,
+                            log2cpm.valid=log2cpm.valid,
+                            pdata.valid=pdata.valid,
+                            fdata=fdata)
+
+      # saveRDS(data_training, file=paste0("data/results/ind_",ind,"_data_training.rds"))
+      # saveRDS(data_withheld, file=paste0("data/results/ind_",ind,"_data_withheld.rds"))
+  }
 }
 
 
 
-
-###### <- Data when the validation sample consists of random cells
-library(Biobase)
-df <- readRDS(file="data/eset-final.rds")
-pdata <- pData(df)
-fdata <- fData(df)
-
-# select endogeneous genes
-counts <- exprs(df)[grep("ENSG", rownames(df)), ]
-
-log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
-
-#macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
-counts <- counts[,order(pdata$theta)]
-log2cpm.all <- log2cpm.all[,order(pdata$theta)]
-pdata <- pdata[order(pdata$theta),]
-
-log2cpm.quant <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
-
-
-# select external validation samples
-set.seed(99)
-nvalid <- round(ncol(log2cpm.quant)*.15)
-ii.valid <- sample(1:ncol(log2cpm.quant), nvalid, replace = F)
-ii.nonvalid <- setdiff(1:ncol(log2cpm.quant), ii.valid)
-
-pdata.nonvalid <- pdata[ii.nonvalid,]
-pdata.valid <- pdata[ii.valid,]
-
-#all.equal(rownames(pdata.valid), colnames(log2cpm.quant.valid))
-log2cpm.quant.nonvalid <- log2cpm.quant[,ii.nonvalid]
-log2cpm.quant.valid <- log2cpm.quant[,ii.valid]
-theta <- pdata$theta
-names(theta) <- rownames(pdata)
-
-log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
-log2cpm.valid <- log2cpm.all[,ii.valid]
-
-theta.nonvalid <- theta[ii.nonvalid]
-theta.valid <- theta[ii.valid]
-
-#sig.genes <- readRDS("output/npreg-trendfilter-quantile.Rmd/out.stats.ordered.sig.476.rds")
-
-data_training <- list(theta.nonvalid=theta.nonvalid,
-                      log2cpm.quant.nonvalid=log2cpm.quant.nonvalid,
-                      log2cpm.nonvalid=log2cpm.nonvalid,
-                      pdata.nonvalid=pdata.nonvalid,
-                      fdata=fdata)
-
-data_withheld <- list(theta.valid=theta.valid,
-                      log2cpm.quant.valid=log2cpm.quant.valid,
-                      log2cpm.valid=log2cpm.valid,
-                      pdata.valid=pdata.valid,
-                      fdata=fdata)
-
-saveRDS(data_training, file="data/results/data_training.rds")
-saveRDS(data_withheld, file="data/results/data_withheld.rds")
 
 
 

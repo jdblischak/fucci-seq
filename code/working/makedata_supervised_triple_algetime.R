@@ -21,7 +21,7 @@ source("peco/R/intensity2circle.R")
 theta <- intensity2circle(cbind(pdata$gfp.median.log10sum.adjust,
                               pdata$rfp.median.log10sum.adjust,
                               pdata$dapi.median.log10sum.adjust),
-                        plot.it = F, method="trig")
+                        plot.it = F, method="algebraic")
 names(theta) <- rownames(pdata)
 
 
@@ -100,7 +100,7 @@ source("peco/R/intensity2circle.R")
 theta <- intensity2circle(cbind(pdata$gfp.median.log10sum.adjust,
                                 pdata$rfp.median.log10sum.adjust,
                                 pdata$dapi.median.log10sum.adjust),
-                          plot.it = F, method="trig")
+                          plot.it = F, method="algebraic")
 names(theta) <- rownames(pdata)
 
 log2cpm.nonvalid <- log2cpm.all[,ii.nonvalid]
