@@ -49,6 +49,7 @@ output/method-eval-withheld-explore-removenoisy.Rmd/* filter=lfs diff=lfs merge=
 output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-labels.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-labels-equalfold.Rmd/* filter=lfs diff=lfs merge=lfs -text
+output/method-train-summary-output.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
 output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers-genes.Rmd/* filter=lfs diff=lfs merge=lfs -text
