@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Compile training results</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Compile training results</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#two-training-scenarios">Two training scenarios</a></li>
+<li><a href="#codes">Codes</a></li>
+<li><a href="#make-top-cyclical-genes-lists">Make top cyclical genes lists</a></li>
+<li><a href="#prediction-error-by-top-x-cyclical-genes">Prediction error by top X cyclical genes</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-08-24</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 9593c50</p>
+<hr />
+<div id="two-training-scenarios" class="section level2">
+<h2>Two training scenarios</h2>
+<ol style="list-style-type: decimal">
+<li><p>Cell times derived from fucci: mixed individua predict mixed individual, mixed individual predict one individual</p></li>
+<li><p>Cell times derived from fucci + dapi: mixed individua predict mixed individual, mixed individual predict one individual</p></li>
+</ol>
+<hr />
+</div>
+<div id="codes" class="section level2">
+<h2>Codes</h2>
+<p>There are two main steps in the analysis.</p>
+<ol style="list-style-type: decimal">
+<li><p><code>code/working/job_run_methods.cyclical.R</code>: runs for one fold at a time the nonparametic regression, estimates the cyclical functions for every single gene and saves the PVE. This generates <code>data/results/data_training_cyclical_genes.fold.K.rds</code></p></li>
+<li><p><code>code/working/job_run_methods.train.R</code>: runs for one fold at the time, takes the output from the previous step, and computes the prediction error of the top X cyclical genes. This generates <code>data/results/results_train.fold.K.topX.rds</code>.</p></li>
+</ol>
+<p>For the training results on random error, we compute the prediction error of the top X cyclical genes on permuted cell times. This generates <code>data/results/results_train_permute_oncyclical.K.topX.rds</code>.</p>
+<p>For the different individual prediction scenario, we perform the training five times. Each time uses data from four individuals to estimate per-gene cyclical gene expression fucntions and estimates the prediction error of top X genes in a different individual.</p>
+<p>Note that these two sets of training results are evaluated differently. Namely, in the case where we learn genes that are predictive of cell times for the same individuals, we evaluate the selected genes in a group of mixed individuals. And, in the case where we learn genes that are predictive of cell times for a different individual, we evaluate the selected genes in yet another individual. Hence, we get six sets of evaluation results for the different individual scenario and one set of evaluation results for the same individual scenario.</p>
+<hr />
+</div>
+<div id="make-top-cyclical-genes-lists" class="section level2">
+<h2>Make top cyclical genes lists</h2>
+<ul>
+<li><p>Choose across the 5 folds (training sets), the genes that appear among the top X cyclical genes in at least 4 training sets.</p></li>
+<li><p>Overlap between random prediction and individual prediction: a gene has to appear in the random list and in 4 or more individuals in the individual list.</p></li>
+</ul>
+<pre class="r"><code># cell times based on fucci: mixed individuals ---------------------------
+data_training_cyclical_genes.fold.1 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.1.rds&quot;)
+data_training_cyclical_genes.fold.2 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.2.rds&quot;)
+data_training_cyclical_genes.fold.3 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.3.rds&quot;)
+data_training_cyclical_genes.fold.4 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.4.rds&quot;)
+data_training_cyclical_genes.fold.5 &lt;- readRDS(&quot;../data/results/data_training_cyclical_genes.fold.5.rds&quot;)
+data_cyclical_list &lt;- list(data_training_cyclical_genes.fold.1,
+                           data_training_cyclical_genes.fold.2,
+                           data_training_cyclical_genes.fold.3,
+                           data_training_cyclical_genes.fold.4,
+                           data_training_cyclical_genes.fold.5)
+
+ngenes &lt;- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+genes_list &lt;- lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  tmp &lt;- do.call(cbind, lapply(1:5, function(fold) {
+    top_list &lt;- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+                                                        decreasing = T)[1:ngene]]
+    rownames(data_cyclical_list[[fold]]) %in% top_list
+  }) )
+  rownames(tmp) &lt;- rownames(data_cyclical_list[[fold]])
+  return(rownames(tmp)[rowSums(tmp)&gt;=4])
+})
+names(genes_list) &lt;- ngenes
+
+saveRDS(genes_list, 
+        file = &quot;../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds&quot;)</code></pre>
+<p>Below runs <code>code/working/job_run_methods.ind.R</code>.</p>
+<pre class="r"><code># cell times based on fucci: one individual ---------------------------
+inds &lt;- c(&quot;NA19098&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19101&quot;, &quot;NA18855&quot;, &quot;NA19160&quot;)
+ngenes &lt;- c(5, seq(10, 11040, 10))
+for (j in 1:length(inds)) {
+  ind &lt;- inds[j]
+  gene_names &lt;- rownames(readRDS(paste0(&quot;../data/results/ind_&quot;,ind,&quot;_data_training_cyclical_genes.fold.&quot;,
+                   1,&quot;.rds&quot;)))
+  genes_list &lt;- lapply(1:length(ngenes), function(i) {
+    ngene &lt;- ngenes[i]
+    tmp &lt;- do.call(cbind, lapply(1:5, function(fold) {
+      fl_name &lt;- paste0(&quot;../data/results/ind_&quot;,ind,&quot;_data_training_cyclical_genes.fold.&quot;,
+                   fold,&quot;.rds&quot;)
+      df &lt;- readRDS(fl_name)
+      top_list &lt;- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+      rownames(df) %in% top_list
+    }) )
+    rownames(tmp) &lt;- gene_names
+    return(rownames(tmp)[rowSums(tmp)&gt;=4])
+  })
+  names(genes_list) &lt;- ngenes
+  saveRDS(genes_list, 
+          file = paste0(&quot;../output/method-train-summary-output.Rmd/double_topgenes_&quot;,ind,&quot;.rds&quot;))
+}</code></pre>
+<p>Hold off results on including DAPI as cell time measure.</p>
+<pre class="r"><code># # cell times based on fucci an dapi: mixed individuals ---------------------------
+# data_training_cyclical_genes.fold.1 &lt;- readRDS(&quot;../data/results/triple_alge_data_training_cyclical_genes.fold.1.rds&quot;)
+# data_training_cyclical_genes.fold.2 &lt;- readRDS(&quot;../data/results/triple_alge_data_training_cyclical_genes.fold.2.rds&quot;)
+# data_training_cyclical_genes.fold.3 &lt;- readRDS(&quot;../data/results/triple_alge_data_training_cyclical_genes.fold.3.rds&quot;)
+# data_training_cyclical_genes.fold.4 &lt;- readRDS(&quot;../data/results/triple_alge_data_training_cyclical_genes.fold.4.rds&quot;)
+# data_training_cyclical_genes.fold.5 &lt;- readRDS(&quot;../data/results/triple_alge_data_training_cyclical_genes.fold.5.rds&quot;)
+# data_cyclical_list &lt;- list(data_training_cyclical_genes.fold.1,
+#                            data_training_cyclical_genes.fold.2,
+#                            data_training_cyclical_genes.fold.3,
+#                            data_training_cyclical_genes.fold.4,
+#                            data_training_cyclical_genes.fold.5)
+# 
+# ngenes &lt;- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+# genes_list &lt;- lapply(1:length(ngenes), function(i) {
+#   ngene &lt;- ngenes[i]
+#   tmp &lt;- do.call(cbind, lapply(1:5, function(fold) {
+#     top_list &lt;- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+#                                                         decreasing = T)[1:ngene]]
+#     rownames(data_cyclical_list[[fold]]) %in% top_list
+#   }) )
+#   rownames(tmp) &lt;- rownames(data_cyclical_list[[fold]])
+#   return(rownames(tmp)[rowSums(tmp)&gt;=4])
+# })
+# names(genes_list) &lt;- ngenes
+# 
+# saveRDS(genes_list, 
+#         file = &quot;../output/method-train-summary-output.Rmd/triple_topgenes_mixed.rds&quot;)
+# 
+# 
+# 
+# # cell times based on fucci and dapi: one individual ---------------------------
+# inds &lt;- c(&quot;NA19098&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19101&quot;, &quot;NA18855&quot;, &quot;NA19160&quot;)
+# ngenes &lt;- c(5, seq(10, 11040, 10))
+# for (j in 1:length(inds)) {
+#   ind &lt;- inds[j]
+#   gene_names &lt;- rownames(readRDS(paste0(&quot;../data/results/triple_alge_ind_&quot;,ind,&quot;_data_training_cyclical_genes.fold.&quot;,
+#                    1,&quot;.rds&quot;)))
+#   genes_list &lt;- lapply(1:length(ngenes), function(i) {
+#     ngene &lt;- ngenes[i]
+#     tmp &lt;- do.call(cbind, lapply(1:5, function(fold) {
+#       fl_name &lt;- paste0(&quot;../data/results/triple_alge_ind_&quot;,ind,&quot;_data_training_cyclical_genes.fold.&quot;,
+#                    fold,&quot;.rds&quot;)
+#       df &lt;- readRDS(fl_name)
+#       top_list &lt;- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+#       rownames(df) %in% top_list
+#     }) )
+#     rownames(tmp) &lt;- gene_names
+#     return(rownames(tmp)[rowSums(tmp)&gt;=4])
+#   })
+#   names(genes_list) &lt;- ngenes
+#   saveRDS(genes_list, 
+#           file = paste0(&quot;../output/method-train-summary-output.Rmd/triple_topgenes_&quot;,ind,&quot;.rds&quot;))
+# }</code></pre>
+<hr />
+</div>
+<div id="prediction-error-by-top-x-cyclical-genes" class="section level2">
+<h2>Prediction error by top X cyclical genes</h2>
+<p>code for summarize results</p>
+<pre class="r"><code>diff_time_wrapper &lt;- function(results_list) {
+  
+  methods_list &lt;- sapply(names(results_list),
+                         function(x) strsplit(x, split=&quot;.&quot;, fixed=TRUE)[[1]][2])
+  
+  diff_time_list &lt;- do.call(rbind, lapply(1:length(results_list), function(i) {
+    diff_time &lt;- results_list[[i]]$diff_time
+    diff_mean &lt;- mean(diff_time/2/pi)
+
+    return(data.frame(diff_mean=diff_mean,
+#                      diff_se=diff_se,
+                      methods=methods_list[i]))
+  }) )
+  return(diff_time_list)  
+}
+
+
+# cell times based on FUCCI, mixed individuals -------------------------------------------
+ngenes &lt;- c(5, seq(10, 1000, by=10))
+train_top &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train.fold.&quot;,fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+saveRDS(train_top, &quot;../output/method-train-summary-output.Rmd/double_diff_time_mixed.rds&quot;)
+
+
+# cell times based on FUCCI, mixed individuals, permuted labels ---------------------------
+ngenes &lt;- c(5, seq(10,1000, by=10))
+train_top_permute &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene &lt;- ngenes[i]
+  train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name &lt;- paste0(&quot;../data/results/results_train_permute_oncyclical.fold.&quot;,
+                      fold,&quot;.top&quot;,ngene,&quot;.rds&quot;)
+    df &lt;- readRDS(fl_name)
+    out &lt;- diff_time_wrapper(df$fit.test)
+    out$fold &lt;- fold
+    return(out)
+  }) )
+  train_topX$ngenes &lt;- ngene
+  #return(train_topX)  
+  agg_mn &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd &lt;- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj &lt;- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes &lt;- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top_permute, 
+    file = &quot;../output/method-train-summary-output.Rmd/double_diff_time_mixed_permute.rds&quot;)
+
+
+
+# cell times based on fucci, predicting one individual ----------------------------------
+# some problems with NA18870, fold 4, 810 gene
+# some problem with NA18855, fold 1, 770 gene
+ngenes &lt;- c(5, seq(10,700, by=10))
+inds &lt;- c(&quot;NA19098&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19101&quot;, &quot;NA18855&quot;, &quot;NA19160&quot;)
+train_top &lt;- lapply(1:length(inds), function(j) {
+  ind &lt;- inds[j]
+  out &lt;- do.call(rbind, lapply(1:length(ngenes), function(i) {
+    ngene &lt;- ngenes[i]
+    train_topX &lt;- do.call(rbind, lapply(1:5, function(fold) {
+      print(ind)
+      print(ngene)
+      print(fold)
+      fl_name &lt;- paste0(&quot;../data/results/ind_&quot;,ind,&quot;_results_train.fold.&quot;,fold,
+                        &quot;.top&quot;,ngene,&quot;.rds&quot;)
+      df &lt;- readRDS(fl_name)
+      out &lt;- diff_time_wrapper(df$fit.test)
+      out$fold &lt;- fold
+      return(out)
+    }) )
+    train_topX$ngenes &lt;- ngene
+    #return(train_topX)  
+    agg_mn &lt;- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=mean)
+    agg_sd &lt;- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=sd)
+  
+    obj &lt;- data.frame(methods=agg_mn$methods, 
+                      diff_mean=agg_mn$diff_mean,
+                      diff_se=agg_sd$diff_mean/sqrt(5))
+    obj$ngenes &lt;- ngene
+    return(obj)
+  }) )
+  out$ind &lt;- ind
+  return(out)
+})
+names(train_top) &lt;- inds
+
+saveRDS(train_top, 
+  file = &quot;../output/method-train-summary-output.Rmd/double_diff_time_ind.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] compiler_3.4.3  backports_1.1.2 magrittr_1.5    rprojroot_1.3-2
+ [5] tools_3.4.3     htmltools_0.3.6 yaml_2.2.0      Rcpp_0.12.18   
+ [9] stringi_1.2.4   rmarkdown_1.10  knitr_1.20      git2r_0.21.0   
+[13] stringr_1.3.1   digest_0.6.15   evaluate_0.10.1</code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
