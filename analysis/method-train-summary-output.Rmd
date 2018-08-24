@@ -1,0 +1,319 @@
+---
+title: "Compile training results"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Two training scenarios
+
+1. Cell times derived from fucci: mixed individua predict mixed individual, mixed individual predict one individual
+
+2. Cell times derived from fucci + dapi: mixed individua predict mixed individual, mixed individual predict one individual
+
+---
+
+## Codes
+
+There are two main steps in the analysis.
+
+1. `code/working/job_run_methods.cyclical.R`: runs for one fold at a time the nonparametic regression, estimates the cyclical functions for every single gene and saves the PVE. This generates `data/results/data_training_cyclical_genes.fold.K.rds`
+
+2. `code/working/job_run_methods.train.R`: runs for one fold at the time, takes the output from the previous step, and computes the prediction error of the top X cyclical genes. This generates `data/results/results_train.fold.K.topX.rds`.
+
+For the training results on random error, we compute the prediction error of the top X cyclical genes on permuted cell times. This generates `data/results/results_train_permute_oncyclical.K.topX.rds`.
+
+For the different individual prediction scenario, we perform the training five times. Each time uses data from four individuals to estimate per-gene cyclical gene expression fucntions and estimates the prediction error of top X genes in a different individual. 
+
+Note that these two sets of training results are evaluated differently. Namely, in the case where we learn genes that are predictive of cell times for the same individuals, we evaluate the selected genes in a group of mixed individuals. And, in the case where we learn genes that are predictive of cell times for a different individual, we evaluate the selected genes in yet another individual. Hence, we get six sets of evaluation results for the different individual scenario and one set of evaluation results for the same individual scenario. 
+
+
+---
+
+## Make top cyclical genes lists
+
+* Choose across the 5 folds (training sets), the genes that appear among the top X cyclical genes in at least 4 training sets.
+
+* Overlap between random prediction and individual prediction: a gene has to appear in the random list and in 4 or more individuals in the individual list.
+
+
+```{r, eval=F}
+# cell times based on fucci: mixed individuals ---------------------------
+data_training_cyclical_genes.fold.1 <- readRDS("../data/results/data_training_cyclical_genes.fold.1.rds")
+data_training_cyclical_genes.fold.2 <- readRDS("../data/results/data_training_cyclical_genes.fold.2.rds")
+data_training_cyclical_genes.fold.3 <- readRDS("../data/results/data_training_cyclical_genes.fold.3.rds")
+data_training_cyclical_genes.fold.4 <- readRDS("../data/results/data_training_cyclical_genes.fold.4.rds")
+data_training_cyclical_genes.fold.5 <- readRDS("../data/results/data_training_cyclical_genes.fold.5.rds")
+data_cyclical_list <- list(data_training_cyclical_genes.fold.1,
+                           data_training_cyclical_genes.fold.2,
+                           data_training_cyclical_genes.fold.3,
+                           data_training_cyclical_genes.fold.4,
+                           data_training_cyclical_genes.fold.5)
+
+ngenes <- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+genes_list <- lapply(1:length(ngenes), function(i) {
+  ngene <- ngenes[i]
+  tmp <- do.call(cbind, lapply(1:5, function(fold) {
+    top_list <- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+                                                        decreasing = T)[1:ngene]]
+    rownames(data_cyclical_list[[fold]]) %in% top_list
+  }) )
+  rownames(tmp) <- rownames(data_cyclical_list[[fold]])
+  return(rownames(tmp)[rowSums(tmp)>=4])
+})
+names(genes_list) <- ngenes
+
+saveRDS(genes_list, 
+        file = "../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds")
+```
+
+
+Below runs `code/working/job_run_methods.ind.R`.
+
+```{r, eval=F}
+# cell times based on fucci: one individual ---------------------------
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+ngenes <- c(5, seq(10, 11040, 10))
+for (j in 1:length(inds)) {
+  ind <- inds[j]
+  gene_names <- rownames(readRDS(paste0("../data/results/ind_",ind,"_data_training_cyclical_genes.fold.",
+                   1,".rds")))
+  genes_list <- lapply(1:length(ngenes), function(i) {
+    ngene <- ngenes[i]
+    tmp <- do.call(cbind, lapply(1:5, function(fold) {
+      fl_name <- paste0("../data/results/ind_",ind,"_data_training_cyclical_genes.fold.",
+                   fold,".rds")
+      df <- readRDS(fl_name)
+      top_list <- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+      rownames(df) %in% top_list
+    }) )
+    rownames(tmp) <- gene_names
+    return(rownames(tmp)[rowSums(tmp)>=4])
+  })
+  names(genes_list) <- ngenes
+  saveRDS(genes_list, 
+          file = paste0("../output/method-train-summary-output.Rmd/double_topgenes_",ind,".rds"))
+}
+```
+
+
+Hold off results on including DAPI as cell time measure.
+
+```{r, eval=F}
+# # cell times based on fucci an dapi: mixed individuals ---------------------------
+# data_training_cyclical_genes.fold.1 <- readRDS("../data/results/triple_alge_data_training_cyclical_genes.fold.1.rds")
+# data_training_cyclical_genes.fold.2 <- readRDS("../data/results/triple_alge_data_training_cyclical_genes.fold.2.rds")
+# data_training_cyclical_genes.fold.3 <- readRDS("../data/results/triple_alge_data_training_cyclical_genes.fold.3.rds")
+# data_training_cyclical_genes.fold.4 <- readRDS("../data/results/triple_alge_data_training_cyclical_genes.fold.4.rds")
+# data_training_cyclical_genes.fold.5 <- readRDS("../data/results/triple_alge_data_training_cyclical_genes.fold.5.rds")
+# data_cyclical_list <- list(data_training_cyclical_genes.fold.1,
+#                            data_training_cyclical_genes.fold.2,
+#                            data_training_cyclical_genes.fold.3,
+#                            data_training_cyclical_genes.fold.4,
+#                            data_training_cyclical_genes.fold.5)
+# 
+# ngenes <- c(5, seq(10, nrow(data_cyclical_list[[1]]), 10))
+# genes_list <- lapply(1:length(ngenes), function(i) {
+#   ngene <- ngenes[i]
+#   tmp <- do.call(cbind, lapply(1:5, function(fold) {
+#     top_list <- rownames(data_cyclical_list[[fold]])[order(data_cyclical_list[[fold]]$pve,
+#                                                         decreasing = T)[1:ngene]]
+#     rownames(data_cyclical_list[[fold]]) %in% top_list
+#   }) )
+#   rownames(tmp) <- rownames(data_cyclical_list[[fold]])
+#   return(rownames(tmp)[rowSums(tmp)>=4])
+# })
+# names(genes_list) <- ngenes
+# 
+# saveRDS(genes_list, 
+#         file = "../output/method-train-summary-output.Rmd/triple_topgenes_mixed.rds")
+# 
+# 
+# 
+# # cell times based on fucci and dapi: one individual ---------------------------
+# inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+# ngenes <- c(5, seq(10, 11040, 10))
+# for (j in 1:length(inds)) {
+#   ind <- inds[j]
+#   gene_names <- rownames(readRDS(paste0("../data/results/triple_alge_ind_",ind,"_data_training_cyclical_genes.fold.",
+#                    1,".rds")))
+#   genes_list <- lapply(1:length(ngenes), function(i) {
+#     ngene <- ngenes[i]
+#     tmp <- do.call(cbind, lapply(1:5, function(fold) {
+#       fl_name <- paste0("../data/results/triple_alge_ind_",ind,"_data_training_cyclical_genes.fold.",
+#                    fold,".rds")
+#       df <- readRDS(fl_name)
+#       top_list <- rownames(df)[order(df$pve,decreasing = T)[1:ngene]]
+#       rownames(df) %in% top_list
+#     }) )
+#     rownames(tmp) <- gene_names
+#     return(rownames(tmp)[rowSums(tmp)>=4])
+#   })
+#   names(genes_list) <- ngenes
+#   saveRDS(genes_list, 
+#           file = paste0("../output/method-train-summary-output.Rmd/triple_topgenes_",ind,".rds"))
+# }
+```
+
+
+---
+
+## Prediction error by top X cyclical genes
+
+code for summarize results
+
+```{r, eval=F}
+diff_time_wrapper <- function(results_list) {
+  
+  methods_list <- sapply(names(results_list),
+                         function(x) strsplit(x, split=".", fixed=TRUE)[[1]][2])
+  
+  diff_time_list <- do.call(rbind, lapply(1:length(results_list), function(i) {
+    diff_time <- results_list[[i]]$diff_time
+    diff_mean <- mean(diff_time/2/pi)
+
+    return(data.frame(diff_mean=diff_mean,
+#                      diff_se=diff_se,
+                      methods=methods_list[i]))
+  }) )
+  return(diff_time_list)  
+}
+
+
+# cell times based on FUCCI, mixed individuals -------------------------------------------
+ngenes <- c(5, seq(10, 1000, by=10))
+train_top <- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene <- ngenes[i]
+  train_topX <- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name <- paste0("../data/results/results_train.fold.",fold,".top",ngene,".rds")
+    df <- readRDS(fl_name)
+    out <- diff_time_wrapper(df$fit.test)
+    out$fold <- fold
+    return(out)
+  }) )
+  train_topX$ngenes <- ngene
+  #return(train_topX)  
+  agg_mn <- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd <- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj <- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes <- ngene
+  return(obj)
+}) )
+saveRDS(train_top, "../output/method-train-summary-output.Rmd/double_diff_time_mixed.rds")
+
+
+# cell times based on FUCCI, mixed individuals, permuted labels ---------------------------
+ngenes <- c(5, seq(10,1000, by=10))
+train_top_permute <- do.call(rbind, lapply(1:length(ngenes), function(i) {
+  ngene <- ngenes[i]
+  train_topX <- do.call(rbind, lapply(1:5, function(fold) {
+    fl_name <- paste0("../data/results/results_train_permute_oncyclical.fold.",
+                      fold,".top",ngene,".rds")
+    df <- readRDS(fl_name)
+    out <- diff_time_wrapper(df$fit.test)
+    out$fold <- fold
+    return(out)
+  }) )
+  train_topX$ngenes <- ngene
+  #return(train_topX)  
+  agg_mn <- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=mean)
+  agg_sd <- aggregate(diff_mean ~ methods,
+                    data=train_topX, FUN=sd)
+
+  obj <- data.frame(methods=agg_mn$methods, 
+                    diff_mean=agg_mn$diff_mean,
+                    diff_se=agg_sd$diff_mean/sqrt(5))
+  obj$ngenes <- ngene
+  return(obj)
+}) )
+
+saveRDS(train_top_permute, 
+    file = "../output/method-train-summary-output.Rmd/double_diff_time_mixed_permute.rds")
+
+
+
+# cell times based on fucci, predicting one individual ----------------------------------
+# some problems with NA18870, fold 4, 810 gene
+# some problem with NA18855, fold 1, 770 gene
+ngenes <- c(5, seq(10,700, by=10))
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+train_top <- lapply(1:length(inds), function(j) {
+  ind <- inds[j]
+  out <- do.call(rbind, lapply(1:length(ngenes), function(i) {
+    ngene <- ngenes[i]
+    train_topX <- do.call(rbind, lapply(1:5, function(fold) {
+      print(ind)
+      print(ngene)
+      print(fold)
+      fl_name <- paste0("../data/results/ind_",ind,"_results_train.fold.",fold,
+                        ".top",ngene,".rds")
+      df <- readRDS(fl_name)
+      out <- diff_time_wrapper(df$fit.test)
+      out$fold <- fold
+      return(out)
+    }) )
+    train_topX$ngenes <- ngene
+    #return(train_topX)  
+    agg_mn <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=mean)
+    agg_sd <- aggregate(diff_mean ~ methods,
+                      data=train_topX, FUN=sd)
+  
+    obj <- data.frame(methods=agg_mn$methods, 
+                      diff_mean=agg_mn$diff_mean,
+                      diff_se=agg_sd$diff_mean/sqrt(5))
+    obj$ngenes <- ngene
+    return(obj)
+  }) )
+  out$ind <- ind
+  return(out)
+})
+names(train_top) <- inds
+
+saveRDS(train_top, 
+  file = "../output/method-train-summary-output.Rmd/double_diff_time_ind.rds")
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
