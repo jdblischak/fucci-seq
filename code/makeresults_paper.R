@@ -149,3 +149,135 @@ cbind(rownames(pdata),
 #
 # cdc6 <- with(macosko, ensembl[which(hgnc=="CDC6")])
 # plot(log2cpm.quant[rownames(log2cpm.quant)==cdc6,])
+
+
+# more recent figures ------------------------------------------------------
+
+df <- readRDS("data/eset-final.rds")
+pca <- prcomp(cbind(pData(df)$rfp.median.log10sum.adjust,
+                    pData(df)$gfp.median.log10sum.adjust))
+(pca$sdev^2)/sum(pca$sdev^2)
+plot(pca$x[,1], pca$x[,2], pch=16, cex=.7, xlim=c(-1.2, 1.2), ylim=c(-1.2,1.2),
+     xlab="PC1 (67%)", ylab="PC2 (33%)",
+     main = "fucci intensities PC1 vs PC2")
+abline(h=0,v=0, col="gray50", lty=2)
+points(cos(pData(df)$theta), sin(pData(df)$theta), col="brown", pch=16, cex=.7)
+
+plot(x=(pData(df)$theta -2)%%(2*pi),
+     y=pData(df)$gfp.median.log10sum.adjust, col="forestgreen",
+     ylim=c(-1.5, 1.5), pch=16, cex=.7,
+     xlab="fucci time", ylab="fucci intensities adjusted for batch effect",
+     main="Fucci intensities ordered by fucci time")
+abline(h=0, col="gray50", lty=2)
+points(x=(pData(df)$theta -2)%%(2*pi),
+       y=pData(df)$rfp.median.log10sum.adjust, col="firebrick",
+       ylim=c(-1.5, 1.5), pch=16, cex=.7)
+hist((pData(df)$theta -2)%%(2*pi), nclass=25,
+     main="fucci time frequency", xlab="fucci time")
+
+theta <- (pData(df)$theta -2)%%(2*pi)
+plot(pData(df)$theta,
+     pData(df)$dapi.median.log10sum.adjust)
+
+
+cdk1 <- rownames(fData(df))[which(fData(df)$name=="CDK1")]
+dtl <- rownames(fData(df))[which(fData(df)$name=="DTL")]
+expr_normed <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+
+all.equal(colnames(expr_normed), rownames(pData(df)))
+expr_normed2 <- expr_normed[,match(rownames(pData(df)),colnames(expr_normed))]
+
+theta <- (pData(df)$theta -2)%%(2*pi)
+cdc6 <- rownames(fData(df))[which(fData(df)$name=="CDC6")]
+yy <- expr_normed2[rownames(expr_normed2)==cdc6,]
+fit.cdc6 <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
+plot(x=theta[order(theta)], y=yy[order(theta)],
+     ylab="log2CPM normalized expression", xlab="fucci time",
+     main = "CDC6", cex=.7, col="gray40")
+abline(h=0, col="gray50")
+points(x=theta[order(theta)],
+       y=fit.cdc6$trend.yy, col ="brown", pch=16, cex=.6)
+
+
+# theta <- (pData(df)$theta -2)%%(2*pi)
+# yy <- expr_normed2[rownames(expr_normed2)==dtl,]
+# fit.dtl <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
+# plot(x=theta[order(theta)], y=yy[order(theta)],
+#      ylab="log2CPM normalized expression", xlab="fucci time",
+#      main = "DTL", cex=.7)
+# points(x=theta[order(theta)],
+#        y=fit.dtl$trend.yy, col ="brown", pch=16, cex=.6)
+
+theta <- (pData(df)$theta -2)%%(2*pi)
+yy <- expr_normed2[rownames(expr_normed2)==cdk1,]
+fit.cdk1 <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
+plot(x=theta[order(theta)], y=yy[order(theta)],
+     ylab="log2CPM normalized expression", xlab="fucci time",
+     main = "CDK1", cex=.7, col="gray40")
+abline(h=0, col="gray50")
+points(x=theta[order(theta)],
+       y=fit.cdk1$trend.yy, col ="brown", pch=16, cex=.6)
+
+
+
+
+# getting gene information
+genes_list <- readRDS(file = "data/results/results_topgenes.rds")
+genes_list_symbols <- readRDS("output/method-train-classifiers-genes.Rmd/genes_list_symbols.rds")
+
+
+genes_list_symbols[[1]]
+sapply(genes_list, length)[1:10]
+sapply(genes_list_symbols, nrow)[1:10]
+
+
+seurat.genes <- readLines(
+  con = "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+symbs <- c(genes_list_symbols[[1]]$hgnc_symbol[1:4], "HIST1H4E")
+which(symbs %in% unlist(seurat.genes))
+symbs[1:3]
+
+
+symbs <- c(genes_list_symbols[[1]]$hgnc_symbol[1:4], "HIST1H4E")
+which(symbs %in% unlist(seurat.genes))
+symbs[ii]
+
+
+symbs <- c(genes_list_symbols[[2]]$hgnc_symbol[which(!is.na(genes_list_symbols[[2]]$hgnc_symbol))], "HIST1H4E")
+ii <- which(symbs %in% unlist(seurat.genes))
+ii2 <- which(!(symbs %in% unlist(seurat.genes)))
+symbs[ii]
+symbs[ii2]
+
+
+symbs <- c(genes_list_symbols[[3]]$hgnc_symbol[which(!is.na(genes_list_symbols[[3]]$hgnc_symbol))], "HIST1H4E")
+ii <- which(symbs %in% unlist(seurat.genes))
+ii2 <- which(!(symbs %in% unlist(seurat.genes)))
+symbs[ii]
+symbs[ii2]
+
+
+
+symbs <- c(genes_list_symbols[[11]]$hgnc_symbol[which(!is.na(genes_list_symbols[[11]]$hgnc_symbol))],
+           "HIST1H4E", "HIST1H4L", "HIST1H4B")
+
+oo <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+
+bb <- which(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes))
+length(bb)
+symbs[bb]
+bb2 <- which(!(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes)))
+length(bb2)
+symbs[bb2]
+
+
+symbs <- c(genes_list_symbols[[1]]$hgnc_symbol[1:4], "HIST1H4E")
+bb <- which(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes))
+length(bb)
+bb2 <- which(!(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes)))
+symbs[bb2]
+
+

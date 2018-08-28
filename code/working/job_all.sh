@@ -19,31 +19,27 @@ done
 # Prediction error
 
 # done
-for ngenes in $(seq 10; seq 20 10 800); do
+for ngenes in $(seq 10; seq 20 10 1000); do
   for fold in $(seq 1 5); do
   sbatch job_run_methods.train.sbatch 15 $ngenes $fold
   done
 done
 
-# submitted
-for ngenes in $(seq 810 10 1000); do
-  for fold in $(seq 1 5); do
-  sbatch job_run_methods.train.sbatch 15 $ngenes $fold
-  done
-done
+
 
 
 # DONE
-for ngenes in $(seq 5; seq 10 10 200); do
+for ngenes in $(seq 5; seq 10 10 1000); do
   for fold in $(seq 1 5); do
   sbatch job_run_methods.train.permute.oncyclical.sbatch 15 $ngenes $fold
   done
 done
 
 
+
 # done
 inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
-for ngenes in $(seq 9; seq 10 10 300); do
+for ngenes in $(5; seq 10 10 900); do
  for ind in ${inds[@]}; do
   for fold in $(seq 1 5); do
   sbatch job_run_methods.train.ind.sbatch 15 $ngenes $fold $ind
@@ -51,48 +47,20 @@ for ngenes in $(seq 9; seq 10 10 300); do
  done
 done
 
-# done?
-inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
-for ngenes in $(seq 310 10 500); do
+# submitted
+#inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
+inds=("NA18870")
+for ngenes in $(seq 830 10 1000); do
  for ind in ${inds[@]}; do
-  for fold in $(seq 1 5); do
-  sbatch job_run_methods.train.ind.sbatch 15 $ngenes $fold $ind
-  done
- done
-done
-
-# submitted (?)
-inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
-for ngenes in $(seq 510 10 1000); do
- for ind in ${inds[@]}; do
-  for fold in $(seq 1 5); do
+#  for fold in $(seq 1 5); do
+  for fold in 4; do
   sbatch job_run_methods.train.ind.sbatch 15 $ngenes $fold $ind
   done
  done
 done
 
 
-inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
-for ngenes in $(seq 410 10 490); do
- for ind in ${inds[@]}; do
-  for fold in $(seq 1 5); do
-  sbatch job_run_methods.train.ind.sbatch 15 $ngenes $fold $ind
-  done
- done
-done
-
-#TBD
-inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
-for ngenes in $(seq 680 10 800); do
- for ind in ${inds[@]}; do
-  for fold in $(seq 1 5); do
-  sbatch job_run_methods.train.ind.sbatch 15 $ngenes $fold $ind
-  done
- done
-done
-
-
-# TBD
+# TBD?
 inds=("NA19098" "NA18511" "NA18870" "NA19101" "NA18855" "NA19160")
 for ngenes in $(seq 5 5 ; seq(10 20 200); do
  for ind in ${inds[@]}; do
@@ -141,8 +109,15 @@ for ngenes in $(seq 5 5; seq 10 20 200); do
   done
 done
 
-# TBD
+# submiteed
 for ngenes in $(seq 210 20 400); do
+  for fold in $(seq 1 5); do
+  sbatch job_run_methods.triple.train.permute.oncyclical.sbatch 15 $ngenes $fold
+  done
+done
+
+# submiteed
+for ngenes in $(seq 410 20 600); do
   for fold in $(seq 1 5); do
   sbatch job_run_methods.triple.train.permute.oncyclical.sbatch 15 $ngenes $fold
   done
