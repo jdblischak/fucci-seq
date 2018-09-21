@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Compute prediction error and get genes selected</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Compute prediction error and get genes selected</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#two-training-scenarios">Two training scenarios</a></li>
+<li><a href="#prediction-error">Prediction error</a></li>
+<li><a href="#choose-top-5-cyclical-genes">Choose top 5 cyclical genes</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-09-20</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 1bcf5d5</p>
+<hr />
+<div id="two-training-scenarios" class="section level2">
+<h2>Two training scenarios</h2>
+<ul>
+<li><p>Cell times derived from fucci: mixed individua predict mixed individual, mixed individual predict one individual</p></li>
+<li><p>Cell times derived from fucci + dapi: mixed individua predict mixed individual, mixed individual predict one individual</p></li>
+</ul>
+<hr />
+</div>
+<div id="prediction-error" class="section level2">
+<h2>Prediction error</h2>
+<pre class="r"><code>double_diff_time_ind &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_diff_time_ind.rds&quot;)
+double_diff_time_mixed &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_diff_time_mixed.rds&quot;)
+double_diff_time_mixed_permute &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_diff_time_mixed_permute.rds&quot;)</code></pre>
+<p>plots</p>
+<pre class="r"><code>library(ggplot2)
+
+double_diff_time_ind &lt;- do.call(rbind, double_diff_time_ind)
+double_diff_time_ind &lt;- subset(double_diff_time_ind, methods==&quot;supervised&quot;)
+
+df &lt;- rbind(data.frame(subset(double_diff_time_mixed, methods == &quot;supervised&quot;),
+                       ind=&quot;mixed&quot;),
+            data.frame(subset(double_diff_time_mixed_permute, methods == &quot;supervised&quot;),
+                       ind=&quot;mixed_permute&quot;),
+            double_diff_time_ind)
+
+df$ind &lt;- as.character(df$ind)
+df$ind &lt;- factor(df$ind, levels=c(&quot;mixed&quot;, &quot;mixed_permute&quot;, 
+                                   &quot;NA19098&quot;, &quot;NA18855&quot;, 
+                 &quot;NA19101&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19160&quot;),
+                 labels=c(&quot;Mixed&quot;, &quot;Mixed permute&quot;, LETTERS[1:6]))
+
+# df$type &lt;- df$ind
+# df$type[df$ind==&quot;Mixed&quot;]
+
+ggplot(subset(df, ngenes &lt;= 700), 
+       aes(x=ngenes, y=diff_mean, group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes &lt;= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;) +
+  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes &lt;= 700 &amp; ind==&quot;Mixed&quot;), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_hline(yintercept=.25, col=&quot;gray50&quot;) +
+  theme_light()</code></pre>
+<p><img src="figure/method-train-summary.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(df, ngenes &lt;= 700), 
+       aes(x=ngenes, y=(2^diff_se), group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes &lt;= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab(&quot;Mean squared error&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Standard error of predictions&quot;) +
+#  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes &lt;= 700 &amp; ind==&quot;Mixed&quot;), 
+       aes(x=ngenes, y=(2^diff_se))) +
+#  geom_hline(yintercept=.25, col=&quot;gray50&quot;) +
+  theme_light()</code></pre>
+<p><img src="figure/method-train-summary.Rmd/unnamed-chunk-2-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(df, ngenes &lt;= 400), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  # geom_errorbar(subset(df, ngenes &lt;= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set up to top 400 genes&quot;) +
+  ylim(.10,.17) +
+  theme_light()</code></pre>
+<p><img src="figure/method-train-summary.Rmd/unnamed-chunk-2-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(df, ngenes &lt;= 700), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_errorbar(subset(df, ngenes &lt;= 700),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;Prediction error in the training set&quot;) +
+  ylim(0,.25) </code></pre>
+<p><img src="figure/method-train-summary.Rmd/unnamed-chunk-2-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(subset(df, ngenes == 5), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab(&quot;Error margin (% arc length)&quot;) + xlab(&quot;Top X cyclical genes&quot;) +
+  ggtitle(&quot;using top 5 cyclical genes&quot;) </code></pre>
+<p><img src="figure/method-train-summary.Rmd/unnamed-chunk-2-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#+
+#  ylim(0,.25) </code></pre>
+<p>Prediction error margin is minimized at 5 genes for both scenarios.</p>
+<pre class="r"><code>diff_mean_min &lt;- sapply(1:length(unique(double_diff_time_ind$ind)), function(i) {
+  ind_lab &lt;- unique(double_diff_time_ind$ind)[i]
+  tmp &lt;- subset(double_diff_time_ind, ind==ind_lab)
+  tmp$ngenes[which.min(tmp$diff_mean)]
+#a$ngenes[which.min(a$diff_mean)]
+})
+cbind(unique(double_diff_time_ind$ind), diff_mean_min)</code></pre>
+<pre><code>               diff_mean_min
+[1,] &quot;NA19098&quot; &quot;5&quot;          
+[2,] &quot;NA18511&quot; &quot;420&quot;        
+[3,] &quot;NA18870&quot; &quot;50&quot;         
+[4,] &quot;NA19101&quot; &quot;130&quot;        
+[5,] &quot;NA18855&quot; &quot;5&quot;          
+[6,] &quot;NA19160&quot; &quot;30&quot;         </code></pre>
+<pre class="r"><code>double_diff_time_mixed$ngenes[which.min(double_diff_time_mixed$diff_mean)]</code></pre>
+<pre><code>[1] 5</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;Mixed&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1233992 0.1480880</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;A&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1439658 0.1703153</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;B&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1384198 0.1609955</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;C&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1429252 0.1640695</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;D&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1398339 0.1549927</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;E&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1375898 0.1576234</code></pre>
+<pre class="r"><code>range(df[df$ind ==&quot;F&quot; &amp; df$ngenes &lt;= 500,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1268329 0.1520259</code></pre>
+<pre class="r"><code>range(df[(df$ind ==&quot;A&quot; | df$ind ==&quot;B&quot; | df$ind ==&quot;C&quot; | df$ind ==&quot;D&quot; | df$ind ==&quot;E&quot; | df$ind ==&quot;F&quot;) &amp; df$ngenes &lt;= 100,]$diff_mean)</code></pre>
+<pre><code>[1] 0.1268329 0.1501624</code></pre>
+<hr />
+</div>
+<div id="choose-top-5-cyclical-genes" class="section level2">
+<h2>Choose top 5 cyclical genes</h2>
+<p>All top 5 in the mixed individual set are also the top 5 in the individual held-out datasets, which is not surprising, as the individual held-out samples are subsets of the mixed-indvidual samples.</p>
+<pre class="r"><code>double_topgenes_mixed &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds&quot;)
+double_topgenes_NA18511 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA18511.rds&quot;)
+double_topgenes_NA18855 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA18855.rds&quot;)
+double_topgenes_NA18870 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA18870.rds&quot;)
+double_topgenes_NA19098 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA19098.rds&quot;)
+double_topgenes_NA19101 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA19101.rds&quot;)
+double_topgenes_NA19160 &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_NA19160.rds&quot;)
+
+
+double_topgenes_NA18511[[1]] %in% double_topgenes_mixed[[1]] </code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>double_topgenes_NA18855[[1]] %in% double_topgenes_mixed[[1]] </code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>double_topgenes_NA18870[[1]] %in% double_topgenes_mixed[[1]] </code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>double_topgenes_NA19098[[1]] %in% double_topgenes_mixed[[1]] </code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>double_topgenes_NA19160[[1]] %in% double_topgenes_mixed[[1]] </code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE TRUE</code></pre>
+<pre class="r"><code>double_topgenes_NA19101[[1]] %in% double_topgenes_mixed[[1]]</code></pre>
+<pre><code>[1] TRUE TRUE TRUE TRUE</code></pre>
+<p>Print gene info. CDK1, TOP2A, and UBE2C are in the list of cell cycle genes used in previous single-cell RNA-seq studies (not discovered). HIST1H4C is listed as related to cell cycle in the Macosco list of genes, and the other one HIST1H4E in our list is</p>
+<pre class="r"><code>eset &lt;- readRDS(&quot;../data/eset-final.rds&quot;)
+library(Biobase)
+fdata &lt;- fData(eset)
+genes_selected &lt;- fdata[rownames(fdata) %in% double_topgenes_mixed[[1]],]
+genes_selected</code></pre>
+<pre><code>                 chr    start      end     name strand     source
+ENSG00000131747 hs17 38544768 38574202    TOP2A      - H. sapiens
+ENSG00000170312 hs10 62538089 62554610     CDK1      + H. sapiens
+ENSG00000175063 hs20 44441215 44445596    UBE2C      + H. sapiens
+ENSG00000197061  hs6 26104104 26104518 HIST1H4C      + H. sapiens
+ENSG00000198518  hs6 26204858 26206266 HIST1H4E      + H. sapiens</code></pre>
+<pre class="r"><code>seurat.genes &lt;- readLines(
+  con = &quot;../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;)
+seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+which(genes_selected$name %in% unlist(seurat.genes))</code></pre>
+<pre><code>[1] 1 2 3</code></pre>
+<pre class="r"><code>oscope &lt;- readRDS(&quot;../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds&quot;)
+oscope[oscope$ensembl %in% rownames(genes_selected),]</code></pre>
+<pre><code>        hgnc phase         ensembl
+113     CDK1    G2 ENSG00000170312
+273 HIST1H4C     S ENSG00000197061
+603    TOP2A    G2 ENSG00000131747
+605    TOP2A     S ENSG00000131747
+641    UBE2C    G2 ENSG00000175063</code></pre>
+<pre class="r"><code>#aa &lt;- fdata$name[match(double_topgenes_mixed[[2]],rownames(fdata))]
+#oscope[oscope$ensembl %in% double_topgenes_mixed[[2]],]</code></pre>
+<p>Get gene information</p>
+<pre class="r"><code>library(mygene)
+gene_info &lt;- getGenes(c(&quot;ENSG00000131747&quot;,&quot;ENSG00000170312&quot;,&quot;ENSG00000175063&quot;,
+                        &quot;ENSG00000197061&quot;,&quot;ENSG00000198518&quot;), 
+         fields=c(&quot;symbol&quot;,&quot;summary&quot;), return.as = &quot;DataFrame&quot;)
+
+library(knitr)
+kable(cbind(gene_info$symbol, gene_info$summary))</code></pre>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">TOP2A</td>
+<td align="left">This gene encodes a DNA topoisomerase, an enzyme that controls and alters the topologic states of DNA during transcription. This nuclear enzyme is involved in processes such as chromosome condensation, chromatid separation, and the relief of torsional stress that occurs during DNA transcription and replication. It catalyzes the transient breaking and rejoining of two strands of duplex DNA which allows the strands to pass through one another, thus altering the topology of DNA. Two forms of this enzyme exist as likely products of a gene duplication event. The gene encoding this form, alpha, is localized to chromosome 17 and the beta gene is localized to chromosome 3. The gene encoding this enzyme functions as the target for several anticancer agents and a variety of mutations in this gene have been associated with the development of drug resistance. Reduced activity of this enzyme may also play a role in ataxia-telangiectasia. [provided by RefSeq, Jul 2010].</td>
+</tr>
+<tr class="even">
+<td align="left">CDK1</td>
+<td align="left">The protein encoded by this gene is a member of the Ser/Thr protein kinase family. This protein is a catalytic subunit of the highly conserved protein kinase complex known as M-phase promoting factor (MPF), which is essential for G1/S and G2/M phase transitions of eukaryotic cell cycle. Mitotic cyclins stably associate with this protein and function as regulatory subunits. The kinase activity of this protein is controlled by cyclin accumulation and destruction through the cell cycle. The phosphorylation and dephosphorylation of this protein also play important regulatory roles in cell cycle control. Alternatively spliced transcript variants encoding different isoforms have been found for this gene. [provided by RefSeq, Mar 2009].</td>
+</tr>
+<tr class="odd">
+<td align="left">UBE2C</td>
+<td align="left">The modification of proteins with ubiquitin is an important cellular mechanism for targeting abnormal or short-lived proteins for degradation. Ubiquitination involves at least three classes of enzymes: ubiquitin-activating enzymes, ubiquitin-conjugating enzymes, and ubiquitin-protein ligases. This gene encodes a member of the E2 ubiquitin-conjugating enzyme family. The encoded protein is required for the destruction of mitotic cyclins and for cell cycle progression, and may be involved in cancer progression. Multiple transcript variants encoding different isoforms have been found for this gene. Pseudogenes of this gene have been defined on chromosomes 4, 14, 15, 18, and 19. [provided by RefSeq, Aug 2013].</td>
+</tr>
+<tr class="even">
+<td align="left">HIST1H4C</td>
+<td align="left">Histones are basic nuclear proteins that are responsible for the nucleosome structure of the chromosomal fiber in eukaryotes. Two molecules of each of the four core histones (H2A, H2B, H3, and H4) form an octamer, around which approximately 146 bp of DNA is wrapped in repeating units, called nucleosomes. The linker histone, H1, interacts with linker DNA between nucleosomes and functions in the compaction of chromatin into higher order structures. This gene is intronless and encodes a replication-dependent histone that is a member of the histone H4 family. Transcripts from this gene lack polyA tails but instead contain a palindromic termination element. This gene is found in the large histone gene cluster on chromosome 6. [provided by RefSeq, Aug 2015].</td>
+</tr>
+<tr class="odd">
+<td align="left">NA</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    parallel  stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] knitr_1.20             mygene_1.14.0          GenomicFeatures_1.30.3
+ [4] AnnotationDbi_1.42.1   GenomicRanges_1.30.3   GenomeInfoDb_1.14.0   
+ [7] IRanges_2.12.0         S4Vectors_0.16.0       Biobase_2.38.0        
+[10] BiocGenerics_0.24.0    ggplot2_3.0.0         
+
+loaded via a namespace (and not attached):
+ [1] httr_1.3.1                 RMySQL_0.10.15            
+ [3] bit64_0.9-7                jsonlite_1.5              
+ [5] splines_3.4.3              gsubfn_0.7                
+ [7] Formula_1.2-2              assertthat_0.2.0          
+ [9] highr_0.6                  latticeExtra_0.6-28       
+[11] blob_1.1.1                 GenomeInfoDbData_1.0.0    
+[13] Rsamtools_1.30.0           yaml_2.2.0                
+[15] progress_1.1.2             pillar_1.1.0              
+[17] RSQLite_2.1.1              backports_1.1.2           
+[19] lattice_0.20-35            glue_1.3.0                
+[21] chron_2.3-52               digest_0.6.15             
+[23] checkmate_1.8.5            RColorBrewer_1.1-2        
+[25] XVector_0.18.0             colorspace_1.3-2          
+[27] htmltools_0.3.6            Matrix_1.2-14             
+[29] plyr_1.8.4                 XML_3.98-1.9              
+[31] pkgconfig_2.0.1            biomaRt_2.34.2            
+[33] zlibbioc_1.24.0            scales_0.5.0              
+[35] BiocParallel_1.12.0        htmlTable_1.11.2          
+[37] git2r_0.21.0               tibble_1.4.2              
+[39] sqldf_0.4-11               withr_2.1.2               
+[41] SummarizedExperiment_1.8.1 nnet_7.3-12               
+[43] lazyeval_0.2.1             proto_1.0.0               
+[45] survival_2.41-3            magrittr_1.5              
+[47] memoise_1.1.0              evaluate_0.10.1           
+[49] foreign_0.8-69             data.table_1.11.4         
+[51] tools_3.4.3                prettyunits_1.0.2         
+[53] matrixStats_0.53.0         stringr_1.3.1             
+[55] munsell_0.4.3              cluster_2.0.6             
+[57] DelayedArray_0.4.1         bindrcpp_0.2              
+[59] Biostrings_2.46.0          compiler_3.4.3            
+[61] rlang_0.2.1                grid_3.4.3                
+[63] RCurl_1.95-4.10            rstudioapi_0.7            
+[65] htmlwidgets_1.0            bitops_1.0-6              
+[67] base64enc_0.1-3            labeling_0.3              
+[69] rmarkdown_1.10             gtable_0.2.0              
+[71] curl_3.2                   DBI_1.0.0                 
+[73] R6_2.2.2                   gridExtra_2.3             
+[75] GenomicAlignments_1.14.2   dplyr_0.7.4               
+[77] rtracklayer_1.38.3         bit_1.1-12                
+[79] bindr_0.1                  Hmisc_4.1-1               
+[81] rprojroot_1.3-2            stringi_1.2.4             
+[83] Rcpp_0.12.18               rpart_4.1-11              
+[85] acepack_1.4.1             </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
