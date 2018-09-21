@@ -1,0 +1,241 @@
+---
+title: "Compute prediction error and get genes selected"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Two training scenarios
+
+* Cell times derived from fucci: mixed individua predict mixed individual, mixed individual predict one individual
+
+* Cell times derived from fucci + dapi: mixed individua predict mixed individual, mixed individual predict one individual
+
+
+---
+
+## Prediction error
+
+```{r}
+double_diff_time_ind <- readRDS("../output/method-train-summary-output.Rmd/double_diff_time_ind.rds")
+double_diff_time_mixed <- readRDS("../output/method-train-summary-output.Rmd/double_diff_time_mixed.rds")
+double_diff_time_mixed_permute <- readRDS("../output/method-train-summary-output.Rmd/double_diff_time_mixed_permute.rds")
+```
+
+plots
+
+```{r}
+library(ggplot2)
+
+double_diff_time_ind <- do.call(rbind, double_diff_time_ind)
+double_diff_time_ind <- subset(double_diff_time_ind, methods=="supervised")
+
+df <- rbind(data.frame(subset(double_diff_time_mixed, methods == "supervised"),
+                       ind="mixed"),
+            data.frame(subset(double_diff_time_mixed_permute, methods == "supervised"),
+                       ind="mixed_permute"),
+            double_diff_time_ind)
+
+df$ind <- as.character(df$ind)
+df$ind <- factor(df$ind, levels=c("mixed", "mixed_permute", 
+                                   "NA19098", "NA18855", 
+                 "NA19101", "NA18511", "NA18870", "NA19160"),
+                 labels=c("Mixed", "Mixed permute", LETTERS[1:6]))
+
+# df$type <- df$ind
+# df$type[df$ind=="Mixed"]
+
+ggplot(subset(df, ngenes <= 700), 
+       aes(x=ngenes, y=diff_mean, group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"), 
+       aes(x=ngenes, y=diff_mean)) +
+  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+  
+
+
+ggplot(subset(df, ngenes <= 700), 
+       aes(x=ngenes, y=(2^diff_se), group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab("Mean squared error") + xlab("Top X cyclical genes") +
+  ggtitle("Standard error of predictions") +
+#  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"), 
+       aes(x=ngenes, y=(2^diff_se))) +
+#  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 400), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set up to top 400 genes") +
+  ylim(.10,.17) +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 700), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_errorbar(subset(df, ngenes <= 700),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25) 
+
+ggplot(subset(df, ngenes == 5), 
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) + 
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("using top 5 cyclical genes") 
+#+
+#  ylim(0,.25) 
+```
+
+
+Prediction error margin is minimized at 5 genes for both scenarios. 
+
+```{r}
+diff_mean_min <- sapply(1:length(unique(double_diff_time_ind$ind)), function(i) {
+  ind_lab <- unique(double_diff_time_ind$ind)[i]
+  tmp <- subset(double_diff_time_ind, ind==ind_lab)
+  tmp$ngenes[which.min(tmp$diff_mean)]
+#a$ngenes[which.min(a$diff_mean)]
+})
+cbind(unique(double_diff_time_ind$ind), diff_mean_min)
+
+
+double_diff_time_mixed$ngenes[which.min(double_diff_time_mixed$diff_mean)]
+```
+
+```{r}
+range(df[df$ind =="Mixed" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="A" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="B" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="C" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="D" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="E" & df$ngenes <= 500,]$diff_mean)
+range(df[df$ind =="F" & df$ngenes <= 500,]$diff_mean)
+```
+
+
+```{r}
+range(df[(df$ind =="A" | df$ind =="B" | df$ind =="C" | df$ind =="D" | df$ind =="E" | df$ind =="F") & df$ngenes <= 100,]$diff_mean)
+```
+
+---
+
+## Choose top 5 cyclical genes 
+
+All top 5 in the mixed individual set are also the top 5 in the individual held-out datasets, which is not surprising, as the individual held-out samples are subsets of the mixed-indvidual samples.
+
+```{r}
+double_topgenes_mixed <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds")
+double_topgenes_NA18511 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA18511.rds")
+double_topgenes_NA18855 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA18855.rds")
+double_topgenes_NA18870 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA18870.rds")
+double_topgenes_NA19098 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA19098.rds")
+double_topgenes_NA19101 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA19101.rds")
+double_topgenes_NA19160 <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_NA19160.rds")
+
+
+double_topgenes_NA18511[[1]] %in% double_topgenes_mixed[[1]] 
+double_topgenes_NA18855[[1]] %in% double_topgenes_mixed[[1]] 
+double_topgenes_NA18870[[1]] %in% double_topgenes_mixed[[1]] 
+double_topgenes_NA19098[[1]] %in% double_topgenes_mixed[[1]] 
+double_topgenes_NA19160[[1]] %in% double_topgenes_mixed[[1]] 
+double_topgenes_NA19101[[1]] %in% double_topgenes_mixed[[1]]
+```
+
+
+Print gene info.  CDK1, TOP2A, and UBE2C are in the list of cell cycle genes used in previous single-cell RNA-seq studies (not discovered). HIST1H4C is listed as related to cell cycle in the Macosco list of genes, and the other one HIST1H4E in our list is
+
+```{r}
+eset <- readRDS("../data/eset-final.rds")
+library(Biobase)
+fdata <- fData(eset)
+genes_selected <- fdata[rownames(fdata) %in% double_topgenes_mixed[[1]],]
+genes_selected
+```
+
+
+```{r}
+seurat.genes <- readLines(
+  con = "../data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+which(genes_selected$name %in% unlist(seurat.genes))
+
+
+oscope <- readRDS("../data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
+oscope[oscope$ensembl %in% rownames(genes_selected),]
+#aa <- fdata$name[match(double_topgenes_mixed[[2]],rownames(fdata))]
+#oscope[oscope$ensembl %in% double_topgenes_mixed[[2]],]
+```
+
+Get gene information
+
+```{r}
+library(mygene)
+gene_info <- getGenes(c("ENSG00000131747","ENSG00000170312","ENSG00000175063",
+                        "ENSG00000197061","ENSG00000198518"), 
+         fields=c("symbol","summary"), return.as = "DataFrame")
+
+library(knitr)
+kable(cbind(gene_info$symbol, gene_info$summary))
+```
+
+
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
