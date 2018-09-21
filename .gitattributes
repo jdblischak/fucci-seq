@@ -55,5 +55,7 @@ output/method-train-classifiers-all.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-train-classifiers-genes.Rmd/* filter=lfs diff=lfs merge=lfs -text
 output/method-eval.Rmd/* filter=lfs diff=lfs merge=lfs -text
 
+output/trendfilter-individual.Rmd/* filter=lfs diff=lfs merge=lfs -text
+
 # finalized results
 data/results/* filter=lfs diff=lfs merge=lfs -text
