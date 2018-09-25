@@ -222,7 +222,8 @@ div.section {
 <div id="TOC">
 <ul>
 <li><a href="#summary-and-overview">Summary and overview</a></li>
-<li><a href="#model-training-and-prediction-results">Model training and prediction results</a></li>
+<li><a href="#supervised-method-learning-finalizing-on-data-holiding-out-validation-samples">Supervised method learning: finalizing on data holiding out validation samples</a></li>
+<li><a href="#supervised-method-learning-building-the-analysis-approach">Supervised method learning: building the analysis approach</a></li>
 <li><a href="#approaches-to-fitting-cyclical-trend-in-gene-expression-data">Approaches to fitting cyclical trend in gene expression data</a></li>
 <li><a href="#cell-cycle-signal-in-gene-expression-data">Cell cycle signal in gene expression data</a></li>
 <li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
@@ -237,18 +238,55 @@ div.section {
 <ul>
 <li><a href="data-overview.html">Data description</a></li>
 <li><a href="talk-20180416.html">Seminar talk 2018-04-16</a></li>
-<li>Some code for generating plots for the paper
-<ul>
-<li><code>code/paper.plot.images.R</code></li>
-</ul></li>
+<li>Code for compiling results and plots for the paper: <code>code/makeresults_paper.R</code></li>
 </ul>
 <hr />
 </div>
-<div id="model-training-and-prediction-results" class="section level2">
-<h2>Model training and prediction results</h2>
+<div id="supervised-method-learning-finalizing-on-data-holiding-out-validation-samples" class="section level2">
+<h2>Supervised method learning: finalizing on data holiding out validation samples</h2>
+<ul>
+<li>Perform model training on cell times computed in different ways
+<ul>
+<li>Based on Fucci only
+<ul>
+<li>Cells from mixed individuals: <a href="method-train-classifiers-all.html">Prediction error</a>, and <a href="method-train-classifiers-genes.html">functional annotations of genes selected</a></li>
+<li>Cells from one individual: <a href="method-train-ind.html">Prediction error</a>, and <a href="method-train-ind-genes.html">functional annotations of genes selected</a></li>
+</ul></li>
+<li>Based on Fucci and DAPI and derived from trigonometric transformation
+<ul>
+<li>Cells from mixed individuals: <a href="method-train-triple.html">Prediction error</a></li>
+<li>Cells from one individual: <a href="method-train-ind.html">Prediction error</a>, and <a href="method-train-ind-genes.html">functional annotations of genes selected</a></li>
+</ul></li>
+<li>Based on FUCCI and DAPI and derived from an algebraic approach
+<ul>
+<li><a href="method-train-alge.html">Cells from one individual</a></li>
+</ul></li>
+</ul></li>
+<li>Compare model training results
+<ul>
+<li><a href="method-labels-compare.html">Compute and compare cell time estimates</a> derived under two different assumptions: assuming equal variance in PC1 and PC2 (circle) vs. unequal variances in PC1 and PC2.</li>
+<li><a href="method-train-genes-fucci-vs-triple.html">Prediction error for cells from mixed individuals</a>: Prediction error smaller when based on fucci time only than based on fucci and dapi time, though only a very small difference. However, the genes selected in these two are similar, both found to have 37 genes enriched for the Cell Cycle GO (0007049).</li>
+</ul></li>
+<li>Compiling results
+<ul>
+<li><a href="method-train-summary-output.html">Compile training results for both training scenarios</a> and <a href="method-train-summary.html">Plotting prediction error margin and genes selected</a></li>
+<li><a href="method-validation.html">Compile results on validation samples</a></li>
+</ul></li>
+</ul>
+<!--     * [Validation sample](method-eval.html) (to be removed...) -->
+<!-- * Predicting individual X using expression from random individuals -->
+<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
+<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
+<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
+<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
+<hr />
+</div>
+<div id="supervised-method-learning-building-the-analysis-approach" class="section level2">
+<h2>Supervised method learning: building the analysis approach</h2>
 <ul>
 <li><p>Early analysis <a href="method-npreg.html">using trendfilter and evaluating model performance</a></p></li>
 <li><p>Investigate the property and quality of <a href="method-labels.html">the cell time labels derived from GFP and RFP</a>: PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.</p></li>
+<li><p>Investigate the cyclical trends for <a href="trendfilter-individua.Rmd">each individual</a></p></li>
 <li><p>Investigate the property of <a href="method-label-seurat.html">Seurat classes and cell time</a></p></li>
 <li>Noisy label analysis
 <ul>
@@ -265,32 +303,7 @@ div.section {
 <li>Evaluate the withheld sample <a href="method-eval-withheld-explore.html">including noisy labels</a> on the top 10 and top 101 cyclical genes] and comparing peco methods with seurat predictions.</li>
 <li>Evaluate the withheld samples <a href="method-eval-withheld-explore-removenoisy.html">removing noisy labels</a> on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.</li>
 </ul></li>
-<li>Finalizing training for predicting cell times for cells from individuals
-<ul>
-<li><a href="method-labels-compare.html">Compute and compare cell time estimates</a> derived under two different assumptions: assuming equal variance in PC1 and PC2 (circle) vs. unequal variances in PC1 and PC2.</li>
-<li>Results assuming equal variance, considering when
-<ul>
-<li>Cell times derived from fucci only: <a href="method-train-classifiers-all.html">cyclical genes selected</a>, and <a href="method-train-classifiers-genes.html">gene annotations</a></li>
-<li>Cell times derived from fucci and dapi: <a href="method-train-triple.html">cyclical genes selected</a></li>
-<li><a href="method-train-genes-fucci-vs-triple.html">Comparisons</a>: Prediction error smaller when based on fucci time only than based on fucci and dapi time, though only a very small difference. However, the genes selected in these two are similar, both found to have 37 genes enriched for the Cell Cycle GO (0007049).</li>
-</ul></li>
-</ul></li>
-<li>Finalizing training for predicting cell times for one individual
-<ul>
-<li>Results assuming equal variance, considering when
-<ul>
-<li>Cell times derived from fucci only: <a href="method-train-ind.html">cyclical genes selected</a>, and <a href="method-train-ind-genes.html">gene annotations</a></li>
-</ul></li>
-</ul></li>
 </ul>
-<!-- * Finalizing gene selection -->
-<!--     * [methods-train-genes.html] -->
-<!--     * [Validation sample](method-eval.html) (to be removed...) -->
-<!-- * Predicting individual X using expression from random individuals -->
-<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
-<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
-<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
-<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
 <hr />
 </div>
 <div id="approaches-to-fitting-cyclical-trend-in-gene-expression-data" class="section level2">
@@ -340,6 +353,7 @@ div.section {
 <li>Fit <a href="npreg-trendfilter-prelim.html">trendfilter</a> on a subset of genes (5) that are observed (visually) to have cyclical pattern. trendfilter is robust to small proportion of undetected cells, approx 2 or 3%. In cases of simulation when increasing proportion of undetected cells to 20%, we observed a flat line in gene expression for genes previously identified to tend to a cyclical pattern.</li>
 <li>Next, we fit trendfilter on all genes after transforming the data to follow standard normal distribution, permutation-based p-values for PVE are used to select <a href="npreg-trendfilter-quantile.html">101 significant cyclical genes</a>.</li>
 </ul></li>
+<li>Additional analysis done to identify top cyclical genes in each individual. The top 5 are not shared across the six individuals. <a href="trendfilter-individual.html">Results</a></li>
 </ol>
 <hr />
 </div>
