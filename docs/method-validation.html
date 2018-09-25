@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Joyce Hsiao" />
+
+
+<title>Evaluate peco in heldout samples</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Evaluate peco in heldout samples</h1>
+<h4 class="author"><em>Joyce Hsiao</em></h4>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#import-gene-info">Import gene info</a></li>
+<li><a href="#validation-sample-analysis">Validation sample analysis</a></li>
+<li><a href="#validation-sample-results">Validation sample results</a></li>
+<li><a href="#public-datasets-leng-et-al.-2015">Public datasets: Leng et al. 2015</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul>
+</div>
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+<!-- Update knitr chunk options -->
+<!-- Insert the date the file was last updated -->
+<p><strong>Last updated:</strong> 2018-09-25</p>
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+<p><strong>Code version:</strong> 5e0b6fe</p>
+<hr />
+<div id="import-gene-info" class="section level2">
+<h2>Import gene info</h2>
+<pre class="r"><code>double_topgenes_mixed &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds&quot;)
+
+eset &lt;- readRDS(&quot;../data/eset-final.rds&quot;)
+library(Biobase)
+fdata &lt;- fData(eset)
+genes_selected &lt;- fdata[rownames(fdata) %in% double_topgenes_mixed[[1]],]</code></pre>
+<hr />
+</div>
+<div id="validation-sample-analysis" class="section level2">
+<h2>Validation sample analysis</h2>
+<pre class="r"><code>dir &lt;-&quot;/project2/gilad/joycehsiao/fucci-seq&quot;
+source(file.path(dir,&quot;code/working/run_methods.R&quot;))
+
+
+# Mixed individuals --------------------------------------------------------
+data_training &lt;- readRDS(file=file.path(dir, &quot;data/results/data_training.rds&quot;))
+data_withheld &lt;-readRDS(file=file.path(dir, &quot;data/results/data_withheld.rds&quot;))
+
+# make prediction parameters
+Y_train_topX &lt;- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_selected), ]
+training_topX &lt;- cycle.npreg.insample(Y = Y_train_topX,
+                                        theta = data_training$theta.nonvalid,
+                                        polyorder=2,
+                                        ncores=15,
+                                        method.trend=&quot;trendfilter&quot;)
+
+seurat.genes &lt;- readLines(
+  con = file.path(dir,
+  &quot;data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;))
+seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+results_eval_topX &lt;- run_methods(Y_test=data_withheld$log2cpm.valid,
+                 Y_test_normed=data_withheld$log2cpm.quant.valid,
+                 theta_test=data_withheld$theta.valid,
+                 training_model=training_topX,
+                 seurat.genes=seurat.genes,
+                 pdata_test=data_withheld$pdata.valid,
+                 fdata=data_withheld$fdata,
+                 ncores=12, maxiter=30)
+
+saveRDS(results_eval_topX,
+        file=file.path(dir,
+         &quot;output/method-validation.Rmd/valid_top5_mixed.rds&quot;))
+
+
+
+
+# each individual --------------------------------------------------------
+inds &lt;- c(&quot;NA19098&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19101&quot;, &quot;NA18855&quot;, &quot;NA19160&quot;)
+
+for (i in 1:length(inds)) {
+  data_training &lt;- readRDS(paste0(&quot;../data/results/ind_&quot;, 
+                                  inds[i], &quot;_data_training.rds&quot;))
+  data_withheld &lt;- readRDS(paste0(&quot;../data/results/ind_&quot;, 
+                                  inds[i], &quot;_data_withheld.rds&quot;))
+  
+  Y_train_topX &lt;- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_selected), ]
+  training_topX &lt;- cycle.npreg.insample(Y = Y_train_topX,
+                                          theta = data_training$theta.nonvalid,
+                                          polyorder=2,
+                                          ncores=15,
+                                          method.trend=&quot;trendfilter&quot;)
+
+  seurat.genes &lt;- readLines(
+  con = file.path(dir,
+  &quot;data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;))
+  seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
+                       g2m.genes=seurat.genes[44:97])
+  
+  results_eval_topX &lt;- run_methods(Y_test=data_withheld$log2cpm.valid,
+                 Y_test_normed=data_withheld$log2cpm.quant.valid,
+                 theta_test=data_withheld$theta.valid,
+                 training_model=training_topX,
+                 seurat.genes=seurat.genes,
+                 pdata_test=data_withheld$pdata.valid,
+                 fdata=data_withheld$fdata,
+                 ncores=12, maxiter=30)
+
+  saveRDS(results_eval_topX,
+          file=paste0(&quot;../output/method-validation.Rmd/valid_top5_&quot;,inds[i],&quot;.rds&quot;))
+}
+
+
+# summarize output --------------------------------------------------------
+
+results_mixed &lt;- readRDS(&quot;../output/method-validation.Rmd/valid_top5_mixed.rds&quot;)
+n &lt;- length(results_mixed$fit.supervised$diff_time)
+foo &lt;- rbind(data.frame(methods=&quot;peco&quot;,
+           diff_mean=mean(results_mixed$fit.supervised$diff_time/2/pi),
+           diff_se=sd(results_mixed$fit.supervised$diff_time/2/pi)/sqrt(n),
+           ind=&quot;mixed&quot;),
+           data.frame(methods=&quot;seurat&quot;,
+           diff_mean=mean(results_mixed$fit.seurat$diff_time/2/pi),
+           diff_se=sd(results_mixed$fit.seurat$diff_time/2/pi)/sqrt(n),
+           ind=&quot;mixed&quot;))
+
+for (i in 1:length(inds)) {
+  res &lt;- readRDS(paste0(&quot;../output/method-validation.Rmd/valid_top5_&quot;, inds[i], &quot;.rds&quot;))
+  n &lt;- length(res$fit.supervised$diff_time)
+  foo_tmp &lt;- rbind(data.frame(methods=&quot;peco&quot;,
+           diff_mean=mean(res$fit.supervised$diff_time/2/pi),
+           diff_se=sd(res$fit.supervised$diff_time/2/pi)/sqrt(n),
+           ind=inds[i]),
+           data.frame(methods=&quot;seurat&quot;,
+           diff_mean=mean(res$fit.seurat$diff_time/2/pi),
+           diff_se=sd(res$fit.seurat$diff_time/2/pi)/sqrt(n),
+           ind=inds[i]))
+  foo &lt;- rbind(foo,foo_tmp)
+}
+
+saveRDS(foo,
+        file=&quot;../output/method-validation.Rmd/valid_top5_summary.rds&quot;)</code></pre>
+<hr />
+</div>
+<div id="validation-sample-results" class="section level2">
+<h2>Validation sample results</h2>
+<pre class="r"><code>results_all &lt;- readRDS(&quot;../output/method-validation.Rmd/valid_top5_summary.rds&quot;)
+results_all$ind &lt;- as.character(results_all$ind)
+results_all$ind &lt;- factor(results_all$ind,
+                          levels=c(&quot;mixed&quot;, &quot;NA19098&quot;, &quot;NA18855&quot;, 
+                 &quot;NA19101&quot;, &quot;NA18511&quot;, &quot;NA18870&quot;, &quot;NA19160&quot;),
+                 labels=c(&quot;Mixed&quot;, LETTERS[1:6]))
+library(ggplot2)
+ggplot(results_all, 
+       aes(x=ind, y=diff_mean, group=methods)) +
+  geom_errorbar(results_all,
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se,
+                            col=methods)) +
+  geom_point(aes(color=methods)) +
+  ylab(&quot;Prediction error (% arc length)&quot;) + xlab(&quot;Validation datasets&quot;) +
+  ylim(0,.25) </code></pre>
+<p><img src="figure/method-validation.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>results_mixed &lt;- readRDS(file=&quot;../output/method-validation.Rmd/valid_top5_mixed.rds&quot;)
+
+plot(results_mixed$fit.supervised$ref_time,
+     results_mixed$fit.supervised$diff_time)</code></pre>
+<p><img src="figure/method-validation.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>par(mfrow=c(1,2))
+hist(results_mixed$fit.supervised$diff_time/2/pi, nclass=20,
+     xlab=&quot;Prediction error (% arc length)&quot;, main= &quot;peco&quot;)
+abline(v=.25, col=&quot;blue&quot;)
+hist(results_mixed$fit.seurat$diff_time/2/pi, nclass=20,
+     xlab=&quot;Prediction error (% arc length)&quot;, main= &quot;seurat&quot;)
+abline(v=.25, col=&quot;blue&quot;)</code></pre>
+<p><img src="figure/method-validation.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>labs &lt;- fdata$name[match(rownames(results_mixed$fit.supervised$Y),
+                         rownames(fdata))]
+par(mfrow=c(2,3))
+for (i in 1:5) {
+plot(x=(results_mixed$fit.supervised$cell_times_est-2)%%(2*pi),
+     results_mixed$fit.supervised$Y[i,], pch=16, col=&quot;gray50&quot;,
+     ylab=&quot;log2CPM expression normalized&quot;, xlab=&quot;Estimated cell time&quot;,
+     main = labs[i],
+     ylim=c(-3,3))
+abline(h=0, col=&quot;black&quot;, lty=2)
+points(x=(results_mixed$fit.supervised$cell_times_reordered-2)%%(2*pi),
+       y=results_mixed$fit.supervised$mu_reordered[i,], col = &quot;brown&quot;, pch=16)  
+}
+hist((results_mixed$fit.supervised$cell_times_est-2)%%(2*pi), nclass=20)</code></pre>
+<p><img src="figure/method-validation.Rmd/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" /></p>
+<hr />
+</div>
+<div id="public-datasets-leng-et-al.-2015" class="section level2">
+<h2>Public datasets: Leng et al. 2015</h2>
+<ul>
+<li><p>Get predictive profile from our data. Mixed of 6 humam iPSC lines. A total of 755 cells.</p></li>
+<li><p>Use 5 genes.</p></li>
+</ul>
+<pre class="r"><code>data_training &lt;- readRDS(&quot;../data/results/data_training.rds&quot;)
+
+dir &lt;-&quot;/project2/gilad/joycehsiao/fucci-seq&quot;
+source(file.path(dir,&quot;code/working/run_methods.R&quot;))
+
+double_topgenes_mixed &lt;- readRDS(&quot;../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds&quot;)
+
+eset &lt;- readRDS(&quot;../data/eset-final.rds&quot;)
+fdata &lt;- fData(eset)
+genes_selected &lt;- fdata[rownames(fdata) %in% double_topgenes_mixed[[11]],]
+
+# Leng data
+log2cpm_quant &lt;- readRDS(&quot;../data/rnaseq-previous-studies/leng/log2cpm_quant.rds&quot;)
+pdata &lt;- readRDS(&quot;../data/rnaseq-previous-studies/leng/pdata_filtered.rds&quot;)
+genes_included &lt;- genes_selected[which(genes_selected$name %in% rownames(log2cpm_quant)),]
+
+Y_train_topX &lt;- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_included), ]
+training_topX &lt;- cycle.npreg.insample(Y = Y_train_topX,
+                                      theta = data_training$theta.nonvalid,
+                                      polyorder=2,
+                                      ncores=10,
+                                      method.trend=&quot;trendfilter&quot;)
+
+
+# Predicting -------------------------------------------------------------------
+
+# Leng data
+log2cpm_quant &lt;- readRDS(&quot;../data/rnaseq-previous-studies/leng/log2cpm_quant.rds&quot;)
+pdata &lt;- readRDS(&quot;../data/rnaseq-previous-studies/leng/pdata_filtered.rds&quot;)
+
+#genes_selected[which(genes_selected$name %in% rownames(log2cpm_quant)),]
+test_data &lt;- log2cpm_quant[which(rownames(log2cpm_quant) %in% genes_included$name),]
+
+test_data &lt;- test_data[match(genes_included$name, rownames(test_data)),]
+
+cbind(rownames(training_topX$Y), rownames(test_data), rownames(genes_included), genes_included$name)
+
+# head(cbind(rownames(test_data), genes_included$name))
+# rownames(training_topX$Y)
+
+# names(sigma_est)
+# names(funs_est)
+# rownames(test_data)
+
+
+source(&quot;../peco/R/cycle.npreg.R&quot;)
+source(&quot;../peco/R/run_seurat.R&quot;)
+fit.supervised &lt;- cycle.npreg.outsample(
+  Y_test=test_data,
+  sigma_est=training_topX$sigma_est,
+  funs_est=training_topX$funs_est,
+#  theta_prior=training_topX$theta,
+  method.grid = &quot;uniform&quot;,
+  method.trend=&quot;trendfilter&quot;,
+  polyorder=2,
+  ncores=15)
+
+seurat.genes &lt;- readLines(
+  con = file.path(dir,
+  &quot;data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt&quot;))
+seurat.genes &lt;- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+fit.seurat &lt;- run_seurat(Y=log2cpm_quant,
+                         s.genes=seurat.genes$s.genes,
+                         g2m.genes=seurat.genes$g2m.genes,
+                         n.bin=25,
+                         seed.use=1, random.seed=1)
+  
+out &lt;- list(training_model=training_topX,
+            genes_selected=genes_selected,
+            fit.supervised=fit.supervised,
+            fit.seurat=fit.seurat)
+
+
+
+saveRDS(out, &quot;../output/method-validation.Rmd/leng_res.rds&quot;)
+
+#table(pdata$cell_state, fit.seurat$assignments)
+shift &lt;- (fit.supervised$cell_times_est - pi/2)%%(2*pi)
+
+plot(shift,
+     fit.supervised$Y[1,], col=pdata$cell_state)
+plot(fit.supervised$cell_times_est,
+     fit.supervised$Y[2,], col=pdata$cell_state)
+
+hist(fit.supervised$cell_times_est, nclass=20)</code></pre>
+<hr />
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Scientific Linux 7.4 (Nitrogen)
+
+Matrix products: default
+BLAS/LAPACK: /software/openblas-0.2.19-el7-x86_64/lib/libopenblas_haswellp-r0.2.19.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+[1] ggplot2_3.0.0       Biobase_2.38.0      BiocGenerics_0.24.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.18     bindr_0.1        knitr_1.20       magrittr_1.5    
+ [5] munsell_0.5.0    colorspace_1.3-2 R6_2.2.2         rlang_0.2.1     
+ [9] dplyr_0.7.4      stringr_1.3.1    plyr_1.8.4       tools_3.4.3     
+[13] grid_3.4.3       gtable_0.2.0     withr_2.1.2      git2r_0.21.0    
+[17] htmltools_0.3.6  assertthat_0.2.0 yaml_2.2.0       lazyeval_0.2.1  
+[21] rprojroot_1.3-2  digest_0.6.15    tibble_1.4.2     bindrcpp_0.2    
+[25] glue_1.3.0       evaluate_0.10.1  rmarkdown_1.10   labeling_0.3    
+[29] stringi_1.2.4    compiler_3.4.3   pillar_1.1.0     scales_1.0.0    
+[33] backports_1.1.2  pkgconfig_2.0.1 </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
