@@ -1,0 +1,334 @@
+---
+title: "Evaluate peco in heldout samples"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Import gene info
+
+```{r}
+double_topgenes_mixed <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds")
+
+eset <- readRDS("../data/eset-final.rds")
+library(Biobase)
+fdata <- fData(eset)
+genes_selected <- fdata[rownames(fdata) %in% double_topgenes_mixed[[1]],]
+```
+
+---
+
+## Validation sample analysis
+
+
+```{r, eval=F}
+dir <-"/project2/gilad/joycehsiao/fucci-seq"
+source(file.path(dir,"code/working/run_methods.R"))
+
+
+# Mixed individuals --------------------------------------------------------
+data_training <- readRDS(file=file.path(dir, "data/results/data_training.rds"))
+data_withheld <-readRDS(file=file.path(dir, "data/results/data_withheld.rds"))
+
+# make prediction parameters
+Y_train_topX <- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_selected), ]
+training_topX <- cycle.npreg.insample(Y = Y_train_topX,
+                                        theta = data_training$theta.nonvalid,
+                                        polyorder=2,
+                                        ncores=15,
+                                        method.trend="trendfilter")
+
+seurat.genes <- readLines(
+  con = file.path(dir,
+  "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
+                 Y_test_normed=data_withheld$log2cpm.quant.valid,
+                 theta_test=data_withheld$theta.valid,
+                 training_model=training_topX,
+                 seurat.genes=seurat.genes,
+                 pdata_test=data_withheld$pdata.valid,
+                 fdata=data_withheld$fdata,
+                 ncores=12, maxiter=30)
+
+saveRDS(results_eval_topX,
+        file=file.path(dir,
+         "output/method-validation.Rmd/valid_top5_mixed.rds"))
+
+
+
+
+# each individual --------------------------------------------------------
+inds <- c("NA19098", "NA18511", "NA18870", "NA19101", "NA18855", "NA19160")
+
+for (i in 1:length(inds)) {
+  data_training <- readRDS(paste0("../data/results/ind_", 
+                                  inds[i], "_data_training.rds"))
+  data_withheld <- readRDS(paste0("../data/results/ind_", 
+                                  inds[i], "_data_withheld.rds"))
+  
+  Y_train_topX <- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_selected), ]
+  training_topX <- cycle.npreg.insample(Y = Y_train_topX,
+                                          theta = data_training$theta.nonvalid,
+                                          polyorder=2,
+                                          ncores=15,
+                                          method.trend="trendfilter")
+
+  seurat.genes <- readLines(
+  con = file.path(dir,
+  "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
+  seurat.genes <- list(s.genes=seurat.genes[1:43],
+                       g2m.genes=seurat.genes[44:97])
+  
+  results_eval_topX <- run_methods(Y_test=data_withheld$log2cpm.valid,
+                 Y_test_normed=data_withheld$log2cpm.quant.valid,
+                 theta_test=data_withheld$theta.valid,
+                 training_model=training_topX,
+                 seurat.genes=seurat.genes,
+                 pdata_test=data_withheld$pdata.valid,
+                 fdata=data_withheld$fdata,
+                 ncores=12, maxiter=30)
+
+  saveRDS(results_eval_topX,
+          file=paste0("../output/method-validation.Rmd/valid_top5_",inds[i],".rds"))
+}
+
+
+# summarize output --------------------------------------------------------
+
+results_mixed <- readRDS("../output/method-validation.Rmd/valid_top5_mixed.rds")
+n <- length(results_mixed$fit.supervised$diff_time)
+foo <- rbind(data.frame(methods="peco",
+           diff_mean=mean(results_mixed$fit.supervised$diff_time/2/pi),
+           diff_se=sd(results_mixed$fit.supervised$diff_time/2/pi)/sqrt(n),
+           ind="mixed"),
+           data.frame(methods="seurat",
+           diff_mean=mean(results_mixed$fit.seurat$diff_time/2/pi),
+           diff_se=sd(results_mixed$fit.seurat$diff_time/2/pi)/sqrt(n),
+           ind="mixed"))
+
+for (i in 1:length(inds)) {
+  res <- readRDS(paste0("../output/method-validation.Rmd/valid_top5_", inds[i], ".rds"))
+  n <- length(res$fit.supervised$diff_time)
+  foo_tmp <- rbind(data.frame(methods="peco",
+           diff_mean=mean(res$fit.supervised$diff_time/2/pi),
+           diff_se=sd(res$fit.supervised$diff_time/2/pi)/sqrt(n),
+           ind=inds[i]),
+           data.frame(methods="seurat",
+           diff_mean=mean(res$fit.seurat$diff_time/2/pi),
+           diff_se=sd(res$fit.seurat$diff_time/2/pi)/sqrt(n),
+           ind=inds[i]))
+  foo <- rbind(foo,foo_tmp)
+}
+
+saveRDS(foo,
+        file="../output/method-validation.Rmd/valid_top5_summary.rds")
+```
+
+
+---
+
+## Validation sample results
+
+
+```{r}
+results_all <- readRDS("../output/method-validation.Rmd/valid_top5_summary.rds")
+results_all$ind <- as.character(results_all$ind)
+results_all$ind <- factor(results_all$ind,
+                          levels=c("mixed", "NA19098", "NA18855", 
+                 "NA19101", "NA18511", "NA18870", "NA19160"),
+                 labels=c("Mixed", LETTERS[1:6]))
+library(ggplot2)
+ggplot(results_all, 
+       aes(x=ind, y=diff_mean, group=methods)) +
+  geom_errorbar(results_all,
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se,
+                            col=methods)) +
+  geom_point(aes(color=methods)) +
+  ylab("Prediction error (% arc length)") + xlab("Validation datasets") +
+  ylim(0,.25) 
+```
+
+
+```{r}
+results_mixed <- readRDS(file="../output/method-validation.Rmd/valid_top5_mixed.rds")
+
+plot(results_mixed$fit.supervised$ref_time,
+     results_mixed$fit.supervised$diff_time)
+
+par(mfrow=c(1,2))
+hist(results_mixed$fit.supervised$diff_time/2/pi, nclass=20,
+     xlab="Prediction error (% arc length)", main= "peco")
+abline(v=.25, col="blue")
+hist(results_mixed$fit.seurat$diff_time/2/pi, nclass=20,
+     xlab="Prediction error (% arc length)", main= "seurat")
+abline(v=.25, col="blue")
+
+
+labs <- fdata$name[match(rownames(results_mixed$fit.supervised$Y),
+                         rownames(fdata))]
+par(mfrow=c(2,3))
+for (i in 1:5) {
+plot(x=(results_mixed$fit.supervised$cell_times_est-2)%%(2*pi),
+     results_mixed$fit.supervised$Y[i,], pch=16, col="gray50",
+     ylab="log2CPM expression normalized", xlab="Estimated cell time",
+     main = labs[i],
+     ylim=c(-3,3))
+abline(h=0, col="black", lty=2)
+points(x=(results_mixed$fit.supervised$cell_times_reordered-2)%%(2*pi),
+       y=results_mixed$fit.supervised$mu_reordered[i,], col = "brown", pch=16)  
+}
+hist((results_mixed$fit.supervised$cell_times_est-2)%%(2*pi), nclass=20)
+
+```
+
+
+
+---
+
+
+## Public datasets: Leng et al. 2015
+
+* Get predictive profile from our data. Mixed of 6 humam iPSC lines. A total of 755 cells.
+
+* Use 5 genes.
+
+
+
+
+
+```{r, eval=F}
+data_training <- readRDS("../data/results/data_training.rds")
+
+dir <-"/project2/gilad/joycehsiao/fucci-seq"
+source(file.path(dir,"code/working/run_methods.R"))
+
+double_topgenes_mixed <- readRDS("../output/method-train-summary-output.Rmd/double_topgenes_mixed.rds")
+
+eset <- readRDS("../data/eset-final.rds")
+fdata <- fData(eset)
+genes_selected <- fdata[rownames(fdata) %in% double_topgenes_mixed[[11]],]
+
+# Leng data
+log2cpm_quant <- readRDS("../data/rnaseq-previous-studies/leng/log2cpm_quant.rds")
+pdata <- readRDS("../data/rnaseq-previous-studies/leng/pdata_filtered.rds")
+genes_included <- genes_selected[which(genes_selected$name %in% rownames(log2cpm_quant)),]
+
+Y_train_topX <- data_training$log2cpm.quant.nonvalid[
+  rownames(data_training$log2cpm.quant.nonvalid) %in% rownames(genes_included), ]
+training_topX <- cycle.npreg.insample(Y = Y_train_topX,
+                                      theta = data_training$theta.nonvalid,
+                                      polyorder=2,
+                                      ncores=10,
+                                      method.trend="trendfilter")
+
+
+# Predicting -------------------------------------------------------------------
+
+# Leng data
+log2cpm_quant <- readRDS("../data/rnaseq-previous-studies/leng/log2cpm_quant.rds")
+pdata <- readRDS("../data/rnaseq-previous-studies/leng/pdata_filtered.rds")
+
+#genes_selected[which(genes_selected$name %in% rownames(log2cpm_quant)),]
+test_data <- log2cpm_quant[which(rownames(log2cpm_quant) %in% genes_included$name),]
+
+test_data <- test_data[match(genes_included$name, rownames(test_data)),]
+
+cbind(rownames(training_topX$Y), rownames(test_data), rownames(genes_included), genes_included$name)
+
+# head(cbind(rownames(test_data), genes_included$name))
+# rownames(training_topX$Y)
+
+# names(sigma_est)
+# names(funs_est)
+# rownames(test_data)
+
+
+source("../peco/R/cycle.npreg.R")
+source("../peco/R/run_seurat.R")
+fit.supervised <- cycle.npreg.outsample(
+  Y_test=test_data,
+  sigma_est=training_topX$sigma_est,
+  funs_est=training_topX$funs_est,
+#  theta_prior=training_topX$theta,
+  method.grid = "uniform",
+  method.trend="trendfilter",
+  polyorder=2,
+  ncores=15)
+
+seurat.genes <- readLines(
+  con = file.path(dir,
+  "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
+seurat.genes <- list(s.genes=seurat.genes[1:43],
+                     g2m.genes=seurat.genes[44:97])
+
+fit.seurat <- run_seurat(Y=log2cpm_quant,
+                         s.genes=seurat.genes$s.genes,
+                         g2m.genes=seurat.genes$g2m.genes,
+                         n.bin=25,
+                         seed.use=1, random.seed=1)
+  
+out <- list(training_model=training_topX,
+            genes_selected=genes_selected,
+            fit.supervised=fit.supervised,
+            fit.seurat=fit.seurat)
+
+
+
+saveRDS(out, "../output/method-validation.Rmd/leng_res.rds")
+
+#table(pdata$cell_state, fit.seurat$assignments)
+shift <- (fit.supervised$cell_times_est - pi/2)%%(2*pi)
+
+plot(shift,
+     fit.supervised$Y[1,], col=pdata$cell_state)
+plot(fit.supervised$cell_times_est,
+     fit.supervised$Y[2,], col=pdata$cell_state)
+
+hist(fit.supervised$cell_times_est, nclass=20)
+```
+
+
+
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
