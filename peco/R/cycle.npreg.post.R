@@ -50,88 +50,88 @@ cycle.npreg.mstep <- function(Y, theta, method.trend=c("trendfilter",
                                                        "npcirc.nw",
                                                        "npcirc.ll",
                                                        "loess", "bspline"),
-                              polyorder=2,
+                              polyorder=3,
                               ncores=12, ...) {
-#      library(NPCirc)
-      library(genlasso)
-      library(assertthat)
+  #      library(NPCirc)
+  library(genlasso)
+  library(assertthat)
 
-      G <- nrow(Y)
-      N <- ncol(Y)
+  G <- nrow(Y)
+  N <- ncol(Y)
 
-      if (!assert_that(all.equal(names(theta), colnames(Y)))) {
-        Y_ordered <- Y[,match(names(theta), colnames(Y))]
-        ord <- order(theta)
-        theta_ordered <- theta[ord]
-        Y_ordered <- Y_ordered[,ord]
-      } else {
-        ord <- order(theta)
-        theta_ordered <- theta[ord]
-        Y_ordered <- Y[,ord]
-      }
+  if (!assert_that(all.equal(names(theta), colnames(Y)))) {
+    Y_ordered <- Y[,match(names(theta), colnames(Y))]
+    ord <- order(theta)
+    theta_ordered <- theta[ord]
+    Y_ordered <- Y_ordered[,ord]
+  } else {
+    ord <- order(theta)
+    theta_ordered <- theta[ord]
+    Y_ordered <- Y[,ord]
+  }
 
-      # for each gene, estimate the cyclical pattern of gene expression
-      # conditioned on the given cell times
-      fit <- mclapply(1:G, function(g) {
-        # print(g)
-        y_g <- Y_ordered[g,]
+  # for each gene, estimate the cyclical pattern of gene expression
+  # conditioned on the given cell times
+  fit <- mclapply(1:G, function(g) {
+    #    print(g)
+    y_g <- Y_ordered[g,]
 
-        if (method.trend=="npcirc.nw") {
-          fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "NW",
-                                     t=theta_ordered)
-          fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
-          mu_g <- fun_g(theta_ordered)
-        }
-        if (method.trend=="npcirc.ll") {
-          fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "LL",
-                                     t=theta_ordered)
-          fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
-          mu_g <- fun_g(theta_ordered)
-        }
-        if (method.trend=="trendfilter") {
-          fit_g <- fit.trendfilter.generic(yy=y_g, polyorder = polyorder)
-          fun_g <- approxfun(x=as.numeric(theta_ordered),
-                             y=as.numeric(fit_g$trend.yy), rule=2)
-          mu_g <- fit_g$trend.yy
-        }
-        if (method.trend=="bspline") {
-          fit_g <- fit.bspline(yy=y_g, time = theta_ordered)
-          fun_g <- approxfun(x=as.numeric(theta_ordered),
-                             y=as.numeric(fit_g$pred.yy), rule=2)
-          mu_g <- fit_g$pred.yy
-        }
-
-        if (method.trend=="loess") {
-          fit_g <- fit.loess(yy=y_g, time = theta_ordered)
-          fun_g <- approxfun(x=as.numeric(theta_ordered),
-                             y=as.numeric(fit_g$pred.yy), rule=2)
-          mu_g <- fit_g$pred.yy
-        }
-
-        sigma_g <- sqrt(sum((y_g-mu_g)^2)/N)
-
-        list(y_g =y_g,
-             mu_g=mu_g,
-             sigma_g=sigma_g,
-             fun_g=fun_g)
-      }, mc.cores = ncores)
-
-      sigma_est <- sapply(fit, "[[", "sigma_g")
-      names(sigma_est) <- rownames(Y_ordered)
-
-      mu_est <- do.call(rbind, lapply(fit, "[[", "mu_g"))
-      colnames(mu_est) <- colnames(Y_ordered)
-      rownames(mu_est) <- rownames(Y_ordered)
-
-      funs <- sapply(fit, "[[", "fun_g")
-      names(funs) <- rownames(Y_ordered)
-
-      return(list(Y = Y_ordered,
-                  theta = theta_ordered,
-                  mu_est = mu_est,
-                  sigma_est = sigma_est,
-                  funs = funs))
+    if (method.trend=="npcirc.nw") {
+      fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "NW",
+                                 t=theta_ordered)
+      fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
+      mu_g <- fun_g(theta_ordered)
     }
+    if (method.trend=="npcirc.ll") {
+      fit_g <- kern.reg.circ.lin(theta_ordered, y_g, method = "LL",
+                                 t=theta_ordered)
+      fun_g <- approxfun(x=as.numeric(fit_g$x), y=fit_g$y, rule=2)
+      mu_g <- fun_g(theta_ordered)
+    }
+    if (method.trend=="trendfilter") {
+      fit_g <- fit.trendfilter.generic(yy=y_g, polyorder = polyorder)
+      fun_g <- approxfun(x=as.numeric(theta_ordered),
+                         y=as.numeric(fit_g$trend.yy), rule=2)
+      mu_g <- fit_g$trend.yy
+    }
+    if (method.trend=="bspline") {
+      fit_g <- fit.bspline(yy=y_g, time = theta_ordered)
+      fun_g <- approxfun(x=as.numeric(theta_ordered),
+                         y=as.numeric(fit_g$pred.yy), rule=2)
+      mu_g <- fit_g$pred.yy
+    }
+
+    if (method.trend=="loess") {
+      fit_g <- fit.loess(yy=y_g, time = theta_ordered)
+      fun_g <- approxfun(x=as.numeric(theta_ordered),
+                         y=as.numeric(fit_g$pred.yy), rule=2)
+      mu_g <- fit_g$pred.yy
+    }
+
+    sigma_g <- sqrt(sum((y_g-mu_g)^2)/N)
+
+    list(y_g =y_g,
+         mu_g=mu_g,
+         sigma_g=sigma_g,
+         fun_g=fun_g)
+  }, mc.cores = ncores)
+
+  sigma_est <- sapply(fit, "[[", "sigma_g")
+  names(sigma_est) <- rownames(Y_ordered)
+
+  mu_est <- do.call(rbind, lapply(fit, "[[", "mu_g"))
+  colnames(mu_est) <- colnames(Y_ordered)
+  rownames(mu_est) <- rownames(Y_ordered)
+
+  funs <- sapply(fit, "[[", "fun_g")
+  names(funs) <- rownames(Y_ordered)
+
+  return(list(Y = Y_ordered,
+              theta = theta_ordered,
+              mu_est = mu_est,
+              sigma_est = sigma_est,
+              funs = funs))
+}
 
 
 
@@ -163,6 +163,8 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
     prob_per_cell_by_celltimes <- matrix(0, N, length(theta_choose))
     colnames(loglik_per_cell_by_celltimes) <- theta_choose
     colnames(prob_per_cell_by_celltimes) <- theta_choose
+    rownames(loglik_per_cell_by_celltimes) <- colnames(Y)
+    rownames(prob_per_cell_by_celltimes) <- colnames(Y)
   }
   if (method.type=="supervised") {
     theta_choose <- initialize_grids(Y, grids=grids, method.grid="uniform")
@@ -170,6 +172,8 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
     prob_per_cell_by_celltimes <- matrix(0, N, grids)
     colnames(loglik_per_cell_by_celltimes) <- theta_choose
     colnames(prob_per_cell_by_celltimes) <- theta_choose
+    rownames(loglik_per_cell_by_celltimes) <- colnames(Y)
+    rownames(prob_per_cell_by_celltimes) <- colnames(Y)
   }
 
   for (n in 1:N) {
@@ -214,14 +218,78 @@ cycle.npreg.loglik <- function(Y, sigma_est, funs_est,
 
   return(list(loglik_est=loglik_est,
               cell_times_est=cell_times_est,
-              #loglik_per_cell_by_celltimes=loglik_per_cell_by_celltimes,
+              loglik_per_cell_by_celltimes=loglik_per_cell_by_celltimes,
               prob_per_cell_by_celltimes=prob_per_cell_by_celltimes))
 }
 
 
 
 
+#' @title log-likelihood of nonparametric smoothing
+#'
+#' @param Y gene by sample expression matrix
+#' @param mu_est gene by sample matrix of expected mean
+#' @param sigma_est vector of standard errors for each gene
+#'
+#' @export
+#' @title log-likelihood of nonparametric smoothing
+#'
+#' @param Y gene by sample expression matrix
+#' @param mu_est gene by sample matrix of expected mean
+#' @param sigma_est vector of standard errors for each gene
+#'
+#' @export
+cycle.npreg.loglik.post <- function(loglik,
+                                    pi_bins, ...) {
 
+
+  #theta_choose <- initialize_grids(Y, grids=grids, method.grid="uniform")
+  post_loglik_per_cell_by_celltime <- matrix(0, nrow=nrow(loglik), ncol=ncol(loglik))
+  post_prob_per_cell_by_celltime <- matrix(0, nrow=nrow(loglik), ncol=ncol(loglik))
+  theta_choose <- as.numeric(colnames(loglik))
+  cell_times_est <- matrix(0,nrow=nrow(loglik),
+                           dimnames=list(rownames(loglik)))
+  names(cell_times_est) <- rownames(loglik)
+
+  post_loglik_est <- 0
+  for (n in 1:ncol(loglik)) {
+    post_loglik <- loglik[n,] + log(pi_bins)
+    post_loglik_per_cell_by_celltime[n,] <- post_loglik
+
+    post_prob <- exp(post_loglik)/sum(exp(post_loglik))
+    which_grid <- which.max(post_prob)
+    cell_times_est[n] <- theta_choose[which_grid]
+    post_loglik_est <- post_loglik_est + sum(post_loglik)
+  }
+
+  return(list(loglik_est=post_loglik_est,
+              cell_times_est=cell_times_est,
+              loglik_per_cell_by_celltimes=post_loglik_per_cell_by_celltime,
+              prob_per_cell_by_celltimes=post_prob_per_cell_by_celltime))
+}
+
+
+
+
+#' @title Prior probabilty distribution for cell times
+#'
+#' @export
+cycle.npreg.prior <- function(theta, grids=100, plot.it=F,...) {
+
+  breaks <- seq(0,2*pi, by=2*pi/grids)
+  bins <- cut(theta, breaks=breaks, include.lowest = T)
+  n_eachbin <- table(bins)
+  pi_bins <- (n_eachbin+1)/(length(theta)+1)
+  pi_bins <- (pi_bins)/sum(pi_bins)
+
+  if (plot.it==TRUE) {
+    par(mfrow=c(1,2))
+    hist(theta, nclass=100, main = "Theta observed",
+         xlab="theta")
+    plot(pi_bins, xlab="Theta bins", ylab="Prior probability")
+  }
+  return(pi_bins)
+}
 
 
 
@@ -268,6 +336,7 @@ cycle.npreg.insample <- function(Y, theta,
 cycle.npreg.outsample <- function(Y_test,
                                   sigma_est,
                                   funs_est,
+                                  theta_prior=NULL,
                                   method.trend=c("npcirc.nw", "npcirc.ll", "trendfilter",
                                                  "loess", "bspline"),
                                   polyorder=3,
@@ -282,11 +351,16 @@ cycle.npreg.outsample <- function(Y_test,
                                        method.type="supervised",
                                        method.grid=method.grid,
                                        funs_est=funs_est)
+
+  # pi_bins <- cycle.npreg.prior(theta_prior, grids=100)
+  # initial_postlik <- cycle.npreg.loglik.post(loglik=initial_loglik$loglik_per_cell_by_celltimes,
+  #                                            pi_bins = pi_bins)
+
   updated_estimates <- cycle.npreg.mstep(Y = Y_test,
-                                     theta = initial_loglik$cell_times_est,
-                                     method.trend = method.trend,
-                                     polyorder=polyorder,
-                                     ncores = ncores)
+                                         theta = initial_loglik$cell_times_est,
+                                         method.trend = method.trend,
+                                         polyorder=polyorder,
+                                         ncores = ncores)
 
   out <- list(Y=Y_test,
               cell_times_est=initial_loglik$cell_times_est,
@@ -300,6 +374,7 @@ cycle.npreg.outsample <- function(Y_test,
               prob_per_cell_by_celltimes=initial_loglik$prob_per_cell_by_celltimes)
   return(out)
 }
+
 
 
 
