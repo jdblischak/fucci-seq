@@ -1,222 +1,443 @@
-df <- readRDS(file="data/eset-final.rds")
-pdata <- pData(df)
-fdata <- fData(df)
+# RNA-seq data quality, PCA, etc ---------------------------------------------------------
 
-# select endogeneous genes
-counts <- exprs(df)[grep("ENSG", rownames(df)), ]
+eset <- readRDS("data/eset-final.rds")
+
+counts <- exprs(eset)
+counts <- counts[grep("ENSG", rownames(counts)), ]
+pdata <- pData(eset)
 
 log2cpm.all <- t(log2(1+(10^6)*(t(counts)/pdata$molecules)))
 
-macosko <- readRDS("data/cellcycle-genes-previous-studies/rds/macosko-2015.rds")
-
-theta <- 2*pi - pdata$theta
-log2cpm.all <- log2cpm.all[,order(theta)]
-pdata <- pdata[order(theta),]
-theta <- theta[order(theta)]
-
-log2cpm.quant <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
-
-
-red_high <- rownames(pdata)[which.max(pdata$rfp.median.log10sum.adjust)]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        rfp.median.log10sum.adjust)), theta)[which(rownames(pdata) %in% red_high),]
-
-red_low <- rownames(pdata)[which.min(pdata$rfp.median.log10sum.adjust)]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        rfp.median.log10sum.adjust)), theta)[which(rownames(pdata) %in% red_low),]
-
-red_middle <- rownames(pdata)[pdata$rfp.median.log10sum.adjust < .6 & pdata$rfp.median.log10sum.adjust > .5 & theta > 3 & theta < 3.01]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        rfp.median.log10sum.adjust)), theta)[which(rownames(pdata) %in% red_middle),]
-
-green_high <- rownames(pdata)[which.max(pdata$gfp.median.log10sum.adjust)]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        gfp.median.log10sum.adjust)), theta)[which(rownames(pdata) %in% green_high),]
-
-# green_low <- rownames(pdata)[which.min(pdata$gfp.median.log10sum.adjust)]
-# cbind(with(pdata, cbind(rownames(pdata),
-#                         image_individual, image_label,
-#                         gfp.median.log10sum.adjust)), theta)[which(rownames(pdata) %in% green_low),]
-
-theta_min <- rownames(pdata)[which.min(theta)]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        gfp.median.log10sum.adjust)), theta)[which.min(theta),]
-
-theta_max <- rownames(pdata)[which.max(theta)]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        gfp.median.log10sum.adjust)), theta)[which.max(theta),]
-
-others1 <- rownames(pdata)[which(rownames(pdata)=="20170906-E07")]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        rfp.median.log10sum.adjust,
-                        gfp.median.log10sum.adjust)), theta)[which(rownames(pdata)=="20170906-E07"),]
-
-#rownames(pdata)[which(theta < 3.5 & theta > 3.46)]
-others2 <- rownames(pdata)[which(rownames(pdata)=="20170921-D05")]
-cbind(with(pdata, cbind(rownames(pdata),
-                        image_individual, image_label,
-                        rfp.median.log10sum.adjust,
-                        gfp.median.log10sum.adjust)), theta)[which(rownames(pdata)=="20170921-D05"),]
+# selection of technical factor
+library(dplyr)
+covariates <- pData(eset) %>% dplyr::select(experiment, well, chip_id,
+                                                   concentration, raw:unmapped,
+                                                   starts_with("detect"),  molecules)
+# look at the first 6 PCs
+pca_log2cpm <- prcomp(t(log2cpm.all), scale. = TRUE, center = TRUE)
+pcs <- pca_log2cpm$x[, 1:6]
 
 
+# R-square between PCs and the covariates
+get_r2 <- function(x, y) {
+  stopifnot(length(x) == length(y))
+  model <- lm(y ~ x)
+  stats <- summary(model)
+  return(stats$adj.r.squared)
+}
+r2 <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+             dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
 
-plot(x=theta, pdata$gfp.median.log10sum.adjust, col = "forestgreen", cex=.6, pch=16,
-     ylim = c(-1.8,1.5),
-     ylab = "log10 sum of adjusted pixel intensities",
-     xlab = "Estimated cell time based on FUCCI intensities",
-     axes=F)
+# plot heatmap
+library(heatmap3)
+heatmap3(r2, cexRow=1, cexCol=1, margins=c(2,12), scale="none",
+         ylab="", main = "",
+         Colv=F, showColDendro = F,
+         labRow = c("C1: C1 batch",
+                    "Well: C1 capture site (well) ID",
+                    "Individual",
+                    "cDNA: cDNA concentration",
+                    "Reads raw: Raw reads",
+                    "Reads UMI: Reads with valid UMI",
+                    "Reads mapped: Reads with valid UMI mapped to genome",
+                    "Reads unmapped: Reads with valid UMI not mapped to genome",
+                    "ERCC: ERCC gene proportion detected",
+                    "ENSG: Endogeneous gene proportion detected",
+                    "Molecules: Total sample molecule count"
+                    ))
+
+# r-squared between PC1 and individual
+f1 <- lm(pcs[,1] ~ covariates$chip_id)
+f2 <- lm(pcs[,1] ~ covariates$molecules)
+summary(f1)
+
+summary(f1)$adj.r.squared
+summary(f2)$adj.r.squared
+
+
+# PC proportions
+100*((pca_log2cpm$sdev^2)/sum(pca_log2cpm$sdev^2))[1:6]
+
+
+# Correlation between Technical factors
+cor_tech <- cor(as.matrix(covariates[,4:11]),use="pairwise.complete.obs")
+library(RColorBrewer)
+heatmap3(cor_tech, symm = TRUE, margins=c(8,12),
+         col=brewer.pal (9, "Blues" ), cexRow=1, cexCol=1, scale="none",
+         labRow = c("cDNA: cDNA concentration",
+                    "Reads raw: Raw reads",
+                    "Reads UMI: Reads with valid UMI",
+                    "Reads mapped: Reads with valid UMI mapped to genome",
+                    "Reads unmapped: Reads with valid UMI not mapped to genome",
+                    "ERCC: ERCC gene proportion detected",
+                    "ENSG: Endogeneous gene proportion detected",
+                    "Molecules: Total sample molecule count"),
+         labCol = c("cDNA",
+                    "Reads raw",
+                    "Reads UMI",
+                    "Reads mapped",
+                    "Reads unmapped",
+                    "ERCC",
+                    "ENSG",
+                    "Molecules"))
+
+summary(lm(covariates$detect_hs ~ covariates$experiment))
+
+summary(lm(covariates$detect_hs ~ covariates$mapped))
+
+summary(lm(covariates$detect_hs ~ covariates$chip_id))
+
+summary(lm(covariates$detect_hs ~ covariates$molecules))
+
+summary(lm(covariates$detect_hs ~ covariates$concentration))
+
+# pca of top 10% experssing genes
+log2cpm_mean <- rowMeans(log2cpm.all)
+log2cpm_top <- log2cpm.all[rank(log2cpm_mean) / length(log2cpm_mean) > 1 - 0.1, ]
+dim(log2cpm_top)
+
+pca_top <- prcomp(t(log2cpm_top), scale. = T, center = T)
+
+## look at the first 6 PCs
+pcs <- pca_top$x[, 1:6]
+
+## generate the data
+r2_top <- matrix(NA, nrow = ncol(covariates), ncol = ncol(pcs),
+                 dimnames = list(colnames(covariates), colnames(pcs)))
+for (cov in colnames(covariates)) {
+  for (pc in colnames(pcs)) {
+    r2_top[cov, pc] <- get_r2(covariates[, cov], pcs[, pc])
+  }
+}
+
+## plot heatmap
+heatmap3(r2_top, cexRow=1, cexCol=1, margins=c(8,8),
+         Colv=F, showColDendro = F,
+         labRow = c("C1: C1 batch",
+                    "Well: C1 capture site (well) ID",
+                    "Individual",
+                    "cDNA: cDNA concentration",
+                    "Reads raw: Raw reads",
+                    "Reads UMI: Reads with valid UMI",
+                    "Reads mapped: Reads with valid UMI mapped to genome",
+                    "Reads unmapped: Reads with valid UMI not mapped to genome",
+                    "ERCC: ERCC gene proportion detected",
+                    "ENSG: Endogeneous gene proportion detected",
+                    "Molecules: Total sample molecule count"
+         ))
+
+
+
+# Intensity batch effect ---------------------------------------------------------
+lm.rfp <- lm(rfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label),
+             data = pdata)
+lm.gfp <- lm(gfp.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label),
+             data = pdata)
+lm.dapi <- lm(dapi.median.log10sum~factor(chip_id)+factor(experiment) + factor(image_label),
+              data = pdata)
+
+library(ibd)
+aov.lm.rfp <- Anova(lm.rfp, type = "III")
+aov.lm.gfp <- Anova(lm.gfp, type = "III")
+aov.lm.dapi <- Anova(lm.dapi, type = "III")
+
+aov.lm.rfp
+aov.lm.gfp
+
+library(ggplot2)
+ggplot(pdata, aes(gfp.median.log10sum, col=factor(experiment))) +
+  geom_density()
+
+  facet_wrap(~ factor(chip_id))
+
+ggplot(pdata, aes(x=factor(experiment), y=gfp.median.log10sum.adjust)) +
+  geom_boxplot() + facet_wrap(~ factor(chip_id))
+
+ggplot(pdata, aes(x=factor(experiment), y=gfp.median.log10sum.adjust)) +
+  geom_boxplot()
+
+
+# Fucci phase making and properties --------------------------------------------------
+par(mfrow=c(1,1))
+plot(x=pData(df)$rfp.median.log10sum.adjust, xlim=c(-1.5,1.5), ylim=c(-1.5,1.5),
+     y=pData(df)$gfp.median.log10sum.adjust, pch=16, cex=.5, col="gray50",
+     xlab="RFP log10 sum intensity",
+     ylab="GFP log10 sum intensity", axes=F)
 axis(1); axis(2)
-#points(x=theta, pdata$rfp.median.log10sum.adjust, col = "red", cex=.6, pch=16)
-abline(h=0, col="gray50", lty=3)
-points(x=theta[which(rownames(pdata) == red_low)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == red_low)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == red_high)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == red_high)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == red_middle)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == red_middle)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == green_high)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == green_high)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == theta_min)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == theta_min)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == theta_max)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == theta_max)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == others1)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == others1)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == others2)],
-       y= pdata$gfp.median.log10sum.adjust[which(rownames(pdata) == others2)],
-       pch=5, col="black", cex=1, lwd=1)
-
-
-plot(x=theta, pdata$rfp.median.log10sum.adjust, col = "red", cex=.6, pch=16,
-     ylim = c(-1.8,1.5),
-     ylab = "log10 sum of adjusted pixel intensities",
-     xlab = "Estimated cell time based on FUCCI intensities",
-     axes=F)
-axis(1); axis(2)
-#points(x=theta, pdata$rfp.median.log10sum.adjust, col = "red", cex=.6, pch=16)
-abline(h=0, col="gray50", lty=3)
-points(x=theta[which(rownames(pdata) == red_low)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == red_low)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == red_high)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == red_high)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == red_middle)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == red_middle)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == green_high)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == green_high)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == theta_min)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == theta_min)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == theta_max)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == theta_max)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == others1)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == others1)],
-       pch=5, col="black", cex=1, lwd=1)
-points(x=theta[which(rownames(pdata) == others2)],
-       y= pdata$rfp.median.log10sum.adjust[which(rownames(pdata) == others2)],
-       pch=5, col="black", cex=1, lwd=1)
-
-
-cbind(rownames(pdata),
-      pdata$image_individual,
-      pdata$image_label, theta)[which(rownames(pdata) %in% c(red_high,
-                                                             red_middle, red_low,
-                                                             green_high,
-                                                             theta_min, theta_max,
-                                                             others1,
-                                                             others2)),]
-
-# cdk1 <- with(macosko, ensembl[which(hgnc=="CDK1")])
-# plot(log2cpm.quant[rownames(log2cpm.quant)==cdk1,])
-#
-# cdc6 <- with(macosko, ensembl[which(hgnc=="CDC6")])
-# plot(log2cpm.quant[rownames(log2cpm.quant)==cdc6,])
-
-
-# more recent figures ------------------------------------------------------
 
 df <- readRDS("data/eset-final.rds")
 pca <- prcomp(cbind(pData(df)$rfp.median.log10sum.adjust,
                     pData(df)$gfp.median.log10sum.adjust))
 (pca$sdev^2)/sum(pca$sdev^2)
-plot(pca$x[,1], pca$x[,2], pch=16, cex=.7, xlim=c(-1.2, 1.2), ylim=c(-1.2,1.2),
+plot(pca$x[,1], pca$x[,2], pch=16, cex=.5, xlim=c(-4, 4), ylim=c(-4,4),
      xlab="PC1 (67%)", ylab="PC2 (33%)",
-     main = "fucci intensities PC1 vs PC2")
+     main = "fucci intensities PC1 vs PC2", col="gray50", axes=F)
+axis(1);axis(2)
 abline(h=0,v=0, col="gray50", lty=2)
-points(cos(pData(df)$theta), sin(pData(df)$theta), col="brown", pch=16, cex=.7)
+par(new=TRUE)
 
-plot(x=(pData(df)$theta -2)%%(2*pi),
+theta <- coord2rad(pca$x)
+library(circular)
+plot(circular(theta), stack=T, shrink=1.3, cex=.5, bins=200)
+
+
+# fucci intensity and expression by phase
+fits_all <- readRDS("output/npreg-trendfilter-quantile.Rmd/fit.quant.rds")
+pve_all <- sapply(fits_all, "[[", 3)
+pve_all_ord <- pve_all[order(pve_all, decreasing = T)]
+genes <- names(pve_all_ord)[1:5]
+data <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+labs <- c("CDK1", "UBE2C", "TOP2A", "HIST1H4E", "HIST1H4C")
+
+source("peco/R/fit.trendfilter.generic.R")
+data_quant <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+theta_final <- (2*pi-as.numeric(theta))%%(2*pi)
+sample_ord <- rownames(pData(df))[order(theta_final)]
+data_quant_ord <- data_quant[,match(sample_ord,colnames(data_quant))]
+fits_tmp <- lapply(1:5, function(i) {
+  ii <- which(rownames(data_quant_ord)==genes[i])
+  foo <- fit.trendfilter.generic(data_quant_ord[ii,])
+  return(foo)
+})
+names(fits_tmp) <- genes
+
+par(mfcol=c(6,1), mar=c(2,3,1,1))
+plot(x=(2*pi-as.numeric(theta))%%(2*pi),
      y=pData(df)$gfp.median.log10sum.adjust, col="forestgreen",
-     ylim=c(-1.5, 1.5), pch=16, cex=.7,
-     xlab="fucci time", ylab="fucci intensities adjusted for batch effect",
-     main="Fucci intensities ordered by fucci time")
+     ylim=c(-1.5, 1.5), pch=16, cex=.5,
+     xlab="Fucci phase", ylab="Fucci intensities adjusted for batch effect",
+     main="Fucci intensities", axes=F)
+axis(2); axis(1,at=c(0,pi/2, pi, 3*pi/2, 2*pi), labels=F)
 abline(h=0, col="gray50", lty=2)
-points(x=(pData(df)$theta -2)%%(2*pi),
+points(x=(2*pi-as.numeric(theta))%%(2*pi),
        y=pData(df)$rfp.median.log10sum.adjust, col="firebrick",
-       ylim=c(-1.5, 1.5), pch=16, cex=.7)
-hist((pData(df)$theta -2)%%(2*pi), nclass=25,
-     main="fucci time frequency", xlab="fucci time")
-
-theta <- (pData(df)$theta -2)%%(2*pi)
-plot(pData(df)$theta,
-     pData(df)$dapi.median.log10sum.adjust)
-
-
-cdk1 <- rownames(fData(df))[which(fData(df)$name=="CDK1")]
-dtl <- rownames(fData(df))[which(fData(df)$name=="DTL")]
-expr_normed <- readRDS("output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
-
-all.equal(colnames(expr_normed), rownames(pData(df)))
-expr_normed2 <- expr_normed[,match(rownames(pData(df)),colnames(expr_normed))]
-
-theta <- (pData(df)$theta -2)%%(2*pi)
-cdc6 <- rownames(fData(df))[which(fData(df)$name=="CDC6")]
-yy <- expr_normed2[rownames(expr_normed2)==cdc6,]
-fit.cdc6 <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
-plot(x=theta[order(theta)], y=yy[order(theta)],
-     ylab="log2CPM normalized expression", xlab="fucci time",
-     main = "CDC6", cex=.7, col="gray40")
-abline(h=0, col="gray50")
-points(x=theta[order(theta)],
-       y=fit.cdc6$trend.yy, col ="brown", pch=16, cex=.6)
+       ylim=c(-1.5, 1.5), pch=16, cex=.5)
+for (i in 1:5) {
+  plot(data_quant_ord[rownames(data_quant_ord)==genes[i],], col="gray50",
+       xlab="Fucci phase",
+       ylab="Normalized log2CPM", axes=F, cex=.7,
+       main = labs[i])
+  points(fits_tmp[[i]]$trend.yy, col="blue", pch=16, cex=.5)
+  axis(2) #axis(1,at=c(0,pi/2, pi, 3*pi/2, 2*pi), labels=F)
+  abline(h=0, col="gray50", lty=2)
+}
 
 
-# theta <- (pData(df)$theta -2)%%(2*pi)
-# yy <- expr_normed2[rownames(expr_normed2)==dtl,]
-# fit.dtl <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
-# plot(x=theta[order(theta)], y=yy[order(theta)],
-#      ylab="log2CPM normalized expression", xlab="fucci time",
-#      main = "DTL", cex=.7)
-# points(x=theta[order(theta)],
-#        y=fit.dtl$trend.yy, col ="brown", pch=16, cex=.6)
+hist((2*pi-as.numeric(theta)), nclass=25,
+     main="", xlab="Fucci phase")
 
-theta <- (pData(df)$theta -2)%%(2*pi)
-yy <- expr_normed2[rownames(expr_normed2)==cdk1,]
-fit.cdk1 <- fit.trendfilter.generic(yy[order(theta)], polyorder=2)
-plot(x=theta[order(theta)], y=yy[order(theta)],
-     ylab="log2CPM normalized expression", xlab="fucci time",
-     main = "CDK1", cex=.7, col="gray40")
-abline(h=0, col="gray50")
-points(x=theta[order(theta)],
-       y=fit.cdk1$trend.yy, col ="brown", pch=16, cex=.6)
+
+# Top cyclical genes before training ----------------------------------------------
+
+# import results
+fits_all <- readRDS("../output/npreg-trendfilter-quantile.Rmd/fit.quant.rds")
+pve_all <- sapply(fits_all, "[[", 3)
+
+pve_all_ord <- pve_all[order(pve_all, decreasing = T)]
+
+head(pve_all_ord)
+
+genes <- names(pve_all_ord)[1:5]
+data <- readRDS("../output/npreg-trendfilter-quantile.Rmd/log2cpm.quant.rds")
+labs <- c("CDK1", "UBE2C", "TOP2A", "HIST1H4E", "HIST1H4C")
+par(mfrow=c(2,3))
+for (i in 1:5) {
+  ii <- which(names(fits_all)==genes[i])
+  plot(data[rownames(data)==genes[i],], col="gray50",
+       xlab="Fucci ordering",
+       ylab="Normalized log2CPM", axes=F,
+       main = labs[i])
+  axis(1); axis(2)
+  points(fits_all[[ii]]$trend.yy, col="red", pch=16)
+}
+
+
+# Top cyclical genes in other datasets ----------------------------------------
+
+
+
+
+
+
+
+
+
+# prediction error -------------------------------------------------------------
+library(ggplot2)
+
+double_diff_time_ind <- readRDS("output/method-train-summary-output.Rmd/double_diff_time_ind.rds")
+
+double_diff_time_ind <- do.call(rbind, double_diff_time_ind)
+double_diff_time_ind <- subset(double_diff_time_ind, methods=="supervised")
+
+df <- rbind(data.frame(subset(double_diff_time_mixed, methods == "supervised"),
+                       ind="mixed"),
+            data.frame(subset(double_diff_time_mixed_permute, methods == "supervised"),
+                       ind="mixed_permute"),
+            double_diff_time_ind)
+
+df$ind <- as.character(df$ind)
+df$ind <- factor(df$ind, levels=c("mixed", "mixed_permute",
+                                  "NA19098", "NA18855",
+                                  "NA19101", "NA18511", "NA18870", "NA19160"),
+                 labels=c("Mixed", "Mixed permute", LETTERS[1:6]))
+
+# df$type <- df$ind
+# df$type[df$ind=="Mixed"]
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=diff_mean, group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"),
+            aes(x=ngenes, y=diff_mean)) +
+  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=(2^diff_se), group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Mean squared error") + xlab("Top X cyclical genes") +
+  ggtitle("Standard error of predictions") +
+  #  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"),
+            aes(x=ngenes, y=(2^diff_se))) +
+  #  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 400),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set up to top 400 genes") +
+  ylim(.10,.17) +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_errorbar(subset(df, ngenes <= 700),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25)
+
+ggplot(subset(df, ngenes == 5),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("using top 5 cyclical genes")
+
+
+
+library(ggplot2)
+
+double_diff_time_ind <- do.call(rbind, double_diff_time_ind)
+double_diff_time_ind <- subset(double_diff_time_ind, methods=="supervised")
+
+df <- rbind(data.frame(subset(double_diff_time_mixed, methods == "supervised"),
+                       ind="mixed"),
+            data.frame(subset(double_diff_time_mixed_permute, methods == "supervised"),
+                       ind="mixed_permute"),
+            double_diff_time_ind)
+
+df$ind <- as.character(df$ind)
+df$ind <- factor(df$ind, levels=c("mixed", "mixed_permute",
+                                  "NA19098", "NA18855",
+                                  "NA19101", "NA18511", "NA18870", "NA19160"),
+                 labels=c("Mixed", "Mixed permute", LETTERS[1:6]))
+
+# df$type <- df$ind
+# df$type[df$ind=="Mixed"]
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=diff_mean, group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"),
+            aes(x=ngenes, y=diff_mean)) +
+  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=(2^diff_se), group=ind, alpha=.05)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Mean squared error") + xlab("Top X cyclical genes") +
+  ggtitle("Standard error of predictions") +
+  #  ylim(0,.25) +
+  geom_line(data=subset(df, ngenes <= 700 & ind=="Mixed"),
+            aes(x=ngenes, y=(2^diff_se))) +
+  #  geom_hline(yintercept=.25, col="gray50") +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 400),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  # geom_errorbar(subset(df, ngenes <= 700),
+  #               mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set up to top 400 genes") +
+  ylim(.10,.17) +
+  theme_light()
+
+
+
+ggplot(subset(df, ngenes <= 700),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_errorbar(subset(df, ngenes <= 700),
+                mapping=aes(ymin=diff_mean-diff_se, ymax=diff_mean+diff_se, col=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("Prediction error in the training set") +
+  ylim(0,.25)
+
+ggplot(subset(df, ngenes == 5),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Error margin (% arc length)") + xlab("Top X cyclical genes") +
+  ggtitle("using top 5 cyclical genes")
+
+# new version
+ggplot(subset(df, ngenes <=50 & ind != "Mixed"),
+       aes(x=ngenes, y=diff_mean, group=ind)) +
+  ylim(.10, .18) + xlim(0, 55) +
+  geom_line(aes(col=ind), lty=2, lwd=.3) +
+  geom_point(aes(color=ind)) + #geom_line(lty=3) +
+  ylab("Prediction error (percent circle)") + xlab("Top X cyclical genes") +
+  theme_light()
+
+
+
+############################################################
 
 
 
@@ -235,6 +456,7 @@ seurat.genes <- readLines(
   con = "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt")
 seurat.genes <- list(s.genes=seurat.genes[1:43],
                      g2m.genes=seurat.genes[44:97])
+
 
 symbs <- c(genes_list_symbols[[1]]$hgnc_symbol[1:4], "HIST1H4E")
 which(symbs %in% unlist(seurat.genes))
@@ -279,5 +501,18 @@ bb <- which(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes))
 length(bb)
 bb2 <- which(!(symbs %in% oo$hgnc | symbs %in% unlist(seurat.genes)))
 symbs[bb2]
+
+
+
+# genes in oscope?
+which(oscope$hgnc == "CDK1")
+which(oscope$hgnc == "TOP2A")
+which(oscope$hgnc == "UBE2C")
+which(oscope$hgnc == "HIST1H4C")
+which(oscope$hgnc == "HIST1H4E")
+
+
+
+
 
 
