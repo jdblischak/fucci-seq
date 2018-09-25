@@ -1,0 +1,146 @@
+---
+title: "Cyclical trends for expression data of each individual"
+author: "Joyce Hsiao"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: FALSE
+---
+
+<!-- The file analysis/chunks.R contains chunks that define default settings
+shared across the workflowr files. -->
+```{r read-chunk, include=FALSE, cache=FALSE}
+knitr::read_chunk("chunks.R")
+```
+
+<!-- Update knitr chunk options -->
+```{r knitr-opts-chunk, include=FALSE}
+```
+
+<!-- Insert the date the file was last updated -->
+```{r last-updated, echo=FALSE, results='asis'}
+```
+
+<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
+ package git2r is installed -->
+```{r code-version, echo=FALSE, results='asis'}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
+```
+
+---
+
+## Summary
+
+* Evaluate cyclical trends of expression levels for each gene in each individual
+
+* Jobs run on cluster using code in `code/trendfilter-individual.Rmd`
+
+* Results saved in `output/trendfilter-individual.Rmd`
+
+* The top 5 cyclical genes are the same across the 6 individuals. When looking at the overlap of the top cyclical genes across individuals, I found that the top 5 cyclical genes are detected in the top 500 cyclial genes across the individuals.
+
+---
+
+
+## Import results
+
+```{r}
+fits_NA18511 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA18511.rds")
+fits_NA18855 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA18855.rds")
+fits_NA18870 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA18870.rds")
+fits_NA19098 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA19098.rds")
+fits_NA19101 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA19101.rds")
+fits_NA19160 <- readRDS("../output/trendfilter-individual.Rmd/fits_NA19160.rds")
+```
+
+
+---
+
+## Analysis
+
+
+```{r}
+pve_NA18511 <- sapply(fits_NA18511, "[[", 2)
+pve_NA18855 <- sapply(fits_NA18855, "[[", 2)
+pve_NA18870 <- sapply(fits_NA18870, "[[", 2)
+pve_NA19098 <- sapply(fits_NA19098, "[[", 2)
+pve_NA19101 <- sapply(fits_NA19101, "[[", 2)
+pve_NA19160 <- sapply(fits_NA19160, "[[", 2)
+
+pve_NA18511_ord <- pve_NA18511[order(pve_NA18511, decreasing = T)]
+pve_NA18855_ord <- pve_NA18855[order(pve_NA18855, decreasing = T)]
+pve_NA18870_ord <- pve_NA18870[order(pve_NA18870, decreasing = T)]
+pve_NA19098_ord <- pve_NA19098[order(pve_NA19098, decreasing = T)]
+pve_NA19101_ord <- pve_NA19101[order(pve_NA19101, decreasing = T)]
+pve_NA19160_ord <- pve_NA19160[order(pve_NA19160, decreasing = T)]
+
+names(pve_NA18511_ord)[1:5]
+names(pve_NA18855_ord)[1:5]
+names(pve_NA18870_ord)[1:5]
+names(pve_NA19098_ord)[1:5]
+names(pve_NA19101_ord)[1:5]
+names(pve_NA19160_ord)[1:5]
+
+library(venn)
+intersect(intersect(
+  intersect(intersect(intersect(names(pve_NA18511_ord)[1:500],
+          names(pve_NA18855_ord)[1:500]),
+          names(pve_NA18870_ord)[1:500]),
+          names(pve_NA19098_ord)[1:500]),
+          names(pve_NA19101_ord)[1:500]),
+          names(pve_NA19160_ord)[1:500])
+```
+
+
+checking that trendfilter was done correctly
+
+```{r}
+df_NA19101 <- readRDS("../output/trendfilter-individual.Rmd/df_NA19101.rds")
+
+plot(df_NA19101[which(rownames(df_NA19101)==names(pve_NA19101_ord)[1]),])
+points(fits_NA19101[which(names(fits_NA19101) ==names(pve_NA19101_ord)[1])][[1]]$trend.yy,
+       col="red", pch=16)
+```
+
+getting PVE of CDK1 from all individuals
+
+```{r}
+pve_NA18511_ord[names(pve_NA18511_ord)=="ENSG00000170312"]
+pve_NA18855_ord[names(pve_NA18855_ord)=="ENSG00000170312"]
+pve_NA18870_ord[names(pve_NA18870_ord)=="ENSG00000170312"]
+pve_NA19098_ord[names(pve_NA19098_ord)=="ENSG00000170312"]
+pve_NA19101_ord[names(pve_NA19101_ord)=="ENSG00000170312"]
+pve_NA19160_ord[names(pve_NA19160_ord)=="ENSG00000170312"]
+```
+distribution of cell times in different individuals
+
+```{r}
+eset <- readRDS("../data/eset-final.rds")
+library(Biobase)
+hist(pData(eset)$theta)
+
+ids <- unique(pData(eset)$chip_id)
+par(mfrow=c(2,3))
+for (i in 1:6) {
+  hist(pData(eset)$theta[pData(eset)$chip_id==ids[i]],
+       main=ids[i],
+       xlab="Fucci phase")
+}
+
+plot(pData(eset)$theta[pData(eset)$chip_id==ids[1]])
+points(pData(eset)$theta[pData(eset)$chip_id==ids[2]], col="red")
+```
+
+
+
+---
+
+## Session information
+
+```{r}
+sessionInfo()
+```
+
