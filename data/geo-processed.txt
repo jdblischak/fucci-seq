@@ -1,0 +1,6 @@
+name	type	checksum
+eset-raw.rds	Serialized R object of Bioconductor ExpressionSet class	ac9e471553864141117e10bf82f0a172
+fucci-counts.txt.gz	gzipped tab-delimited text	64f8289056c0ad59bc25df909f7bb312
+fucci-annotation.txt	tab-delimited text	a6e966a1ee6539571f9c0d2e4db5c047
+fucci-annotation-description.txt	tab-delimited text	6125094aa37f8c69595bd87f432ed731
+eset-final.rds	Serialized R object of Bioconductor ExpressionSet class	051a25c7ee8559ed3d3d0bd313a7851f
