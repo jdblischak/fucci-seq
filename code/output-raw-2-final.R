@@ -152,7 +152,8 @@ pdata.adj_combo <- pdata.adj[which(pdata.adj$unique %in% sample_include_alldata)
 eset_combo <- new("ExpressionSet", 
                   exprs = exprs(eset_filtered)[,which(pdata$unique %in% sample_include_alldata)], 
                   phenoData = phenoData(eset_filtered)[which(pdata$unique %in% sample_include_alldata), ], 
-                  featureData = featureData(eset_filtered))
+                  featureData = featureData(eset_filtered),
+		  experimentData = experimentData(eset_filtered))
 
 pdata_combo <- pData(eset_combo)
 pdata_combo$unique <- paste(pdata_combo$image_individual, 
