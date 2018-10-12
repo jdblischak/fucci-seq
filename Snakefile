@@ -92,7 +92,9 @@ rule all:
     input: counts = dir_data + "fucci-counts.txt.gz",
            anno = dir_data + "fucci-annotation.txt",
            description = dir_data + "fucci-annotation-description.txt",
-           eset_combined = dir_data + "eset-raw.rds"
+           eset_combined = dir_data + "eset-raw.rds",
+           eset_filtered = dir_data + "eset-filtered.rds",
+           eset_final = dir_data + "eset-final.rds"
 
 rule intermediate:
     input: #MultiQC
@@ -364,10 +366,12 @@ rule expressionset:
                                                 {output}"
 
 rule expressionset_combined:
-    input: expand(dir_data + "eset/{chip}.rds", chip = chips)
-    output: dir_data + "eset-raw.rds"
-    params: dir_eset = dir_data + "eset/"
-    shell: "Rscript code/output-combined-eset.R {params.dir_eset} {output}"
+    input: expand(dir_data + "eset/{chip}.rds", chip = chips),
+           dir_data + "intensity.rds"
+    output: raw = dir_data + "eset-raw.rds",
+            filtered = dir_data + "eset-filtered.rds",
+            final = dir_data + "eset-final.rds"
+    shell: "Rscript code/output-raw-2-final.R"
 
 rule counts_combined:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
