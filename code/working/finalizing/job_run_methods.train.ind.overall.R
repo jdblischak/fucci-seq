@@ -24,11 +24,15 @@ data_training <- readRDS(file.path(dir,paste0("data/results/ind_",
 data_withheld <- readRDS(file.path(dir,paste0("data/results/ind_",
                                 ind, "_data_withheld.rds")))
 
-cyclical_genes <- readRDS(file=file.path(dir, paste0(
-  paste0("data/results/finalizing/ind_",ind,"_cyclical_genes.rds"))))
+fits_all <- readRDS(file.path(dir,"output/npreg-trendfilter-quantile.Rmd/fit.quant.rds"))
+genes_all <- names(fits_all)[order(sapply(fits_all,"[[",3), decreasing=T)]
 
-which_genes <- rownames(cyclical_genes)[order(cyclical_genes$pve,
-                                              decreasing = T)[1:ngenes]]
+# cyclical_genes <- readRDS(file=file.path(dir, paste0(
+#   paste0("data/results/finalizing/ind_",ind,"_cyclical_genes.rds"))))
+# which_genes <- rownames(cyclical_genes)[order(cyclical_genes$pve,
+#                                               decreasing = T)[1:ngenes]]
+
+which_genes <- genes_all[1:ngenes]
 
 seurat.genes <- readLines(con = file.path(dir,
                                           "data/cellcycle-genes-previous-studies/seurat_cellcycle/regev_lab_cell_cycle_genes.txt"))
@@ -71,7 +75,7 @@ out <- list(fit.train=fit.train,
 #names(fits) <- paste0("fold.", 1:length(fold_indices))
 saveRDS(out,
         file=file.path(dir,
-                       paste0("data/results/finalizing/ind_",ind,"_results.top",ngenes,".rds")))
+                       paste0("data/results/finalizing/ind_",ind,"_results_overallcyclical.top",ngenes,".rds")))
 
 
 
