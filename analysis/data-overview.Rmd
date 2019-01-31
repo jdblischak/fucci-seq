@@ -5,8 +5,6 @@ output: workflowr::wflow_html
 ---
 
 
----
-
 ## Overview
 
 We collected two types of data for each single cell sample: single-cell RNA-seq using C1 plates and FUCCI image intensity data.
@@ -43,7 +41,7 @@ Code used to generate data from `data/eset-raw.rds` to `data/eset-final.rds` is 
 
 ---
 
-## Phenotypic data on singleton samples
+## Phenotypic data of singleton samples
 
 We provided phenotypic data in Supplementary Data files.
 
@@ -51,7 +49,7 @@ We provided phenotypic data in Supplementary Data files.
 * Data file 2: 888 samples after filtering (`output/data-overview.Rmd/phenotypes_singletonsamples.txt`)
 * Data file 3: phenotype labels (`output/data-overview.Rmd/phenotypes_labels.txt`)
 
-```{r}
+```{r, eval=F}
 library(Biobase)
 
 eset_raw <- readRDS("../data/eset-raw.rds")
@@ -85,7 +83,7 @@ df_labels <- fread(file = "../output/data-overview.Rmd/phenotypes_labels.txt")
 
 
 
-```{r}
+```{r, eval=F}
 eset_final <- readRDS("../data/eset-final.rds")
 
 df <- data.frame(sample_id=rownames(pData(eset_raw)), pData(eset_raw), stringsAsFactors = F)
@@ -108,7 +106,7 @@ df_labels_test <- fread(file = "../output/data-overview.Rmd/phenotypes_allsample
 
 ---
 
-## Access expressionSets
+## How to access expressionSets
 
 We store feature-level (gene) read count and molecule count in `expressionSet` (`data/eset`) objects, which also contain sample metadata (e.g., assigned indivdual ID, cDNA concentraion) and quality filtering criteria (e.g., number of reads mapped to FUCCI transgenes, ERCC conversion rate). Data from different C1 plates are stored in separate `eset` objects:
 
