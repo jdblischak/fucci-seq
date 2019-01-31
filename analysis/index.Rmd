@@ -3,19 +3,48 @@ title: "Home"
 output: 
   html_document:
     toc: TRUE
+    toc_depth: 4
     toc_float: FALSE
 ---
 
----
+We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section [Finalizing](#finalizing) below. Here are some useful links:
 
-## Summary and overview
-
-* [Data description](data-overview.html)
-* [Seminar talk 2018-04-16](talk-20180416.html)
-* Code for compiling results and plots for the paper: `code/makeresults_paper.R`
+* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](biorxiv)
+* GEO record [GSE121265](http://www.ncbi.nlm.nih.gov/ geo/query/acc.cgi?acc=GSE121265) for the raw FASTQ files
+* [GitHub repo](https://github.com/jdblischak/fucci-seq) for code and data
 
 
 ---
+
+# Finalizing
+
+#### [Data description](data-overview.html)
+#### [Quality control of scRNA-seq data](#rna-seq-data-preprcessing)
+#### [Process images - from images to intensities](images-process.html)
+#### [Inspect and correct for the C1 plate effect in fluorescence intensities](images-normalize-anova.html)
+#### [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
+#### [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
+
+
+
+
+
+
+
+<!-- * Code for compiling results and plots for the paper: `code/makeresults_paper.R` -->
+        
+<!-- ## Supervised method learning: finalizing results on holding-an-individual-out scenario -->
+
+<!--     * [Validation sample](method-eval.html) (to be removed...) -->
+<!-- * Predicting individual X using expression from random individuals -->
+<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
+<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
+<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
+<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
+
+
+
+# Analysis 
 
 ## Supervised method learning: finalizing on data holiding out validation samples
 
@@ -38,23 +67,7 @@ output:
     * [Compile training results for both training scenarios](method-train-summary-output.html) and [Plotting prediction error margin and genes selected](method-train-summary.html)
     * [Compile results on validation samples](method-validation.html)
     
-        
 
-
-
-
-<!--     * [Validation sample](method-eval.html) (to be removed...) -->
-<!-- * Predicting individual X using expression from random individuals -->
-<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
-<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
-<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
-<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
-
-
-
-
-
----
 
 ## Supervised method learning: building the analysis approach
 
@@ -80,8 +93,6 @@ output:
     
 
 
----
-
 ## Approaches to fitting cyclical trend in gene expression data
 
 * Apply spherically projected multivariate linear model
@@ -96,7 +107,7 @@ output:
     * [Fitting on Leng data)](cellcycler-seqdata-leng.html)
     * [Fitting on fucci-seq RNA-seq data)](cellcycler-seqdata-fucci.html)
  
----
+
 
 ## Cell cycle signal in gene expression data
 
@@ -111,9 +122,9 @@ output:
     * Examine gene pression scores defined by the Macosko paper in the selected cluster representatives [before confounding correction](images-classify-fucci.html) and [after confounding correction](images-classify-fucci-adjusted.html)
     * Examine gene expression scores defined by the Macosk paer [in the sorted cells of the Leng et al. 2015 paper](images-classify-leng.html)
 
-3. We ordered cells on a circle using FUCCI intensities alone. 
-    * First, I used GFP and RFP intensities to estimate a [least-square fit of unit circle which approximate the relative ordering of cells on cell cycle](images-circle-ordering.html)
-    * I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and [to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression](images-circle-ordering-eval.html)
+3. We inferred an angle for each cell on a unit circle using FUCCI intensities alone. 
+    * First, I used GFP and RFP intensities to estimate a [least-square fit of unit circle](images-circle-ordering.html)
+    * I computed the PCs of GFP and RFP and used these to infer an angle for each cell on a unit circle (i.e., polar coordinates), and [to evaluate these results, I computed circular-circular and circular-linear correlation with DAPI and gene expression](images-circle-ordering-eval.html)
     * Here I put together lists of genes identified as significantly correlatd with the PC-based fit [by linear correlation and circular-linear correlation, also cyclical genes by smash](images-circle-ordering-sigcorgenes.html)
   
 4. I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
@@ -124,7 +135,6 @@ output:
 5. Additional analysis done to identify top cyclical genes in each individual. The top 5 are not shared across the six individuals. [Results](trendfilter-individual.html)
 
 
----
 
 ## RNA-seq data preprcessing
 
@@ -142,7 +152,6 @@ output:
     * [Estimate variance explained in IBD and correct for batch effects](seqdata-batch-correction.html)
 
 
----
 
 ## Microscopy image analysis
 
@@ -172,7 +181,6 @@ We evaluated and pre-processed the results of image analysis as follows:
     * Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What's the differences between cell time estimates from [the two normalization approaches](images-time-compare-normalize.html)?
 
 
----
 
 ## One-time investigations
 
@@ -181,3 +189,7 @@ We evaluated and pre-processed the results of image analysis as follows:
 * I selected a set of cell cycle [genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.](seqdata-select-cellcyclegenes.html)
 
 * [Replicate Seurat example of scoring cell cycle phases](seurat-cellcycle.Rmd)
+
+* [Reproducing some QC analysis and making plots for a seminar talk](talk-20180416.html)
+
+* [Compile codes for the paper in ]
