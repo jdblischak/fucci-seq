@@ -221,7 +221,15 @@ div.section {
 
 <div id="TOC">
 <ul>
-<li><a href="#summary-and-overview">Summary and overview</a></li>
+<li><a href="#finalizing">Finalizing</a><ul>
+<li><a href="#data-description"><a href="data-overview.html">Data description</a></a></li>
+<li><a href="#quality-control-of-scrna-seq-data"><a href="#rna-seq-data-preprcessing">Quality control of scRNA-seq data</a></a></li>
+<li><a href="#process-images---from-images-to-intensities"><a href="images-process.html">Process images - from images to intensities</a></a></li>
+<li><a href="#inspect-and-correct-for-the-c1-plate-effect-in-fluorescence-intensities"><a href="images-normalize-anova.html">Inspect and correct for the C1 plate effect in fluorescence intensities</a></a></li>
+<li><a href="#infer-an-angel-for-each-cell-based-on-fucci-fluorescence-intensities"><a href="images-circle-ordering-eval.html">Infer an angel for each cell based on FUCCI fluorescence intensities</a></a></li>
+<li><a href="#estimate-the-cyclic-trends-of-gene-expression-levels"><a href="npreg-trendfilter-quantile.html">Estimate the cyclic trends of gene expression levels</a></a></li>
+</ul></li>
+<li><a href="#analysis">Analysis</a><ul>
 <li><a href="#supervised-method-learning-finalizing-on-data-holiding-out-validation-samples">Supervised method learning: finalizing on data holiding out validation samples</a></li>
 <li><a href="#supervised-method-learning-building-the-analysis-approach">Supervised method learning: building the analysis approach</a></li>
 <li><a href="#approaches-to-fitting-cyclical-trend-in-gene-expression-data">Approaches to fitting cyclical trend in gene expression data</a></li>
@@ -229,19 +237,48 @@ div.section {
 <li><a href="#rna-seq-data-preprcessing">RNA-seq data preprcessing</a></li>
 <li><a href="#microscopy-image-analysis">Microscopy image analysis</a></li>
 <li><a href="#one-time-investigations">One-time investigations</a></li>
+</ul></li>
 </ul>
 </div>
 
-<hr />
-<div id="summary-and-overview" class="section level2">
-<h2>Summary and overview</h2>
+<p>We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section <a href="#finalizing">Finalizing</a> below. Here are some useful links:</p>
 <ul>
-<li><a href="data-overview.html">Data description</a></li>
-<li><a href="talk-20180416.html">Seminar talk 2018-04-16</a></li>
-<li>Code for compiling results and plots for the paper: <code>code/makeresults_paper.R</code></li>
+<li><a href="biorxiv">Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis</a></li>
+<li>GEO record <a href="http://www.ncbi.nlm.nih.gov/%20geo/query/acc.cgi?acc=GSE121265">GSE121265</a> for the raw FASTQ files</li>
+<li><a href="https://github.com/jdblischak/fucci-seq">GitHub repo</a> for code and data</li>
 </ul>
 <hr />
+<div id="finalizing" class="section level1">
+<h1>Finalizing</h1>
+<div id="data-description" class="section level4">
+<h4><a href="data-overview.html">Data description</a></h4>
 </div>
+<div id="quality-control-of-scrna-seq-data" class="section level4">
+<h4><a href="#rna-seq-data-preprcessing">Quality control of scRNA-seq data</a></h4>
+</div>
+<div id="process-images---from-images-to-intensities" class="section level4">
+<h4><a href="images-process.html">Process images - from images to intensities</a></h4>
+</div>
+<div id="inspect-and-correct-for-the-c1-plate-effect-in-fluorescence-intensities" class="section level4">
+<h4><a href="images-normalize-anova.html">Inspect and correct for the C1 plate effect in fluorescence intensities</a></h4>
+</div>
+<div id="infer-an-angel-for-each-cell-based-on-fucci-fluorescence-intensities" class="section level4">
+<h4><a href="images-circle-ordering-eval.html">Infer an angel for each cell based on FUCCI fluorescence intensities</a></h4>
+</div>
+<div id="estimate-the-cyclic-trends-of-gene-expression-levels" class="section level4">
+<h4><a href="npreg-trendfilter-quantile.html">Estimate the cyclic trends of gene expression levels</a></h4>
+<!-- * Code for compiling results and plots for the paper: `code/makeresults_paper.R` -->
+<!-- ## Supervised method learning: finalizing results on holding-an-individual-out scenario -->
+<!--     * [Validation sample](method-eval.html) (to be removed...) -->
+<!-- * Predicting individual X using expression from random individuals -->
+<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
+<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
+<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
+<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
+</div>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
 <div id="supervised-method-learning-finalizing-on-data-holiding-out-validation-samples" class="section level2">
 <h2>Supervised method learning: finalizing on data holiding out validation samples</h2>
 <ul>
@@ -273,13 +310,6 @@ div.section {
 <li><a href="method-validation.html">Compile results on validation samples</a></li>
 </ul></li>
 </ul>
-<!--     * [Validation sample](method-eval.html) (to be removed...) -->
-<!-- * Predicting individual X using expression from random individuals -->
-<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
-<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
-<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
-<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
-<hr />
 </div>
 <div id="supervised-method-learning-building-the-analysis-approach" class="section level2">
 <h2>Supervised method learning: building the analysis approach</h2>
@@ -304,7 +334,6 @@ div.section {
 <li>Evaluate the withheld samples <a href="method-eval-withheld-explore-removenoisy.html">removing noisy labels</a> on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.</li>
 </ul></li>
 </ul>
-<hr />
 </div>
 <div id="approaches-to-fitting-cyclical-trend-in-gene-expression-data" class="section level2">
 <h2>Approaches to fitting cyclical trend in gene expression data</h2>
@@ -323,7 +352,6 @@ div.section {
 <li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
 </ul></li>
 </ul>
-<hr />
 </div>
 <div id="cell-cycle-signal-in-gene-expression-data" class="section level2">
 <h2>Cell cycle signal in gene expression data</h2>
@@ -341,10 +369,10 @@ div.section {
 <li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
 <li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
 </ul></li>
-<li>We ordered cells on a circle using FUCCI intensities alone.
+<li>We inferred an angle for each cell on a unit circle using FUCCI intensities alone.
 <ul>
-<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle which approximate the relative ordering of cells on cell cycle</a></li>
-<li>I computed the PCs of GFP and RFP and used these to infer the relative ordering on a circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate the circle fit, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
+<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle</a></li>
+<li>I computed the PCs of GFP and RFP and used these to infer an angle for each cell on a unit circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate these results, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
 <li>Here I put together lists of genes identified as significantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
 </ul></li>
 <li>I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
@@ -355,7 +383,6 @@ div.section {
 </ul></li>
 <li>Additional analysis done to identify top cyclical genes in each individual. The top 5 are not shared across the six individuals. <a href="trendfilter-individual.html">Results</a></li>
 </ol>
-<hr />
 </div>
 <div id="rna-seq-data-preprcessing" class="section level2">
 <h2>RNA-seq data preprcessing</h2>
@@ -381,7 +408,6 @@ div.section {
 <li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
 </ul></li>
 </ol>
-<hr />
 </div>
 <div id="microscopy-image-analysis" class="section level2">
 <h2>Microscopy image analysis</h2>
@@ -416,7 +442,6 @@ div.section {
 <li>Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What’s the differences between cell time estimates from <a href="images-time-compare-normalize.html">the two normalization approaches</a>?</li>
 </ul></li>
 </ol>
-<hr />
 </div>
 <div id="one-time-investigations" class="section level2">
 <h2>One-time investigations</h2>
@@ -424,7 +449,10 @@ div.section {
 <li><p>Why some gene symbols (genes) correspond to <a href="ensembl.html">multiple Ensembl IDs?</a></p></li>
 <li><p>I selected a set of cell cycle <a href="seqdata-select-cellcyclegenes.html">genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.</a></p></li>
 <li><p><a href="seurat-cellcycle.Rmd">Replicate Seurat example of scoring cell cycle phases</a></p></li>
+<li><p><a href="talk-20180416.html">Reproducing some QC analysis and making plots for a seminar talk</a></p></li>
+<li><p>[Compile codes for the paper in ]</p></li>
 </ul>
+</div>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
