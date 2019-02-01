@@ -333,7 +333,8 @@ div.section {
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
-<p><details> <summary> <strong style="color:red;">✖</strong> <strong>R Markdown file:</strong> uncommitted changes </summary> The R Markdown file has unstaged changes. To know which version of the R Markdown file created these results, you’ll want to first commit it to the Git repo. If you’re still working on the analysis, you can ignore this warning. When you’re finished, you can run <code>wflow_publish</code> to commit the R Markdown file and build the HTML.</p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
 </details>
 </li>
 <li>
@@ -352,7 +353,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jdblischak/fucci-seq/tree/b46700253ff217ece1b9a5c40b16cdb1632f06dd" target="_blank">b467002</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jdblischak/fucci-seq/tree/5b3779c8637b57f8e490441c8615c429b02adb8a" target="_blank">5b3779c</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -1909,102 +1910,11 @@ Ignored files:
     Ignored:    slurm-50629699.out
 
 Untracked files:
-    Untracked:  _workflowr.yml
     Untracked:  create-env.sh
     Untracked:  publish.bash
     Untracked:  snake.txt
     Untracked:  snakelog.out
     Untracked:  update-env.sh
-
-Unstaged changes:
-    Modified:   analysis/_site.yml
-    Modified:   analysis/about.Rmd
-    Modified:   analysis/cellcycler-seqdata-leng.Rmd
-    Deleted:    analysis/chunks.R
-    Modified:   analysis/circ-simulation-correlation.Rmd
-    Modified:   analysis/confess-prelim.Rmd
-    Modified:   analysis/ensembl.Rmd
-    Modified:   analysis/gene-filtering.Rmd
-    Modified:   analysis/images-cellcycleR-convergence.Rmd
-    Modified:   analysis/images-cellcycleR.Rmd
-    Modified:   analysis/images-circle-ordering-eval.Rmd
-    Modified:   analysis/images-circle-ordering-sigcorgenes.Rmd
-    Modified:   analysis/images-circle-ordering.Rmd
-    Modified:   analysis/images-classify-fucci-adjusted.Rmd
-    Modified:   analysis/images-classify-fucci.Rmd
-    Modified:   analysis/images-classify-leng.Rmd
-    Modified:   analysis/images-mclust.Rmd
-    Modified:   analysis/images-metrics-cell-shape.Rmd
-    Modified:   analysis/images-metrics.Rmd
-    Modified:   analysis/images-multiple-nuclei.Rmd
-    Modified:   analysis/images-normalize-anova.Rmd
-    Modified:   analysis/images-normalize-quantile.Rmd
-    Modified:   analysis/images-pam.Rmd
-    Modified:   analysis/images-process.Rmd
-    Modified:   analysis/images-qc-followup.Rmd
-    Modified:   analysis/images-qc-labels.Rmd
-    Modified:   analysis/images-qc-variation.Rmd
-    Modified:   analysis/images-qc.Rmd
-    Modified:   analysis/images-seq-correlation.Rmd
-    Modified:   analysis/images-subset-silhouette.Rmd
-    Modified:   analysis/images-time-eval.Rmd
-    Modified:   analysis/images-transgene.Rmd
-    Modified:   analysis/images-zero-nuclei.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   analysis/license.Rmd
-    Modified:   analysis/method-eval-withheld-explore-removenoisy.Rmd
-    Modified:   analysis/method-eval-withheld-explore.Rmd
-    Modified:   analysis/method-eval.Rmd
-    Modified:   analysis/method-labels-compare.Rmd
-    Modified:   analysis/method-labels-noisy.Rmd
-    Modified:   analysis/method-labels-seurat.Rmd
-    Modified:   analysis/method-labels.Rmd
-    Modified:   analysis/method-npreg-prelim-results.Rmd
-    Modified:   analysis/method-npreg.Rmd
-    Modified:   analysis/method-spml.Rmd
-    Modified:   analysis/method-train-alge.Rmd
-    Modified:   analysis/method-train-classifiers-all.Rmd
-    Modified:   analysis/method-train-classifiers-genes.Rmd
-    Modified:   analysis/method-train-classifiers-top10.Rmd
-    Modified:   analysis/method-train-classifiers.Rmd
-    Modified:   analysis/method-train-genes-fucci-vs-triple.Rmd
-    Modified:   analysis/method-train-ind-genes.Rmd
-    Modified:   analysis/method-train-ind.Rmd
-    Modified:   analysis/method-train-labels-equalfold.Rmd
-    Modified:   analysis/method-train-labels.Rmd
-    Modified:   analysis/method-train-summary-output.Rmd
-    Modified:   analysis/method-train-summary.Rmd
-    Modified:   analysis/method-train-triple.Rmd
-    Modified:   analysis/method-validation.Rmd
-    Modified:   analysis/model-spml-pilot.Rmd
-    Modified:   analysis/npreg-methods.Rmd
-    Modified:   analysis/npreg-trendfilter-prelim.Rmd
-    Modified:   analysis/npreg-trendfilter-quantile.Rmd
-    Modified:   analysis/pca-tf.Rmd
-    Modified:   analysis/reads-v-molecules.Rmd
-    Modified:   analysis/sampleqc.Rmd
-    Modified:   analysis/seqdata-batch-correction.Rmd
-    Modified:   analysis/seqdata-select-cellcyclegenes.Rmd
-    Modified:   analysis/seurat-cellcycle.Rmd
-    Modified:   analysis/talk-20180416.Rmd
-    Modified:   analysis/totals.Rmd
-    Modified:   analysis/trendfilter-individual.Rmd
-    Modified:   data/eset/20170905.rds
-    Modified:   data/eset/20170906.rds
-    Modified:   data/eset/20170907.rds
-    Modified:   data/eset/20170908.rds
-    Modified:   data/eset/20170910.rds
-    Modified:   data/eset/20170912.rds
-    Modified:   data/eset/20170913.rds
-    Modified:   data/eset/20170914.rds
-    Modified:   data/eset/20170915.rds
-    Modified:   data/eset/20170916.rds
-    Modified:   data/eset/20170917.rds
-    Modified:   data/eset/20170919.rds
-    Modified:   data/eset/20170920.rds
-    Modified:   data/eset/20170921.rds
-    Modified:   data/eset/20170922.rds
-    Modified:   data/eset/20170924.rds
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -2033,6 +1943,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/5b3779c8637b57f8e490441c8615c429b02adb8a/analysis/totals.Rmd" target="_blank">5b3779c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2019-02-01
+</td>
+<td style="text-align:left;">
+Update workflowr to 1.0.1 with wflow_update().
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/5b3779c8637b57f8e490441c8615c429b02adb8a/docs/totals.html" target="_blank">5b3779c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2019-02-01
+</td>
+<td style="text-align:left;">
+Update workflowr to 1.0.1 with wflow_update().
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 html
@@ -2325,46 +2269,6 @@ John Blischak
 </tbody>
 </table>
 <p></details></p>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.4.1 (2017-06-30)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Scientific Linux 7.4 (Nitrogen)
-
-Matrix products: default
-BLAS: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
-LAPACK: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRlapack.so
-
-locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
-
-attached base packages:
-[1] parallel  stats     graphics  grDevices utils     datasets  methods  
-[8] base     
-
-other attached packages:
-[1] bindrcpp_0.2        Biobase_2.38.0      BiocGenerics_0.24.0
-[4] reshape2_1.4.2      ggplot2_2.2.1       DT_0.2             
-[7] dplyr_0.7.4        
-
-loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13      compiler_3.4.1    git2r_0.19.0     
- [4] plyr_1.8.4        workflowr_1.0.1   bindr_0.1        
- [7] R.methodsS3_1.7.1 R.utils_2.5.0     tools_3.4.1      
-[10] digest_0.6.12     jsonlite_1.4      evaluate_0.10.1  
-[13] tibble_1.3.3      gtable_0.2.0      pkgconfig_2.0.1  
-[16] rlang_0.1.2       yaml_2.1.14       stringr_1.2.0    
-[19] knitr_1.16        htmlwidgets_0.9   cowplot_0.9.1    
-[22] rprojroot_1.2     grid_3.4.1        glue_1.1.1       
-[25] R6_2.2.0          rmarkdown_1.8     magrittr_1.5     
-[28] whisker_0.3-2     backports_1.0.5   scales_0.5.0     
-[31] htmltools_0.3.6   assertthat_0.1    colorspace_1.3-2 
-[34] labeling_0.3      stringi_1.1.2     lazyeval_0.2.0   
-[37] munsell_0.4.3     R.oo_1.21.0      </code></pre>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
