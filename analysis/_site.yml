@@ -15,7 +15,7 @@ navbar:
   - icon: fa-github
     href: https://github.com/jdblischak/fucci-seq
 output:
-  html_document:
+  workflowr::wflow_html:
     toc: yes
     toc_float: yes
     theme: cosmo
