@@ -2,3 +2,6 @@
 # Version 1.0.1
 
 # See ?wflow_html to learn how to customize workflowr.
+
+# Always use the main repo for inserting URLs to past versions
+github: https://github.com/jdblischak/fucci-seq
