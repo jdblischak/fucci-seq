@@ -2,29 +2,13 @@
 title: "Cyclical trends for expression data of each individual"
 author: "Joyce Hsiao"
 output: 
-  html_document:
+  workflowr::wflow_html:
     toc: TRUE
     toc_float: FALSE
 ---
 
-<!-- The file analysis/chunks.R contains chunks that define default settings
-shared across the workflowr files. -->
-```{r read-chunk, include=FALSE, cache=FALSE}
-knitr::read_chunk("chunks.R")
-```
 
-<!-- Update knitr chunk options -->
-```{r knitr-opts-chunk, include=FALSE}
-```
 
-<!-- Insert the date the file was last updated -->
-```{r last-updated, echo=FALSE, results='asis'}
-```
-
-<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
- package git2r is installed -->
-```{r code-version, echo=FALSE, results='asis'}
-```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning=FALSE)
@@ -138,7 +122,6 @@ points(pData(eset)$theta[pData(eset)$chip_id==ids[2]], col="red")
 
 ---
 
-## Session information
 
 ```{r}
 sessionInfo()
