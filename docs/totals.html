@@ -25,8 +25,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <script src="site_libs/htmlwidgets-0.9/htmlwidgets.js"></script>
 <script src="site_libs/datatables-binding-0.2/datatables.js"></script>
 <link href="site_libs/dt-core-1.10.12/css/jquery.dataTables.min.css" rel="stylesheet" />
@@ -41,10 +41,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -309,6 +311,13 @@ div.section {
 }
 </style>
 
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
 <div class="fluid-row" id="header">
 
 
@@ -320,14 +329,1761 @@ div.section {
 </div>
 
 
-<!-- The file analysis/chunks.R contains chunks that define default settings
-shared across the workflowr files. -->
-<!-- Update knitr chunk options -->
-<!-- Insert the date the file was last updated -->
-<p><strong>Last updated:</strong> 2018-02-06</p>
-<!-- Insert the code version (Git commit SHA1) if Git repository exists and R
- package git2r is installed -->
-<p><strong>Code version:</strong> fd3bf7b</p>
+<p><strong>Last updated:</strong> 2019-02-01</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(12345)</code> </summary></p>
+<p>The command <code>set.seed(12345)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jdblischak/fucci-seq/tree/5b3779c8637b57f8e490441c8615c429b02adb8a" target="_blank">5b3779c</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    .snakemake/
+    Ignored:    data/molecules/
+    Ignored:    data/reads/
+    Ignored:    data/totals/
+    Ignored:    data/verify/
+    Ignored:    log/
+    Ignored:    slurm-46031744.out
+    Ignored:    slurm-50622757.out
+    Ignored:    slurm-50622948.out
+    Ignored:    slurm-50622950.out
+    Ignored:    slurm-50622951.out
+    Ignored:    slurm-50622954.out
+    Ignored:    slurm-50622956.out
+    Ignored:    slurm-50622998.out
+    Ignored:    slurm-50623000.out
+    Ignored:    slurm-50623005.out
+    Ignored:    slurm-50623025.out
+    Ignored:    slurm-50623028.out
+    Ignored:    slurm-50623029.out
+    Ignored:    slurm-50623031.out
+    Ignored:    slurm-50623033.out
+    Ignored:    slurm-50623035.out
+    Ignored:    slurm-50623037.out
+    Ignored:    slurm-50623038.out
+    Ignored:    slurm-50623040.out
+    Ignored:    slurm-50623043.out
+    Ignored:    slurm-50623045.out
+    Ignored:    slurm-50623047.out
+    Ignored:    slurm-50623048.out
+    Ignored:    slurm-50623050.out
+    Ignored:    slurm-50623051.out
+    Ignored:    slurm-50623053.out
+    Ignored:    slurm-50623055.out
+    Ignored:    slurm-50623057.out
+    Ignored:    slurm-50623059.out
+    Ignored:    slurm-50623060.out
+    Ignored:    slurm-50623062.out
+    Ignored:    slurm-50623064.out
+    Ignored:    slurm-50623066.out
+    Ignored:    slurm-50623068.out
+    Ignored:    slurm-50623069.out
+    Ignored:    slurm-50623071.out
+    Ignored:    slurm-50623073.out
+    Ignored:    slurm-50623075.out
+    Ignored:    slurm-50623077.out
+    Ignored:    slurm-50623078.out
+    Ignored:    slurm-50623080.out
+    Ignored:    slurm-50623082.out
+    Ignored:    slurm-50623084.out
+    Ignored:    slurm-50623086.out
+    Ignored:    slurm-50623088.out
+    Ignored:    slurm-50623090.out
+    Ignored:    slurm-50623092.out
+    Ignored:    slurm-50623094.out
+    Ignored:    slurm-50623095.out
+    Ignored:    slurm-50623097.out
+    Ignored:    slurm-50623100.out
+    Ignored:    slurm-50623102.out
+    Ignored:    slurm-50623103.out
+    Ignored:    slurm-50623105.out
+    Ignored:    slurm-50623107.out
+    Ignored:    slurm-50623108.out
+    Ignored:    slurm-50623110.out
+    Ignored:    slurm-50623112.out
+    Ignored:    slurm-50623114.out
+    Ignored:    slurm-50623115.out
+    Ignored:    slurm-50623123.out
+    Ignored:    slurm-50623130.out
+    Ignored:    slurm-50623143.out
+    Ignored:    slurm-50623145.out
+    Ignored:    slurm-50623146.out
+    Ignored:    slurm-50623148.out
+    Ignored:    slurm-50623150.out
+    Ignored:    slurm-50623152.out
+    Ignored:    slurm-50623154.out
+    Ignored:    slurm-50623155.out
+    Ignored:    slurm-50623157.out
+    Ignored:    slurm-50623159.out
+    Ignored:    slurm-50623161.out
+    Ignored:    slurm-50623163.out
+    Ignored:    slurm-50623165.out
+    Ignored:    slurm-50623166.out
+    Ignored:    slurm-50623168.out
+    Ignored:    slurm-50623170.out
+    Ignored:    slurm-50623172.out
+    Ignored:    slurm-50623174.out
+    Ignored:    slurm-50623175.out
+    Ignored:    slurm-50623177.out
+    Ignored:    slurm-50623179.out
+    Ignored:    slurm-50623181.out
+    Ignored:    slurm-50623182.out
+    Ignored:    slurm-50623184.out
+    Ignored:    slurm-50623186.out
+    Ignored:    slurm-50623188.out
+    Ignored:    slurm-50623190.out
+    Ignored:    slurm-50623191.out
+    Ignored:    slurm-50623194.out
+    Ignored:    slurm-50623196.out
+    Ignored:    slurm-50623197.out
+    Ignored:    slurm-50623199.out
+    Ignored:    slurm-50623201.out
+    Ignored:    slurm-50623203.out
+    Ignored:    slurm-50623204.out
+    Ignored:    slurm-50623206.out
+    Ignored:    slurm-50623208.out
+    Ignored:    slurm-50623210.out
+    Ignored:    slurm-50623212.out
+    Ignored:    slurm-50623214.out
+    Ignored:    slurm-50623216.out
+    Ignored:    slurm-50623218.out
+    Ignored:    slurm-50623219.out
+    Ignored:    slurm-50623221.out
+    Ignored:    slurm-50623223.out
+    Ignored:    slurm-50623225.out
+    Ignored:    slurm-50623227.out
+    Ignored:    slurm-50623230.out
+    Ignored:    slurm-50623232.out
+    Ignored:    slurm-50623233.out
+    Ignored:    slurm-50623236.out
+    Ignored:    slurm-50623238.out
+    Ignored:    slurm-50623240.out
+    Ignored:    slurm-50623242.out
+    Ignored:    slurm-50623244.out
+    Ignored:    slurm-50623246.out
+    Ignored:    slurm-50623247.out
+    Ignored:    slurm-50623249.out
+    Ignored:    slurm-50623251.out
+    Ignored:    slurm-50623252.out
+    Ignored:    slurm-50623254.out
+    Ignored:    slurm-50623263.out
+    Ignored:    slurm-50623266.out
+    Ignored:    slurm-50623268.out
+    Ignored:    slurm-50623269.out
+    Ignored:    slurm-50623271.out
+    Ignored:    slurm-50623273.out
+    Ignored:    slurm-50623275.out
+    Ignored:    slurm-50623277.out
+    Ignored:    slurm-50623278.out
+    Ignored:    slurm-50623281.out
+    Ignored:    slurm-50623282.out
+    Ignored:    slurm-50623284.out
+    Ignored:    slurm-50623285.out
+    Ignored:    slurm-50623287.out
+    Ignored:    slurm-50623289.out
+    Ignored:    slurm-50623291.out
+    Ignored:    slurm-50623293.out
+    Ignored:    slurm-50623295.out
+    Ignored:    slurm-50623297.out
+    Ignored:    slurm-50623299.out
+    Ignored:    slurm-50623301.out
+    Ignored:    slurm-50623302.out
+    Ignored:    slurm-50623304.out
+    Ignored:    slurm-50623306.out
+    Ignored:    slurm-50623308.out
+    Ignored:    slurm-50623310.out
+    Ignored:    slurm-50623312.out
+    Ignored:    slurm-50623314.out
+    Ignored:    slurm-50623315.out
+    Ignored:    slurm-50623317.out
+    Ignored:    slurm-50623319.out
+    Ignored:    slurm-50623321.out
+    Ignored:    slurm-50623324.out
+    Ignored:    slurm-50623325.out
+    Ignored:    slurm-50623327.out
+    Ignored:    slurm-50623329.out
+    Ignored:    slurm-50623331.out
+    Ignored:    slurm-50623333.out
+    Ignored:    slurm-50623335.out
+    Ignored:    slurm-50623336.out
+    Ignored:    slurm-50623338.out
+    Ignored:    slurm-50623341.out
+    Ignored:    slurm-50623343.out
+    Ignored:    slurm-50623345.out
+    Ignored:    slurm-50623346.out
+    Ignored:    slurm-50623349.out
+    Ignored:    slurm-50623351.out
+    Ignored:    slurm-50623354.out
+    Ignored:    slurm-50623356.out
+    Ignored:    slurm-50623358.out
+    Ignored:    slurm-50623359.out
+    Ignored:    slurm-50623361.out
+    Ignored:    slurm-50623363.out
+    Ignored:    slurm-50623365.out
+    Ignored:    slurm-50623366.out
+    Ignored:    slurm-50623368.out
+    Ignored:    slurm-50623370.out
+    Ignored:    slurm-50623372.out
+    Ignored:    slurm-50623374.out
+    Ignored:    slurm-50623376.out
+    Ignored:    slurm-50623377.out
+    Ignored:    slurm-50623379.out
+    Ignored:    slurm-50623381.out
+    Ignored:    slurm-50623384.out
+    Ignored:    slurm-50623386.out
+    Ignored:    slurm-50623387.out
+    Ignored:    slurm-50623390.out
+    Ignored:    slurm-50623393.out
+    Ignored:    slurm-50623395.out
+    Ignored:    slurm-50623397.out
+    Ignored:    slurm-50623399.out
+    Ignored:    slurm-50623401.out
+    Ignored:    slurm-50623403.out
+    Ignored:    slurm-50623405.out
+    Ignored:    slurm-50623407.out
+    Ignored:    slurm-50623409.out
+    Ignored:    slurm-50623411.out
+    Ignored:    slurm-50623412.out
+    Ignored:    slurm-50623414.out
+    Ignored:    slurm-50623415.out
+    Ignored:    slurm-50623416.out
+    Ignored:    slurm-50623418.out
+    Ignored:    slurm-50623420.out
+    Ignored:    slurm-50623422.out
+    Ignored:    slurm-50623424.out
+    Ignored:    slurm-50623426.out
+    Ignored:    slurm-50623428.out
+    Ignored:    slurm-50623430.out
+    Ignored:    slurm-50623432.out
+    Ignored:    slurm-50623433.out
+    Ignored:    slurm-50623435.out
+    Ignored:    slurm-50623437.out
+    Ignored:    slurm-50623439.out
+    Ignored:    slurm-50623441.out
+    Ignored:    slurm-50623442.out
+    Ignored:    slurm-50623444.out
+    Ignored:    slurm-50623446.out
+    Ignored:    slurm-50623448.out
+    Ignored:    slurm-50623450.out
+    Ignored:    slurm-50623451.out
+    Ignored:    slurm-50623453.out
+    Ignored:    slurm-50623455.out
+    Ignored:    slurm-50623457.out
+    Ignored:    slurm-50623459.out
+    Ignored:    slurm-50623460.out
+    Ignored:    slurm-50623462.out
+    Ignored:    slurm-50623464.out
+    Ignored:    slurm-50623466.out
+    Ignored:    slurm-50623468.out
+    Ignored:    slurm-50623470.out
+    Ignored:    slurm-50623472.out
+    Ignored:    slurm-50623473.out
+    Ignored:    slurm-50623475.out
+    Ignored:    slurm-50623477.out
+    Ignored:    slurm-50623478.out
+    Ignored:    slurm-50623480.out
+    Ignored:    slurm-50623483.out
+    Ignored:    slurm-50623484.out
+    Ignored:    slurm-50623486.out
+    Ignored:    slurm-50623489.out
+    Ignored:    slurm-50623491.out
+    Ignored:    slurm-50623494.out
+    Ignored:    slurm-50623503.out
+    Ignored:    slurm-50623527.out
+    Ignored:    slurm-50623553.out
+    Ignored:    slurm-50623572.out
+    Ignored:    slurm-50623595.out
+    Ignored:    slurm-50623613.out
+    Ignored:    slurm-50623615.out
+    Ignored:    slurm-50623616.out
+    Ignored:    slurm-50623618.out
+    Ignored:    slurm-50623620.out
+    Ignored:    slurm-50623622.out
+    Ignored:    slurm-50623623.out
+    Ignored:    slurm-50623625.out
+    Ignored:    slurm-50623627.out
+    Ignored:    slurm-50623629.out
+    Ignored:    slurm-50623631.out
+    Ignored:    slurm-50623632.out
+    Ignored:    slurm-50623634.out
+    Ignored:    slurm-50623636.out
+    Ignored:    slurm-50623638.out
+    Ignored:    slurm-50623640.out
+    Ignored:    slurm-50623641.out
+    Ignored:    slurm-50623643.out
+    Ignored:    slurm-50623645.out
+    Ignored:    slurm-50623647.out
+    Ignored:    slurm-50623649.out
+    Ignored:    slurm-50623650.out
+    Ignored:    slurm-50623652.out
+    Ignored:    slurm-50623654.out
+    Ignored:    slurm-50623657.out
+    Ignored:    slurm-50623664.out
+    Ignored:    slurm-50623667.out
+    Ignored:    slurm-50623672.out
+    Ignored:    slurm-50623677.out
+    Ignored:    slurm-50623685.out
+    Ignored:    slurm-50623689.out
+    Ignored:    slurm-50623706.out
+    Ignored:    slurm-50623729.out
+    Ignored:    slurm-50623746.out
+    Ignored:    slurm-50623766.out
+    Ignored:    slurm-50623777.out
+    Ignored:    slurm-50623778.out
+    Ignored:    slurm-50623780.out
+    Ignored:    slurm-50623782.out
+    Ignored:    slurm-50623785.out
+    Ignored:    slurm-50623787.out
+    Ignored:    slurm-50623789.out
+    Ignored:    slurm-50623790.out
+    Ignored:    slurm-50623792.out
+    Ignored:    slurm-50623794.out
+    Ignored:    slurm-50623796.out
+    Ignored:    slurm-50623798.out
+    Ignored:    slurm-50623799.out
+    Ignored:    slurm-50623801.out
+    Ignored:    slurm-50623803.out
+    Ignored:    slurm-50623805.out
+    Ignored:    slurm-50623807.out
+    Ignored:    slurm-50623809.out
+    Ignored:    slurm-50623811.out
+    Ignored:    slurm-50623813.out
+    Ignored:    slurm-50623815.out
+    Ignored:    slurm-50623817.out
+    Ignored:    slurm-50623818.out
+    Ignored:    slurm-50623820.out
+    Ignored:    slurm-50623822.out
+    Ignored:    slurm-50623823.out
+    Ignored:    slurm-50623825.out
+    Ignored:    slurm-50623827.out
+    Ignored:    slurm-50623829.out
+    Ignored:    slurm-50623831.out
+    Ignored:    slurm-50623833.out
+    Ignored:    slurm-50623835.out
+    Ignored:    slurm-50623837.out
+    Ignored:    slurm-50623839.out
+    Ignored:    slurm-50623842.out
+    Ignored:    slurm-50623844.out
+    Ignored:    slurm-50623846.out
+    Ignored:    slurm-50623849.out
+    Ignored:    slurm-50623850.out
+    Ignored:    slurm-50623855.out
+    Ignored:    slurm-50623857.out
+    Ignored:    slurm-50623859.out
+    Ignored:    slurm-50623861.out
+    Ignored:    slurm-50623862.out
+    Ignored:    slurm-50623864.out
+    Ignored:    slurm-50623866.out
+    Ignored:    slurm-50623871.out
+    Ignored:    slurm-50623971.out
+    Ignored:    slurm-50623973.out
+    Ignored:    slurm-50623975.out
+    Ignored:    slurm-50623977.out
+    Ignored:    slurm-50623978.out
+    Ignored:    slurm-50623980.out
+    Ignored:    slurm-50623982.out
+    Ignored:    slurm-50623984.out
+    Ignored:    slurm-50623986.out
+    Ignored:    slurm-50623987.out
+    Ignored:    slurm-50623989.out
+    Ignored:    slurm-50623991.out
+    Ignored:    slurm-50623993.out
+    Ignored:    slurm-50623995.out
+    Ignored:    slurm-50623998.out
+    Ignored:    slurm-50623999.out
+    Ignored:    slurm-50624000.out
+    Ignored:    slurm-50624002.out
+    Ignored:    slurm-50624003.out
+    Ignored:    slurm-50624005.out
+    Ignored:    slurm-50624007.out
+    Ignored:    slurm-50624009.out
+    Ignored:    slurm-50624011.out
+    Ignored:    slurm-50624013.out
+    Ignored:    slurm-50624015.out
+    Ignored:    slurm-50624016.out
+    Ignored:    slurm-50624018.out
+    Ignored:    slurm-50624020.out
+    Ignored:    slurm-50624022.out
+    Ignored:    slurm-50624023.out
+    Ignored:    slurm-50624025.out
+    Ignored:    slurm-50624027.out
+    Ignored:    slurm-50624029.out
+    Ignored:    slurm-50624031.out
+    Ignored:    slurm-50624033.out
+    Ignored:    slurm-50624034.out
+    Ignored:    slurm-50624036.out
+    Ignored:    slurm-50624038.out
+    Ignored:    slurm-50624040.out
+    Ignored:    slurm-50624042.out
+    Ignored:    slurm-50624044.out
+    Ignored:    slurm-50624046.out
+    Ignored:    slurm-50624048.out
+    Ignored:    slurm-50624050.out
+    Ignored:    slurm-50624051.out
+    Ignored:    slurm-50624053.out
+    Ignored:    slurm-50624055.out
+    Ignored:    slurm-50624057.out
+    Ignored:    slurm-50624058.out
+    Ignored:    slurm-50624060.out
+    Ignored:    slurm-50624061.out
+    Ignored:    slurm-50624063.out
+    Ignored:    slurm-50624064.out
+    Ignored:    slurm-50624067.out
+    Ignored:    slurm-50624070.out
+    Ignored:    slurm-50624072.out
+    Ignored:    slurm-50624075.out
+    Ignored:    slurm-50624076.out
+    Ignored:    slurm-50624079.out
+    Ignored:    slurm-50624082.out
+    Ignored:    slurm-50624084.out
+    Ignored:    slurm-50624086.out
+    Ignored:    slurm-50624089.out
+    Ignored:    slurm-50624091.out
+    Ignored:    slurm-50624093.out
+    Ignored:    slurm-50624095.out
+    Ignored:    slurm-50624097.out
+    Ignored:    slurm-50624100.out
+    Ignored:    slurm-50624103.out
+    Ignored:    slurm-50624104.out
+    Ignored:    slurm-50624106.out
+    Ignored:    slurm-50624110.out
+    Ignored:    slurm-50624112.out
+    Ignored:    slurm-50624114.out
+    Ignored:    slurm-50624116.out
+    Ignored:    slurm-50624117.out
+    Ignored:    slurm-50624120.out
+    Ignored:    slurm-50624123.out
+    Ignored:    slurm-50624125.out
+    Ignored:    slurm-50624127.out
+    Ignored:    slurm-50624130.out
+    Ignored:    slurm-50624131.out
+    Ignored:    slurm-50624133.out
+    Ignored:    slurm-50624135.out
+    Ignored:    slurm-50624136.out
+    Ignored:    slurm-50624139.out
+    Ignored:    slurm-50624143.out
+    Ignored:    slurm-50624145.out
+    Ignored:    slurm-50624147.out
+    Ignored:    slurm-50624153.out
+    Ignored:    slurm-50624156.out
+    Ignored:    slurm-50624158.out
+    Ignored:    slurm-50624162.out
+    Ignored:    slurm-50624165.out
+    Ignored:    slurm-50624167.out
+    Ignored:    slurm-50624169.out
+    Ignored:    slurm-50624173.out
+    Ignored:    slurm-50624175.out
+    Ignored:    slurm-50624177.out
+    Ignored:    slurm-50624180.out
+    Ignored:    slurm-50624182.out
+    Ignored:    slurm-50624187.out
+    Ignored:    slurm-50624188.out
+    Ignored:    slurm-50624192.out
+    Ignored:    slurm-50624196.out
+    Ignored:    slurm-50624200.out
+    Ignored:    slurm-50624203.out
+    Ignored:    slurm-50624208.out
+    Ignored:    slurm-50624211.out
+    Ignored:    slurm-50624213.out
+    Ignored:    slurm-50624215.out
+    Ignored:    slurm-50624338.out
+    Ignored:    slurm-50624341.out
+    Ignored:    slurm-50624348.out
+    Ignored:    slurm-50624351.out
+    Ignored:    slurm-50624353.out
+    Ignored:    slurm-50624355.out
+    Ignored:    slurm-50624360.out
+    Ignored:    slurm-50624362.out
+    Ignored:    slurm-50624370.out
+    Ignored:    slurm-50624376.out
+    Ignored:    slurm-50624378.out
+    Ignored:    slurm-50624382.out
+    Ignored:    slurm-50624390.out
+    Ignored:    slurm-50624392.out
+    Ignored:    slurm-50624396.out
+    Ignored:    slurm-50624399.out
+    Ignored:    slurm-50624402.out
+    Ignored:    slurm-50624404.out
+    Ignored:    slurm-50624405.out
+    Ignored:    slurm-50624408.out
+    Ignored:    slurm-50624410.out
+    Ignored:    slurm-50624412.out
+    Ignored:    slurm-50624415.out
+    Ignored:    slurm-50624417.out
+    Ignored:    slurm-50624419.out
+    Ignored:    slurm-50624421.out
+    Ignored:    slurm-50624423.out
+    Ignored:    slurm-50624427.out
+    Ignored:    slurm-50624430.out
+    Ignored:    slurm-50624433.out
+    Ignored:    slurm-50624436.out
+    Ignored:    slurm-50624440.out
+    Ignored:    slurm-50624444.out
+    Ignored:    slurm-50624446.out
+    Ignored:    slurm-50624449.out
+    Ignored:    slurm-50624451.out
+    Ignored:    slurm-50624454.out
+    Ignored:    slurm-50624455.out
+    Ignored:    slurm-50624458.out
+    Ignored:    slurm-50624461.out
+    Ignored:    slurm-50624469.out
+    Ignored:    slurm-50624471.out
+    Ignored:    slurm-50624472.out
+    Ignored:    slurm-50624478.out
+    Ignored:    slurm-50624479.out
+    Ignored:    slurm-50624481.out
+    Ignored:    slurm-50624485.out
+    Ignored:    slurm-50624489.out
+    Ignored:    slurm-50624491.out
+    Ignored:    slurm-50624493.out
+    Ignored:    slurm-50624495.out
+    Ignored:    slurm-50624497.out
+    Ignored:    slurm-50624498.out
+    Ignored:    slurm-50624500.out
+    Ignored:    slurm-50624503.out
+    Ignored:    slurm-50624507.out
+    Ignored:    slurm-50624509.out
+    Ignored:    slurm-50624511.out
+    Ignored:    slurm-50624516.out
+    Ignored:    slurm-50624518.out
+    Ignored:    slurm-50624519.out
+    Ignored:    slurm-50624522.out
+    Ignored:    slurm-50624523.out
+    Ignored:    slurm-50624526.out
+    Ignored:    slurm-50624527.out
+    Ignored:    slurm-50624531.out
+    Ignored:    slurm-50624537.out
+    Ignored:    slurm-50624539.out
+    Ignored:    slurm-50624541.out
+    Ignored:    slurm-50624544.out
+    Ignored:    slurm-50624546.out
+    Ignored:    slurm-50624548.out
+    Ignored:    slurm-50624551.out
+    Ignored:    slurm-50624554.out
+    Ignored:    slurm-50624556.out
+    Ignored:    slurm-50624558.out
+    Ignored:    slurm-50624561.out
+    Ignored:    slurm-50624564.out
+    Ignored:    slurm-50624566.out
+    Ignored:    slurm-50624567.out
+    Ignored:    slurm-50624569.out
+    Ignored:    slurm-50624571.out
+    Ignored:    slurm-50624573.out
+    Ignored:    slurm-50624575.out
+    Ignored:    slurm-50624577.out
+    Ignored:    slurm-50624581.out
+    Ignored:    slurm-50624582.out
+    Ignored:    slurm-50624584.out
+    Ignored:    slurm-50624586.out
+    Ignored:    slurm-50624588.out
+    Ignored:    slurm-50624591.out
+    Ignored:    slurm-50624594.out
+    Ignored:    slurm-50624598.out
+    Ignored:    slurm-50624599.out
+    Ignored:    slurm-50624605.out
+    Ignored:    slurm-50624609.out
+    Ignored:    slurm-50624612.out
+    Ignored:    slurm-50624613.out
+    Ignored:    slurm-50624615.out
+    Ignored:    slurm-50624618.out
+    Ignored:    slurm-50624621.out
+    Ignored:    slurm-50624623.out
+    Ignored:    slurm-50624626.out
+    Ignored:    slurm-50624628.out
+    Ignored:    slurm-50624630.out
+    Ignored:    slurm-50624632.out
+    Ignored:    slurm-50624633.out
+    Ignored:    slurm-50624635.out
+    Ignored:    slurm-50624637.out
+    Ignored:    slurm-50624639.out
+    Ignored:    slurm-50624641.out
+    Ignored:    slurm-50624642.out
+    Ignored:    slurm-50624645.out
+    Ignored:    slurm-50624648.out
+    Ignored:    slurm-50624651.out
+    Ignored:    slurm-50624653.out
+    Ignored:    slurm-50624656.out
+    Ignored:    slurm-50624659.out
+    Ignored:    slurm-50624661.out
+    Ignored:    slurm-50624664.out
+    Ignored:    slurm-50624667.out
+    Ignored:    slurm-50624688.out
+    Ignored:    slurm-50624692.out
+    Ignored:    slurm-50624695.out
+    Ignored:    slurm-50624701.out
+    Ignored:    slurm-50624705.out
+    Ignored:    slurm-50624714.out
+    Ignored:    slurm-50624729.out
+    Ignored:    slurm-50624733.out
+    Ignored:    slurm-50624734.out
+    Ignored:    slurm-50624742.out
+    Ignored:    slurm-50624746.out
+    Ignored:    slurm-50624762.out
+    Ignored:    slurm-50624783.out
+    Ignored:    slurm-50624805.out
+    Ignored:    slurm-50624809.out
+    Ignored:    slurm-50624812.out
+    Ignored:    slurm-50624815.out
+    Ignored:    slurm-50624818.out
+    Ignored:    slurm-50624820.out
+    Ignored:    slurm-50624822.out
+    Ignored:    slurm-50624823.out
+    Ignored:    slurm-50624825.out
+    Ignored:    slurm-50624827.out
+    Ignored:    slurm-50624829.out
+    Ignored:    slurm-50624831.out
+    Ignored:    slurm-50624834.out
+    Ignored:    slurm-50624837.out
+    Ignored:    slurm-50624838.out
+    Ignored:    slurm-50624840.out
+    Ignored:    slurm-50624842.out
+    Ignored:    slurm-50624846.out
+    Ignored:    slurm-50624850.out
+    Ignored:    slurm-50624852.out
+    Ignored:    slurm-50624854.out
+    Ignored:    slurm-50624855.out
+    Ignored:    slurm-50624858.out
+    Ignored:    slurm-50624859.out
+    Ignored:    slurm-50624860.out
+    Ignored:    slurm-50624862.out
+    Ignored:    slurm-50624866.out
+    Ignored:    slurm-50624868.out
+    Ignored:    slurm-50624870.out
+    Ignored:    slurm-50624872.out
+    Ignored:    slurm-50624874.out
+    Ignored:    slurm-50624876.out
+    Ignored:    slurm-50624878.out
+    Ignored:    slurm-50624880.out
+    Ignored:    slurm-50624882.out
+    Ignored:    slurm-50624884.out
+    Ignored:    slurm-50624887.out
+    Ignored:    slurm-50624888.out
+    Ignored:    slurm-50624890.out
+    Ignored:    slurm-50624892.out
+    Ignored:    slurm-50624894.out
+    Ignored:    slurm-50624896.out
+    Ignored:    slurm-50624898.out
+    Ignored:    slurm-50624899.out
+    Ignored:    slurm-50624901.out
+    Ignored:    slurm-50624903.out
+    Ignored:    slurm-50624905.out
+    Ignored:    slurm-50624907.out
+    Ignored:    slurm-50624909.out
+    Ignored:    slurm-50624911.out
+    Ignored:    slurm-50624913.out
+    Ignored:    slurm-50624916.out
+    Ignored:    slurm-50624918.out
+    Ignored:    slurm-50624921.out
+    Ignored:    slurm-50624922.out
+    Ignored:    slurm-50624925.out
+    Ignored:    slurm-50624927.out
+    Ignored:    slurm-50624930.out
+    Ignored:    slurm-50624932.out
+    Ignored:    slurm-50624933.out
+    Ignored:    slurm-50624935.out
+    Ignored:    slurm-50624937.out
+    Ignored:    slurm-50624939.out
+    Ignored:    slurm-50624942.out
+    Ignored:    slurm-50624943.out
+    Ignored:    slurm-50624945.out
+    Ignored:    slurm-50624947.out
+    Ignored:    slurm-50624949.out
+    Ignored:    slurm-50624950.out
+    Ignored:    slurm-50624952.out
+    Ignored:    slurm-50624955.out
+    Ignored:    slurm-50624957.out
+    Ignored:    slurm-50624959.out
+    Ignored:    slurm-50624961.out
+    Ignored:    slurm-50624963.out
+    Ignored:    slurm-50624966.out
+    Ignored:    slurm-50624967.out
+    Ignored:    slurm-50624969.out
+    Ignored:    slurm-50624970.out
+    Ignored:    slurm-50624971.out
+    Ignored:    slurm-50624973.out
+    Ignored:    slurm-50624974.out
+    Ignored:    slurm-50624976.out
+    Ignored:    slurm-50624978.out
+    Ignored:    slurm-50624980.out
+    Ignored:    slurm-50624981.out
+    Ignored:    slurm-50624983.out
+    Ignored:    slurm-50624985.out
+    Ignored:    slurm-50624988.out
+    Ignored:    slurm-50624990.out
+    Ignored:    slurm-50624991.out
+    Ignored:    slurm-50624993.out
+    Ignored:    slurm-50624995.out
+    Ignored:    slurm-50624997.out
+    Ignored:    slurm-50624999.out
+    Ignored:    slurm-50625000.out
+    Ignored:    slurm-50625003.out
+    Ignored:    slurm-50625005.out
+    Ignored:    slurm-50625007.out
+    Ignored:    slurm-50625009.out
+    Ignored:    slurm-50625012.out
+    Ignored:    slurm-50625013.out
+    Ignored:    slurm-50625015.out
+    Ignored:    slurm-50625017.out
+    Ignored:    slurm-50625019.out
+    Ignored:    slurm-50625021.out
+    Ignored:    slurm-50625022.out
+    Ignored:    slurm-50625026.out
+    Ignored:    slurm-50625030.out
+    Ignored:    slurm-50625037.out
+    Ignored:    slurm-50625040.out
+    Ignored:    slurm-50625054.out
+    Ignored:    slurm-50625084.out
+    Ignored:    slurm-50625117.out
+    Ignored:    slurm-50625132.out
+    Ignored:    slurm-50625146.out
+    Ignored:    slurm-50625159.out
+    Ignored:    slurm-50625173.out
+    Ignored:    slurm-50625188.out
+    Ignored:    slurm-50625204.out
+    Ignored:    slurm-50625218.out
+    Ignored:    slurm-50625231.out
+    Ignored:    slurm-50625245.out
+    Ignored:    slurm-50625254.out
+    Ignored:    slurm-50625268.out
+    Ignored:    slurm-50625282.out
+    Ignored:    slurm-50625294.out
+    Ignored:    slurm-50625307.out
+    Ignored:    slurm-50625322.out
+    Ignored:    slurm-50625326.out
+    Ignored:    slurm-50625335.out
+    Ignored:    slurm-50625345.out
+    Ignored:    slurm-50625346.out
+    Ignored:    slurm-50625349.out
+    Ignored:    slurm-50625352.out
+    Ignored:    slurm-50625353.out
+    Ignored:    slurm-50625360.out
+    Ignored:    slurm-50625363.out
+    Ignored:    slurm-50625369.out
+    Ignored:    slurm-50625379.out
+    Ignored:    slurm-50625391.out
+    Ignored:    slurm-50625403.out
+    Ignored:    slurm-50625417.out
+    Ignored:    slurm-50625426.out
+    Ignored:    slurm-50625437.out
+    Ignored:    slurm-50625446.out
+    Ignored:    slurm-50625479.out
+    Ignored:    slurm-50625496.out
+    Ignored:    slurm-50625516.out
+    Ignored:    slurm-50625517.out
+    Ignored:    slurm-50625533.out
+    Ignored:    slurm-50625569.out
+    Ignored:    slurm-50625599.out
+    Ignored:    slurm-50625626.out
+    Ignored:    slurm-50625630.out
+    Ignored:    slurm-50625641.out
+    Ignored:    slurm-50625646.out
+    Ignored:    slurm-50625647.out
+    Ignored:    slurm-50625651.out
+    Ignored:    slurm-50625657.out
+    Ignored:    slurm-50625662.out
+    Ignored:    slurm-50625663.out
+    Ignored:    slurm-50625667.out
+    Ignored:    slurm-50625674.out
+    Ignored:    slurm-50625678.out
+    Ignored:    slurm-50625690.out
+    Ignored:    slurm-50625695.out
+    Ignored:    slurm-50625699.out
+    Ignored:    slurm-50625700.out
+    Ignored:    slurm-50625702.out
+    Ignored:    slurm-50625705.out
+    Ignored:    slurm-50625707.out
+    Ignored:    slurm-50625710.out
+    Ignored:    slurm-50625712.out
+    Ignored:    slurm-50625714.out
+    Ignored:    slurm-50625716.out
+    Ignored:    slurm-50625718.out
+    Ignored:    slurm-50625720.out
+    Ignored:    slurm-50625721.out
+    Ignored:    slurm-50625723.out
+    Ignored:    slurm-50625726.out
+    Ignored:    slurm-50625727.out
+    Ignored:    slurm-50625729.out
+    Ignored:    slurm-50625731.out
+    Ignored:    slurm-50625732.out
+    Ignored:    slurm-50625734.out
+    Ignored:    slurm-50625735.out
+    Ignored:    slurm-50625739.out
+    Ignored:    slurm-50625741.out
+    Ignored:    slurm-50625745.out
+    Ignored:    slurm-50625747.out
+    Ignored:    slurm-50625749.out
+    Ignored:    slurm-50625751.out
+    Ignored:    slurm-50625754.out
+    Ignored:    slurm-50625756.out
+    Ignored:    slurm-50625758.out
+    Ignored:    slurm-50625759.out
+    Ignored:    slurm-50625761.out
+    Ignored:    slurm-50625763.out
+    Ignored:    slurm-50625765.out
+    Ignored:    slurm-50625766.out
+    Ignored:    slurm-50625768.out
+    Ignored:    slurm-50625769.out
+    Ignored:    slurm-50625770.out
+    Ignored:    slurm-50625772.out
+    Ignored:    slurm-50625774.out
+    Ignored:    slurm-50625775.out
+    Ignored:    slurm-50625777.out
+    Ignored:    slurm-50625778.out
+    Ignored:    slurm-50625779.out
+    Ignored:    slurm-50625781.out
+    Ignored:    slurm-50625783.out
+    Ignored:    slurm-50625785.out
+    Ignored:    slurm-50625787.out
+    Ignored:    slurm-50625788.out
+    Ignored:    slurm-50625790.out
+    Ignored:    slurm-50625792.out
+    Ignored:    slurm-50625794.out
+    Ignored:    slurm-50625795.out
+    Ignored:    slurm-50625797.out
+    Ignored:    slurm-50625799.out
+    Ignored:    slurm-50625801.out
+    Ignored:    slurm-50625803.out
+    Ignored:    slurm-50625805.out
+    Ignored:    slurm-50625807.out
+    Ignored:    slurm-50625928.out
+    Ignored:    slurm-50625930.out
+    Ignored:    slurm-50625931.out
+    Ignored:    slurm-50625934.out
+    Ignored:    slurm-50625935.out
+    Ignored:    slurm-50625937.out
+    Ignored:    slurm-50625939.out
+    Ignored:    slurm-50625941.out
+    Ignored:    slurm-50625942.out
+    Ignored:    slurm-50625944.out
+    Ignored:    slurm-50625946.out
+    Ignored:    slurm-50625948.out
+    Ignored:    slurm-50625950.out
+    Ignored:    slurm-50625952.out
+    Ignored:    slurm-50625954.out
+    Ignored:    slurm-50625955.out
+    Ignored:    slurm-50625957.out
+    Ignored:    slurm-50625959.out
+    Ignored:    slurm-50625961.out
+    Ignored:    slurm-50625963.out
+    Ignored:    slurm-50625966.out
+    Ignored:    slurm-50625968.out
+    Ignored:    slurm-50625971.out
+    Ignored:    slurm-50625972.out
+    Ignored:    slurm-50625974.out
+    Ignored:    slurm-50625976.out
+    Ignored:    slurm-50625977.out
+    Ignored:    slurm-50625979.out
+    Ignored:    slurm-50625980.out
+    Ignored:    slurm-50625982.out
+    Ignored:    slurm-50625983.out
+    Ignored:    slurm-50625985.out
+    Ignored:    slurm-50625987.out
+    Ignored:    slurm-50625989.out
+    Ignored:    slurm-50625990.out
+    Ignored:    slurm-50625993.out
+    Ignored:    slurm-50625994.out
+    Ignored:    slurm-50625996.out
+    Ignored:    slurm-50625997.out
+    Ignored:    slurm-50625999.out
+    Ignored:    slurm-50626001.out
+    Ignored:    slurm-50626003.out
+    Ignored:    slurm-50626005.out
+    Ignored:    slurm-50626006.out
+    Ignored:    slurm-50626008.out
+    Ignored:    slurm-50626010.out
+    Ignored:    slurm-50626012.out
+    Ignored:    slurm-50626014.out
+    Ignored:    slurm-50626016.out
+    Ignored:    slurm-50626018.out
+    Ignored:    slurm-50626019.out
+    Ignored:    slurm-50626021.out
+    Ignored:    slurm-50626022.out
+    Ignored:    slurm-50626023.out
+    Ignored:    slurm-50626025.out
+    Ignored:    slurm-50626026.out
+    Ignored:    slurm-50626030.out
+    Ignored:    slurm-50626031.out
+    Ignored:    slurm-50626033.out
+    Ignored:    slurm-50626035.out
+    Ignored:    slurm-50626037.out
+    Ignored:    slurm-50626039.out
+    Ignored:    slurm-50626041.out
+    Ignored:    slurm-50626043.out
+    Ignored:    slurm-50626045.out
+    Ignored:    slurm-50626047.out
+    Ignored:    slurm-50626051.out
+    Ignored:    slurm-50626053.out
+    Ignored:    slurm-50626055.out
+    Ignored:    slurm-50626056.out
+    Ignored:    slurm-50626058.out
+    Ignored:    slurm-50626060.out
+    Ignored:    slurm-50626062.out
+    Ignored:    slurm-50626064.out
+    Ignored:    slurm-50626066.out
+    Ignored:    slurm-50626068.out
+    Ignored:    slurm-50626070.out
+    Ignored:    slurm-50626071.out
+    Ignored:    slurm-50626073.out
+    Ignored:    slurm-50626074.out
+    Ignored:    slurm-50626077.out
+    Ignored:    slurm-50626080.out
+    Ignored:    slurm-50626082.out
+    Ignored:    slurm-50626084.out
+    Ignored:    slurm-50626087.out
+    Ignored:    slurm-50626088.out
+    Ignored:    slurm-50626091.out
+    Ignored:    slurm-50626096.out
+    Ignored:    slurm-50626099.out
+    Ignored:    slurm-50626107.out
+    Ignored:    slurm-50626114.out
+    Ignored:    slurm-50626122.out
+    Ignored:    slurm-50626128.out
+    Ignored:    slurm-50626135.out
+    Ignored:    slurm-50626141.out
+    Ignored:    slurm-50626150.out
+    Ignored:    slurm-50626158.out
+    Ignored:    slurm-50626161.out
+    Ignored:    slurm-50626172.out
+    Ignored:    slurm-50626180.out
+    Ignored:    slurm-50626189.out
+    Ignored:    slurm-50626197.out
+    Ignored:    slurm-50626206.out
+    Ignored:    slurm-50626210.out
+    Ignored:    slurm-50626217.out
+    Ignored:    slurm-50626219.out
+    Ignored:    slurm-50626222.out
+    Ignored:    slurm-50626224.out
+    Ignored:    slurm-50626229.out
+    Ignored:    slurm-50626232.out
+    Ignored:    slurm-50626237.out
+    Ignored:    slurm-50626244.out
+    Ignored:    slurm-50626247.out
+    Ignored:    slurm-50626251.out
+    Ignored:    slurm-50626254.out
+    Ignored:    slurm-50626264.out
+    Ignored:    slurm-50626272.out
+    Ignored:    slurm-50626280.out
+    Ignored:    slurm-50626289.out
+    Ignored:    slurm-50626296.out
+    Ignored:    slurm-50626304.out
+    Ignored:    slurm-50626313.out
+    Ignored:    slurm-50626321.out
+    Ignored:    slurm-50626323.out
+    Ignored:    slurm-50626331.out
+    Ignored:    slurm-50626338.out
+    Ignored:    slurm-50626344.out
+    Ignored:    slurm-50626354.out
+    Ignored:    slurm-50626362.out
+    Ignored:    slurm-50626370.out
+    Ignored:    slurm-50626376.out
+    Ignored:    slurm-50626378.out
+    Ignored:    slurm-50626380.out
+    Ignored:    slurm-50626382.out
+    Ignored:    slurm-50626385.out
+    Ignored:    slurm-50626389.out
+    Ignored:    slurm-50626396.out
+    Ignored:    slurm-50626404.out
+    Ignored:    slurm-50626406.out
+    Ignored:    slurm-50626409.out
+    Ignored:    slurm-50626413.out
+    Ignored:    slurm-50626421.out
+    Ignored:    slurm-50626429.out
+    Ignored:    slurm-50626434.out
+    Ignored:    slurm-50626437.out
+    Ignored:    slurm-50626444.out
+    Ignored:    slurm-50626453.out
+    Ignored:    slurm-50626462.out
+    Ignored:    slurm-50626470.out
+    Ignored:    slurm-50626476.out
+    Ignored:    slurm-50626477.out
+    Ignored:    slurm-50626479.out
+    Ignored:    slurm-50626481.out
+    Ignored:    slurm-50626482.out
+    Ignored:    slurm-50626483.out
+    Ignored:    slurm-50626488.out
+    Ignored:    slurm-50626490.out
+    Ignored:    slurm-50626493.out
+    Ignored:    slurm-50626500.out
+    Ignored:    slurm-50626507.out
+    Ignored:    slurm-50626516.out
+    Ignored:    slurm-50626523.out
+    Ignored:    slurm-50626530.out
+    Ignored:    slurm-50626537.out
+    Ignored:    slurm-50626543.out
+    Ignored:    slurm-50626545.out
+    Ignored:    slurm-50626553.out
+    Ignored:    slurm-50626561.out
+    Ignored:    slurm-50626570.out
+    Ignored:    slurm-50626578.out
+    Ignored:    slurm-50626587.out
+    Ignored:    slurm-50626591.out
+    Ignored:    slurm-50626599.out
+    Ignored:    slurm-50626605.out
+    Ignored:    slurm-50626611.out
+    Ignored:    slurm-50626613.out
+    Ignored:    slurm-50626614.out
+    Ignored:    slurm-50626616.out
+    Ignored:    slurm-50626621.out
+    Ignored:    slurm-50626624.out
+    Ignored:    slurm-50626627.out
+    Ignored:    slurm-50626630.out
+    Ignored:    slurm-50626638.out
+    Ignored:    slurm-50626643.out
+    Ignored:    slurm-50626652.out
+    Ignored:    slurm-50626660.out
+    Ignored:    slurm-50626669.out
+    Ignored:    slurm-50626677.out
+    Ignored:    slurm-50626685.out
+    Ignored:    slurm-50626693.out
+    Ignored:    slurm-50626701.out
+    Ignored:    slurm-50626710.out
+    Ignored:    slurm-50626719.out
+    Ignored:    slurm-50626727.out
+    Ignored:    slurm-50626735.out
+    Ignored:    slurm-50626738.out
+    Ignored:    slurm-50626740.out
+    Ignored:    slurm-50626742.out
+    Ignored:    slurm-50626745.out
+    Ignored:    slurm-50626747.out
+    Ignored:    slurm-50626749.out
+    Ignored:    slurm-50626751.out
+    Ignored:    slurm-50626753.out
+    Ignored:    slurm-50626755.out
+    Ignored:    slurm-50626756.out
+    Ignored:    slurm-50626759.out
+    Ignored:    slurm-50626760.out
+    Ignored:    slurm-50626762.out
+    Ignored:    slurm-50626763.out
+    Ignored:    slurm-50626765.out
+    Ignored:    slurm-50626766.out
+    Ignored:    slurm-50626768.out
+    Ignored:    slurm-50626770.out
+    Ignored:    slurm-50626773.out
+    Ignored:    slurm-50626774.out
+    Ignored:    slurm-50626775.out
+    Ignored:    slurm-50626777.out
+    Ignored:    slurm-50626779.out
+    Ignored:    slurm-50626781.out
+    Ignored:    slurm-50626784.out
+    Ignored:    slurm-50626786.out
+    Ignored:    slurm-50626788.out
+    Ignored:    slurm-50626790.out
+    Ignored:    slurm-50626792.out
+    Ignored:    slurm-50626793.out
+    Ignored:    slurm-50626795.out
+    Ignored:    slurm-50626797.out
+    Ignored:    slurm-50626799.out
+    Ignored:    slurm-50626801.out
+    Ignored:    slurm-50626803.out
+    Ignored:    slurm-50626804.out
+    Ignored:    slurm-50626809.out
+    Ignored:    slurm-50626813.out
+    Ignored:    slurm-50626815.out
+    Ignored:    slurm-50626820.out
+    Ignored:    slurm-50626823.out
+    Ignored:    slurm-50626832.out
+    Ignored:    slurm-50626844.out
+    Ignored:    slurm-50626857.out
+    Ignored:    slurm-50626866.out
+    Ignored:    slurm-50626870.out
+    Ignored:    slurm-50626879.out
+    Ignored:    slurm-50626887.out
+    Ignored:    slurm-50626898.out
+    Ignored:    slurm-50626908.out
+    Ignored:    slurm-50626920.out
+    Ignored:    slurm-50626930.out
+    Ignored:    slurm-50626935.out
+    Ignored:    slurm-50626945.out
+    Ignored:    slurm-50626956.out
+    Ignored:    slurm-50626969.out
+    Ignored:    slurm-50626980.out
+    Ignored:    slurm-50626993.out
+    Ignored:    slurm-50626997.out
+    Ignored:    slurm-50627007.out
+    Ignored:    slurm-50627011.out
+    Ignored:    slurm-50627014.out
+    Ignored:    slurm-50627017.out
+    Ignored:    slurm-50627019.out
+    Ignored:    slurm-50627022.out
+    Ignored:    slurm-50627033.out
+    Ignored:    slurm-50627041.out
+    Ignored:    slurm-50627043.out
+    Ignored:    slurm-50627047.out
+    Ignored:    slurm-50627056.out
+    Ignored:    slurm-50627057.out
+    Ignored:    slurm-50627060.out
+    Ignored:    slurm-50627073.out
+    Ignored:    slurm-50627079.out
+    Ignored:    slurm-50627091.out
+    Ignored:    slurm-50627099.out
+    Ignored:    slurm-50627110.out
+    Ignored:    slurm-50627116.out
+    Ignored:    slurm-50627122.out
+    Ignored:    slurm-50627131.out
+    Ignored:    slurm-50627143.out
+    Ignored:    slurm-50627151.out
+    Ignored:    slurm-50627162.out
+    Ignored:    slurm-50627174.out
+    Ignored:    slurm-50627176.out
+    Ignored:    slurm-50627178.out
+    Ignored:    slurm-50627181.out
+    Ignored:    slurm-50627183.out
+    Ignored:    slurm-50627187.out
+    Ignored:    slurm-50627188.out
+    Ignored:    slurm-50627192.out
+    Ignored:    slurm-50627199.out
+    Ignored:    slurm-50627210.out
+    Ignored:    slurm-50627217.out
+    Ignored:    slurm-50627234.out
+    Ignored:    slurm-50627244.out
+    Ignored:    slurm-50627260.out
+    Ignored:    slurm-50627280.out
+    Ignored:    slurm-50627303.out
+    Ignored:    slurm-50627325.out
+    Ignored:    slurm-50627336.out
+    Ignored:    slurm-50627365.out
+    Ignored:    slurm-50627392.out
+    Ignored:    slurm-50627399.out
+    Ignored:    slurm-50627412.out
+    Ignored:    slurm-50627423.out
+    Ignored:    slurm-50627428.out
+    Ignored:    slurm-50627440.out
+    Ignored:    slurm-50627449.out
+    Ignored:    slurm-50627453.out
+    Ignored:    slurm-50627455.out
+    Ignored:    slurm-50627459.out
+    Ignored:    slurm-50627467.out
+    Ignored:    slurm-50627477.out
+    Ignored:    slurm-50627485.out
+    Ignored:    slurm-50627490.out
+    Ignored:    slurm-50627493.out
+    Ignored:    slurm-50627497.out
+    Ignored:    slurm-50627508.out
+    Ignored:    slurm-50627514.out
+    Ignored:    slurm-50627522.out
+    Ignored:    slurm-50627525.out
+    Ignored:    slurm-50627533.out
+    Ignored:    slurm-50627540.out
+    Ignored:    slurm-50627542.out
+    Ignored:    slurm-50627544.out
+    Ignored:    slurm-50627545.out
+    Ignored:    slurm-50627547.out
+    Ignored:    slurm-50627549.out
+    Ignored:    slurm-50627551.out
+    Ignored:    slurm-50627553.out
+    Ignored:    slurm-50627554.out
+    Ignored:    slurm-50627556.out
+    Ignored:    slurm-50627578.out
+    Ignored:    slurm-50627580.out
+    Ignored:    slurm-50627584.out
+    Ignored:    slurm-50627586.out
+    Ignored:    slurm-50627588.out
+    Ignored:    slurm-50627590.out
+    Ignored:    slurm-50627593.out
+    Ignored:    slurm-50627595.out
+    Ignored:    slurm-50627597.out
+    Ignored:    slurm-50627599.out
+    Ignored:    slurm-50627601.out
+    Ignored:    slurm-50627603.out
+    Ignored:    slurm-50627605.out
+    Ignored:    slurm-50627606.out
+    Ignored:    slurm-50627708.out
+    Ignored:    slurm-50627711.out
+    Ignored:    slurm-50627714.out
+    Ignored:    slurm-50627715.out
+    Ignored:    slurm-50627717.out
+    Ignored:    slurm-50627718.out
+    Ignored:    slurm-50627720.out
+    Ignored:    slurm-50627722.out
+    Ignored:    slurm-50627724.out
+    Ignored:    slurm-50627726.out
+    Ignored:    slurm-50627728.out
+    Ignored:    slurm-50627730.out
+    Ignored:    slurm-50627731.out
+    Ignored:    slurm-50627733.out
+    Ignored:    slurm-50627735.out
+    Ignored:    slurm-50627737.out
+    Ignored:    slurm-50627739.out
+    Ignored:    slurm-50627740.out
+    Ignored:    slurm-50627742.out
+    Ignored:    slurm-50627744.out
+    Ignored:    slurm-50627746.out
+    Ignored:    slurm-50627748.out
+    Ignored:    slurm-50627750.out
+    Ignored:    slurm-50627752.out
+    Ignored:    slurm-50627755.out
+    Ignored:    slurm-50627757.out
+    Ignored:    slurm-50627760.out
+    Ignored:    slurm-50627762.out
+    Ignored:    slurm-50627764.out
+    Ignored:    slurm-50627765.out
+    Ignored:    slurm-50627766.out
+    Ignored:    slurm-50627768.out
+    Ignored:    slurm-50627770.out
+    Ignored:    slurm-50627773.out
+    Ignored:    slurm-50627775.out
+    Ignored:    slurm-50627784.out
+    Ignored:    slurm-50627790.out
+    Ignored:    slurm-50627798.out
+    Ignored:    slurm-50627807.out
+    Ignored:    slurm-50627815.out
+    Ignored:    slurm-50627824.out
+    Ignored:    slurm-50627833.out
+    Ignored:    slurm-50627843.out
+    Ignored:    slurm-50627851.out
+    Ignored:    slurm-50627858.out
+    Ignored:    slurm-50627867.out
+    Ignored:    slurm-50627873.out
+    Ignored:    slurm-50627881.out
+    Ignored:    slurm-50627886.out
+    Ignored:    slurm-50627889.out
+    Ignored:    slurm-50627895.out
+    Ignored:    slurm-50627904.out
+    Ignored:    slurm-50627907.out
+    Ignored:    slurm-50627909.out
+    Ignored:    slurm-50627911.out
+    Ignored:    slurm-50627915.out
+    Ignored:    slurm-50627916.out
+    Ignored:    slurm-50627918.out
+    Ignored:    slurm-50627922.out
+    Ignored:    slurm-50627928.out
+    Ignored:    slurm-50627951.out
+    Ignored:    slurm-50627976.out
+    Ignored:    slurm-50627995.out
+    Ignored:    slurm-50628022.out
+    Ignored:    slurm-50628045.out
+    Ignored:    slurm-50628067.out
+    Ignored:    slurm-50628081.out
+    Ignored:    slurm-50628089.out
+    Ignored:    slurm-50628099.out
+    Ignored:    slurm-50628106.out
+    Ignored:    slurm-50628112.out
+    Ignored:    slurm-50628121.out
+    Ignored:    slurm-50628129.out
+    Ignored:    slurm-50628135.out
+    Ignored:    slurm-50628144.out
+    Ignored:    slurm-50628152.out
+    Ignored:    slurm-50628159.out
+    Ignored:    slurm-50628168.out
+    Ignored:    slurm-50628176.out
+    Ignored:    slurm-50628184.out
+    Ignored:    slurm-50628189.out
+    Ignored:    slurm-50628191.out
+    Ignored:    slurm-50628196.out
+    Ignored:    slurm-50628199.out
+    Ignored:    slurm-50628201.out
+    Ignored:    slurm-50628204.out
+    Ignored:    slurm-50628207.out
+    Ignored:    slurm-50628212.out
+    Ignored:    slurm-50628221.out
+    Ignored:    slurm-50628226.out
+    Ignored:    slurm-50628227.out
+    Ignored:    slurm-50628232.out
+    Ignored:    slurm-50628240.out
+    Ignored:    slurm-50628249.out
+    Ignored:    slurm-50628257.out
+    Ignored:    slurm-50628264.out
+    Ignored:    slurm-50628273.out
+    Ignored:    slurm-50628280.out
+    Ignored:    slurm-50628289.out
+    Ignored:    slurm-50628297.out
+    Ignored:    slurm-50628305.out
+    Ignored:    slurm-50628311.out
+    Ignored:    slurm-50628320.out
+    Ignored:    slurm-50628328.out
+    Ignored:    slurm-50628336.out
+    Ignored:    slurm-50628344.out
+    Ignored:    slurm-50628348.out
+    Ignored:    slurm-50628353.out
+    Ignored:    slurm-50628357.out
+    Ignored:    slurm-50628358.out
+    Ignored:    slurm-50628359.out
+    Ignored:    slurm-50628361.out
+    Ignored:    slurm-50628364.out
+    Ignored:    slurm-50628366.out
+    Ignored:    slurm-50628369.out
+    Ignored:    slurm-50628374.out
+    Ignored:    slurm-50628377.out
+    Ignored:    slurm-50628382.out
+    Ignored:    slurm-50628387.out
+    Ignored:    slurm-50628396.out
+    Ignored:    slurm-50628400.out
+    Ignored:    slurm-50628408.out
+    Ignored:    slurm-50628416.out
+    Ignored:    slurm-50628425.out
+    Ignored:    slurm-50628434.out
+    Ignored:    slurm-50628443.out
+    Ignored:    slurm-50628451.out
+    Ignored:    slurm-50628460.out
+    Ignored:    slurm-50628469.out
+    Ignored:    slurm-50628477.out
+    Ignored:    slurm-50628485.out
+    Ignored:    slurm-50628493.out
+    Ignored:    slurm-50628501.out
+    Ignored:    slurm-50628508.out
+    Ignored:    slurm-50628514.out
+    Ignored:    slurm-50628516.out
+    Ignored:    slurm-50628519.out
+    Ignored:    slurm-50628522.out
+    Ignored:    slurm-50628523.out
+    Ignored:    slurm-50628527.out
+    Ignored:    slurm-50628528.out
+    Ignored:    slurm-50628534.out
+    Ignored:    slurm-50628536.out
+    Ignored:    slurm-50628537.out
+    Ignored:    slurm-50628539.out
+    Ignored:    slurm-50628541.out
+    Ignored:    slurm-50628543.out
+    Ignored:    slurm-50628545.out
+    Ignored:    slurm-50628547.out
+    Ignored:    slurm-50628548.out
+    Ignored:    slurm-50628550.out
+    Ignored:    slurm-50628552.out
+    Ignored:    slurm-50628554.out
+    Ignored:    slurm-50628556.out
+    Ignored:    slurm-50628557.out
+    Ignored:    slurm-50628559.out
+    Ignored:    slurm-50628561.out
+    Ignored:    slurm-50628563.out
+    Ignored:    slurm-50628565.out
+    Ignored:    slurm-50628567.out
+    Ignored:    slurm-50628569.out
+    Ignored:    slurm-50628571.out
+    Ignored:    slurm-50628573.out
+    Ignored:    slurm-50628576.out
+    Ignored:    slurm-50628580.out
+    Ignored:    slurm-50628586.out
+    Ignored:    slurm-50628593.out
+    Ignored:    slurm-50628600.out
+    Ignored:    slurm-50628607.out
+    Ignored:    slurm-50628616.out
+    Ignored:    slurm-50628621.out
+    Ignored:    slurm-50628623.out
+    Ignored:    slurm-50628631.out
+    Ignored:    slurm-50628637.out
+    Ignored:    slurm-50628653.out
+    Ignored:    slurm-50628677.out
+    Ignored:    slurm-50628701.out
+    Ignored:    slurm-50628704.out
+    Ignored:    slurm-50628712.out
+    Ignored:    slurm-50628723.out
+    Ignored:    slurm-50628737.out
+    Ignored:    slurm-50628751.out
+    Ignored:    slurm-50628761.out
+    Ignored:    slurm-50628771.out
+    Ignored:    slurm-50628782.out
+    Ignored:    slurm-50628794.out
+    Ignored:    slurm-50628805.out
+    Ignored:    slurm-50628817.out
+    Ignored:    slurm-50628827.out
+    Ignored:    slurm-50628829.out
+    Ignored:    slurm-50628841.out
+    Ignored:    slurm-50628855.out
+    Ignored:    slurm-50628867.out
+    Ignored:    slurm-50628872.out
+    Ignored:    slurm-50628874.out
+    Ignored:    slurm-50628878.out
+    Ignored:    slurm-50628882.out
+    Ignored:    slurm-50628885.out
+    Ignored:    slurm-50628895.out
+    Ignored:    slurm-50628908.out
+    Ignored:    slurm-50628917.out
+    Ignored:    slurm-50628925.out
+    Ignored:    slurm-50628936.out
+    Ignored:    slurm-50628950.out
+    Ignored:    slurm-50628959.out
+    Ignored:    slurm-50628961.out
+    Ignored:    slurm-50628970.out
+    Ignored:    slurm-50628981.out
+    Ignored:    slurm-50628989.out
+    Ignored:    slurm-50629001.out
+    Ignored:    slurm-50629009.out
+    Ignored:    slurm-50629020.out
+    Ignored:    slurm-50629030.out
+    Ignored:    slurm-50629043.out
+    Ignored:    slurm-50629055.out
+    Ignored:    slurm-50629064.out
+    Ignored:    slurm-50629076.out
+    Ignored:    slurm-50629086.out
+    Ignored:    slurm-50629088.out
+    Ignored:    slurm-50629089.out
+    Ignored:    slurm-50629091.out
+    Ignored:    slurm-50629093.out
+    Ignored:    slurm-50629095.out
+    Ignored:    slurm-50629096.out
+    Ignored:    slurm-50629098.out
+    Ignored:    slurm-50629099.out
+    Ignored:    slurm-50629103.out
+    Ignored:    slurm-50629104.out
+    Ignored:    slurm-50629106.out
+    Ignored:    slurm-50629108.out
+    Ignored:    slurm-50629110.out
+    Ignored:    slurm-50629112.out
+    Ignored:    slurm-50629115.out
+    Ignored:    slurm-50629117.out
+    Ignored:    slurm-50629118.out
+    Ignored:    slurm-50629120.out
+    Ignored:    slurm-50629122.out
+    Ignored:    slurm-50629124.out
+    Ignored:    slurm-50629126.out
+    Ignored:    slurm-50629128.out
+    Ignored:    slurm-50629129.out
+    Ignored:    slurm-50629131.out
+    Ignored:    slurm-50629133.out
+    Ignored:    slurm-50629135.out
+    Ignored:    slurm-50629137.out
+    Ignored:    slurm-50629138.out
+    Ignored:    slurm-50629140.out
+    Ignored:    slurm-50629142.out
+    Ignored:    slurm-50629144.out
+    Ignored:    slurm-50629146.out
+    Ignored:    slurm-50629148.out
+    Ignored:    slurm-50629150.out
+    Ignored:    slurm-50629152.out
+    Ignored:    slurm-50629154.out
+    Ignored:    slurm-50629156.out
+    Ignored:    slurm-50629157.out
+    Ignored:    slurm-50629158.out
+    Ignored:    slurm-50629160.out
+    Ignored:    slurm-50629162.out
+    Ignored:    slurm-50629164.out
+    Ignored:    slurm-50629166.out
+    Ignored:    slurm-50629171.out
+    Ignored:    slurm-50629176.out
+    Ignored:    slurm-50629186.out
+    Ignored:    slurm-50629196.out
+    Ignored:    slurm-50629206.out
+    Ignored:    slurm-50629209.out
+    Ignored:    slurm-50629215.out
+    Ignored:    slurm-50629220.out
+    Ignored:    slurm-50629224.out
+    Ignored:    slurm-50629227.out
+    Ignored:    slurm-50629229.out
+    Ignored:    slurm-50629233.out
+    Ignored:    slurm-50629237.out
+    Ignored:    slurm-50629240.out
+    Ignored:    slurm-50629243.out
+    Ignored:    slurm-50629246.out
+    Ignored:    slurm-50629249.out
+    Ignored:    slurm-50629252.out
+    Ignored:    slurm-50629253.out
+    Ignored:    slurm-50629256.out
+    Ignored:    slurm-50629259.out
+    Ignored:    slurm-50629262.out
+    Ignored:    slurm-50629265.out
+    Ignored:    slurm-50629268.out
+    Ignored:    slurm-50629270.out
+    Ignored:    slurm-50629272.out
+    Ignored:    slurm-50629274.out
+    Ignored:    slurm-50629277.out
+    Ignored:    slurm-50629280.out
+    Ignored:    slurm-50629283.out
+    Ignored:    slurm-50629284.out
+    Ignored:    slurm-50629286.out
+    Ignored:    slurm-50629289.out
+    Ignored:    slurm-50629292.out
+    Ignored:    slurm-50629295.out
+    Ignored:    slurm-50629298.out
+    Ignored:    slurm-50629300.out
+    Ignored:    slurm-50629303.out
+    Ignored:    slurm-50629306.out
+    Ignored:    slurm-50629309.out
+    Ignored:    slurm-50629312.out
+    Ignored:    slurm-50629314.out
+    Ignored:    slurm-50629316.out
+    Ignored:    slurm-50629319.out
+    Ignored:    slurm-50629322.out
+    Ignored:    slurm-50629326.out
+    Ignored:    slurm-50629328.out
+    Ignored:    slurm-50629331.out
+    Ignored:    slurm-50629333.out
+    Ignored:    slurm-50629335.out
+    Ignored:    slurm-50629338.out
+    Ignored:    slurm-50629341.out
+    Ignored:    slurm-50629344.out
+    Ignored:    slurm-50629346.out
+    Ignored:    slurm-50629349.out
+    Ignored:    slurm-50629351.out
+    Ignored:    slurm-50629354.out
+    Ignored:    slurm-50629356.out
+    Ignored:    slurm-50629358.out
+    Ignored:    slurm-50629360.out
+    Ignored:    slurm-50629362.out
+    Ignored:    slurm-50629366.out
+    Ignored:    slurm-50629367.out
+    Ignored:    slurm-50629370.out
+    Ignored:    slurm-50629373.out
+    Ignored:    slurm-50629375.out
+    Ignored:    slurm-50629378.out
+    Ignored:    slurm-50629381.out
+    Ignored:    slurm-50629384.out
+    Ignored:    slurm-50629386.out
+    Ignored:    slurm-50629389.out
+    Ignored:    slurm-50629392.out
+    Ignored:    slurm-50629395.out
+    Ignored:    slurm-50629397.out
+    Ignored:    slurm-50629400.out
+    Ignored:    slurm-50629402.out
+    Ignored:    slurm-50629405.out
+    Ignored:    slurm-50629408.out
+    Ignored:    slurm-50629410.out
+    Ignored:    slurm-50629412.out
+    Ignored:    slurm-50629414.out
+    Ignored:    slurm-50629415.out
+    Ignored:    slurm-50629421.out
+    Ignored:    slurm-50629423.out
+    Ignored:    slurm-50629425.out
+    Ignored:    slurm-50629426.out
+    Ignored:    slurm-50629428.out
+    Ignored:    slurm-50629429.out
+    Ignored:    slurm-50629431.out
+    Ignored:    slurm-50629452.out
+    Ignored:    slurm-50629454.out
+    Ignored:    slurm-50629455.out
+    Ignored:    slurm-50629457.out
+    Ignored:    slurm-50629459.out
+    Ignored:    slurm-50629461.out
+    Ignored:    slurm-50629463.out
+    Ignored:    slurm-50629485.out
+    Ignored:    slurm-50629497.out
+    Ignored:    slurm-50629515.out
+    Ignored:    slurm-50629537.out
+    Ignored:    slurm-50629553.out
+    Ignored:    slurm-50629574.out
+    Ignored:    slurm-50629577.out
+    Ignored:    slurm-50629586.out
+    Ignored:    slurm-50629588.out
+    Ignored:    slurm-50629590.out
+    Ignored:    slurm-50629592.out
+    Ignored:    slurm-50629593.out
+    Ignored:    slurm-50629595.out
+    Ignored:    slurm-50629597.out
+    Ignored:    slurm-50629600.out
+    Ignored:    slurm-50629649.out
+    Ignored:    slurm-50629651.out
+    Ignored:    slurm-50629653.out
+    Ignored:    slurm-50629655.out
+    Ignored:    slurm-50629656.out
+    Ignored:    slurm-50629658.out
+    Ignored:    slurm-50629660.out
+    Ignored:    slurm-50629662.out
+    Ignored:    slurm-50629664.out
+    Ignored:    slurm-50629666.out
+    Ignored:    slurm-50629668.out
+    Ignored:    slurm-50629669.out
+    Ignored:    slurm-50629671.out
+    Ignored:    slurm-50629673.out
+    Ignored:    slurm-50629676.out
+    Ignored:    slurm-50629677.out
+    Ignored:    slurm-50629679.out
+    Ignored:    slurm-50629682.out
+    Ignored:    slurm-50629684.out
+    Ignored:    slurm-50629686.out
+    Ignored:    slurm-50629688.out
+    Ignored:    slurm-50629690.out
+    Ignored:    slurm-50629692.out
+    Ignored:    slurm-50629693.out
+    Ignored:    slurm-50629695.out
+    Ignored:    slurm-50629697.out
+    Ignored:    slurm-50629699.out
+
+Untracked files:
+    Untracked:  create-env.sh
+    Untracked:  publish.bash
+    Untracked:  snake.txt
+    Untracked:  snakelog.out
+    Untracked:  update-env.sh
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/5b3779c8637b57f8e490441c8615c429b02adb8a/analysis/totals.Rmd" target="_blank">5b3779c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2019-02-01
+</td>
+<td style="text-align:left;">
+Update workflowr to 1.0.1 with wflow_update().
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/5b3779c8637b57f8e490441c8615c429b02adb8a/docs/totals.html" target="_blank">5b3779c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2019-02-01
+</td>
+<td style="text-align:left;">
+Update workflowr to 1.0.1 with wflow_update().
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/da1fdf30ef25dc47ef425b1fde7ab29dd47e174a/docs/totals.html" target="_blank">da1fdf3</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2018-02-06
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/cf9e702009636a64997d87504425f4548e2bd842/docs/totals.html" target="_blank">cf9e702</a>
+</td>
+<td style="text-align:left;">
+Joyce Hsiao
+</td>
+<td style="text-align:left;">
+2017-12-13
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/029305ccde06844deb55725d58ec419915828eba/docs/totals.html" target="_blank">029305c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-12-04
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/6018090ecd31848d811be83f83d16d69160458e2/analysis/totals.Rmd" target="_blank">6018090</a>
+</td>
+<td style="text-align:left;">
+pytung
+</td>
+<td style="text-align:left;">
+2017-11-30
+</td>
+<td style="text-align:left;">
+minor edits
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jdblischak/fucci-seq/6898149497db323a1a3cbbc40d1779fdfc03bd6d/docs/totals.html" target="_blank">6898149</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-11-29
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/3d5d19319769cecfd668d00594193995637f2679/analysis/totals.Rmd" target="_blank">3d5d193</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-11-29
+</td>
+<td style="text-align:left;">
+Visualize sequencing depth per C1 chip.
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
 <div id="setup" class="section level2">
 <h2>Setup</h2>
 <pre class="r"><code>library(&quot;dplyr&quot;)
@@ -348,6 +2104,47 @@ pData(eset)$experiment &lt;- as.factor(pData(eset)$experiment)</code></pre>
        title = &quot;Distribution of total raw sequences per single cell&quot;) +
   scale_color_discrete(name = &quot;C1 chip&quot;)</code></pre>
 <p><img src="figure/totals.Rmd/distribution-sequencing-depth-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of distribution-sequencing-depth-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/da1fdf30ef25dc47ef425b1fde7ab29dd47e174a/docs/figure/totals.Rmd/distribution-sequencing-depth-1.png" target="_blank">da1fdf3</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2018-02-06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/6898149497db323a1a3cbbc40d1779fdfc03bd6d/docs/figure/totals.Rmd/distribution-sequencing-depth-1.png" target="_blank">6898149</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-11-29
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>Mapped reads per cell</p>
 <pre class="r"><code>ggplot(pData(eset), aes(x = experiment, y = mapped, color = experiment)) +
   geom_violin() + 
@@ -357,6 +2154,47 @@ pData(eset)$experiment &lt;- as.factor(pData(eset)$experiment)</code></pre>
   theme(legend.title = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
 <p><img src="figure/totals.Rmd/mapped-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of mapped-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/da1fdf30ef25dc47ef425b1fde7ab29dd47e174a/docs/figure/totals.Rmd/mapped-1.png" target="_blank">da1fdf3</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2018-02-06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/029305ccde06844deb55725d58ec419915828eba/docs/figure/totals.Rmd/mapped-1.png" target="_blank">029305c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-12-04
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>Sum of sequences across the 96 single cells per C1 chip.</p>
 <pre class="r"><code>total_per_experiment &lt;- pData(eset) %&gt;%
   group_by(experiment) %&gt;%
@@ -379,14 +2217,65 @@ datatable(total_per_experiment,
   theme(legend.title = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))</code></pre>
 <p><img src="figure/totals.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-1-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/da1fdf30ef25dc47ef425b1fde7ab29dd47e174a/docs/figure/totals.Rmd/unnamed-chunk-1-1.png" target="_blank">da1fdf3</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2018-02-06
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/029305ccde06844deb55725d58ec419915828eba/docs/figure/totals.Rmd/unnamed-chunk-1-1.png" target="_blank">029305c</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-12-04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jdblischak/fucci-seq/blob/6898149497db323a1a3cbbc40d1779fdfc03bd6d/docs/figure/totals.Rmd/unnamed-chunk-1-1.png" target="_blank">6898149</a>
+</td>
+<td style="text-align:left;">
+John Blischak
+</td>
+<td style="text-align:left;">
+2017-11-29
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
-<!-- Insert the session information into the document -->
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>R version 3.4.1 (2017-06-30)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Scientific Linux 7.2 (Nitrogen)
+Running under: Scientific Linux 7.4 (Nitrogen)
 
 Matrix products: default
 BLAS: /project2/gilad/jdblischak/miniconda3/envs/fucci-seq/lib/R/lib/libRblas.so
@@ -401,7 +2290,7 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] parallel  methods   stats     graphics  grDevices utils     datasets 
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
 [8] base     
 
 other attached packages:
@@ -410,15 +2299,19 @@ other attached packages:
 [7] dplyr_0.7.4        
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.13     knitr_1.16       bindr_0.1        magrittr_1.5    
- [5] cowplot_0.9.1    munsell_0.4.3    colorspace_1.3-2 R6_2.2.0        
- [9] rlang_0.1.2      plyr_1.8.4       stringr_1.2.0    tools_3.4.1     
-[13] grid_3.4.1       gtable_0.2.0     git2r_0.19.0     htmltools_0.3.6 
-[17] lazyeval_0.2.0   yaml_2.1.14      rprojroot_1.2    digest_0.6.12   
-[21] assertthat_0.1   tibble_1.3.3     htmlwidgets_0.9  glue_1.1.1      
-[25] evaluate_0.10.1  rmarkdown_1.6    labeling_0.3     stringi_1.1.2   
-[29] compiler_3.4.1   scales_0.5.0     backports_1.0.5  jsonlite_1.4    
-[33] pkgconfig_2.0.1 </code></pre>
+ [1] Rcpp_0.12.13      compiler_3.4.1    git2r_0.19.0     
+ [4] plyr_1.8.4        workflowr_1.0.1   bindr_0.1        
+ [7] R.methodsS3_1.7.1 R.utils_2.5.0     tools_3.4.1      
+[10] digest_0.6.12     jsonlite_1.4      evaluate_0.10.1  
+[13] tibble_1.3.3      gtable_0.2.0      pkgconfig_2.0.1  
+[16] rlang_0.1.2       yaml_2.1.14       stringr_1.2.0    
+[19] knitr_1.16        htmlwidgets_0.9   cowplot_0.9.1    
+[22] rprojroot_1.2     grid_3.4.1        glue_1.1.1       
+[25] R6_2.2.0          rmarkdown_1.8     magrittr_1.5     
+[28] whisker_0.3-2     backports_1.0.5   scales_0.5.0     
+[31] htmltools_0.3.6   assertthat_0.1    colorspace_1.3-2 
+[34] labeling_0.3      stringi_1.1.2     lazyeval_0.2.0   
+[37] munsell_0.4.3     R.oo_1.21.0      </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -435,7 +2328,7 @@ footer is added to webpages before the MathJax javascript. -->
 
 <hr>
 <p>
-    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+    
 </p>
 <hr>
 
@@ -457,6 +2350,25 @@ footer is added to webpages before the MathJax javascript. -->
     <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
     <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 -->
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
 
 
 </div>

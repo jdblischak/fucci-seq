@@ -155,17 +155,63 @@ feature_anno <- new("AnnotatedDataFrame", data = feature,
 
 experiment <- new(
   "MIAME",
-  name = "PoYuan Tung, Joyce Hsiao, John Blischak",
-  lab = "Gilad",
+  name = "Chiaowen Joyce Hsiao, Po-Yuan Tung, John D. Blischak, Jonathan E. Burnett, Kushal K. Dey, Kenneth Barr, Yoav Gilad, Matthew Stephens",
+  lab = "Stephens/Gilad (University of Chicago)",
   contact = "https://github.com/jdblischak/fucci-seq/issues",
-  title = "fucci-seq",
-  abstract = "Investigating the effect of cell cycle on scRNA-seq",
+  title = "Quantifying continuous cell-cycle phase using single-cell gene expression data",
+  abstract =
+"The cell cycle is known to regulate cell proliferation and cell fate
+decisions, the underlying mechanism of which is well-studied and] conserved
+across species and cell types. To date, the cell cycle is receiving a renewed
+importance due to the rapid advancement of single-cell genomics technology.
+Especially in the analysis of single-cell gene expression, the cell cycle
+plays a key role in understanding the expression variation across cell states
+and cell types.  The current study was designed to develop effective tools for
+assessing and predicting the cell cycle in single-cell gene expression data
+analysis. We collected both Fluorescent Ubiquitination-based Cell Cycle
+Indicator (FUCCI) – for determining the cell cycle – and single-cell RNA-seq
+(scRNA-seq) data from each individual using STRT-seq on the Fluidigm C1
+platform. The cells were collected from iPSCs derived from 6 genotyped Yoruba
+cell lines. The experimental design controlled for C1 processing batch
+effects, as well as individual and gender effects. Using these data, we
+developed a supervised approach for predicting the cyclical ordering of single
+cells in the cell cycle using single-cell gene expression data. We used the
+FUCCI fluorescent intensities to determine a cyclical ordering of the
+individual cells, and to assign cell time labels for individual cells
+representing each cell's position in one complete cell cycle. We estimated the
+cyclical trend of expression levels for each gene based on the FUCCI-derived
+cell times,  and identified candidate sets of cyclical genes for model
+training. We trained our model in in 5-fold cross-validation and evaluate the
+trained model in held-out validation samples and external datasets. We
+compared the prediction results with existing approaches for estimating the
+cell cycle using single-cell gene expression data: including unsupervised
+approaches to construct the cyclical ordering of single cells and approaches
+to categorically assign the cell cycle to individual cells. These results
+provide a benchmark for assessing the cell cycle in scRNA-seq data analysis
+and insights into the effects of the cell cycle on gene expression variation
+in stem cells.",
   url = "https://jdblischak.github.io/fucci-seq",
   preprocessing = list(
-    mapping = "Mapped to GRCh37 with Sunjunc",
-    umi = "UMIs were extracted and deduplicated with umi_tools",
-    counting = "Counts per gene (Ensembl 75) were obtained with featureCounts",
-    verify = "Individuals were identified by verifyBamID"
+    umi_extract =
+"We used `umi_tools extract` (UMI-tools 0.5.3) to extract the 6 base
+pair unique molecular identifier (UMI) from the 5’ end of each read.",
+    mapping =
+"We used `subjunc` (Subread 1.5.3) to map reads to the human genome (Ensembl
+GRCh37.75; chromosomes 1-22, X, Y, MT), ERCC spike-ins
+(http://tools.invitrogen.com/downloads/ERCC92.fa), and the mCherry and EGFP
+open reading frames from the FUCCI plasmid.",
+    counting =
+"We used `featureCounts` (Subread 1.5.3) to count the number of reads
+for all protein-coding genes (Ensembl GRCh37 release 75) and the ERCC
+spike-in genes. We performed strand-specific counting (flag -s 1)
+because the UMI protocol preserves sequence strand information.",
+    umi_dedup =
+"We used `umi_tools dedup` (UMI-tools 0.5.3) to deduplicate reads with
+the same UMI and start position to molecules.",
+    verify =
+"We used `verifyBamID` (1.1.3) to identify the individual of origin for
+each sample based on the overlap of the RNA-seq reads with the known
+genotypes."
   ))
 
 # Create ExpressionSet object --------------------------------------------------

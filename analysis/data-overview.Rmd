@@ -18,18 +18,63 @@ output: workflowr::wflow_html
 
 We collected two types of data for each single cell sample: single-cell RNA-seq using C1 plates and FUCCI image intensity data.
 
-* Raw RNA-seq data: `data/eset-raw.rds`
+* Raw RNA-seq data: [`data/eset-raw.rds`](https://github.com/jdblischak/fucci-seq/blob/master/data/eset-raw.rds?raw=true)
 
-* Filtered RNA-seq data: `data/eset-filtered.rds`
+* Filtered RNA-seq data: [`data/eset-filtered.rds`](https://github.com/jdblischak/fucci-seq/blob/master/data/eset-filtered.rds?raw=true)
 
-* FUCCI intensity data: `data/intensity.rds`  
+* FUCCI intensity data: [`data/intensity.rds`](https://github.com/jdblischak/fucci-seq/blob/master/data/intensity.rds?raw=true)
 
-* FUCCI intensity data adjusted for batch effect: `output/images-normalize-anova.Rmd/pdata.adj.rds`  
+* FUCCI intensity data adjusted for batch effect: [`output/images-normalize-anova.Rmd/pdata.adj.rds`](https://github.com/jdblischak/fucci-seq/blob/master/output/images-normalize-anova.Rmd/pdata.adj.rds?raw=true)
 
-* Final data combining filtered intensity and RNA-seq, including 11093 genes and 888 samples: `data/eset-final.rds`  
+* Final data combining filtered intensity and RNA-seq, including 11093 genes and 888 samples: [`data/eset-final.rds`](https://github.com/jdblischak/fucci-seq/blob/master/data/eset-final.rds?raw=true)
 
 Code used to generate data from `data/eset-raw.rds` to `data/eset-final.rds` is stored in `code/output-raw-2-final.R`.
 
+
+## Downloading the data files
+
+You have two main options for downloading the data files. First, you can
+manually download the individual files by clicking on the links on this page or
+navigating to the files in the
+[fucci-seq](https://github.com/jdblischak/fucci-seq) GitHub repository. This is
+the recommended strategy if you only need a few data files.
+
+Second, you can install [git-lfs](https://git-lfs.github.com/). To handle large
+files, we used Git Large File Storage (LFS). This means that the files that you
+download with `git clone` are only plain text files that contain identifiers for
+the files saved on GitHub's servers. If you want to download all of the data
+files at once, you can do this with after you install git-lfs.
+
+To install git-lfs, follow their instructions to download, install, and setup
+(`git lfs install`). Alternatively, if you use conda, you can install git-lfs
+with `conda install -c conda-forge git-lfs`. Once installed, you can download
+the latest version of the data files with `git lfs pull`.
+
+
+## How to access expressionSets
+
+We store feature-level (gene) read count and molecule count in `expressionSet` (`data/eset`) objects, which also contain sample metadata (e.g., assigned indivdual ID, cDNA concentraion) and quality filtering criteria (e.g., number of reads mapped to FUCCI transgenes, ERCC conversion rate). Data from different C1 plates are stored in separate `eset` objects:
+
+
+To combine `eset` objects from the different C1 plates:
+
+`eset <- Reduce(combine, Map(readRDS, Sys.glob("data/eset/*.rds")))`
+
+
+To access data stored in  `expressionSet`:
+
+* `exprs(eset)`: access count data, 20,421 features by 1,536 single cell samples.
+
+* `pData(eset)`: access sample metadata. Returns data.frame of 1,536 samples by 43 labels. Use `varMetadata(phenoData(eset))` to view label descriptions. 
+
+* `fData(eset)`: access feature metadata. Returns data.frame of 20,421 features by 6 labels. Use `varMetadata(featureData(eset))` to view label descriptions. 
+
+* `varMetadata(phenoData(eset))`: view the sample metadata labels.
+
+* `varMetadata(featureData(eset))`: view the feature (gene) metadata labels.
+
+
+## Additional data information
 
 ### FUCCI intensity data
 
@@ -49,9 +94,9 @@ Code used to generate data from `data/eset-raw.rds` to `data/eset-final.rds` is 
 
 ### Phenotypic data of singleton samples
 
-* Data file 1: all 1536 samples before filtering (`output/data-overview.Rmd/phenotypes_allsamples.txt`)
-* Data file 2: 888 samples after filtering (`output/data-overview.Rmd/phenotypes_singletonsamples.txt`)
-* Data file 3: phenotype labels (`output/data-overview.Rmd/phenotypes_labels.txt`)
+* Data file 1: all 1536 samples before filtering ([`output/data-overview.Rmd/phenotypes_allsamples.txt`](https://raw.githubusercontent.com/jdblischak/fucci-seq/master/output/data-overview.Rmd/phenotypes_allsamples.txt))
+* Data file 2: 888 samples after filtering ([`output/data-overview.Rmd/phenotypes_singletonsamples.txt`](https://raw.githubusercontent.com/jdblischak/fucci-seq/master/output/data-overview.Rmd/phenotypes_singletonsamples.txt))
+* Data file 3: phenotype labels ([`output/data-overview.Rmd/phenotypes_labels.txt`](https://raw.githubusercontent.com/jdblischak/fucci-seq/master/output/data-overview.Rmd/phenotypes_labels.txt))
 
 ```{r, eval=F}
 library(Biobase)
@@ -109,26 +154,5 @@ df_labels_test <- fread(file = "../output/data-overview.Rmd/phenotypes_allsample
 ```
 
 
-## How to access expressionSets
-
-We store feature-level (gene) read count and molecule count in `expressionSet` (`data/eset`) objects, which also contain sample metadata (e.g., assigned indivdual ID, cDNA concentraion) and quality filtering criteria (e.g., number of reads mapped to FUCCI transgenes, ERCC conversion rate). Data from different C1 plates are stored in separate `eset` objects:
-
-
-To combine `eset` objects from the different C1 plates:
-
-`eset <- Reduce(combine, Map(readRDS, Sys.glob("data/eset/*.rds")))`
-
-
-To access data stored in  `expressionSet`:
-
-* `exprs(eset)`: access count data, 20,421 features by 1,536 single cell samples.
-
-* `pData(eset)`: access sample metadata. Returns data.frame of 1,536 samples by 43 labels. Use `varMetadata(phenoData(eset))` to view label descriptions. 
-
-* `fData(eset)`: access feature metadata. Returns data.frame of 20,421 features by 6 labels. Use `varMetadata(featureData(eset))` to view label descriptions. 
-
-* `varMetadata(phenoData(eset))`: view the sample metadata labels.
-
-* `varMetadata(featureData(eset))`: view the feature (gene) metadata labels.
 
 

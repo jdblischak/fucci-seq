@@ -1,4 +1,5 @@
 ---
+site: workflowr::wflow_site
 title: "Home"
 output: 
   html_document:
@@ -22,22 +23,6 @@ We used this site to collaborate and share our results. Please feel free to expl
 ### [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
 ### [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
 
-
-
-
-
-
-
-<!-- * Code for compiling results and plots for the paper: `code/makeresults_paper.R` -->
-        
-<!-- ## Supervised method learning: finalizing results on holding-an-individual-out scenario -->
-
-<!--     * [Validation sample](method-eval.html) (to be removed...) -->
-<!-- * Predicting individual X using expression from random individuals -->
-<!--     * [Selecting the top X cyclical genes in the training sample](method-train-ind.html) -->
-<!--     * [Learning gene annotations](method-train-ind-genes.html) -->
-<!--     * [Validation sample](method-eval-ind.html) (to be removed) -->
-<!-- * Analyze the public datasets, including [Leng et al.](method-eval-leng.html), [Bottcher et al.](method-eval-bottcher.html), and [Buettner et al.](method-eval-buettner.html). -->
 
 
 
