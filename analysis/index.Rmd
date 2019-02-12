@@ -16,19 +16,19 @@ We used this site to collaborate and share our results. Please feel free to expl
 
 # Finalizing
 
-### [Data description](data-overview.html)
-### [Quality control of scRNA-seq data](#rna-seq-data-preprcessing)
-### [Process images - from images to intensities](images-process.html)
-### [Inspect and correct for the C1 plate effect in fluorescence intensities](images-normalize-anova.html)
-### [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
-### [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
+* [Data description](data-overview.html)
+* [Quality control of scRNA-seq data](#rna-seq-data-preprcessing)
+* [Process images - from images to intensities](images-process.html)
+* [Inspect and correct for the C1 plate effect in fluorescence intensities](images-normalize-anova.html)
+* [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
+* [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
 
 
 
 
 # Analysis 
 
-## Supervised method learning: finalizing on data holiding out validation samples
+### Supervised method learning: finalizing on data holiding out validation samples
 
 * Perform model training on cell times computed in different ways
     * Based on Fucci only
@@ -51,7 +51,7 @@ We used this site to collaborate and share our results. Please feel free to expl
     
 
 
-## Supervised method learning: building the analysis approach
+### Supervised method learning: building the analysis approach
 
 * Early analysis [using trendfilter and evaluating model performance](method-npreg.html)
 
@@ -75,7 +75,7 @@ We used this site to collaborate and share our results. Please feel free to expl
     
 
 
-## Approaches to fitting cyclical trend in gene expression data
+### Approaches to fitting cyclical trend in gene expression data
 
 * Apply spherically projected multivariate linear model
     * [First trying out spml package](model-spml.pilot.html)
@@ -91,7 +91,7 @@ We used this site to collaborate and share our results. Please feel free to expl
  
 
 
-## Cell cycle signal in gene expression data
+### Cell cycle signal in gene expression data
 
 1. We investigated cell cycle signals in the sequencing data alone.
     * Consider [transgene count in sequencing data](images-transgene.html)
@@ -118,7 +118,7 @@ We used this site to collaborate and share our results. Please feel free to expl
 
 
 
-## RNA-seq data preprcessing
+### RNA-seq data preprcessing
 
 1. The first step in preprocessing RNA-seq data consists of QC and filtering. 
     * Sample QC and filtering
@@ -135,7 +135,7 @@ We used this site to collaborate and share our results. Please feel free to expl
 
 
 
-## Microscopy image analysis
+### Microscopy image analysis
 
 * [Processing images - from images to intensities](images-process.html)
 
@@ -164,7 +164,7 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 
 
-## One-time investigations
+### One-time investigations
 
 * Why some gene symbols (genes) correspond to [multiple Ensembl IDs?](ensembl.html)
 
