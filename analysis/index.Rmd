@@ -2,28 +2,25 @@
 title: "Home"
 output: 
   html_document:
-    toc: TRUE
-    toc_depth: 4
-    toc_float: FALSE
+    toc_float: TRUE
 ---
 
 We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section [Finalizing](#finalizing) below. Here are some useful links:
 
-* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](biorxiv)
+* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](doi.org/10.1101/526848)
 * GEO record [GSE121265](http://www.ncbi.nlm.nih.gov/ geo/query/acc.cgi?acc=GSE121265) for the raw FASTQ files
 * [GitHub repo](https://github.com/jdblischak/fucci-seq) for code and data
+* [peco package](https://github.com/jhsiao999/peco) for our supervised approach predicting cell cycle phase in induced pluripotent stem cells.
 
-
----
 
 # Finalizing
 
-#### [Data description](data-overview.html)
-#### [Quality control of scRNA-seq data](#rna-seq-data-preprcessing)
-#### [Process images - from images to intensities](images-process.html)
-#### [Inspect and correct for the C1 plate effect in fluorescence intensities](images-normalize-anova.html)
-#### [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
-#### [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
+### [Data description](data-overview.html)
+### [Quality control of scRNA-seq data](#rna-seq-data-preprcessing)
+### [Process images - from images to intensities](images-process.html)
+### [Inspect and correct for the C1 plate effect in fluorescence intensities](images-normalize-anova.html)
+### [Infer an angel for each cell based on FUCCI fluorescence intensities](images-circle-ordering-eval.html)
+### [Estimate the cyclic trends of gene expression levels](npreg-trendfilter-quantile.html)
 
 
 
