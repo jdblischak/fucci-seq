@@ -1,1 +1,11 @@
-How should others cite this work?
+@article {Hsiao526848,
+	author = {Hsiao, Chiaowen Joyce and Tung, PoYuan and Blischak, John D and Burnett, Jonathan and Barr, Kenneth and Dey, Kushal K and Stephens, Matthew and Gilad, Yoav},
+	title = {Characterizing and inferring quantitative cell cycle phase in single-cell RNA-seq data analysis},
+	elocation-id = {526848},
+	year = {2019},
+	doi = {10.1101/526848},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2019/02/03/526848},
+	eprint = {https://www.biorxiv.org/content/early/2019/02/03/526848.full.pdf},
+	journal = {bioRxiv}
+}
