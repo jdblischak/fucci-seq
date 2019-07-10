@@ -21,7 +21,7 @@ dir_output: output/
 # Enter the absolute path to an external directory to store intermediate files.
 # It should also contain a subdirectory fastq/ which contains the raw gzipped
 # FASTQ files.
-dir_external: /project2/gilad/fucci-seq/
+dir_external: /scratch/midway2/jdblischak/fucci-seq-hg38-external/
 
 # Enter the path (absolute or relative to the Snakefile) for writing log
 # files. Make sure to also update this path for log files in cluster.json
@@ -51,9 +51,9 @@ cols: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 
 # Specify Ensembl release for genome sequence and annotation
 # http://feb2014.archive.ensembl.org/index.html
-ensembl_archive: feb2014.archive.ensembl.org
-ensembl_rel: 75
-ensembl_genome_hs: GRCh37.75
+ensembl_archive: apr2019.archive.ensembl.org
+ensembl_rel: 96
+ensembl_genome_hs: GRCh38
 
 chr_hs: ["1", "2", "3", "4", "5", "6", "7", "8", "9",
          "10", "11", "12", "13", "14", "15", "16",
