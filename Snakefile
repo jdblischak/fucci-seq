@@ -108,6 +108,9 @@ rule intermediate:
 rule rds:
     input: expand(dir_data + "eset/{chip}.rds", chip = chips)
 
+rule molecules:
+    input: expand(dir_data + "molecules/{chip}.txt.gz", chip = chips)
+
 # Functions --------------------------------------------------------------------
 
 # Find all fastq.gz files for a given sample.
@@ -142,7 +145,7 @@ rule download_genome_hs:
 
 rule download_ercc:
     output: dir_genome + "ercc.fa"
-    shell: "wget -O {output} http://tools.invitrogen.com/downloads/ERCC92.fa"
+    shell: "wget -O {output} http://media.invitrogen.com.edgesuite.net/softwares/ERCC92.fa"
 
 rule unzip_chromosome_fasta_hs:
     input: expand(dir_genome + "Homo_sapiens." + ensembl_genome_hs + \
