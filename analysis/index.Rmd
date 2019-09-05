@@ -8,7 +8,7 @@ output:
 
 We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section [Finalizing](#finalizing) below. Here are some useful links:
 
-* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](doi.org/10.1101/526848)
+* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](https://doi.org/10.1101/526848)
 * GEO record [GSE121265](http://www.ncbi.nlm.nih.gov/ geo/query/acc.cgi?acc=GSE121265) for the raw FASTQ files
 * [GitHub repo](https://github.com/jdblischak/fucci-seq) for code and data
 * [peco package](https://github.com/jhsiao999/peco) for our supervised approach predicting cell cycle phase in induced pluripotent stem cells.
@@ -57,7 +57,7 @@ We used this site to collaborate and share our results. Please feel free to expl
 
 * Investigate the property and quality of [the cell time labels derived from GFP and RFP](method-labels.html): PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.
 
-* Investigate the cyclical trends for [each individual](trendfilter-individua.Rmd)
+* Investigate the cyclical trends for [each individual](trendfilter-individual.html)
 
 * Investigate the property of [Seurat classes and cell time](method-label-seurat.html) 
 
@@ -170,7 +170,7 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 * I selected a set of cell cycle [genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.](seqdata-select-cellcyclegenes.html)
 
-* [Replicate Seurat example of scoring cell cycle phases](seurat-cellcycle.Rmd)
+* [Replicate Seurat example of scoring cell cycle phases](seurat-cellcycle.html)
 
 * [Reproducing some QC analysis and making plots for a seminar talk](talk-20180416.html)
 
