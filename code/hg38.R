@@ -5,6 +5,7 @@
 #
 # Script executed in ~/fucci-seq-hg38/
 
+library(Biobase)
 library(data.table)
 library(stringr)
 
@@ -35,16 +36,15 @@ genes_shared <- intersect(genes_hg19, genes_hg38)
 length(genes_shared) / length(genes_all)
 ## [1] 0.8929394
 
-# Limiting to protein-coding genes
-saf <- fread("/project2/gilad/fucci-seq/genome-ensembl-release-75/hs.saf")
-saf
-protein_coding <- unique(saf$GeneID)
-genes_hg19 <- genes_hg19[genes_hg19 %in% protein_coding]
-genes_hg38 <- genes_hg38[genes_hg38 %in% protein_coding]
+# Limiting to protein-coding genes used in the actual study
+eset <- readRDS("data/eset-final.rds")
+genes_study <- rownames(fData(eset))
+genes_hg19 <- genes_hg19[genes_hg19 %in% genes_study]
+genes_hg38 <- genes_hg38[genes_hg38 %in% genes_study]
 genes_all <- union(genes_hg19, genes_hg38)
 genes_shared <- intersect(genes_hg19, genes_hg38)
 length(genes_shared) / length(genes_all)
-## [1] 0.9351109
+## [1] 0.9897645
 
 # Filter -----------------------------------------------------------------------
 
@@ -58,36 +58,57 @@ stopifnot(dim(mol_hg19_shared) == dim(mol_hg38_shared),
           colnames(mol_hg19_shared) == colnames(mol_hg38_shared))
 
 
-# Remove zeros
+# Confirm no genes with zero counts across all cells
 sums_hg19 <- mol_hg19_shared[, vapply(.SD, sum, integer(1)), .SDcols = -(sample:well)]
 sums_hg38 <- mol_hg38_shared[, vapply(.SD, sum, integer(1)), .SDcols = -(sample:well)]
 cor(sums_hg19, sums_hg38)
 plot(sums_hg19, sums_hg38)
 sums_total <- sums_hg19 + sums_hg38
 zeros <- sums_total == 0
-sum(zeros)
-genes_shared_nonzero <- genes_shared[!zeros]
-cols_shared_nonzero <- c("sample", "experiment", "well", genes_shared_nonzero)
-mol_hg19_shared_nonzero <- mol_hg19_shared[, ..cols_shared_nonzero]
-dim(mol_hg19_shared_nonzero)
-mol_hg38_shared_nonzero <- mol_hg38_shared[, ..cols_shared_nonzero]
-dim(mol_hg38_shared_nonzero)
-stopifnot(dim(mol_hg19_shared_nonzero) == dim(mol_hg38_shared_nonzero),
-          colnames(mol_hg19_shared_nonzero) == colnames(mol_hg38_shared_nonzero))
+stopifnot(sum(zeros) == 0)
 
 # Correlation ------------------------------------------------------------------
 
-corrs <- numeric(length = length(genes_shared_nonzero))
-names(corrs) <- genes_shared_nonzero
-for (i in seq_along(genes_shared_nonzero)) {
-  counts_hg19 <- unlist(mol_hg19_shared_nonzero[, genes_shared_nonzero[i], with = FALSE])
-  counts_hg38 <- unlist(mol_hg38_shared_nonzero[, genes_shared_nonzero[i], with = FALSE])
-  corrs[i] <- cor(counts_hg19, counts_hg38)
+corrs <- numeric(length = length(genes_shared))
+names(corrs) <- genes_shared
+for (i in seq_along(genes_shared)) {
+  counts_hg19 <- unlist(mol_hg19_shared[, genes_shared[i], with = FALSE])
+  counts_hg38 <- unlist(mol_hg38_shared[, genes_shared[i], with = FALSE])
+  if (sum(counts_hg19) == 0 || sum(counts_hg38) == 0) {
+    corrs[i] <- 0
+  } else {
+    corrs[i] <- cor(counts_hg19, counts_hg38)
+  }
 }
 summary(corrs)
 hist(corrs)
+mean(corrs < 0.9, na.rm = TRUE)
+## [1] 0.09792258
+sum(corrs < 0.9)
+## [1] 1070
+sum(corrs < 0)
+## [1] 2
 
-plot(unlist(mol_hg19_shared_nonzero[, 5]), unlist(mol_hg38_shared_nonzero[, 5]))
-cor(unlist(mol_hg19_shared_nonzero[, 5]), unlist(mol_hg38_shared_nonzero[, 5]))
+negative <- names(corrs)[corrs < 0]
+plot(unlist(mol_hg19_shared[, negative[1], with = FALSE]),
+     unlist(mol_hg38_shared[, negative[1], with = FALSE]))
+plot(unlist(mol_hg19_shared[, negative[2], with = FALSE]),
+     unlist(mol_hg38_shared[, negative[2], with = FALSE]))
+
+five <- c("CDK1", "UBE2C", "TOP2A", "HIST1H4E", "HIST1H4C")
+five_ensg <- rownames(fData(eset))[fData(eset)$name %in% five]
+five_ensg %in% genes_shared
+cycling <- five[five_ensg %in% genes_shared]
+cycling_ensg <- five_ensg[five_ensg %in% genes_shared]
+
+plot(unlist(mol_hg19_shared[, 5]), unlist(mol_hg38_shared[, 5]))
+cor(unlist(mol_hg19_shared[, 5]), unlist(mol_hg38_shared[, 5]))
+
+for (i in seq_along(cycling)) {
+  cycling_hg19 <- unlist(mol_hg19_shared[, cycling_ensg[i], with = FALSE])
+  cycling_hg38 <- unlist(mol_hg38_shared[, cycling_ensg[i], with = FALSE])
+  plot(cycling_hg19, cycling_hg38, main = paste(cycling[i], cycling_ensg[i]),
+       sub = cor(cycling_hg19, cycling_hg38))
+}
 
 # Plot -------------------------------------------------------------------------
