@@ -67,7 +67,7 @@ sums_total <- sums_hg19 + sums_hg38
 zeros <- sums_total == 0
 stopifnot(sum(zeros) == 0)
 
-# Correlation ------------------------------------------------------------------
+# Correlation per gene ---------------------------------------------------------
 
 corrs <- numeric(length = length(genes_shared))
 names(corrs) <- genes_shared
@@ -110,5 +110,30 @@ for (i in seq_along(cycling)) {
   plot(cycling_hg19, cycling_hg38, main = paste(cycling[i], cycling_ensg[i]),
        sub = cor(cycling_hg19, cycling_hg38))
 }
+
+# Correlation per sample -------------------------------------------------------
+
+# Remove columns with sample metadata
+mol_hg19_shared_mat <- as.matrix(mol_hg19_shared[, -(sample:well)])
+mol_hg38_shared_mat <- as.matrix(mol_hg38_shared[, -(sample:well)])
+
+cor_sample <- numeric(length = nrow(mol_hg19_shared_mat))
+
+for (i in seq_len(nrow(mol_hg19_shared_mat))) {
+  cor_sample[i] <- cor(mol_hg19_shared_mat[i, ],
+                       mol_hg38_shared_mat[i, ])
+}
+
+summary(cor_sample)
+hist(cor_sample)
+mean(cor_sample < 0.9, na.rm = TRUE)
+## [1] 0.1992188
+sum(cor_sample < 0.9)
+## [1] 306
+sum(cor_sample < 0)
+## [1] 0
+
+sums_per_sample <- rowSums(mol_hg19_shared_mat) + rowSums(mol_hg38_shared_mat)
+plot(sums_per_sample, cor_sample)
 
 # Plot -------------------------------------------------------------------------
