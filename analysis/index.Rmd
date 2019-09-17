@@ -31,10 +31,10 @@ We used this site to collaborate and share our results. Please feel free to expl
 ### Supervised method learning: finalizing on data holiding out validation samples
 
 * Perform model training on cell times computed in different ways
-    * Based on Fucci only
+    * Based on FUCCI only
         * Cells from mixed individuals: [Prediction error](method-train-classifiers-all.html), and [functional annotations of genes selected](method-train-classifiers-genes.html)
         * Cells from one individual: [Prediction error](method-train-ind.html), and [functional annotations of genes selected](method-train-ind-genes.html)
-    * Based on Fucci and DAPI and derived from trigonometric transformation
+    * Based on FUCCI and DAPI and derived from trigonometric transformation
         * Cells from mixed individuals: [Prediction error](method-train-triple.html)
         * Cells from one individual: [Prediction error](method-train-ind.html), and [functional annotations of genes selected](method-train-ind-genes.html)
     * Based on FUCCI and DAPI and derived from an algebraic approach
@@ -174,4 +174,3 @@ We evaluated and pre-processed the results of image analysis as follows:
 
 * [Reproducing some QC analysis and making plots for a seminar talk](talk-20180416.html)
 
-* [Compile codes for the paper in ]
