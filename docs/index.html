@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Home</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">fucci-seq</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/fucci-seq">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Home</h1>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2019-09-17
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>fucci-seq/analysis/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.4.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjdblischakfucciseqtree05f661ff7cf35fbdbc201839d259703c55dd0866targetblank05f661fa"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/jdblischak/fucci-seq/tree/05f661ff7cf35fbdbc201839d259703c55dd0866" target="_blank">05f661f</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomjdblischakfucciseqtree05f661ff7cf35fbdbc201839d259703c55dd0866targetblank05f661fa" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/revision/
+    Ignored:    code/method-npreg.Rmd/slurm-46123907.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123908.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123909.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123910.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123911.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123912.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123913.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123914.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123915.out
+    Ignored:    code/method-npreg.Rmd/slurm-46123916.out
+    Ignored:    code/npreg-methods.Rmd/slurm-45076734.out
+    Ignored:    code/npreg/slurm-45320823.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893750.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893751.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893752.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893753.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893754.out
+    Ignored:    code/trendfilter-individual.Rmd/slurm-49893755.out
+    Ignored:    data/batch-paper/
+    Ignored:    data/cellcycle-genes-previous-studies/cycle_genes/
+    Ignored:    data/cellcycle-genes-previous-studies/rnaseq/
+    Ignored:    data/confess-rds/
+    Ignored:    data/data-labwebsite/
+    Ignored:    data/results/
+    Ignored:    notes/
+    Ignored:    output/npreg-trendfilter.Rmd/
+    Ignored:    output_tmp/
+
+Untracked files:
+    Untracked:  analysis/cellcycler-seqdata-fucci.Rmd
+    Untracked:  analysis/method-eval-leng.Rmd
+    Untracked:  analysis/norm-ercc-batch.Rmd
+    Untracked:  analysis/norm-ercc-fucci.Rmd
+    Untracked:  analysis/sampleqc_lda.Rmd
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/05f661ff7cf35fbdbc201839d259703c55dd0866/analysis/index.Rmd" target="_blank">05f661f</a>
+</td>
+<td>
+jhsiao999
+</td>
+<td>
+2019-09-17
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/237fdf15b20c667dc23245357e2d2a2749d33d39/docs/index.html" target="_blank">237fdf1</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2019-09-05
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/e39d12e9627b2348b335c44e2505b9d86767dce8/analysis/index.Rmd" target="_blank">e39d12e</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2019-09-05
+</td>
+<td>
+Update URLs on homepage.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/d848f8eec2e963703ba70ac60af1c2c5d3238298/docs/index.html" target="_blank">d848f8e</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/391ed92fc2c4058dbf3d8dcd4b7dfb6835a0632d/analysis/index.Rmd" target="_blank">391ed92</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+add John’s changes
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/c4f411fec65cddbb1c77213de6d3a847940f18d5/analysis/index.Rmd" target="_blank">c4f411f</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+move TOC
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/435d656647e71f27cecd19b95b44d6af635535e6/analysis/index.Rmd" target="_blank">435d656</a>
+</td>
+<td>
+Chiaowen Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+Merge branch ‘master’ into master
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/435d656647e71f27cecd19b95b44d6af635535e6/docs/index.html" target="_blank">435d656</a>
+</td>
+<td>
+Chiaowen Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+Merge branch ‘master’ into master
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/9c05421ff4a22a6b1300f44fa91d7ecb5a947a0d/analysis/index.Rmd" target="_blank">9c05421</a>
+</td>
+<td>
+Chiaowen Joyce Hsiao
+</td>
+<td>
+2019-02-12
+</td>
+<td>
+Merge pull request #57 from jdblischak/download
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/5b3779c8637b57f8e490441c8615c429b02adb8a/analysis/index.Rmd" target="_blank">5b3779c</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2019-02-01
+</td>
+<td>
+Update workflowr to 1.0.1 with wflow_update().
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/94710940632bf842503ca9e5e0721d1c4635ac58/docs/index.html" target="_blank">9471094</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2019-01-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/162f192c2b0a32f0007dd370e4c6491178bea74f/analysis/index.Rmd" target="_blank">162f192</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2019-01-31
+</td>
+<td>
+build homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/0544e3c6644852720e1ece731f73470494085eb4/docs/index.html" target="_blank">0544e3c</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-09-25
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/49ad6fded35d33d40b3b6e248f0721bd02e03e72/analysis/index.Rmd" target="_blank">49ad6fd</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-09-25
+</td>
+<td>
+build homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/e3e6dbf381d4da5341e3e080c93be663c8feb4d7/docs/index.html" target="_blank">e3e6dbf</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-17
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/ff67833216177a6d1e95eb88ab0d9ff938642b0d/analysis/index.Rmd" target="_blank">ff67833</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-17
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/453044f1765a48b91429a007205d54ec5d3d53ee/docs/index.html" target="_blank">453044f</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/1d8f2140dbfe5203f5b7f5b3c5882fb753f9f977/analysis/index.Rmd" target="_blank">1d8f214</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-12
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/6a46a6b36ab6864c8d3be8c54f2a77db49ad8e99/docs/index.html" target="_blank">6a46a6b</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/efaea97399de955e354f399060239467042a7ccd/analysis/index.Rmd" target="_blank">efaea97</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-07-02
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/c526f3fce30c840237b29744274337977090256b/docs/index.html" target="_blank">c526f3f</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-06-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/78ce6d89e67c9495d17028d2990dcb39031e76fe/analysis/index.Rmd" target="_blank">78ce6d8</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-06-29
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/6a93de390520b8ccce3c279d6d6f563dc9eb661e/docs/index.html" target="_blank">6a93de3</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-06-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/63fd7fff52b404c45277eb2bc47fbe9b88cc8141/docs/index.html" target="_blank">63fd7ff</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-06-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/5387a9cc6e3be84bcf779dbd8b7f5223b87fa8c5/analysis/index.Rmd" target="_blank">5387a9c</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-06-21
+</td>
+<td>
+update hompage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/3dc9b895c45637db69fcf6e296f19fab25212d4e/docs/index.html" target="_blank">3dc9b89</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-05-22
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/b4cdf0a94a4b11893eeda97e1c3d6e6588ad6d91/analysis/index.Rmd" target="_blank">b4cdf0a</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-05-22
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/dea875a64605d632f448b3f4d18f6d8dc74e247a/docs/index.html" target="_blank">dea875a</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-05-09
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/fec5c5c2ba01dd3228f0e35a90a2be2564968818/analysis/index.Rmd" target="_blank">fec5c5c</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-05-08
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/a625a22699329e91f43764a64b9ab6beb1c13947/docs/index.html" target="_blank">a625a22</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-04-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/067340bebab78e4d0bb35b03ce12caeaceea150c/analysis/index.Rmd" target="_blank">067340b</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-04-10
+</td>
+<td>
+update hompage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/688a3ba945fa96f6c0d4f5b4d3a751319a08ae4f/docs/index.html" target="_blank">688a3ba</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-03-15
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/0fc96fdc3b334e21d376b532245ef7bf75efa9c8/analysis/index.Rmd" target="_blank">0fc96fd</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-03-15
+</td>
+<td>
+re-organize homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/7205420ca604a3e78b8487bba969c7fcbd32eddc/docs/index.html" target="_blank">7205420</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-03-09
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/94d284982f8954133ef19cedaec73cc61470caff/analysis/index.Rmd" target="_blank">94d2849</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-03-09
+</td>
+<td>
+update hompage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/e3ecf8394c0bb62037d4540299b62634a5c23eb7/docs/index.html" target="_blank">e3ecf83</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/920c73242fdab687bf97d10f4202455fe14f70a1/analysis/index.Rmd" target="_blank">920c732</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-26
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/d2d3c37400c68712c67f5095ce1cd118474795f8/docs/index.html" target="_blank">d2d3c37</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-22
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/e74c417172813cc80a6507601c3e9fa771e43994/analysis/index.Rmd" target="_blank">e74c417</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-22
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/7d55333f0ec9e4b6d868ff1bc14509c333a6feaf/docs/index.html" target="_blank">7d55333</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/af2ac8bbba44f4a2318d4b118a31c3de9a56c184/analysis/index.Rmd" target="_blank">af2ac8b</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-08
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/be18b2f9bbd03745e688545dbc001d89616e765b/docs/index.html" target="_blank">be18b2f</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/e0ef1bdfc410d5e2a64e4600a0cd8e96cec8caba/analysis/index.Rmd" target="_blank">e0ef1bd</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-08
+</td>
+<td>
+minor edits
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/3ae09b6e44cbff5eafa3da36cd59c5a7787c4b39/docs/index.html" target="_blank">3ae09b6</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-07
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/34c35b15c8c86adb60445f69a6d773d47341a21e/analysis/index.Rmd" target="_blank">34c35b1</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-07
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/f6c8d2d26bad052fde8b23e2b1bfe42de5c3dfe3/analysis/index.Rmd" target="_blank">f6c8d2d</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-02-01
+</td>
+<td>
+update homepage
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/5a1ad9ccf4534a12ec5c7563b6d4246c6a90d241/analysis/index.Rmd" target="_blank">5a1ad9c</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2018-01-31
+</td>
+<td>
+Merge remote-tracking branch ‘jhsiao999/master’
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/9fb49f96d10331190331251f87a86f663120f616/docs/index.html" target="_blank">9fb49f9</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-01-31
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/4b1a660a616508fd4d50d80258565253bf42f448/analysis/index.Rmd" target="_blank">4b1a660</a>
+</td>
+<td>
+pytung
+</td>
+<td>
+2018-01-31
+</td>
+<td>
+add analysis of PCA vs techinical factors
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/3909c4cb479043016db824ee4a64b47f09f77f60/analysis/index.Rmd" target="_blank">3909c4c</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2018-01-30
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/bde6496060a59eae30b6c386eb587e77f29d47ee/docs/index.html" target="_blank">bde6496</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-21
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/556d50ef8e6f47914214d3ca871721e876c9e39c/analysis/index.Rmd" target="_blank">556d50e</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-21
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/913f2d17505c6206f83f00b93257e96d3ff7f27c/docs/index.html" target="_blank">913f2d1</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/6fbaf59369a6b04d6cc893aa25b2fa1503d31e2c/analysis/index.Rmd" target="_blank">6fbaf59</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-14
+</td>
+<td>
+wflow_publish(“analysis/index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/6e3c938ae1901c36682af448d3ee0457c0e6d524/analysis/index.Rmd" target="_blank">6e3c938</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-11
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/3a4dd7ce95fe28c934f0527f72319f903ee29005/docs/index.html" target="_blank">3a4dd7c</a>
+</td>
+<td>
+Joyce Hsiao
+</td>
+<td>
+2017-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/4fcf7d1a41630b3cbd8ffb6795f88002aa5b3922/docs/index.html" target="_blank">4fcf7d1</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2017-11-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/6898149497db323a1a3cbbc40d1779fdfc03bd6d/docs/index.html" target="_blank">6898149</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2017-11-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/3d5d19319769cecfd668d00594193995637f2679/analysis/index.Rmd" target="_blank">3d5d193</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2017-11-29
+</td>
+<td>
+Visualize sequencing depth per C1 chip.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/cbaf910c865756c91bdebfa7dfe7635b0d37a6c9/analysis/index.Rmd" target="_blank">cbaf910</a>
+</td>
+<td>
+Chiaowen Hsiao
+</td>
+<td>
+2017-11-01
+</td>
+<td>
+add image QC follow-up to index page
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/cbaf910c865756c91bdebfa7dfe7635b0d37a6c9/docs/index.html" target="_blank">cbaf910</a>
+</td>
+<td>
+Chiaowen Hsiao
+</td>
+<td>
+2017-11-01
+</td>
+<td>
+add image QC follow-up to index page
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/b238da636f6bc13167e3d5e72792a2de53601d52/analysis/index.Rmd" target="_blank">b238da6</a>
+</td>
+<td>
+Chiaowen Hsiao
+</td>
+<td>
+2017-10-31
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/620ad02bad5e8c495576a7667f13a378894a2ec5/docs/index.html" target="_blank">620ad02</a>
+</td>
+<td>
+Chiaowen Hsiao
+</td>
+<td>
+2017-10-31
+</td>
+<td>
+preliminary image anaysis, mainly QC
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/bd252b59e6c7abbe993e7c8c1eaa89a40a290008/analysis/index.Rmd" target="_blank">bd252b5</a>
+</td>
+<td>
+jhsiao999
+</td>
+<td>
+2017-10-12
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/bd252b59e6c7abbe993e7c8c1eaa89a40a290008/docs/index.html" target="_blank">bd252b5</a>
+</td>
+<td>
+jhsiao999
+</td>
+<td>
+2017-10-12
+</td>
+<td>
+update index
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jdblischak/fucci-seq/f6b94c1d2de7121d9c5bb404dbd6961887e3c78c/docs/index.html" target="_blank">f6b94c1</a>
+</td>
+<td>
+jhsiao999
+</td>
+<td>
+2017-10-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/c8c26544a882e0da3df72844968361253d6a6532/analysis/index.Rmd" target="_blank">c8c2654</a>
+</td>
+<td>
+jhsiao999
+</td>
+<td>
+2017-10-12
+</td>
+<td>
+wflow_publish(all = TRUE)
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/jdblischak/fucci-seq/blob/e7f5236ac24e0234d8325454e56359f3a14caae0/analysis/index.Rmd" target="_blank">e7f5236</a>
+</td>
+<td>
+John Blischak
+</td>
+<td>
+2017-10-11
+</td>
+<td>
+Start workflowr project.
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section <a href="#finalizing">Finalizing</a> below. Here are some useful links:</p>
+<ul>
+<li><a href="https://doi.org/10.1101/526848">Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis</a></li>
+<li>GEO record <a href="http://www.ncbi.nlm.nih.gov/%20geo/query/acc.cgi?acc=GSE121265">GSE121265</a> for the raw FASTQ files</li>
+<li><a href="https://github.com/jdblischak/fucci-seq">GitHub repo</a> for code and data</li>
+<li><a href="https://github.com/jhsiao999/peco">peco package</a> for our supervised approach predicting cell cycle phase in induced pluripotent stem cells.</li>
+</ul>
+<div id="finalizing" class="section level1">
+<h1>Finalizing</h1>
+<ul>
+<li><a href="data-overview.html">Data description</a></li>
+<li><a href="#rna-seq-data-preprcessing">Quality control of scRNA-seq data</a></li>
+<li><a href="images-process.html">Process images - from images to intensities</a></li>
+<li><a href="images-normalize-anova.html">Inspect and correct for the C1 plate effect in fluorescence intensities</a></li>
+<li><a href="images-circle-ordering-eval.html">Infer an angel for each cell based on FUCCI fluorescence intensities</a></li>
+<li><a href="npreg-trendfilter-quantile.html">Estimate the cyclic trends of gene expression levels</a></li>
+</ul>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="supervised-method-learning-finalizing-on-data-holiding-out-validation-samples" class="section level3">
+<h3>Supervised method learning: finalizing on data holiding out validation samples</h3>
+<ul>
+<li>Perform model training on cell times computed in different ways
+<ul>
+<li>Based on FUCCI only
+<ul>
+<li>Cells from mixed individuals: <a href="method-train-classifiers-all.html">Prediction error</a>, and <a href="method-train-classifiers-genes.html">functional annotations of genes selected</a></li>
+<li>Cells from one individual: <a href="method-train-ind.html">Prediction error</a>, and <a href="method-train-ind-genes.html">functional annotations of genes selected</a></li>
+</ul></li>
+<li>Based on FUCCI and DAPI and derived from trigonometric transformation
+<ul>
+<li>Cells from mixed individuals: <a href="method-train-triple.html">Prediction error</a></li>
+<li>Cells from one individual: <a href="method-train-ind.html">Prediction error</a>, and <a href="method-train-ind-genes.html">functional annotations of genes selected</a></li>
+</ul></li>
+<li>Based on FUCCI and DAPI and derived from an algebraic approach
+<ul>
+<li><a href="method-train-alge.html">Cells from one individual</a></li>
+</ul></li>
+</ul></li>
+<li>Compare model training results
+<ul>
+<li><a href="method-labels-compare.html">Compute and compare cell time estimates</a> derived under two different assumptions: assuming equal variance in PC1 and PC2 (circle) vs. unequal variances in PC1 and PC2.</li>
+<li><a href="method-train-genes-fucci-vs-triple.html">Prediction error for cells from mixed individuals</a>: Prediction error smaller when based on fucci time only than based on fucci and dapi time, though only a very small difference. However, the genes selected in these two are similar, both found to have 37 genes enriched for the Cell Cycle GO (0007049).</li>
+</ul></li>
+<li>Compiling results
+<ul>
+<li><a href="method-train-summary-output.html">Compile training results for both training scenarios</a> and <a href="method-train-summary.html">Plotting prediction error margin and genes selected</a></li>
+<li><a href="method-validation.html">Compile results on validation samples</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="supervised-method-learning-building-the-analysis-approach" class="section level3">
+<h3>Supervised method learning: building the analysis approach</h3>
+<ul>
+<li><p>Early analysis <a href="method-npreg.html">using trendfilter and evaluating model performance</a></p></li>
+<li><p>Investigate the property and quality of <a href="method-labels.html">the cell time labels derived from GFP and RFP</a>: PVE of intensities by cell times, comparing PVEs by cell times from DAPI and FUCCI vs from FUCCI; comparing prediction before and after removing PC outliers (after is slightly better), and in different sets of genes.</p></li>
+<li><p>Investigate the cyclical trends for <a href="trendfilter-individual.html">each individual</a></p></li>
+<li><p>Investigate the property of <a href="method-label-seurat.html">Seurat classes and cell time</a></p></li>
+<li>Noisy label analysis
+<ul>
+<li>PVE in DAPI, GFP, and RFP <a href="method-labels-noisy.html">before vs after removing noisy labels</a></li>
+<li>Comparing results excluding/including noisy training labels on top 10 and top 101 cyclical genes, when <a href="method-train-labels.html">excluding noisy labels from each fold validation, hence unequal sample numbers per fold</a> as opposed to <a href="method-train-labels-equalfold.html">excluding noisy labels before making fold valdiation, hence equal nubmer per fold</a></li>
+</ul></li>
+<li>Analyze the training datasets
+<ul>
+<li>Comparing trendfilter order 2 and order 3 with npcirc.nw <a href="method-npreg-prelim-results.html">on the odd-numbered genes in the top 101 cyclical genes</a></li>
+<li>Comparing resuls of the various classifers (supervised, PC, unsupervised) <a href="method-train-classifiers.html">on top 101 cyclical genes</a>, and on <a href="method-train-classifiers-top10.html">top 10 cyclial genes</a>.</li>
+</ul></li>
+<li>Analyze the withheld samples
+<ul>
+<li>Evaluate the withheld sample <a href="method-eval-withheld-explore.html">including noisy labels</a> on the top 10 and top 101 cyclical genes] and comparing peco methods with seurat predictions.</li>
+<li>Evaluate the withheld samples <a href="method-eval-withheld-explore-removenoisy.html">removing noisy labels</a> on the top 10 and top 101 cyclical genes and comparing peco methods with seurat predictions.</li>
+</ul></li>
+</ul>
+</div>
+<div id="approaches-to-fitting-cyclical-trend-in-gene-expression-data" class="section level3">
+<h3>Approaches to fitting cyclical trend in gene expression data</h3>
+<ul>
+<li>Apply spherically projected multivariate linear model
+<ul>
+<li><a href="model-spml.pilot.html">First trying out spml package</a></li>
+<li><a href="method-spml.html">To predictd cell times using traing/test samples set-up</a></li>
+</ul></li>
+<li><p>Learning about correlation for circular response variable: some simulations to check <a href="circ-simulation-correlation.html">its property and also relations with Fisher’s z transformation</a></p></li>
+<li>CellcycleR 0.1.6
+<ul>
+<li><a href="images-cellcycleR-convergence.html">Model convergence assessment</a></li>
+<li><a href="images-cellcycleR.html">Fitting on intensities across plates and individuals</a></li>
+<li><a href="cellcycler-seqdata-leng.html">Fitting on Leng data)</a></li>
+<li><a href="cellcycler-seqdata-fucci.html">Fitting on fucci-seq RNA-seq data)</a></li>
+</ul></li>
+</ul>
+</div>
+<div id="cell-cycle-signal-in-gene-expression-data" class="section level3">
+<h3>Cell cycle signal in gene expression data</h3>
+<ol style="list-style-type: decimal">
+<li>We investigated cell cycle signals in the sequencing data alone.
+<ul>
+<li>Consider <a href="images-transgene.html">transgene count in sequencing data</a></li>
+<li>Compute linear correlation between gene expression levels <a href="images-seq-correlation.html">with DAPI and FUCCI intensities</a></li>
+</ul></li>
+<li>We then assign categorical labels of cell cycle and explored the expresson profiles of these categories.
+<ul>
+<li>Cluster samples by <a href="images-pam.html">Partition around medoids(PAM)</a></li>
+<li>Cluster samples by <a href="images-mclust.html">Guassian mixture modeling</a></li>
+<li>Select a subset of samples that are closet to the cluster centers (cluster representives) <a href="images-subset-silhouette.html">using silhouette index</a></li>
+<li>Examine gene pression scores defined by the Macosko paper in the selected cluster representatives <a href="images-classify-fucci.html">before confounding correction</a> and <a href="images-classify-fucci-adjusted.html">after confounding correction</a></li>
+<li>Examine gene expression scores defined by the Macosk paer <a href="images-classify-leng.html">in the sorted cells of the Leng et al. 2015 paper</a></li>
+</ul></li>
+<li>We inferred an angle for each cell on a unit circle using FUCCI intensities alone.
+<ul>
+<li>First, I used GFP and RFP intensities to estimate a <a href="images-circle-ordering.html">least-square fit of unit circle</a></li>
+<li>I computed the PCs of GFP and RFP and used these to infer an angle for each cell on a unit circle (i.e., polar coordinates), and <a href="images-circle-ordering-eval.html">to evaluate these results, I computed circular-circular and circular-linear correlation with DAPI and gene expression</a></li>
+<li>Here I put together lists of genes identified as significantly correlatd with the PC-based fit <a href="images-circle-ordering-sigcorgenes.html">by linear correlation and circular-linear correlation, also cyclical genes by smash</a></li>
+</ul></li>
+<li>I used nonparametric methods to identify genes that may be cyclical along cell cycle phases.
+<ul>
+<li>Fit <a href="npreg-methods.html">smash and kernel regression on circular variables</a> on a subset of genes with detection rate &gt; .8.</li>
+<li>Fit <a href="npreg-trendfilter-prelim.html">trendfilter</a> on a subset of genes (5) that are observed (visually) to have cyclical pattern. trendfilter is robust to small proportion of undetected cells, approx 2 or 3%. In cases of simulation when increasing proportion of undetected cells to 20%, we observed a flat line in gene expression for genes previously identified to tend to a cyclical pattern.</li>
+<li>Next, we fit trendfilter on all genes after transforming the data to follow standard normal distribution, permutation-based p-values for PVE are used to select <a href="npreg-trendfilter-quantile.html">101 significant cyclical genes</a>.</li>
+</ul></li>
+<li>Additional analysis done to identify top cyclical genes in each individual. The top 5 are not shared across the six individuals. <a href="trendfilter-individual.html">Results</a></li>
+</ol>
+</div>
+<div id="rna-seq-data-preprcessing" class="section level3">
+<h3>RNA-seq data preprcessing</h3>
+<ol style="list-style-type: decimal">
+<li>The first step in preprocessing RNA-seq data consists of QC and filtering.
+<ul>
+<li>Sample QC and filtering
+<ul>
+<li><a href="sampleqc.html">Sample QC criteria</a><br />
+</li>
+<li><a href="totals.html">Sequencing depth</a><br />
+</li>
+<li><a href="reads-v-molecules.html">Reads versus molecules</a></li>
+</ul></li>
+<li>Gene QC and filtering
+<ul>
+<li><a href="gene-filtering.html">gene filtering</a></li>
+<li><a href="pca-tf.html">PCA with technical fators</a></li>
+</ul></li>
+</ul></li>
+<li>We then analyzed and corrected for batch effect due to C1 plate in the sequencing data
+<ul>
+<li><a href="seqdata-batch-correction.html">Estimate variance explained in IBD and correct for batch effects</a></li>
+</ul></li>
+</ol>
+</div>
+<div id="microscopy-image-analysis" class="section level3">
+<h3>Microscopy image analysis</h3>
+<ul>
+<li><a href="images-process.html">Processing images - from images to intensities</a></li>
+</ul>
+<p>We evaluated and pre-processed the results of image analysis as follows:</p>
+<ol style="list-style-type: decimal">
+<li>We visually inspect images deteced to have none or more than one nucleus. For cases that are inconsistent with visual inspection, we correct the number of nuclei detected.
+<ul>
+<li><a href="images-multiple-nuclei.html">Inspect images with multiple nuclei</a></li>
+<li><a href="images-zero-nuclei.html">Inspect images with no nucleus</a></li>
+</ul></li>
+<li>We applied background correction to the intensity measurements of GFP, RFP and DAPI based on the following analyses.
+<ul>
+<li><a href="confess-prelim.html">CONFESS results</a></li>
+<li><a href="images-qc.html">QC analysis including no. nuclei detected, DAPI, and intensity variation</a></li>
+<li><a href="images-qc-followup.html">Explore using log10 sum pixel intensity for signal metrics</a></li>
+<li><a href="images-metrics.html">Compare correction approaches using median versus mean background</a></li>
+<li><a href="images-metrics-cell-shape.html">Explore associations between nucleus shape metrics vs intensities</a></li>
+</ul></li>
+<li>We analyzed intensity variation across individuals and batches and considers approaches for removing batch effects in the data.
+<ul>
+<li><a href="images-qc-labels.html">Visualize signal variation by plate and individual identity</a></li>
+<li><a href="images-qc-variation.html">Visualize the structure of signal variation by individual identity</a></li>
+<li><a href="images-normalize-quantile.html">Quantile normalization for GFP, RFP and DAPI</a></li>
+<li><a href="images-normalize-anova.html">Estimate variance explained in IBD and correct for batch effects in intensities</a></li>
+</ul></li>
+<li>We investigated the cell time estimates based on FUCCI intensities.
+<ul>
+<li>Consider the mean-adjusted FUCCI intensities, what’s the relationship between cell time <a href="images-time-eval.html">estimates and DAPI and sample molecule count</a>?</li>
+<li>Consider the quantile-normalized FUCCI intensities versus the mean-adjusted intensities (for adjusting batch effect). What’s the differences between cell time estimates from <a href="images-time-compare-normalize.html">the two normalization approaches</a>?</li>
+</ul></li>
+</ol>
+</div>
+<div id="one-time-investigations" class="section level3">
+<h3>One-time investigations</h3>
+<ul>
+<li><p>Why some gene symbols (genes) correspond to <a href="ensembl.html">multiple Ensembl IDs?</a></p></li>
+<li><p>I selected a set of cell cycle <a href="seqdata-select-cellcyclegenes.html">genes that belong to GO term Cell Cycle and looked at the overlap with the detected genes in our data.</a></p></li>
+<li><p><a href="seurat-cellcycle.html">Replicate Seurat example of scoring cell cycle phases</a></p></li>
+<li><p><a href="talk-20180416.html">Reproducing some QC analysis and making plots for a seminar talk</a></p></li>
+</ul>
+</div>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+    
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
