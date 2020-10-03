@@ -8,7 +8,7 @@ output:
 
 We used this site to collaborate and share our results. Please feel free to explore. The results that made it into the final paper are in the section [Finalizing](#finalizing) below. Here are some useful links:
 
-* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](https://doi.org/10.1101/526848)
+* [Characterizing and inferring quantitative cell-cycle phase in single-cell RNA-seq data analysis](https://doi.org/10.1101/gr.247759.118)
 * GEO record [GSE121265](http://www.ncbi.nlm.nih.gov/ geo/query/acc.cgi?acc=GSE121265) for the raw FASTQ files
 * [GitHub repo](https://github.com/jdblischak/fucci-seq) for code and data
 * [peco package](https://github.com/jhsiao999/peco) for our supervised approach predicting cell cycle phase in induced pluripotent stem cells.

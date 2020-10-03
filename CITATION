@@ -1,3 +1,15 @@
+@article{Hsiao01042020,
+  author = {Hsiao, Chiaowen Joyce and Tung, PoYuan and Blischak, John D. and Burnett, Jonathan E. and Barr, Kenneth A. and Dey,   Kushal K. and Stephens, Matthew and Gilad, Yoav},
+  title = {Characterizing and inferring quantitative cell cycle phase in single-cell RNA-seq data analysis},
+  volume = {30},
+  number = {4},
+  pages = {611-621},
+  year = {2020},
+  doi = {10.1101/gr.247759.118},
+  URL = {http://genome.cshlp.org/content/30/4/611.abstract},
+  journal = {Genome Research}
+}
+
 @article {Hsiao526848,
 	author = {Hsiao, Chiaowen Joyce and Tung, PoYuan and Blischak, John D and Burnett, Jonathan and Barr, Kenneth and Dey, Kushal K and Stephens, Matthew and Gilad, Yoav},
 	title = {Characterizing and inferring quantitative cell cycle phase in single-cell RNA-seq data analysis},
