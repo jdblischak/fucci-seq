@@ -1,7 +1,6 @@
 name: fucci-seq
 output_dir: ../docs
 include: .nojekyll
-exclude: include
 navbar:
   title: fucci-seq
   left:
@@ -20,9 +19,5 @@ output:
     toc_float: yes
     theme: cosmo
     highlight: textmate
-    include:
-      before_body: include/header.html
-      after_body: include/footer.html
     lib_dir: site_libs
     self_contained: no
-
